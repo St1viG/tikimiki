@@ -22,7 +22,8 @@ Projekat "tikimiki" je razvijen u okviru predmeta Principi softverskog inženjer
 * Dimitrije Pešić
 * Nenad Skoković
 
-## Verzije
-| Verzija | Datum | Opis | Autori |
+## 📝 Verzije projekta (Changelog)
+
+| Verzija | Datum | Opis promena | Autori |
 | :--- | :--- | :--- | :--- |
-| **1.0** | 04.05.2026. | Inicijalna verzija projektne specifikacije. | Andrej Čolić, Stevan Gnjato |
+| **1.0** | 04.05.2026. | [cite_start]Inicijalna verzija projektne specifikacije[cite: 7]. | [cite_start]Andrej Čolić, Stevan Gnjato [cite: 7] |
