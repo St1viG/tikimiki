@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # tikimiki
 
 [cite_start]**Platforma za održavanje i učešće na hakatonima** [cite: 3]
@@ -22,8 +21,6 @@
 - [cite_start]Andrej Čolić [cite: 17]
 - [cite_start]Dimitrije Pešić [cite: 18]
 - [cite_start]Nenad Skoković [cite: 19]
-
----
 
 ## 📝 Verzije projekta (Changelog)
 
