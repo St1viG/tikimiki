@@ -1,0 +1,205 @@
+
+    <!DOCTYPE html>
+    <html lang="sr">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link rel="stylesheet" href="tikimiki.css">
+      <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+      <link rel="icon" href="images/favicon.ico">
+      <title>tikimiki</title>
+    </head>
+
+    <body>
+
+    <nav>
+      <div class="nav-inner">
+      <div class="logo"><span>tiki</span>miki</div>
+      <div class="search-wrap">
+        <span class="search-ico">⌕</span>
+          <input type="text" placeholder="Pretraži korisnike, hakathone, organizacije...">
+        </div>
+        <div class="nav-right">
+          <div class="icon-btn">◈<span class="badge">2</span></div>
+          <div class="icon-btn">🔔<span class="badge">5</span></div>
+          <div class="avatar">AČ</div>
+        </div>
+      </div>
+    </nav>
+
+    <div class="layout">
+      <aside class="sidebar-left">
+        <div class="menu-item active"><span class="ico">⌂</span> Početna</div>
+        <div class="menu-item"><span class="ico">◈</span> Hakathoni</div>
+        <div class="menu-item"><span class="ico">👥</span> Timovi</div>
+        <div class="menu-item"><span class="ico">✉</span> Poruke</div>
+        <div class="menu-divider"></div>
+        <div class="menu-label">Nalog</div>
+        <div class="menu-item"><span class="ico">👤</span> Profil</div>
+        <div class="menu-item"><span class="ico">⚙</span> Podešavanja</div>
+        <div class="menu-divider"></div>
+        <div class="menu-item crystal-text"><span class="ico">◆</span> Premium</div>
+      </aside>
+
+      <main class="feed">
+        <div class="composer">
+          <div class="composer-top">
+            <div class="avatar" style="width:34px;height:34px;font-size:11px">AČ</div>
+            <div class="composer-fake-input">Započni objavu</div>
+          </div>
+          <div class="composer-btns">
+            <button class="comp-btn">📷 Slika</button>
+            <button class="comp-btn">🔗 Link</button>
+            <button class="comp-btn">◈ Hakathon</button>
+            <button class="post-btn">Objavi</button>
+          </div>
+        </div>
+
+        <div class="hack-card">
+          <div class="hack-banner">
+            <div class="hack-banner-name">ETF HackWeek 2026</div>
+            <div class="live-pill">● AKTIVAN</div>
+          </div>
+          <div style="padding:10px;border-bottom:0.5px solid var(--border);">
+            <img src="images/etf2.jpg" alt="ETF HackWeek 2026 - Tema Hakathona" style="width:100%;border-radius:8px;display:block;">
+          </div>
+          <div class="hack-body">
+            <div class="hack-chips">
+              <div class="chip">📍 <strong>Beograd, ETF</strong></div>
+              <div class="chip">⏱ <strong>48h</strong></div>
+              <div class="chip">👥 <strong>120 učesnika</strong></div>
+            </div>
+            <div class="p-body">Godišnji hakathon ETF-a. Timovi od 2 do 4 člana.</div>
+            <div><span class="tag t-v">AI</span><span class="tag t-t">Web</span><span class="tag t-l">Low level</span></div>
+            <div class="hack-foot">
+              <button class="btn-join">Prijavi se</button>
+              <button class="btn-info">Više info</button>
+              <div class="prize">🏆 $2,000</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="post">
+          <div class="post-head">
+            <div class="pav pav-v">F</div>
+            <div><div class="p-name">fenjer</div><div class="p-time">pre 2 sata</div></div>
+          </div>
+          <div class="p-body">nikad više na hakathon sa <span class="mention">@moljac</span>...</div>
+          <div class="post-actions">
+            <button class="paction liked">♥ <span>24</span></button>
+            <button class="paction">💬 <span>8</span></button>
+            <button class="paction share-btn">↗</button>
+          </div>
+        </div>
+
+        <div class="post">
+          <div class="post-head">
+            <div class="pav pav-t">MA</div>
+            <div><div class="p-name">Mohammed Avdol</div><div class="p-time">pre 5 sati</div></div>
+          </div>
+          <div style="padding:10px;border-bottom:0.5px solid var(--border);">
+            <img src="images/group_photo.jpg" alt="ETF HackWeek 2026 - Tema Hakathona" style="width:100%;border-radius:8px;display:block;">
+          </div>
+          <div class="p-body">Garaža Hackathon je bio super! Odlična atmosfera! <br> <span class="mention">@miki</span>, <span class="mention">@tiki</span>, <span class="mention">@mara</span> </div>
+          <div class="post-actions">
+            <button class="paction">♥ <span>67</span></button>
+            <button class="paction">💬 <span>5</span></button>
+            <button class="paction share-btn">↗</button>
+          </div>
+        </div>
+
+      </main>
+
+      <aside class="sidebar-right">
+        <div class="social-card">
+          <div class="social-card-header">
+            <div class="social-card-title">Cohor</div>
+            <div class="arrow-circle">›</div>
+          </div>
+
+          <div class="preview-list">
+            <div class="preview-row">
+              <div class="pr-dot dot-green"></div>
+              <div class="pr-info">
+                <div class="pr-name">ETF HackWeek server</div>
+                <div class="pr-sub">Miki: Počinjemo za 10 min</div>
+              </div>
+              <div class="pr-badge green">12</div>
+            </div>
+            <div class="preview-row">
+              <div class="pr-dot dot-violet"></div>
+              <div class="pr-info">
+                <div class="pr-name">fenjer</div>
+                <div class="pr-sub">Ćao</div>
+              </div>
+              <div class="pr-badge">3</div>
+            </div>
+            <div class="preview-row">
+              <div class="pr-dot dot-violet"></div>
+              <div class="pr-info">
+                <div class="pr-name">digitalci</div>
+                <div class="pr-sub">StiviG: buzz</div>
+              </div>
+              <div class="pr-badge">7</div>
+            </div>
+            <div class="preview-row">
+              <div class="pr-dot" style="background:var(--muted)"></div>
+              <div class="pr-info">
+                <div class="pr-name">nina</div>
+                <div class="pr-sub" style="font-style: italic;">reaguje na poruku sa 🍓</div>
+              </div>
+            </div>
+          </div>  
+        </div>
+
+        <div class="social-card">
+          <div class="social-card-header">
+            <div class="social-card-title">GameHub</div>
+            <div class="arrow-circle">›</div>
+          </div>
+
+          <div class="preview-list">
+
+            <div class="preview-row">
+              <div class="pr-dot" style="background:#00f5ff;"></div>
+              <div class="pr-info">
+                <div class="pr-name">Daily Spin</div>
+                <div class="pr-sub"></div>
+              </div>
+              <div class="pr-badge">XP</div>
+            </div>
+
+            <div class="preview-row">
+              <div class="pr-dot" style="background:#ff9ff3;"></div>
+              <div class="pr-info">
+                <div class="pr-name">Daily Minigame</div>
+                <div class="pr-sub">Pređi današnju igricu</div>
+              </div>
+              <div class="pr-badge">🔥</div>
+            </div>
+
+            <div class="preview-row">
+              <div class="pr-dot" style="background:var(--muted);"></div>
+              <div class="pr-info">
+                <div class="pr-name">Coming Soon</div>
+                <div class="pr-sub" style="font-style: italic;">Nove igre uskoro...</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <footer style="margin-top:24px;padding:0 2px;text-align:center;">
+          <div style="display:flex;flex-wrap:wrap;gap:6px 10px;margin-bottom:10px;justify-content:center;">
+            <a style="font-size:var(--fs-xs);color:var(--muted);cursor:pointer;">About</a> <span style="font-size:10px;color:var(--muted);text-decoration:none;">·</span>
+            <a style="font-size:var(--fs-xs);color:var(--muted);cursor:pointer;">Accessibility</a> <span style="font-size:10px;color:var(--muted);text-decoration:none;">·</span>
+            <a style="font-size:var(--fs-xs);color:var(--muted);cursor:pointer;">Help Center</a>
+            <a style="font-size:var(--fs-xs);color:var(--muted);cursor:pointer;">Privacy & Terms</a>
+          </div>
+          <div style="font-size:var(--fs-s);color:var(--violet-light);">tiki<span style="color:var(--lemon)">miki</span> © 2026</div>
+        </footer>
+      </aside>
+    </div>
+
+    </body>
+    </html>
