@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="tikimiki.css">
+  <link rel="stylesheet" href="cohor.css">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" href="images/favicon.icon">
+  <title>tikimiki · Cohor</title>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <div class="logo"><span>tiki</span>miki</div>
+    <div class="cohor-nav-center">
+      <span>Cohor</span>
+      <span class="sep">/</span>
+      <span class="cohor-hack-name">ETF HackWeek 2026</span>
+      <span class="sep">/</span>
+      <span id="nav-ch-label">#opšte</span>
+      <span class="cohor-live-pill">
+        <span class="cohor-live-dot"></span> AKTIVAN
+      </span>
+    </div>
+    <div class="nav-right">
+      <div class="icon-btn">◈<span class="badge">2</span></div>
+      <div class="icon-btn">🔔<span class="badge">5</span></div>
+      <div class="avatar">AČ</div>
+    </div>
+  </div>
+</nav>
+
+<div class="cohor-app">
+
+  <!-- SERVER STRIP -->
+  <div class="srv-strip">
+    <!-- DMs -->
+    <div class="srv-icon srv-dm" onclick="selectServer(this)">
+      <span style="font-size:16px">✉</span>
+      <span class="srv-notif srv-notif-v">3</span>
+      <span class="srv-tooltip">Direktne poruke</span>
+    </div>
+
+    <div class="srv-divider"></div>
+
+    <!-- Active hackathon -->
+    <div class="srv-icon srv-active" onclick="selectServer(this)">
+      <span style="font-size:11px;letter-spacing:-.5px">ETF</span>
+      <span class="srv-notif srv-notif-green">12</span>
+      <span class="srv-tooltip">ETF HackWeek 2026 · aktivan</span>
+    </div>
+
+    <div class="srv-divider"></div>
+    <div class="srv-past-label">prošli</div>
+
+    <!-- Past hackathons -->
+    <div class="srv-icon srv-past" onclick="selectServer(this)">
+      <span style="font-size:11px">GAR</span>
+      <span class="srv-tooltip">Garaža Hackathon '25</span>
+    </div>
+    <div class="srv-icon srv-past" onclick="selectServer(this)">
+      <span style="font-size:10px">HN1</span>
+      <span class="srv-tooltip">HackNight #1</span>
+    </div>
+    <div class="srv-icon srv-past" onclick="selectServer(this)">
+      <span style="font-size:10px">MI6</span>
+      <span class="srv-tooltip">MilanoInno 2024</span>
+    </div>
+
+    <div style="flex:1"></div>
+    <div class="srv-icon" style="background:var(--surface2);color:var(--muted);border:0.5px solid var(--border);font-size:16px;border-radius:50%">
+      ⚙
+      <span class="srv-tooltip">Podešavanja</span>
+    </div>
+  </div>
+
+  <!-- CHANNEL SIDEBAR -->
+  <div class="ch-sidebar">
+    <div class="ch-sidebar-header">
+      <div class="ch-sidebar-title">
+        <span>◈</span> ETF HackWeek 2026
+        <span style="margin-left:auto;font-size:10px;font-weight:600;background:#04342C;color:#5DCAA5;border:0.5px solid #0F3D30;border-radius:20px;padding:2px 7px">LIVE</span>
+      </div>
+      <div class="ch-sidebar-sub">48h · Beograd, ETF · 120 učesnika</div>
+    </div>
+
+    <div class="ch-tabs">
+      <div class="ch-tab ch-tab-active" onclick="switchTab('channels', this)">Kanali</div>
+      <div class="ch-tab" onclick="switchTab('dms', this)">Poruke</div>
+    </div>
+
+    <!-- CHANNELS LIST -->
+    <div class="ch-list" id="panel-channels">
+      <div class="ch-section">Opšte</div>
+      <div class="ch-item ch-active" onclick="switchChannel(this, 'opšte', 'Opšti razgovori i najave')">
+        <span class="ch-icon">#</span><span class="ch-name">opšte</span>
+      </div>
+      <div class="ch-item ch-unread" onclick="switchChannel(this, 'najave', 'Obaveštenja organizatora')">
+        <span class="ch-icon">📢</span><span class="ch-name">najave</span>
+        <span class="ch-badge ch-badge-g">3</span>
+      </div>
+      <div class="ch-item" onclick="switchChannel(this, 'resursi', 'Korisni linkovi i materijali')">
+        <span class="ch-icon">📎</span><span class="ch-name">resursi</span>
+      </div>
+
+      <div class="ch-section">Timovi</div>
+      <div class="ch-item ch-unread" onclick="switchChannel(this, 'tim-digitalci', 'Privatni kanal tima digitalci')">
+        <span class="ch-icon">🔒</span><span class="ch-name">tim-digitalci</span>
+        <span class="ch-badge ch-badge-v">7</span>
+      </div>
+      <div class="ch-item ch-locked" title="Nisi član ovog tima">
+        <span class="ch-icon">🔒</span><span class="ch-name">tim-bytecraft</span>
+      </div>
+      <div class="ch-item ch-locked" title="Nisi član ovog tima">
+        <span class="ch-icon">🔒</span><span class="ch-name">tim-nullptr</span>
+      </div>
+
+      <div class="ch-section">Kanban</div>
+      <div class="ch-item" onclick="switchChannel(this, 'moj-tim-board', 'Kanban tabla tima digitalci')">
+        <span class="ch-icon">▦</span><span class="ch-name">moj-tim-board</span>
+      </div>
+
+      <div class="ch-section">Glasanje &amp; Predaja</div>
+      <div class="ch-item ch-unread" onclick="switchChannel(this, 'glasanje-publike', 'Glasajte za projekte')">
+        <span class="ch-icon">🗳</span><span class="ch-name">glasanje-publike</span>
+        <span class="ch-badge ch-badge-g">1</span>
+      </div>
+      <div class="ch-item" onclick="switchChannel(this, 'predaja-projekta', 'Predaja finalnog projekta')">
+        <span class="ch-icon">📤</span><span class="ch-name">predaja-projekta</span>
+      </div>
+    </div>
+
+    <!-- DMs LIST -->
+    <div class="ch-list ch-hidden" id="panel-dms">
+      <div class="ch-section">Direktne poruke</div>
+      <div class="ch-item ch-unread" onclick="switchChannel(this, 'moljac', 'Direktna poruka — moljac')">
+        <div style="width:18px;height:18px;border-radius:50%;background:#1A1133;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;color:var(--violet-light);flex-shrink:0">M</div>
+        <span class="ch-name">moljac</span>
+        <span class="ch-badge ch-badge-v">3</span>
+      </div>
+      <div class="ch-item" onclick="switchChannel(this, 'fenjer', 'Direktna poruka — fenjer')">
+        <div style="width:18px;height:18px;border-radius:50%;background:#1A1133;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;color:var(--violet-light);flex-shrink:0">F</div>
+        <span class="ch-name">fenjer</span>
+      </div>
+      <div class="ch-item" onclick="switchChannel(this, 'StiviG', 'Direktna poruka — StiviG')">
+        <div style="width:18px;height:18px;border-radius:50%;background:#1C1A00;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;color:var(--lemon-vivid);flex-shrink:0">S</div>
+        <span class="ch-name">StiviG</span>
+      </div>
+      <div class="ch-item" onclick="switchChannel(this, 'nona', 'Direktna poruka — nona')">
+        <div style="width:18px;height:18px;border-radius:50%;background:#04342C;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:600;color:#5DCAA5;flex-shrink:0">N</div>
+        <span class="ch-name">nona</span>
+      </div>
+    </div>
+
+    <!-- USER STRIP -->
+    <div class="user-strip">
+      <div class="avatar" style="width:32px;height:32px;font-size:10px">AČ</div>
+      <div class="user-strip-info">
+        <div class="user-strip-name">Andrej Čolić</div>
+        <div class="user-strip-status"><span class="status-dot"></span>Online</div>
+      </div>
+      <div class="strip-actions">
+        <div class="strip-btn">🎤</div>
+        <div class="strip-btn">⚙</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAT AREA -->
+  <div class="chat-area">
+    <div class="chat-topbar">
+      <span class="chat-topbar-icon" id="topbar-icon">#</span>
+      <span class="chat-topbar-name" id="topbar-name">opšte</span>
+      <span class="chat-topbar-desc" id="topbar-desc">Opšti razgovori i najave</span>
+      <div class="topbar-actions">
+        <div class="topbar-btn">🔍</div>
+        <div class="topbar-btn">📌</div>
+        <div class="topbar-btn">👥</div>
+      </div>
+    </div>
+
+    <div class="messages" id="messages">
+      <div class="ch-intro">
+        <div class="ch-intro-hash">#</div>
+        <div class="ch-intro-title">Dobrodošli u #opšte</div>
+        <div class="ch-intro-sub">Ovo je početak kanala <strong style="color:var(--violet-light)">#opšte</strong> za ETF HackWeek 2026.</div>
+      </div>
+
+      <div class="msg-date-sep">Subota, 11. april 2026.</div>
+
+      <!-- Org message -->
+      <div class="msg">
+        <div class="msg-av pav-t">MA</div>
+        <div class="msg-body">
+          <div class="msg-meta-row">
+            <span class="msg-author msg-author-t">Mohammed Avdol</span>
+            <span class="msg-role-badge mrb-org">organizator</span>
+            <span class="msg-time">08:00</span>
+          </div>
+          <div class="msg-text">Dobro jutro svima! Hakathon počinje za <strong style="color:var(--lemon-vivid)">2 sata</strong>. Svi timovi da se prijave na recepciji u prizemlju do 10h. Srećno!</div>
+        </div>
+      </div>
+      <div class="msg msg-grouped">
+        <div class="msg-av pav-t">MA</div>
+        <div class="msg-body">
+          <div class="msg-text">Tema ovogodišnjeg takmičenja: <strong style="color:var(--violet-light)">AI za obrazovanje</strong>. Više detalja u kanalu #resursi.</div>
+          <div class="msg-reactions">
+            <div class="reaction mine">🔥 14</div>
+            <div class="reaction">👍 9</div>
+            <div class="reaction">🚀 6</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- fenjer -->
+      <div class="msg" style="margin-top:10px">
+        <div class="msg-av pav-v">F</div>
+        <div class="msg-body">
+          <div class="msg-meta-row">
+            <span class="msg-author msg-author-v">fenjer</span>
+            <span class="msg-time">08:14</span>
+          </div>
+          <div class="msg-text">Konačno! Prošle godine tema bila dosadna, ovo je mnogo bolje 🙌</div>
+        </div>
+      </div>
+      <div class="msg msg-grouped">
+        <div class="msg-av pav-v">F</div>
+        <div class="msg-body">
+          <div class="msg-text"><span class="mention">@moljac</span> jesi već napravio repo?</div>
+        </div>
+      </div>
+
+      <!-- moljac -->
+      <div class="msg" style="margin-top:10px">
+        <div class="msg-av pav-l">M</div>
+        <div class="msg-body">
+          <div class="msg-meta-row">
+            <span class="msg-author msg-author-g">moljac</span>
+            <span class="msg-time">08:17</span>
+          </div>
+          <div class="reply-bar"><strong>fenjer</strong> — jesi već napravio repo?</div>
+          <div class="msg-text">Da, već sam push-ovao skeleton. Linkujem u tim kanalu.</div>
+          <div style="margin-top:6px">
+            <div class="msg-attachment">
+              <span class="msg-attachment-icon">🔗</span>
+              <div>
+                <div class="msg-attachment-name">github.com/moljac/etf-hackweek-2026</div>
+                <div class="msg-attachment-sub">digitalci · public repo</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Nenad -->
+      <div class="msg" style="margin-top:10px">
+        <div class="msg-av" style="background:#160D0D;color:#ff9ff3;border:1px solid #3D1A3D">NS</div>
+        <div class="msg-body">
+          <div class="msg-meta-row">
+            <span class="msg-author msg-author-p">Nenad Skoković</span>
+            <span class="msg-time">08:23</span>
+          </div>
+          <div class="msg-text">alo</div>
+        </div>
+      </div>
+      <div class="msg msg-grouped">
+        <div class="msg-av" style="background:#160D0D;color:#ff9ff3;border:1px solid #3D1A3D;visibility:hidden">NS</div>
+        <div class="msg-body">
+          <div class="msg-text">imate privatan kanal</div>
+          <div class="msg-reactions">
+            <div class="reaction">😂 11</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AČ -->
+      <div class="msg" style="margin-top:10px">
+        <div class="msg-av pav-v">AČ</div>
+        <div class="msg-body">
+          <div class="msg-meta-row">
+            <span class="msg-author msg-author-v">Andrej Čolić</span>
+            <span class="msg-time">08:31</span>
+          </div>
+          <div class="msg-attachment">
+            <img src="images/cat.gif" style="max-width:200px; border-radius:6px;">
+          </div>
+        </div> 
+      </div>
+
+
+      <div class="msg-date-sep">Nedavno</div>
+
+      <!-- Final org message -->
+      <div class="msg">
+        <div class="msg-av pav-t">MA</div>
+        <div class="msg-body">
+          <div class="msg-meta-row">
+            <span class="msg-author msg-author-t">Mohammed Avdol</span>
+            <span class="msg-role-badge mrb-org">organizator</span>
+            <span class="msg-time">09:58</span>
+          </div>
+          <div class="msg-text">📢 <span class="mention">@everyone</span> Počinjemo za <strong style="font-weight: bold;">10 minuta</strong>! Svi timovi da zauzmu mesta. Kick-off u Amfiteatru 1.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="typing-bar">
+      <div class="typing-dots">
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+      </div>
+      <span><strong style="color:var(--text)">moljac</strong> kuca...</span>
+    </div>
+
+    <div class="chat-input-wrap">
+      <div class="chat-input-box">
+        <div class="inp-btn">+</div>
+        <input type="text" id="msg-input" placeholder="Poruka #opšte" onkeydown="sendMsg(event)">
+        <div class="inp-actions">
+          <div class="inp-btn">😊</div>
+          <div class="inp-btn">📎</div>
+          <div class="inp-btn">@</div>
+          <div class="send-btn" onclick="sendMsgClick()">↑</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MEMBERS PANEL -->
+  <div class="members-panel">
+    <div class="members-header">Učesnici &nbsp;<span style="color:var(--muted);font-weight:400">120</span></div>
+    <div class="members-list">
+
+      <!-- Hack info card -->
+      <div class="hack-info-card">
+        <div class="hack-info-top">
+          <div class="hack-info-name">ETF HackWeek 2026</div>
+          <div class="hack-info-sub" id="hack-elapsed">počelo pre 0h 02min</div>
+        </div>
+        <div class="hack-info-stats">
+          <div class="hack-stat">
+            <span class="hack-stat-label">Preostalo</span>
+            <span class="hack-stat-val" id="timer-val">47:58:00</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+          <div class="hack-stat">
+            <span class="hack-stat-label">Timovi</span>
+            <span class="hack-stat-val">28</span>
+          </div>
+          <div class="hack-stat">
+            <span class="hack-stat-label">Nagrada</span>
+            <span class="hack-stat-val" style="color:var(--lemon-vivid)">$2,000</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="members-section">Organizatori — 2</div>
+      <div class="member-row">
+        <div class="member-av pav-t">MA<span class="si si-on"></span></div>
+        <div class="member-info">
+          <div class="member-name" style="color:#5DCAA5">Mohammed Avdol</div>
+          <div class="member-sub">Organizator</div>
+        </div>
+        <span class="member-badge mbadge-org">org</span>
+      </div>
+      <div class="member-row">
+        <div class="member-av" style="background:#0D0D1A;color:var(--muted);border:1px solid var(--border)">ET<span class="si si-on"></span></div>
+        <div class="member-info">
+          <div class="member-name">etf_admin</div>
+          <div class="member-sub">Co-organizator</div>
+        </div>
+        <span class="member-badge mbadge-org">org</span>
+      </div>
+
+      <div class="members-section">Tvoj tim — 4</div>
+      <div class="member-row">
+        <div class="member-av pav-v">AČ<span class="si si-on"></span></div>
+        <div class="member-info">
+          <div class="member-name" style="color:var(--violet-light)">Andrej Čolić</div>
+        </div>
+        <span class="member-badge mbadge-lead">★</span>
+      </div>
+      <div class="member-row">
+        <div class="member-av pav-l">M<span class="si si-on"></span></div>
+        <div class="member-info">
+          <div class="member-name" style="color:var(--lemon-vivid)">moljac</div>
+          <div class="member-sub">kuca...</div>
+        </div>
+      </div>
+      <div class="member-row">
+        <div class="member-av pav-v">F<span class="si si-on"></span></div>
+        <div class="member-info">
+          <div class="member-name" style="color:var(--violet-light)">fenjer</div>
+        </div>
+      </div>
+      <div class="member-row">
+        <div class="member-av" style="background:#160D0D;color:#ff9ff3;border:1px solid #3D1A3D">NS<span class="si si-idle"></span></div>
+        <div class="member-info">
+          <div class="member-name" style="color:#ff9ff3">Nenad Skoković</div>
+          <div class="member-sub">Odsutan</div>
+        </div>
+      </div>
+
+      <div class="members-section">Online — 47</div>
+      <div class="member-row">
+        <div class="member-av" style="background:#14112A;color:var(--muted);border:1px solid var(--border)">TK<span class="si si-on"></span></div>
+        <div class="member-info"><div class="member-name">tiki</div></div>
+      </div>
+      <div class="member-row">
+        <div class="member-av" style="background:#04342C;color:#5DCAA5;border:1px solid #0D4035">MR<span class="si si-on"></span></div>
+        <div class="member-info"><div class="member-name">mara</div></div>
+      </div>
+      <div class="member-row">
+        <div class="member-av" style="background:#14112A;color:var(--muted);border:1px solid var(--border);font-size:9px">+44<span class="si si-on"></span></div>
+        <div class="member-info">
+          <div class="member-name" style="font-size:12px;color:var(--muted)">i još 44 online...</div>
+        </div>
+      </div>
+
+      <div class="members-section">Offline — 73</div>
+      <div style="padding:4px 14px 8px;font-size:12px;color:var(--muted)">73 učesnika offline</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const TOTAL_SECONDS = 48 * 3600;
+  let remaining = TOTAL_SECONDS - 120;
+
+  function pad(n) { return String(n).padStart(2,'0'); }
+
+  function updateTimer() {
+    if (remaining <= 0) return;
+    const h = Math.floor(remaining / 3600);
+    const m = Math.floor((remaining % 3600) / 60);
+    const s = remaining % 60;
+    document.getElementById('timer-val').textContent = pad(h)+':'+pad(m)+':'+pad(s);
+    const elapsed = TOTAL_SECONDS - remaining;
+    const pct = (elapsed / TOTAL_SECONDS * 100).toFixed(3);
+    document.getElementById('progress-fill').style.width = pct + '%';
+    const eh = Math.floor(elapsed/3600);
+    const em = Math.floor((elapsed%3600)/60);
+    document.getElementById('hack-elapsed').textContent = 'počelo pre '+eh+'h '+pad(em)+'min';
+    remaining--;
+  }
+  updateTimer();
+  setInterval(updateTimer, 1000);
+
+  function switchTab(tab, el) {
+    document.querySelectorAll('.ch-tab').forEach(t => t.classList.remove('ch-tab-active'));
+    el.classList.add('ch-tab-active');
+    document.getElementById('panel-channels').className = 'ch-list' + (tab === 'channels' ? '' : ' ch-hidden');
+    document.getElementById('panel-dms').className = 'ch-list' + (tab === 'dms' ? '' : ' ch-hidden');
+  }
+
+  function switchChannel(el, name, desc) {
+    document.querySelectorAll('.ch-item').forEach(i => i.classList.remove('ch-active'));
+    el.classList.add('ch-active');
+    el.classList.remove('ch-unread');
+    const badge = el.querySelector('.ch-badge');
+    if (badge) badge.remove();
+    document.getElementById('topbar-name').textContent = name;
+    document.getElementById('topbar-desc').textContent = desc || '';
+    document.getElementById('nav-ch-label').textContent = '#' + name;
+    document.getElementById('msg-input').placeholder = 'Poruka #' + name;
+  }
+
+  function selectServer(el) {
+    document.querySelectorAll('.srv-icon').forEach(i => i.classList.remove('srv-active'));
+    el.classList.add('srv-active');
+    const notif = el.querySelector('.srv-notif');
+    if (notif) notif.remove();
+  }
+
+  function sendMsg(e) { if (e.key === 'Enter') sendMsgClick(); }
+
+  function sendMsgClick() {
+    const input = document.getElementById('msg-input');
+    const val = input.value.trim();
+    if (!val) return;
+    const msgs = document.getElementById('messages');
+    const now = new Date();
+    const time = pad(now.getHours())+':'+pad(now.getMinutes());
+    const div = document.createElement('div');
+    div.className = 'msg';
+    div.style.marginTop = '10px';
+    div.innerHTML = `
+      <div class="msg-av pav-v">AČ</div>
+      <div class="msg-body">
+        <div class="msg-meta-row">
+          <span class="msg-author msg-author-v">Andrej Čolić</span>
+          <span class="msg-time">${time}</span>
+        </div>
+        <div class="msg-text">${val.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div>
+      </div>`;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+    input.value = '';
+  }
+
+  document.getElementById('messages').scrollTop = 99999;
+</script>
+</body>
+</html>
+  
