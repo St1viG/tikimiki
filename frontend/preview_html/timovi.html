@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="tikimiki.css">
+  <link rel="stylesheet" href="timovi.css">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="images/favicon.ico">
+  <title>tikimiki · Timovi</title>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="logo" onclick="window.location.href='home_page.html'" style="cursor:pointer"><span>tiki</span>miki</div>
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input type="text" placeholder="Pretraži korisnike, hackathone, organizacije...">
+    </div>
+    <div class="nav-right">
+      <div class="icon-btn">◈<span class="badge">2</span></div>
+      <div class="icon-btn">🔔<span class="badge">5</span></div>
+      <div class="avatar">AČ</div>
+    </div>
+  </div>
+</nav>
+
+<div class="tm-page">
+
+  <!-- PAGE HEADER -->
+  <header class="tm-header">
+    <div>
+      <h1 class="tm-title">Timovi</h1>
+      <div class="tm-sub">Tvoji timovi, AI predlozi i saigrači za naredni hackathon.</div>
+    </div>
+    <button class="tm-create-btn"><span>+</span> Kreiraj tim</button>
+  </header>
+
+  <!-- STATS STRIP -->
+  <div class="tm-stats">
+    <div class="tm-stat-tile">
+      <div class="tm-stat-num">142</div>
+      <div class="tm-stat-lbl">Aktivnih timova</div>
+    </div>
+    <div class="tm-stat-tile">
+      <div class="tm-stat-num tm-stat-accent">38</div>
+      <div class="tm-stat-lbl">Traži članove</div>
+    </div>
+    <div class="tm-stat-tile">
+      <div class="tm-stat-num">217</div>
+      <div class="tm-stat-lbl">Slobodnih igrača</div>
+    </div>
+    <div class="tm-stat-tile">
+      <div class="tm-stat-num">3.4</div>
+      <div class="tm-stat-lbl">Prosečna veličina</div>
+    </div>
+  </div>
+
+  <!-- MY TEAM SPOTLIGHT -->
+  <section class="tm-section">
+    <div class="tm-section-head">
+      <div class="tm-section-title">Moj aktivni tim</div>
+      <div class="tm-section-link">Vidi sve moje timove ›</div>
+    </div>
+
+    <div class="tm-spotlight">
+      <div class="tm-spot-left">
+        <div class="tm-avatar-stack tm-avatar-stack-lg">
+          <div class="tm-av tm-av-v">AČ</div>
+          <div class="tm-av tm-av-l">SG</div>
+          <div class="tm-av tm-av-t">DP</div>
+          <div class="tm-av tm-av-r">NS</div>
+        </div>
+        <div class="tm-spot-id">
+          <div class="tm-spot-pill-row">
+            <span class="tm-pill tm-pill-live"><span class="tm-live-dot"></span> LIVE na ETF HackWeek 2026</span>
+          </div>
+          <h2 class="tm-spot-name">digitalci</h2>
+          <div class="tm-spot-tagline">building in 107 since 2024."</div>
+        </div>
+      </div>
+
+      <div class="tm-spot-mid">
+        <div class="tm-roster-label">Članovi (4)</div>
+        <div class="tm-roster">
+          <div class="tm-roster-row">
+            <div class="tm-av tm-av-v tm-av-sm">AČ</div>
+            <div class="tm-roster-info">
+              <div class="tm-roster-name">Andrej Čolić <span class="tm-you">· ti</span></div>
+              <div class="tm-roster-role"><span class="tm-role tm-role-fe">Frontend</span></div>
+            </div>
+          </div>
+          <div class="tm-roster-row">
+            <div class="tm-av tm-av-l tm-av-sm">SG</div>
+            <div class="tm-roster-info">
+              <div class="tm-roster-name">Stevan Gnjato</div>
+              <div class="tm-roster-role"><span class="tm-role tm-role-be">Backend</span> <span class="tm-leader">◆ vođa</span></div>
+            </div>
+          </div>
+          <div class="tm-roster-row">
+            <div class="tm-av tm-av-t tm-av-sm">DP</div>
+            <div class="tm-roster-info">
+              <div class="tm-roster-name">Dimitrije Pešić</div>
+              <div class="tm-roster-role"><span class="tm-role tm-role-ai">AI engineering</span></div>
+            </div>
+          </div>
+          <div class="tm-roster-row">
+            <div class="tm-av tm-av-r tm-av-sm">NS</div>
+            <div class="tm-roster-info">
+              <div class="tm-roster-name">Nenad Skoković</div>
+              <div class="tm-roster-role"><span class="tm-role tm-role-ds">DevOps & low-level</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tm-spot-right">
+        <div class="tm-stats-grid">
+          <div class="tm-mini-stat">
+            <div class="tm-mini-num">3</div>
+            <div class="tm-mini-lbl">Hackathona</div>
+          </div>
+          <div class="tm-mini-stat">
+            <div class="tm-mini-num tm-mini-lemon">🥈 1</div>
+            <div class="tm-mini-lbl">Medalja</div>
+          </div>
+          <div class="tm-mini-stat">
+            <div class="tm-mini-num">420</div>
+            <div class="tm-mini-lbl">Team XP</div>
+          </div>
+          <div class="tm-mini-stat">
+            <div class="tm-mini-num tm-mini-green">94%</div>
+            <div class="tm-mini-lbl">Kompatibilnost</div>
+          </div>
+        </div>
+
+        <div class="tm-progress-wrap">
+          <div class="tm-progress-label">
+            <span>Kanban tabla</span>
+            <span class="tm-progress-val">18 / 27 taskova</span>
+          </div>
+          <div class="tm-progress-bar">
+            <div class="tm-progress-fill" style="width:66%"></div>
+          </div>
+          <div class="tm-progress-sub">5 u reviju · 4 u radu · 18 gotovo</div>
+        </div>
+
+        <div class="tm-spot-actions">
+          <button class="btn-join tm-btn">Otvori server</button>
+          <button class="btn-info tm-btn">Kanban tabla</button>
+          <button class="btn-info tm-btn">Profil tima</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AI MATCHMAKING -->
+  <section class="tm-section">
+    <div class="tm-ai-card">
+      <div class="tm-ai-left">
+        <div class="tm-ai-badge">◆ AI Uparivanje</div>
+        <h2 class="tm-ai-title">Nemaš tim za naredni hackathon?</h2>
+        <p class="tm-ai-desc">
+          Naš AI analizira tvoj <strong>GitHub profil</strong> i zahteve hackathonskog izazova,
+          pa predlaže najkompatibilnije saigrače iz skupa odobrenih učesnika.
+        </p>
+
+        <div class="tm-ai-steps">
+          <div class="tm-ai-step">
+            <div class="tm-ai-step-num">1</div>
+            <div class="tm-ai-step-txt">Izaberi hackathon</div>
+          </div>
+          <div class="tm-ai-step-arrow">→</div>
+          <div class="tm-ai-step">
+            <div class="tm-ai-step-num">2</div>
+            <div class="tm-ai-step-txt">AI analizira profile</div>
+          </div>
+          <div class="tm-ai-step-arrow">→</div>
+          <div class="tm-ai-step">
+            <div class="tm-ai-step-num">3</div>
+            <div class="tm-ai-step-txt">Prihvati predlog</div>
+          </div>
+        </div>
+
+        <div class="tm-ai-cta-row">
+          <button class="tm-ai-cta">Pronađi tim za mene ▸</button>
+          <a class="tm-ai-link">Kako radi?</a>
+        </div>
+      </div>
+      <div class="tm-ai-right">
+        <div class="tm-ai-diagram">
+          <div class="tm-ai-node tm-ai-node-you">AČ</div>
+          <div class="tm-ai-node tm-ai-node-1">?</div>
+          <div class="tm-ai-node tm-ai-node-2">?</div>
+          <div class="tm-ai-node tm-ai-node-3">?</div>
+          <div class="tm-ai-diagram-lbl">analiziram 47 profila</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TABS -->
+  <div class="tm-tabs">
+    <div class="tm-tab tm-tab-active">Moji timovi <span class="tm-tab-count">1</span></div>
+    <div class="tm-tab">🔥 AI Predlozi <span class="tm-tab-count tm-tab-count-l">3</span></div>
+    <div class="tm-tab">Traže saigrače</div>
+    <div class="tm-tab">Browse timovi</div>
+    <div class="tm-tab">Leaderboard</div>
+  </div>
+
+  <!-- AI PREDLOZI -->
+  <section class="tm-section">
+    <div class="tm-section-head">
+      <div class="tm-section-title">🔥 AI Predlozi za tebe</div>
+      <div class="tm-section-link">Osveži predloge ↻</div>
+    </div>
+
+    <div class="tm-sug-list">
+
+      <!-- Suggestion 1 -->
+      <div class="tm-sug-card">
+        <div class="tm-sug-head">
+          <div class="tm-sug-match">
+            <div class="tm-match-num">92%</div>
+            <div class="tm-match-lbl">kompatibilnost</div>
+          </div>
+          <div class="tm-sug-context">
+            <div class="tm-sug-for">Za hackathon</div>
+            <div class="tm-sug-hack">AI4Good Belgrade · 02.05.2026.</div>
+          </div>
+          <div class="tm-sug-actions">
+            <button class="btn-join tm-btn">Prihvati predlog</button>
+            <button class="btn-info tm-btn">Odbij i traži novi</button>
+          </div>
+        </div>
+
+        <div class="tm-sug-body">
+          <div class="tm-sug-members">
+            <div class="tm-sug-member">
+              <div class="tm-av tm-av-v tm-av-sm">F</div>
+              <div>
+                <div class="tm-sug-name">fenjer</div>
+                <div class="tm-sug-github">⚡ 214 commits · top: Python, TS</div>
+              </div>
+              <div class="tm-role tm-role-ai">ML</div>
+            </div>
+            <div class="tm-sug-member">
+              <div class="tm-av tm-av-t tm-av-sm">V</div>
+              <div>
+                <div class="tm-sug-name">vuk</div>
+                <div class="tm-sug-github">⚡ 178 commits · top: Python, Go</div>
+              </div>
+              <div class="tm-role tm-role-be">Backend</div>
+            </div>
+            <div class="tm-sug-member">
+              <div class="tm-av tm-av-l tm-av-sm">M</div>
+              <div>
+                <div class="tm-sug-name">mara</div>
+                <div class="tm-sug-github">⚡ 96 commits · top: React, Figma</div>
+              </div>
+              <div class="tm-role tm-role-fe">Frontend</div>
+            </div>
+          </div>
+          <div class="tm-sug-why">
+            <span class="tm-sug-why-lbl">Zašto ovaj tim:</span>
+            Pokrivate ceo stack (ML + Backend + Frontend) potreban za LLM izazov, plus imate komplementarno GitHub iskustvo u Python eko-sistemu.
+          </div>
+        </div>
+      </div>
+
+      <!-- Suggestion 2 -->
+      <div class="tm-sug-card">
+        <div class="tm-sug-head">
+          <div class="tm-sug-match">
+            <div class="tm-match-num">87%</div>
+            <div class="tm-match-lbl">kompatibilnost</div>
+          </div>
+          <div class="tm-sug-context">
+            <div class="tm-sug-for">Za hackathon</div>
+            <div class="tm-sug-hack">FinTech Sprint · 15.05.2026.</div>
+          </div>
+          <div class="tm-sug-actions">
+            <button class="btn-join tm-btn">Prihvati predlog</button>
+            <button class="btn-info tm-btn">Odbij i traži novi</button>
+          </div>
+        </div>
+
+        <div class="tm-sug-body">
+          <div class="tm-sug-members">
+            <div class="tm-sug-member">
+              <div class="tm-av tm-av-r tm-av-sm">N</div>
+              <div>
+                <div class="tm-sug-name">nona</div>
+                <div class="tm-sug-github">⚡ 312 commits · top: Go, Kubernetes</div>
+              </div>
+              <div class="tm-role tm-role-ds">DevOps</div>
+            </div>
+            <div class="tm-sug-member">
+              <div class="tm-av tm-av-t tm-av-sm">M</div>
+              <div>
+                <div class="tm-sug-name">moljac</div>
+                <div class="tm-sug-github">⚡ 156 commits · top: Rust, C</div>
+              </div>
+              <div class="tm-role tm-role-be">Backend</div>
+            </div>
+          </div>
+          <div class="tm-sug-why">
+            <span class="tm-sug-why-lbl">Zašto ovaj tim:</span>
+            Mali i precizan tim — nona pokriva infra/deploy, moljac radi visoko-performantne servise, ti dodaješ frontend.
+          </div>
+        </div>
+      </div>
+
+      <!-- Suggestion 3 -->
+      <div class="tm-sug-card">
+        <div class="tm-sug-head">
+          <div class="tm-sug-match">
+            <div class="tm-match-num">78%</div>
+            <div class="tm-match-lbl">kompatibilnost</div>
+          </div>
+          <div class="tm-sug-context">
+            <div class="tm-sug-for">Za hackathon</div>
+            <div class="tm-sug-hack">Niš TechStorm 2026 · 20.05.2026.</div>
+          </div>
+          <div class="tm-sug-actions">
+            <button class="btn-join tm-btn">Prihvati predlog</button>
+            <button class="btn-info tm-btn">Odbij i traži novi</button>
+          </div>
+        </div>
+
+        <div class="tm-sug-body">
+          <div class="tm-sug-members">
+            <div class="tm-sug-member">
+              <div class="tm-av tm-av-v tm-av-sm">B</div>
+              <div>
+                <div class="tm-sug-name">bane_iot</div>
+                <div class="tm-sug-github">⚡ 88 commits · top: C, MicroPython</div>
+              </div>
+              <div class="tm-role tm-role-be">Embedded</div>
+            </div>
+            <div class="tm-sug-member">
+              <div class="tm-av tm-av-l tm-av-sm">J</div>
+              <div>
+                <div class="tm-sug-name">jana</div>
+                <div class="tm-sug-github">⚡ 104 commits · top: React, CSS</div>
+              </div>
+              <div class="tm-role tm-role-fe">Frontend</div>
+            </div>
+            <div class="tm-sug-member">
+              <div class="tm-av tm-av-t tm-av-sm">P</div>
+              <div>
+                <div class="tm-sug-name">petar.s</div>
+                <div class="tm-sug-github">⚡ 141 commits · top: Python</div>
+              </div>
+              <div class="tm-role tm-role-ai">ML</div>
+            </div>
+          </div>
+          <div class="tm-sug-why">
+            <span class="tm-sug-why-lbl">Zašto ovaj tim:</span>
+            IoT izazov zahteva hardver + frontend dashboard + analitiku — tim pokriva sve tri dimenzije.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- BROWSE TEAMS -->
+  <section class="tm-section">
+    <div class="tm-section-head">
+      <div class="tm-section-title">Browse timovi</div>
+      <div class="tm-chips-inline">
+        <div class="tm-chip-inline">Svi</div>
+        <div class="tm-chip-inline tm-chip-inline-active">Traže članove</div>
+        <div class="tm-chip-inline">Moj hackathon</div>
+      </div>
+    </div>
+
+    <div class="tm-grid">
+
+      <!-- bytecraft -->
+      <div class="tm-card">
+        <div class="tm-card-banner tm-bg-v">
+          <span class="tm-pill tm-pill-closed">🔒 Popunjen</span>
+          <span class="tm-card-badge">🏆 AI4Good ‘24</span>
+        </div>
+        <div class="tm-card-body">
+          <div class="tm-card-head">
+            <div class="tm-avatar-stack">
+              <div class="tm-av tm-av-v tm-av-sm">BA</div>
+              <div class="tm-av tm-av-l tm-av-sm">MI</div>
+              <div class="tm-av tm-av-t tm-av-sm">LZ</div>
+              <div class="tm-av tm-av-r tm-av-sm">KO</div>
+            </div>
+            <h3 class="tm-card-name">bytecraft</h3>
+          </div>
+          <div class="tm-card-tags">
+            <span class="tag t-v">LLM</span>
+            <span class="tag t-t">Python</span>
+            <span class="tag t-l">PyTorch</span>
+          </div>
+          <div class="tm-card-stats">
+            <div class="tm-cs"><strong>4</strong>/4 članova</div>
+            <div class="tm-cs">🏆 <strong>2</strong></div>
+            <div class="tm-cs">⚡ <strong>680</strong> XP</div>
+          </div>
+          <div class="tm-card-foot">
+            <button class="btn-info tm-btn-sm">Profil tima</button>
+            <button class="btn-info tm-btn-sm">Pošalji poruku</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- nullptr -->
+      <div class="tm-card tm-card-open">
+        <div class="tm-card-banner tm-bg-green">
+          <span class="tm-pill tm-pill-open"><span class="tm-live-dot"></span> Traži 1 člana</span>
+          <span class="tm-card-badge">ETF HackWeek</span>
+        </div>
+        <div class="tm-card-body">
+          <div class="tm-card-head">
+            <div class="tm-avatar-stack">
+              <div class="tm-av tm-av-v tm-av-sm">IV</div>
+              <div class="tm-av tm-av-l tm-av-sm">TO</div>
+              <div class="tm-av tm-av-t tm-av-sm">RA</div>
+              <div class="tm-av tm-av-slot tm-av-sm">+</div>
+            </div>
+            <h3 class="tm-card-name">nullptr</h3>
+          </div>
+          <div class="tm-need">Traže: <span class="tm-role tm-role-be">Backend / Rust</span></div>
+          <div class="tm-card-tags">
+            <span class="tag t-v">Rust</span>
+            <span class="tag t-t">C++</span>
+            <span class="tag t-l">Low level</span>
+          </div>
+          <div class="tm-card-stats">
+            <div class="tm-cs"><strong>3</strong>/4 članova</div>
+            <div class="tm-cs">🏆 <strong>1</strong></div>
+            <div class="tm-cs">⚡ <strong>410</strong> XP</div>
+          </div>
+          <div class="tm-card-foot">
+            <button class="btn-join tm-btn-sm">Zatraži priključenje</button>
+            <button class="btn-info tm-btn-sm">Profil</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- merge-conflict -->
+      <div class="tm-card tm-card-open">
+        <div class="tm-card-banner tm-bg-green">
+          <span class="tm-pill tm-pill-open"><span class="tm-live-dot"></span> Traži 2 člana</span>
+          <span class="tm-card-badge">FinTech Sprint</span>
+        </div>
+        <div class="tm-card-body">
+          <div class="tm-card-head">
+            <div class="tm-avatar-stack">
+              <div class="tm-av tm-av-v tm-av-sm">MP</div>
+              <div class="tm-av tm-av-l tm-av-sm">SD</div>
+              <div class="tm-av tm-av-slot tm-av-sm">+</div>
+              <div class="tm-av tm-av-slot tm-av-sm">+</div>
+            </div>
+            <h3 class="tm-card-name">merge-conflict</h3>
+          </div>
+          <div class="tm-need">Traže: <span class="tm-role tm-role-fe">Frontend</span> <span class="tm-role tm-role-dsg">Design</span></div>
+          <div class="tm-card-tags">
+            <span class="tag t-v">Node</span>
+            <span class="tag t-t">PostgreSQL</span>
+            <span class="tag t-l">React</span>
+          </div>
+          <div class="tm-card-stats">
+            <div class="tm-cs"><strong>2</strong>/4 članova</div>
+            <div class="tm-cs">🏆 <strong>0</strong></div>
+            <div class="tm-cs">⚡ <strong>120</strong> XP</div>
+          </div>
+          <div class="tm-card-foot">
+            <button class="btn-join tm-btn-sm">Zatraži priključenje</button>
+            <button class="btn-info tm-btn-sm">Profil</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- race-condition -->
+      <div class="tm-card">
+        <div class="tm-card-banner tm-bg-v">
+          <span class="tm-pill tm-pill-closed">🔒 Popunjen</span>
+          <span class="tm-card-badge">Niš TechStorm</span>
+        </div>
+        <div class="tm-card-body">
+          <div class="tm-card-head">
+            <div class="tm-avatar-stack">
+              <div class="tm-av tm-av-v tm-av-sm">UR</div>
+              <div class="tm-av tm-av-l tm-av-sm">PM</div>
+              <div class="tm-av tm-av-t tm-av-sm">ZV</div>
+              <div class="tm-av tm-av-r tm-av-sm">AD</div>
+            </div>
+            <h3 class="tm-card-name">race-condition</h3>
+          </div>
+          <div class="tm-card-tags">
+            <span class="tag t-v">Rust</span>
+            <span class="tag t-t">Embedded</span>
+            <span class="tag t-l">IoT</span>
+          </div>
+          <div class="tm-card-stats">
+            <div class="tm-cs"><strong>4</strong>/4 članova</div>
+            <div class="tm-cs">🏆 <strong>1</strong></div>
+            <div class="tm-cs">⚡ <strong>290</strong> XP</div>
+          </div>
+          <div class="tm-card-foot">
+            <button class="btn-info tm-btn-sm">Profil tima</button>
+            <button class="btn-info tm-btn-sm">Pošalji poruku</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 404brains -->
+      <div class="tm-card tm-card-open">
+        <div class="tm-card-banner tm-bg-green">
+          <span class="tm-pill tm-pill-open"><span class="tm-live-dot"></span> Traži 1 člana</span>
+          <span class="tm-card-badge">AI4Good Belgrade</span>
+        </div>
+        <div class="tm-card-body">
+          <div class="tm-card-head">
+            <div class="tm-avatar-stack">
+              <div class="tm-av tm-av-v tm-av-sm">JN</div>
+              <div class="tm-av tm-av-l tm-av-sm">TM</div>
+              <div class="tm-av tm-av-t tm-av-sm">KS</div>
+              <div class="tm-av tm-av-slot tm-av-sm">+</div>
+            </div>
+            <h3 class="tm-card-name">404brains</h3>
+          </div>
+          <div class="tm-need">Traže: <span class="tm-role tm-role-ai">ML</span></div>
+          <div class="tm-card-tags">
+            <span class="tag t-v">Python</span>
+            <span class="tag t-t">Data</span>
+            <span class="tag t-l">Pandas</span>
+          </div>
+          <div class="tm-card-stats">
+            <div class="tm-cs"><strong>3</strong>/4 članova</div>
+            <div class="tm-cs">🏆 <strong>0</strong></div>
+            <div class="tm-cs">⚡ <strong>180</strong> XP</div>
+          </div>
+          <div class="tm-card-foot">
+            <button class="btn-join tm-btn-sm">Zatraži priključenje</button>
+            <button class="btn-info tm-btn-sm">Profil</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- commit-n-chill -->
+      <div class="tm-card">
+        <div class="tm-card-banner tm-bg-v">
+          <span class="tm-pill tm-pill-closed">🔒 Popunjen</span>
+          <span class="tm-card-badge">HackNight #7</span>
+        </div>
+        <div class="tm-card-body">
+          <div class="tm-card-head">
+            <div class="tm-avatar-stack">
+              <div class="tm-av tm-av-v tm-av-sm">MV</div>
+              <div class="tm-av tm-av-l tm-av-sm">LJ</div>
+              <div class="tm-av tm-av-t tm-av-sm">BA</div>
+              <div class="tm-av tm-av-r tm-av-sm">DK</div>
+            </div>
+            <h3 class="tm-card-name">commit-n-chill</h3>
+          </div>
+          <div class="tm-card-tags">
+            <span class="tag t-v">TypeScript</span>
+            <span class="tag t-t">Next.js</span>
+            <span class="tag t-l">Tailwind</span>
+          </div>
+          <div class="tm-card-stats">
+            <div class="tm-cs"><strong>4</strong>/4 članova</div>
+            <div class="tm-cs">🏆 <strong>3</strong></div>
+            <div class="tm-cs">⚡ <strong>720</strong> XP</div>
+          </div>
+          <div class="tm-card-foot">
+            <button class="btn-info tm-btn-sm">Profil tima</button>
+            <button class="btn-info tm-btn-sm">Pošalji poruku</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <button class="tm-load-more">Učitaj još timova ↓</button>
+  </section>
+
+  <!-- SOLO PLAYERS -->
+  <section class="tm-section">
+    <div class="tm-section-head">
+      <div class="tm-section-title">Slobodni igrači · traže tim</div>
+      <div class="tm-section-link">Svi slobodni igrači ›</div>
+    </div>
+
+    <div class="tm-solo-grid">
+
+      <div class="tm-solo-card">
+        <div class="tm-av tm-av-v tm-solo-av">F</div>
+        <div class="tm-solo-name">fenjer</div>
+        <div class="tm-solo-role tm-role tm-role-ai">ML</div>
+        <div class="tm-solo-langs">
+          <span class="tag t-v">Python</span>
+          <span class="tag t-t">TypeScript</span>
+        </div>
+        <div class="tm-solo-git">⚡ 214 commits · 30d</div>
+        <div class="tm-solo-hack">🎯 AI4Good Belgrade</div>
+        <button class="btn-info tm-btn-sm tm-solo-btn">Pošalji poziv</button>
+      </div>
+
+      <div class="tm-solo-card">
+        <div class="tm-av tm-av-t tm-solo-av">M</div>
+        <div class="tm-solo-name">moljac</div>
+        <div class="tm-solo-role tm-role tm-role-be">Backend</div>
+        <div class="tm-solo-langs">
+          <span class="tag t-v">Rust</span>
+          <span class="tag t-t">C</span>
+        </div>
+        <div class="tm-solo-git">⚡ 156 commits · 30d</div>
+        <div class="tm-solo-hack">🎯 FinTech Sprint</div>
+        <button class="btn-info tm-btn-sm tm-solo-btn">Pošalji poziv</button>
+      </div>
+
+      <div class="tm-solo-card">
+        <div class="tm-av tm-av-l tm-solo-av">M</div>
+        <div class="tm-solo-name">mara</div>
+        <div class="tm-solo-role tm-role tm-role-fe">Frontend</div>
+        <div class="tm-solo-langs">
+          <span class="tag t-v">React</span>
+          <span class="tag t-t">Figma</span>
+        </div>
+        <div class="tm-solo-git">⚡ 96 commits · 30d</div>
+        <div class="tm-solo-hack">🎯 HackNight #7</div>
+        <button class="btn-info tm-btn-sm tm-solo-btn">Pošalji poziv</button>
+      </div>
+
+      <div class="tm-solo-card">
+        <div class="tm-av tm-av-r tm-solo-av">N</div>
+        <div class="tm-solo-name">nona</div>
+        <div class="tm-solo-role tm-role tm-role-ds">DevOps</div>
+        <div class="tm-solo-langs">
+          <span class="tag t-v">Go</span>
+          <span class="tag t-t">K8s</span>
+        </div>
+        <div class="tm-solo-git">⚡ 312 commits · 30d</div>
+        <div class="tm-solo-hack">🎯 FinTech Sprint</div>
+        <button class="btn-info tm-btn-sm tm-solo-btn">Pošalji poziv</button>
+      </div>
+
+      <div class="tm-solo-card">
+        <div class="tm-av tm-av-v tm-solo-av">V</div>
+        <div class="tm-solo-name">vuk</div>
+        <div class="tm-solo-role tm-role tm-role-ai">ML</div>
+        <div class="tm-solo-langs">
+          <span class="tag t-v">Python</span>
+          <span class="tag t-t">Go</span>
+        </div>
+        <div class="tm-solo-git">⚡ 178 commits · 30d</div>
+        <div class="tm-solo-hack">🎯 AI4Good Belgrade</div>
+        <button class="btn-info tm-btn-sm tm-solo-btn">Pošalji poziv</button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- LEADERBOARD -->
+  <section class="tm-section">
+    <div class="tm-section-head">
+      <div class="tm-section-title">🏆 Leaderboard · Top timovi sezone</div>
+      <div class="tm-section-link">Cela rang lista ›</div>
+    </div>
+
+    <div class="tm-lb">
+      <div class="tm-lb-row tm-lb-gold">
+        <div class="tm-lb-rank">🥇 1</div>
+        <div class="tm-avatar-stack tm-lb-stack">
+          <div class="tm-av tm-av-l tm-av-sm">MV</div>
+          <div class="tm-av tm-av-v tm-av-sm">LJ</div>
+          <div class="tm-av tm-av-t tm-av-sm">BA</div>
+          <div class="tm-av tm-av-r tm-av-sm">DK</div>
+        </div>
+        <div class="tm-lb-name">commit-n-chill</div>
+        <div class="tm-lb-badges">◉ 12 bedževa</div>
+        <div class="tm-lb-xp">⚡ 720 XP</div>
+      </div>
+
+      <div class="tm-lb-row tm-lb-silver">
+        <div class="tm-lb-rank">🥈 2</div>
+        <div class="tm-avatar-stack tm-lb-stack">
+          <div class="tm-av tm-av-v tm-av-sm">BA</div>
+          <div class="tm-av tm-av-l tm-av-sm">MI</div>
+          <div class="tm-av tm-av-t tm-av-sm">LZ</div>
+          <div class="tm-av tm-av-r tm-av-sm">KO</div>
+        </div>
+        <div class="tm-lb-name">bytecraft</div>
+        <div class="tm-lb-badges">◉ 9 bedževa</div>
+        <div class="tm-lb-xp">⚡ 680 XP</div>
+      </div>
+
+      <div class="tm-lb-row tm-lb-bronze">
+        <div class="tm-lb-rank">🥉 3</div>
+        <div class="tm-avatar-stack tm-lb-stack">
+          <div class="tm-av tm-av-v tm-av-sm">AČ</div>
+          <div class="tm-av tm-av-l tm-av-sm">SG</div>
+          <div class="tm-av tm-av-t tm-av-sm">DP</div>
+          <div class="tm-av tm-av-r tm-av-sm">NS</div>
+        </div>
+        <div class="tm-lb-name">digitalci <span class="tm-you">· ti</span></div>
+        <div class="tm-lb-badges">◉ 6 bedževa</div>
+        <div class="tm-lb-xp">⚡ 420 XP</div>
+      </div>
+
+      <div class="tm-lb-row">
+        <div class="tm-lb-rank">4</div>
+        <div class="tm-avatar-stack tm-lb-stack">
+          <div class="tm-av tm-av-v tm-av-sm">IV</div>
+          <div class="tm-av tm-av-l tm-av-sm">TO</div>
+          <div class="tm-av tm-av-t tm-av-sm">RA</div>
+        </div>
+        <div class="tm-lb-name">nullptr</div>
+        <div class="tm-lb-badges">◉ 5 bedževa</div>
+        <div class="tm-lb-xp">⚡ 410 XP</div>
+      </div>
+
+      <div class="tm-lb-row">
+        <div class="tm-lb-rank">5</div>
+        <div class="tm-avatar-stack tm-lb-stack">
+          <div class="tm-av tm-av-v tm-av-sm">UR</div>
+          <div class="tm-av tm-av-l tm-av-sm">PM</div>
+          <div class="tm-av tm-av-t tm-av-sm">ZV</div>
+          <div class="tm-av tm-av-r tm-av-sm">AD</div>
+        </div>
+        <div class="tm-lb-name">race-condition</div>
+        <div class="tm-lb-badges">◉ 4 bedža</div>
+        <div class="tm-lb-xp">⚡ 290 XP</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+  document.querySelectorAll('.tm-tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.tm-tab').forEach(x => x.classList.remove('tm-tab-active'));
+      t.classList.add('tm-tab-active');
+    });
+  });
+
+  document.querySelectorAll('.tm-chip-inline').forEach(c => {
+    c.addEventListener('click', () => {
+      document.querySelectorAll('.tm-chip-inline').forEach(x => x.classList.remove('tm-chip-inline-active'));
+      c.classList.add('tm-chip-inline-active');
+    });
+  });
+</script>
+
+</body>
+</html>

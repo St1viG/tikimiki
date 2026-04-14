@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="tikimiki.css">
+  <link rel="stylesheet" href="hackathoni.css">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="images/favicon.ico">
+  <title>tikimiki · Hackathoni</title>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="logo" onclick="window.location.href='home_page.html'" style="cursor:pointer"><span>tiki</span>miki</div>
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input type="text" placeholder="Pretraži korisnike, hackathone, organizacije...">
+    </div>
+    <div class="nav-right">
+      <div class="icon-btn">◈<span class="badge">2</span></div>
+      <div class="icon-btn">🔔<span class="badge">5</span></div>
+      <div class="avatar">AČ</div>
+    </div>
+  </div>
+</nav>
+
+<div class="hk-page">
+
+  <!-- PAGE HEADER -->
+  <header class="hk-header">
+    <div>
+      <h1 class="hk-title">Hackathoni</h1>
+      <div class="hk-sub">Pronađi svoj naredni hackathon.</div>
+    </div>
+    <div class="hk-create-wrap">
+      <button class="hk-create-btn" disabled>
+        <span>+</span> Kreiraj hackathon
+      </button>
+      <div class="hk-create-tip">🔒 Dostupno samo verifikovanim organizacijama</div>
+    </div>
+  </header>
+
+  <!-- TABS -->
+  <div class="hk-tabs">
+    <div class="hk-tab hk-tab-active">Svi</div>
+    <div class="hk-tab"><span class="hk-live-dot"></span> Aktuelni</div>
+    <div class="hk-tab">Predstojeći</div>
+    <div class="hk-tab">Moje prijave <span class="hk-tab-count">2</span></div>
+    <div class="hk-tab">Završeni</div>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="hk-filter-bar">
+    <div class="hk-search">
+      <span class="search-icon">⌕</span>
+      <input type="text" placeholder="Pretraži hackathone...">
+    </div>
+    <div class="hk-chips-row">
+      <div class="hk-chip">Lokacija <span class="hk-chip-arrow">▾</span></div>
+      <div class="hk-chip">Tip <span class="hk-chip-arrow">▾</span></div>
+      <div class="hk-chip">Nagrada <span class="hk-chip-arrow">▾</span></div>
+      <div class="hk-chip">Veštine <span class="hk-chip-arrow">▾</span></div>
+      <div class="hk-chip-sort">Sortiraj: <strong>Najskoriji</strong> <span class="hk-chip-arrow">▾</span></div>
+    </div>
+  </div>
+
+  <!-- FEATURED (LIVE) -->
+  <section class="hk-section">
+    <div class="hk-section-head">
+      <div class="hk-section-title"><span class="hk-live-dot hk-live-dot-lg"></span> Trenutno aktivan</div>
+    </div>
+
+    <div class="hk-featured">
+      <div class="hk-featured-banner hk-has-img">
+        <img src="images/etf2.jpg" alt="ETF HackWeek 2026" class="hk-banner-img">
+        <div class="hk-banner-dim"></div>
+        <div class="hk-featured-pills">
+          <span class="hk-pill hk-pill-live"><span class="hk-live-dot"></span> AKTIVAN</span>
+          <span class="hk-pill">Fizički · Beograd, ETF</span>
+        </div>
+      </div>
+
+      <div class="hk-featured-body">
+        <div class="hk-featured-top">
+          <div class="hk-card-org">
+            <div class="hk-org-av">ETF</div>
+            <span>ETF Univerzitet u Beogradu</span>
+            <span class="hk-verify">✓</span>
+          </div>
+          <div class="hk-countdown">23h 41min preostalo</div>
+        </div>
+
+        <h2 class="hk-featured-name">ETF HackWeek 2026</h2>
+
+        <div class="hk-featured-tags">
+          <span class="tag t-v">AI</span>
+          <span class="tag t-t">Web</span>
+          <span class="tag t-l">Low level</span>
+        </div>
+
+        <div class="hk-featured-meta">
+          <div class="hk-meta-item">
+            <div class="hk-meta-label">Trajanje</div>
+            <div class="hk-meta-val">48h</div>
+          </div>
+          <div class="hk-meta-item">
+            <div class="hk-meta-label">Učesnici</div>
+            <div class="hk-meta-val">87<span class="hk-meta-cap">/120</span></div>
+          </div>
+          <div class="hk-meta-item">
+            <div class="hk-meta-label">Glavna nagrada</div>
+            <div class="hk-meta-val hk-meta-val-prize">$2,000</div>
+          </div>
+          <div class="hk-meta-item">
+            <div class="hk-meta-label">Rok za prijavu</div>
+            <div class="hk-meta-val">20.04.2026.</div>
+          </div>
+        </div>
+
+        <div class="hk-featured-foot">
+          <button class="btn-join hk-btn-lg">Prijavi se</button>
+          <button class="btn-info hk-btn-lg">Otvori stranicu</button>
+          <div class="hk-cal-wrap">
+            <button class="btn-info hk-btn-lg hk-cal-btn">📅 Kalendar <span class="hk-chip-arrow">▾</span></button>
+            <div class="hk-cal-menu">
+              <div class="hk-cal-item">Google Calendar</div>
+              <div class="hk-cal-item">Apple Calendar</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PREDSTOJEĆI -->
+  <section class="hk-section">
+    <div class="hk-section-head">
+      <div class="hk-section-title">Predstojeći hackathoni</div>
+    </div>
+
+    <div class="hk-grid">
+
+      <!-- 1: applied/pending -->
+      <div class="hk-card">
+        <div class="hk-card-banner">
+          <span class="hk-type-pill">Fizički</span>
+          <span class="hk-card-days">za 11 dana</span>
+        </div>
+        <div class="hk-card-body">
+          <div class="hk-card-org">
+            <div class="hk-org-av hk-org-av-sm">GH</div>
+            <span>Garaža</span>
+            <span class="hk-verify">✓</span>
+          </div>
+          <h3 class="hk-card-name">Garaža Winter Jam 2026</h3>
+          <div class="hk-card-date">25.04. – 27.04.2026. · Novi Sad</div>
+          <div class="hk-card-tags">
+            <span class="tag t-v">Rust</span>
+            <span class="tag t-t">Embedded</span>
+          </div>
+          <div class="hk-card-foot">
+            <div class="hk-status-pill hk-status-pending">🟡 Prijavljen · Na čekanju</div>
+            <div class="hk-prize-inline">🏆 €1,200</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2 -->
+      <div class="hk-card">
+        <div class="hk-card-banner hk-banner-v">
+          <span class="hk-type-pill">Virtuelni</span>
+          <span class="hk-card-days">za 18 dana</span>
+        </div>
+        <div class="hk-card-body">
+          <div class="hk-card-org">
+            <div class="hk-org-av hk-org-av-sm">A4</div>
+            <span>AI4Good Foundation</span>
+            <span class="hk-verify">✓</span>
+          </div>
+          <h3 class="hk-card-name">AI4Good Belgrade</h3>
+          <div class="hk-card-date">02.05. – 04.05.2026. · Online</div>
+          <div class="hk-card-tags">
+            <span class="tag t-v">LLM</span>
+            <span class="tag t-t">Python</span>
+          </div>
+          <div class="hk-card-foot">
+            <button class="btn-join hk-btn-sm">Prijavi se</button>
+            <div class="hk-prize-inline">🏆 $5,000</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3: popunjeno -->
+      <div class="hk-card">
+        <div class="hk-card-banner">
+          <span class="hk-type-pill">Fizički</span>
+          <span class="hk-card-days">za 26 dana</span>
+        </div>
+        <div class="hk-card-body">
+          <div class="hk-card-org">
+            <div class="hk-org-av hk-org-av-sm">HN</div>
+            <span>HackNight.rs</span>
+            <span class="hk-verify">✓</span>
+          </div>
+          <h3 class="hk-card-name">HackNight #7</h3>
+          <div class="hk-card-date">10.05.2026. · Beograd</div>
+          <div class="hk-card-tags">
+            <span class="tag t-v">Web</span>
+            <span class="tag t-t">UX</span>
+          </div>
+          <div class="hk-card-foot">
+            <button class="hk-btn-sm hk-btn-disabled" disabled>Popunjeno</button>
+            <div class="hk-prize-inline">🏆 €800</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4 -->
+      <div class="hk-card">
+        <div class="hk-card-banner hk-banner-v">
+          <span class="hk-type-pill">Virtuelni</span>
+          <span class="hk-card-days">za 31 dan</span>
+        </div>
+        <div class="hk-card-body">
+          <div class="hk-card-org">
+            <div class="hk-org-av hk-org-av-sm">FT</div>
+            <span>FinTech Hub</span>
+            <span class="hk-verify">✓</span>
+          </div>
+          <h3 class="hk-card-name">FinTech Sprint</h3>
+          <div class="hk-card-date">15.05. – 17.05.2026. · Online</div>
+          <div class="hk-card-tags">
+            <span class="tag t-v">React</span>
+            <span class="tag t-t">Node</span>
+          </div>
+          <div class="hk-card-foot">
+            <button class="btn-join hk-btn-sm">Prijavi se</button>
+            <div class="hk-prize-inline">🏆 $3,000</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5 -->
+      <div class="hk-card">
+        <div class="hk-card-banner">
+          <span class="hk-type-pill">Fizički</span>
+          <span class="hk-card-days">za 36 dana</span>
+        </div>
+        <div class="hk-card-body">
+          <div class="hk-card-org">
+            <div class="hk-org-av hk-org-av-sm">NT</div>
+            <span>Niš TechPark</span>
+            <span class="hk-verify">✓</span>
+          </div>
+          <h3 class="hk-card-name">Niš TechStorm 2026</h3>
+          <div class="hk-card-date">20.05. – 22.05.2026. · Niš</div>
+          <div class="hk-card-tags">
+            <span class="tag t-v">IoT</span>
+            <span class="tag t-t">Green</span>
+          </div>
+          <div class="hk-card-foot">
+            <button class="btn-join hk-btn-sm">Prijavi se</button>
+            <div class="hk-prize-inline">🏆 €4,500</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6 -->
+      <div class="hk-card">
+        <div class="hk-card-banner hk-banner-v">
+          <span class="hk-type-pill">Virtuelni</span>
+          <span class="hk-card-days">za 44 dana</span>
+        </div>
+        <div class="hk-card-body">
+          <div class="hk-card-org">
+            <div class="hk-org-av hk-org-av-sm">ST</div>
+            <span>Startit</span>
+            <span class="hk-verify">✓</span>
+          </div>
+          <h3 class="hk-card-name">Startit Pitch Weekend</h3>
+          <div class="hk-card-date">28.05. – 30.05.2026. · Online</div>
+          <div class="hk-card-tags">
+            <span class="tag t-v">Any stack</span>
+            <span class="tag t-t">Pitch</span>
+          </div>
+          <div class="hk-card-foot">
+            <button class="btn-join hk-btn-sm">Prijavi se</button>
+            <div class="hk-prize-inline">🏆 €2,500</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <button class="hk-load-more">Učitaj još hackathona ↓</button>
+  </section>
+
+  <!-- MOJE PRIJAVE -->
+  <section class="hk-section">
+    <div class="hk-section-head">
+      <div class="hk-section-title">Moje prijave</div>
+    </div>
+
+    <div class="hk-apply-list">
+
+      <div class="hk-apply-row">
+        <div class="hk-apply-status hk-apply-pending">🟡 Na čekanju</div>
+        <div class="hk-apply-info">
+          <div class="hk-apply-name">Garaža Winter Jam 2026</div>
+          <div class="hk-apply-meta">25.04. – 27.04.2026. · tim <strong>digitalci</strong></div>
+        </div>
+        <button class="btn-info hk-btn-sm">Pogledaj prijavu</button>
+      </div>
+
+      <div class="hk-apply-row">
+        <div class="hk-apply-status hk-apply-approved">🟢 Odobren</div>
+        <div class="hk-apply-info">
+          <div class="hk-apply-name">ETF HackWeek 2026</div>
+          <div class="hk-apply-meta">u toku · tim <strong>digitalci</strong></div>
+        </div>
+        <button class="btn-join hk-btn-sm">Otvori server</button>
+      </div>
+
+    </div>
+  </section>
+
+</div>
+
+<script>
+  document.querySelectorAll('.hk-tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.hk-tab').forEach(x => x.classList.remove('hk-tab-active'));
+      t.classList.add('hk-tab-active');
+    });
+  });
+
+  document.querySelectorAll('.hk-chip').forEach(c => {
+    c.addEventListener('click', () => c.classList.toggle('hk-chip-active'));
+  });
+
+  const calBtn = document.querySelector('.hk-cal-btn');
+  const calMenu = document.querySelector('.hk-cal-menu');
+  if (calBtn && calMenu) {
+    calBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      calMenu.classList.toggle('hk-cal-menu-open');
+    });
+    document.addEventListener('click', () => calMenu.classList.remove('hk-cal-menu-open'));
+  }
+</script>
+
+</body>
+</html>
