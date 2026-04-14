@@ -32,11 +32,10 @@
     <div class="menu-item" onclick="window.location.href='home_page.html'"><span class="icon">⌂</span> Početna</div>
     <div class="menu-item"><span class="icon">◈</span> Hackathoni</div>
     <div class="menu-item"><span class="icon">👥</span> Timovi</div>
-    <div class="menu-item"><span class="icon">✉</span> Poruke</div>
-    <div class="menu-divider"></div>
-    <div class="menu-label">Nalog</div>
+    <div class="menu-item" onclick="window.location.href='cohor.html'"><span class="icon">✉</span> Poruke</div>
+    <div class="menu-item active"><span class="icon">👾</span> GameHub</div>
     <div class="menu-item"><span class="icon">👤</span> Profil</div>
-    <div class="menu-item"><span class="icon">⚙</span> Podešavanja</div>
+    <div class="menu-item" onclick="window.location.href='settings.html'"><span class="icon">⚙</span> Podešavanja</div>
     <div class="menu-divider"></div>
     <div class="crystal-button"><span class="crystal-icon">◆</span> Premium</div>
   </aside>
@@ -242,17 +241,20 @@
       </div>
     </div>
 
-    <footer style="margin-top:24px;padding:0 2px;text-align:center;">
-      <div style="display:flex;flex-wrap:wrap;gap:6px 10px;margin-bottom:10px;justify-content:center;">
-        <a style="font-size:var(--fs-xs);color:var(--muted);cursor:pointer;">About</a> <span style="font-size:10px;color:var(--muted);">·</span>
-        <a style="font-size:var(--fs-xs);color:var(--muted);cursor:pointer;">Accessibility</a> <span style="font-size:10px;color:var(--muted);">·</span>
-        <a style="font-size:var(--fs-xs);color:var(--muted);cursor:pointer;">Help Center</a>
-        <a style="font-size:var(--fs-xs);color:var(--muted);cursor:pointer;">Privacy & Terms</a>
-      </div>
-      <div style="font-size:var(--fs-xs);color:var(--violet-light);">tiki<span style="color:var(--lemon)">miki</span> © 2026</div>
-    </footer>
   </aside>
 </div>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-links">
+      <a>O nama</a> <span>·</span>
+      <a>Pristupačnost</a> <span>·</span>
+      <a>Centar za pomoć</a><span>·</span>
+      <a>Privatnost i uslovi</a>
+    </div>
+    <div class="footer-copy">tiki<span>miki</span> © 2026</div>
+  </div>
+</footer>
 
 <script>
 // ── MODAL ───────────────────────────────────────────────────
@@ -455,9 +457,9 @@ const questions = [
     answer: 3
   },
   {
-    clue: "Ko živi u 107",
-    options: ["Pešić", "Čolić", "kohor", "Gnjat"],
-    answer: 2
+    clue: "Ko je lale",
+    options: ["lale", "simić", "pešić", "claude"],
+    answer: 0
   }
 ];
 

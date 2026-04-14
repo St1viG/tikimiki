@@ -12,6 +12,43 @@ body {
     transform: translateX(-3px);
 }
 
+.logo-wrap {
+    width: var(--sidebar-w);
+    flex-shrink: 0;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.logo-wrap .logo {
+    width: 100%;
+}
+
+.back-btn {
+    position: absolute;
+    right: calc(100% + 6px);
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 28px;
+    padding: 0 10px 0 8px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+    user-select: none;
+}
+
+.back-btn:hover {
+    background: var(--surface2);
+    color: var(--text);
+}
+
 .cohor-nav-center {
     flex: 1;
     display: flex;

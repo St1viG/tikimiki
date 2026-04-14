@@ -945,7 +945,54 @@ nav{
     color:var(--lemon-vivid);
 }
 
+/* ── FOOTER ───────────────────────────────────────────────── */
 
+.footer {
+    border-top: 0.5px solid var(--border);
+    margin-top: 24px;
+}
+
+.footer-inner {
+    max-width: 1150px;
+    margin: 0 auto;
+    padding: 16px var(--pad);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.footer-links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.footer-links a {
+    font-size: var(--fs-xs);
+    color: var(--muted);
+    cursor: pointer;
+}
+
+.footer-links a:hover {
+    color: var(--text);
+}
+
+.footer-links span {
+    font-size: 10px;
+    color: var(--muted);
+}
+
+.footer-copy {
+    font-size: var(--fs-s);
+    color: var(--violet-light);
+}
+
+.footer-copy span {
+    color: var(--lemon);
+}
 
 @media(max-width:760px){
     .sidebar-left,.sidebar-right{display:none}
