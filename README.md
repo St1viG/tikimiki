@@ -22,7 +22,7 @@ Projekat "tikimiki" je razvijen u okviru predmeta Principi softverskog inženjer
 * Dimitrije Pešić
 * Nenad Skoković
 
-## 📝 Verzije projekta (Changelog)
+## Verzije projekta (Changelog)
 
 | Verzija | Datum | Opis promena | Autori |
 | :--- | :--- | :--- | :--- |
