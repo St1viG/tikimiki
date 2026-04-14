@@ -1508,3 +1508,40 @@ body {
   color: var(--muted);
   border-color: var(--border);
 }
+
+/* ── Rezultati panel ── */
+.rezultati-select {
+    width: 100%;
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 9px 12px;
+    outline: none;
+    cursor: pointer;
+    transition: border-color .15s;
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238B83A8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+}
+
+.rezultati-select:focus {
+    border-color: var(--violet);
+}
+
+.rezultati-select option {
+    background: #1A1133;
+    color: var(--text);
+}
+
+.ch-locked-icon {
+    font-size: 11px;
+    flex-shrink: 0;
+    opacity: .7;
+}

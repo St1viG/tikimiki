@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="sr">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,870 +10,1306 @@
   <link rel="icon" href="images/favicon.ico">
   <title>tikimiki · Cohor</title>
 </head>
+
 <body>
 
-<nav>
-  <div class="nav-inner">
-    <div class="logo-wrap">
-      <div class="back-btn" onclick="window.location.href='home_page.html'">‹ Početna</div>
-      <div class="logo" onclick="window.location.href='home_page.html'" style="cursor:pointer"><span>tiki</span>miki</div>
-    </div>
-
-    <div class="cohor-nav-center" id="nav-server-mode">
-      <span>Cohor</span>
-      <span class="sep">/</span>
-      <span class="cohor-hack-name" id="nav-server-name">ETF HackWeek 2026</span>
-      <span class="sep">/</span>
-      <span id="nav-ch-label">#opšte</span>
-      <span class="cohor-live-pill"><span class="cohor-live-dot"></span> AKTIVAN</span>
-    </div>
-
-    <div class="cohor-nav-center dm-hidden" id="nav-dm-mode">
-      <span>Cohor</span>
-      <span class="sep">/</span>
-      <span>Direktne poruke</span>
-      <span class="sep">/</span>
-      <span id="nav-dm-label" style="color:var(--text);font-weight:500">moljac</span>
-    </div>
-
-    <div class="nav-right">
-      <div class="icon-btn">◈<span class="badge">2</span></div>
-      <div class="icon-btn">🔔<span class="badge">5</span></div>
-      <div class="avatar">AČ</div>
-    </div>
-  </div>
-</nav>
-
-<div class="cohor-app">
-
-  <!-- SERVER STRIP -->
-  <div class="srv-strip">
-    <div class="srv-icon srv-dm" id="srv-dm-btn" onclick="enterDmMode()">
-      <span style="font-size:16px">✉</span>
-      <span class="srv-notif srv-notif-v" id="dm-strip-notif">3</span>
-      <span class="srv-tooltip">Direktne poruke</span>
-    </div>
-    <div class="srv-divider"></div>
-    <div class="srv-icon srv-active" id="srv-etf" onclick="enterServerMode()">
-      <span style="font-size:11px;letter-spacing:-.5px">ETF</span>
-      <span class="srv-notif srv-notif-green" id="srv-etf-notif">12</span>
-      <span class="srv-tooltip">ETF HackWeek 2026 · aktivan</span>
-    </div>
-    <div class="srv-divider"></div>
-    <div class="srv-past-label">prošli</div>
-    <div class="srv-icon srv-past">
-      <span style="font-size:11px">GAR</span>
-      <span class="srv-tooltip">Garaža Hackathon '25</span>
-    </div>
-    <div class="srv-icon srv-past">
-      <span style="font-size:10px">HN1</span>
-      <span class="srv-tooltip">HackNight #1</span>
-    </div>
-    <div class="srv-icon srv-past">
-      <span style="font-size:10px">MI6</span>
-      <span class="srv-tooltip">MilanoInno 2024</span>
-    </div>
-    <div style="flex:1"></div>
-    <div class="srv-icon" style="background:var(--surface2);color:var(--muted);border:0.5px solid var(--border);font-size:16px;border-radius:50%">
-      ⚙<span class="srv-tooltip">Podešavanja</span>
-    </div>
-  </div>
-
-  <!-- ── SERVER: CHANNEL SIDEBAR ── -->
-  <div class="ch-sidebar" id="panel-ch-sidebar">
-    <div class="ch-sidebar-header">
-      <div class="ch-sidebar-title">
-        <span>◈</span> ETF HackWeek 2026
-        <span style="margin-left:auto;font-size:10px;font-weight:600;background:#04342C;color:#5DCAA5;border:0.5px solid #0F3D30;border-radius:20px;padding:2px 7px">LIVE</span>
-      </div>
-      <div class="ch-sidebar-sub">48h · Beograd, ETF · 120 učesnika</div>
-    </div>
-    <div class="ch-list">
-      <div class="ch-section">Opšte</div>
-      <div class="ch-item ch-active" onclick="switchChannel(this,'opšte','Opšti razgovori i najave')">
-        <span class="ch-icon">#</span><span class="ch-name">opšte</span>
-      </div>
-      <div class="ch-item ch-unread" onclick="switchChannel(this,'najave','Obaveštenja organizatora')">
-        <span class="ch-icon">📢</span><span class="ch-name">najave</span>
-        <span class="ch-badge ch-badge-g">3</span>
-      </div>
-      <div class="ch-item" onclick="switchChannel(this,'resursi','Korisni linkovi i materijali')">
-        <span class="ch-icon">📎</span><span class="ch-name">resursi</span>
-      </div>
-      <div class="ch-section">Timovi</div>
-      <div class="ch-item ch-unread" onclick="switchChannel(this,'tim-digitalci','Privatni kanal tima digitalci')">
-        <span class="ch-icon">🔒</span><span class="ch-name">tim-digitalci</span>
-        <span class="ch-badge ch-badge-v">7</span>
-      </div>
-      <div class="ch-item ch-locked"><span class="ch-icon">🔒</span><span class="ch-name">tim-bytecraft</span></div>
-      <div class="ch-item ch-locked"><span class="ch-icon">🔒</span><span class="ch-name">tim-nullptr</span></div>
-      <div class="ch-section">Kanban</div>
-      <div class="ch-item" onclick="switchChannel(this,'moj-tim-board','Kanban tabla tima digitalci')">
-        <span class="ch-icon">▦</span><span class="ch-name">moj-tim-board</span>
-      </div>
-      <div class="ch-section">Glasanje &amp; Predaja</div>
-      <div class="ch-item ch-unread" onclick="switchChannel(this,'glasanje-publike','Glasajte za projekte')">
-        <span class="ch-icon">🗳</span><span class="ch-name">glasanje-publike</span>
-        <span class="ch-badge ch-badge-g">1</span>
-      </div>
-      <div class="ch-item" id="ch-predaja" onclick="switchChannel(this,'predaja-projekta','Predaja finalnog projekta i video prezentacije')">
-        <span class="ch-icon">📤</span><span class="ch-name">predaja-projekta</span>
-      </div>
-    </div>
-    <div class="user-strip">
-      <div class="avatar" style="width:32px;height:32px;font-size:10px">AČ</div>
-      <div class="user-strip-info">
-        <div class="user-strip-name">Andrej Čolić</div>
-        <div class="user-strip-status"><span class="status-dot"></span>Online</div>
-      </div>
-      <div class="strip-actions">
-        <div class="strip-btn">🎤</div>
-        <div class="strip-btn">⚙</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── DM: CONTACT SIDEBAR ── -->
-  <div class="dm-sidebar" id="panel-dm-sidebar">
-    <div class="dm-sidebar-header">
-      <div class="dm-sidebar-title">Direktne poruke</div>
-      <input class="dm-search" type="text" placeholder="Pronađi ili započni razgovor">
-    </div>
-    <div class="dm-list">
-      <div class="dm-section">Razgovori</div>
-
-      <div class="dm-row" id="dm-row-digitalci" onclick="switchDm(this,'digitalci')">
-        <div class="dm-group-av">
-          <div class="ga1" style="background:#1A1133;color:var(--violet-light);border:1px solid #2D1A55">AČ</div>
-          <div class="ga2" style="background:#1C1A00;color:var(--lemon-vivid);border:1px solid #3A3600">SG</div>
-        </div>
-        <div class="dm-row-info">
-          <div class="dm-row-name">digitalci (tim)</div>
-          <div class="dm-row-preview">Dimitijre Pešić: super</div>
-        </div>
-        <div class="dm-row-meta">
-          <span class="dm-row-time">08:20</span>
-          <span class="dm-row-badge dm-badge-green">7</span>
+  <nav>
+    <div class="nav-inner">
+      <div class="logo-wrap">
+        <div class="back-btn" onclick="window.location.href='home_page.html'">‹ Početna</div>
+        <div class="logo" onclick="window.location.href='home_page.html'" style="cursor:pointer"><span>tiki</span>miki
         </div>
       </div>
 
-      <div class="dm-row dm-row-unread" id="dm-row-nenad" onclick="switchDm(this,'nenad')">
-        <div class="dm-row-av" style="background:#160D0D;color:#ff9ff3;border:1px solid #3D1A3D">NS<span class="dm-row-si dm-row-si-idle"></span></div>
-        <div class="dm-row-info">
-          <div class="dm-row-name">Nenad Skoković</div>
-          <div class="dm-row-preview">digitalac</div>
-        </div>
-        <div class="dm-row-meta">
-          <span class="dm-row-time">08:23</span>
-          <span class="dm-row-badge">1</span>
-        </div>
+      <div class="cohor-nav-center" id="nav-server-mode">
+        <span>Cohor</span>
+        <span class="sep">/</span>
+        <span class="cohor-hack-name" id="nav-server-name">ETF HackWeek 2026</span>
+        <span class="sep">/</span>
+        <span id="nav-ch-label">#opšte</span>
+        <span class="cohor-live-pill"><span class="cohor-live-dot"></span> AKTIVAN</span>
       </div>
 
-    </div>
-
-    <div class="user-strip">
-      <div class="avatar" style="width:32px;height:32px;font-size:10px">AČ</div>
-      <div class="user-strip-info">
-        <div class="user-strip-name">Andrej Čolić</div>
-        <div class="user-strip-status"><span class="status-dot"></span>Online</div>
+      <div class="cohor-nav-center dm-hidden" id="nav-dm-mode">
+        <span>Cohor</span>
+        <span class="sep">/</span>
+        <span>Direktne poruke</span>
+        <span class="sep">/</span>
+        <span id="nav-dm-label" style="color:var(--text);font-weight:500">moljac</span>
       </div>
-      <div class="strip-actions">
-        <div class="strip-btn">🎤</div>
-        <div class="strip-btn">⚙</div>
+
+      <div class="nav-right">
+        <div class="icon-btn">◈<span class="badge">2</span></div>
+        <div class="icon-btn">🔔<span class="badge">5</span></div>
+        <div class="avatar">AČ</div>
       </div>
     </div>
-  </div>
+  </nav>
 
-  <!-- ── CHAT AREA (shared) ── -->
-  <div class="chat-area">
-    <div class="chat-topbar">
-      <span class="chat-topbar-icon" id="topbar-icon">#</span>
-      <span class="chat-topbar-name" id="topbar-name">opšte</span>
-      <span class="chat-topbar-desc" id="topbar-desc">Opšti razgovori i najave</span>
-      <div class="topbar-actions">
-        <div class="topbar-btn">🔍</div>
-        <div class="topbar-btn">📌</div>
-        <div class="topbar-btn" id="topbar-toggle-right" onclick="toggleRightPanel()">👥</div>
+  <div class="cohor-app">
+
+    <!-- SERVER STRIP -->
+    <div class="srv-strip">
+      <div class="srv-icon srv-dm" id="srv-dm-btn" onclick="enterDmMode()">
+        <span style="font-size:16px">✉</span>
+        <span class="srv-notif srv-notif-v" id="dm-strip-notif">3</span>
+        <span class="srv-tooltip">Direktne poruke</span>
       </div>
-    </div>
-
-    <!-- Server messages -->
-    <div class="messages" id="messages-server">
+      <div class="srv-divider"></div>
+      <div class="srv-icon srv-active" id="srv-etf" onclick="enterServerMode()">
+        <span style="font-size:11px;letter-spacing:-.5px">ETF</span>
+        <span class="srv-notif srv-notif-green" id="srv-etf-notif">12</span>
+        <span class="srv-tooltip">ETF HackWeek 2026 · aktivan</span>
+      </div>
+      <div class="srv-divider"></div>
+      <div class="srv-past-label">prošli</div>
+      <div class="srv-icon srv-past">
+        <span style="font-size:11px">GAR</span>
+        <span class="srv-tooltip">Garaža Hackathon '25</span>
+      </div>
+      <div class="srv-icon srv-past">
+        <span style="font-size:10px">HN1</span>
+        <span class="srv-tooltip">HackNight #1</span>
+      </div>
+      <div class="srv-icon srv-past">
+        <span style="font-size:10px">MI6</span>
+        <span class="srv-tooltip">MilanoInno 2024</span>
+      </div>
       <div style="flex:1"></div>
-      <div class="ch-intro">
-        <div class="ch-intro-hash">#</div>
-        <div class="ch-intro-title">Dobrodošli u #opšte</div>
-        <div class="ch-intro-sub">Ovo je početak kanala <strong style="color:var(--violet-light)">#opšte</strong> za ETF HackWeek 2026.</div>
+      <div class="srv-icon"
+        style="background:var(--surface2);color:var(--muted);border:0.5px solid var(--border);font-size:16px;border-radius:50%">
+        ⚙<span class="srv-tooltip">Podešavanja</span>
       </div>
-      <div class="msg-date-sep">Subota, 11. april 2026.</div>
-      <div class="msg">
-        <div class="msg-av pav-t">MA</div>
-        <div class="msg-body">
-          <div class="msg-meta-row"><span class="msg-author msg-author-t">Mohammed Avdol</span><span class="msg-role-badge mrb-org">organizator</span><span class="msg-time">08:00</span></div>
-          <div class="msg-text">Dobro jutro svima! Hakathon počinje za <strong style="color:var(--lemon-vivid)">2 sata</strong>. Svi timovi da se prijave na recepciji do 10h. Srećno!</div>
+    </div>
+
+    <!-- ── SERVER: CHANNEL SIDEBAR ── -->
+    <div class="ch-sidebar" id="panel-ch-sidebar">
+      <div class="ch-sidebar-header">
+        <div class="ch-sidebar-title">
+          <span>◈</span> ETF HackWeek 2026
+          <span
+            style="margin-left:auto;font-size:10px;font-weight:600;background:#04342C;color:#5DCAA5;border:0.5px solid #0F3D30;border-radius:20px;padding:2px 7px">LIVE</span>
+        </div>
+        <div class="ch-sidebar-sub">48h · Beograd, ETF · 120 učesnika</div>
+      </div>
+      <div class="ch-list">
+        <div class="ch-section">Opšte</div>
+        <div class="ch-item ch-active" onclick="switchChannel(this,'opšte','Opšti razgovori i najave')">
+          <span class="ch-icon">#</span><span class="ch-name">opšte</span>
+        </div>
+        <div class="ch-item ch-unread" onclick="switchChannel(this,'najave','Obaveštenja organizatora')">
+          <span class="ch-icon">📢</span><span class="ch-name">najave</span>
+          <span class="ch-badge ch-badge-g">3</span>
+        </div>
+        <div class="ch-item" onclick="switchChannel(this,'resursi','Korisni linkovi i materijali')">
+          <span class="ch-icon">📎</span><span class="ch-name">resursi</span>
+        </div>
+        <div class="ch-section">Timovi</div>
+        <div class="ch-item ch-unread" onclick="switchChannel(this,'tim-digitalci','Privatni kanal tima digitalci')">
+          <span class="ch-icon">🔒</span><span class="ch-name">tim-digitalci</span>
+          <span class="ch-badge ch-badge-v">7</span>
+        </div>
+        <div class="ch-item ch-locked"><span class="ch-icon">🔒</span><span class="ch-name">tim-bytecraft</span></div>
+        <div class="ch-item ch-locked"><span class="ch-icon">🔒</span><span class="ch-name">tim-nullptr</span></div>
+        <div class="ch-section">Kanban</div>
+        <div class="ch-item" onclick="switchChannel(this,'moj-tim-board','Kanban tabla tima digitalci')">
+          <span class="ch-icon">▦</span><span class="ch-name">moj-tim-board</span>
+        </div>
+        <div class="ch-section">Glasanje &amp; Predaja</div>
+        <div class="ch-item ch-unread" onclick="switchChannel(this,'glasanje-publike','Glasajte za projekte')">
+          <span class="ch-icon">🗳</span><span class="ch-name">glasanje-publike</span>
+          <span class="ch-badge ch-badge-g">1</span>
+        </div>
+        <div class="ch-item" id="ch-predaja"
+          onclick="switchChannel(this,'predaja-projekta','Predaja finalnog projekta i video prezentacije')">
+          <span class="ch-icon">📤</span><span class="ch-name">predaja-projekta</span>
+        </div>
+        <div class="ch-item ch-locked" id="ch-rezultati"
+          onclick="switchChannel(this,'rezultati','Zvanični rezultati hakathona')">
+          <span class="ch-icon">🏆</span><span class="ch-name">rezultati</span>
+          <span class="ch-locked-icon" id="ch-rezultati-lock" title="Dostupno nakon završetka hakathona">🔒</span>
         </div>
       </div>
-      <div class="msg msg-grouped">
-        <div class="msg-av pav-t">MA</div>
-        <div class="msg-body">
-          <div class="msg-text">Tema: <strong style="color:var(--violet-light)">AI za obrazovanje</strong>. Detalji u #resursi.</div>
-          <div class="msg-reactions"><div class="reaction mine">🔥 14</div><div class="reaction">👍 9</div><div class="reaction">🚀 6</div></div>
+      <div class="user-strip">
+        <div class="avatar" style="width:32px;height:32px;font-size:10px">AČ</div>
+        <div class="user-strip-info">
+          <div class="user-strip-name">Andrej Čolić</div>
+          <div class="user-strip-status"><span class="status-dot"></span>Online</div>
         </div>
-      </div>
-      <div class="msg" style="margin-top:10px">
-        <div class="msg-av pav-v">F</div>
-        <div class="msg-body">
-          <div class="msg-meta-row"><span class="msg-author msg-author-v">fenjer</span><span class="msg-time">08:14</span></div>
-          <div class="msg-text">Konačno! Prošle godine tema bila dosadna, ovo je mnogo bolje 🙌</div>
-        </div>
-      </div>
-      <div class="msg msg-grouped">
-        <div class="msg-av pav-v">F</div>
-        <div class="msg-body"><div class="msg-text"><span class="mention">@moljac</span> jesi već napravio repo?</div></div>
-      </div>
-      <div class="msg" style="margin-top:10px">
-        <div class="msg-av pav-l">M</div>
-        <div class="msg-body">
-          <div class="msg-meta-row"><span class="msg-author msg-author-g">moljac</span><span class="msg-time">08:17</span></div>
-          <div class="reply-bar"><strong>fenjer</strong> — jesi već napravio repo?</div>
-          <div class="msg-text">Da, push-ovao sam skeleton.</div>
-          <div style="margin-top:6px"><div class="msg-attachment"><span class="msg-attachment-icon">🔗</span><div><div class="msg-attachment-name">github.com/moljac/etf-hackweek-2026</div><div class="msg-attachment-sub">digitalci · public repo</div></div></div></div>
-        </div>
-      </div>
-      <div class="msg" style="margin-top:10px">
-        <div class="msg-av" style="background:#160D0D;color:#ff9ff3;border:1px solid #3D1A3D">NS</div>
-        <div class="msg-body">
-          <div class="msg-meta-row"><span class="msg-author msg-author-p">Nenad Skoković</span><span class="msg-time">08:23</span></div>
-          <div class="msg-text">alo</div>
-        </div>
-      </div>
-      <div class="msg msg-grouped">
-        <div class="msg-av" style="background:#160D0D;color:#ff9ff3;border:1px solid #3D1A3D;visibility:hidden">NS</div>
-        <div class="msg-body">
-          <div class="msg-text">imate privatan kanal</div>
-          <div class="msg-reactions"><div class="reaction">😂 11</div></div>
-        </div>
-      </div>
-      <div class="msg" style="margin-top:10px">
-        <div class="msg-av pav-v">AČ</div>
-        <div class="msg-body">
-          <div class="msg-meta-row"><span class="msg-author msg-author-v">Andrej Čolić</span><span class="msg-time">08:31</span></div>
-          <div class="msg-attachment"><img src="images/cat.gif" style="max-width:200px;border-radius:6px;"></div>
-        </div>
-      </div>
-      <div class="msg-date-sep">Nedavno</div>
-      <div class="msg">
-        <div class="msg-av pav-t">MA</div>
-        <div class="msg-body">
-          <div class="msg-meta-row"><span class="msg-author msg-author-t">Mohammed Avdol</span><span class="msg-role-badge mrb-org">organizator</span><span class="msg-time">09:58</span></div>
-          <div class="msg-text">📢 <span class="mention">@everyone</span> Počinjemo za <strong>10 minuta</strong>! Svi timovi da zauzmu mesta. Kick-off u Amfiteatru 1.</div>
+        <div class="strip-actions">
+          <div class="strip-btn">🎤</div>
+          <div class="strip-btn">⚙</div>
         </div>
       </div>
     </div>
 
-    <!-- DM messages (hidden initially) -->
-    <div class="messages dm-hidden" id="messages-dm"></div>
+    <!-- ── DM: CONTACT SIDEBAR ── -->
+    <div class="dm-sidebar" id="panel-dm-sidebar">
+      <div class="dm-sidebar-header">
+        <div class="dm-sidebar-title">Direktne poruke</div>
+        <input class="dm-search" type="text" placeholder="Pronađi ili započni razgovor">
+      </div>
+      <div class="dm-list">
+        <div class="dm-section">Razgovori</div>
 
-    <!-- ── PREDAJA PROJEKTA PANEL (inside chat-area) ── -->
-    <div id="predaja-panel" style="display:none;flex:1;flex-direction:column;overflow-y:auto;background:var(--bg);">
-
-      <!-- Organizator brief -->
-      <div style="padding:24px 28px 0;">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
-          <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#04342C,#0F5C47);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#5DCAA5;flex-shrink:0">MA</div>
-          <div>
-            <span style="font-size:13px;font-weight:600;color:#5DCAA5">Mohammed Avdol</span>
-            <span style="font-size:11px;background:#04342C;color:#5DCAA5;border:0.5px solid #0F3D30;border-radius:20px;padding:1px 7px;margin-left:7px;font-weight:600">organizator</span>
-            <div style="font-size:11px;color:var(--muted);margin-top:1px">11. april 2026. u 09:00</div>
+        <div class="dm-row" id="dm-row-digitalci" onclick="switchDm(this,'digitalci')">
+          <div class="dm-group-av">
+            <div class="ga1" style="background:#1A1133;color:var(--violet-light);border:1px solid #2D1A55">AČ</div>
+            <div class="ga2" style="background:#1C1A00;color:var(--lemon-vivid);border:1px solid #3A3600">SG</div>
+          </div>
+          <div class="dm-row-info">
+            <div class="dm-row-name">digitalci (tim)</div>
+            <div class="dm-row-preview">Dimitijre Pešić: super</div>
+          </div>
+          <div class="dm-row-meta">
+            <span class="dm-row-time">08:20</span>
+            <span class="dm-row-badge dm-badge-green">7</span>
           </div>
         </div>
-        <div style="background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:20px;">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-            <span style="font-size:16px">📋</span>
-            <span style="font-size:14px;font-weight:600;color:var(--text)">Uputstvo za predaju video prezentacije</span>
+
+        <div class="dm-row dm-row-unread" id="dm-row-nenad" onclick="switchDm(this,'nenad')">
+          <div class="dm-row-av" style="background:#160D0D;color:#ff9ff3;border:1px solid #3D1A3D">NS<span
+              class="dm-row-si dm-row-si-idle"></span></div>
+          <div class="dm-row-info">
+            <div class="dm-row-name">Nenad Skoković</div>
+            <div class="dm-row-preview">digitalac</div>
           </div>
-          <div style="font-size:13px;color:var(--text);line-height:1.7;margin-bottom:14px">
-            Svaki tim je dužan da otpremi finalnu video prezentaciju svog rešenja pre isteka roka.
-            Video ostaje vidljiv i nakon završetka hakathona kao deo portfolija tima.
+          <div class="dm-row-meta">
+            <span class="dm-row-time">08:23</span>
+            <span class="dm-row-badge">1</span>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px">
-            <div style="background:var(--surface2);border:0.5px solid var(--border);border-radius:8px;padding:10px 12px;">
-              <div style="font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Trajanje</div>
-              <div style="font-size:13px;font-weight:600;color:var(--violet-light)">3 – 5 minuta</div>
-            </div>
-            <div style="background:var(--surface2);border:0.5px solid var(--border);border-radius:8px;padding:10px 12px;">
-              <div style="font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Maks. veličina</div>
-              <div style="font-size:13px;font-weight:600;color:var(--violet-light)">500 MB</div>
-            </div>
-            <div style="background:var(--surface2);border:0.5px solid var(--border);border-radius:8px;padding:10px 12px;">
-              <div style="font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Formati</div>
-              <div style="font-size:13px;font-weight:600;color:var(--violet-light)">MP4, MOV, AVI</div>
-            </div>
-            <div style="background:var(--surface2);border:0.5px solid var(--border);border-radius:8px;padding:10px 12px;">
-              <div style="font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Rok za predaju</div>
-              <div style="font-size:13px;font-weight:600;color:var(--lemon-vivid)">12. april, 10:00</div>
+        </div>
+
+      </div>
+
+      <div class="user-strip">
+        <div class="avatar" style="width:32px;height:32px;font-size:10px">AČ</div>
+        <div class="user-strip-info">
+          <div class="user-strip-name">Andrej Čolić</div>
+          <div class="user-strip-status"><span class="status-dot"></span>Online</div>
+        </div>
+        <div class="strip-actions">
+          <div class="strip-btn">🎤</div>
+          <div class="strip-btn">⚙</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CHAT AREA (shared) ── -->
+    <div class="chat-area">
+      <div class="chat-topbar">
+        <span class="chat-topbar-icon" id="topbar-icon">#</span>
+        <span class="chat-topbar-name" id="topbar-name">opšte</span>
+        <span class="chat-topbar-desc" id="topbar-desc">Opšti razgovori i najave</span>
+        <div class="topbar-actions">
+          <div class="topbar-btn">🔍</div>
+          <div class="topbar-btn">📌</div>
+          <div class="topbar-btn" id="topbar-toggle-right" onclick="toggleRightPanel()">👥</div>
+        </div>
+      </div>
+
+      <!-- Server messages -->
+      <div class="messages" id="messages-server">
+        <div style="flex:1"></div>
+        <div class="ch-intro">
+          <div class="ch-intro-hash">#</div>
+          <div class="ch-intro-title">Dobrodošli u #opšte</div>
+          <div class="ch-intro-sub">Ovo je početak kanala <strong style="color:var(--violet-light)">#opšte</strong> za
+            ETF HackWeek 2026.</div>
+        </div>
+        <div class="msg-date-sep">Subota, 11. april 2026.</div>
+        <div class="msg">
+          <div class="msg-av pav-t">MA</div>
+          <div class="msg-body">
+            <div class="msg-meta-row"><span class="msg-author msg-author-t">Mohammed Avdol</span><span
+                class="msg-role-badge mrb-org">organizator</span><span class="msg-time">08:00</span></div>
+            <div class="msg-text">Dobro jutro svima! Hakathon počinje za <strong style="color:var(--lemon-vivid)">2
+                sata</strong>. Svi timovi da se prijave na recepciji do 10h. Srećno!</div>
+          </div>
+        </div>
+        <div class="msg msg-grouped">
+          <div class="msg-av pav-t">MA</div>
+          <div class="msg-body">
+            <div class="msg-text">Tema: <strong style="color:var(--violet-light)">AI za obrazovanje</strong>. Detalji u
+              #resursi.</div>
+            <div class="msg-reactions">
+              <div class="reaction mine">🔥 14</div>
+              <div class="reaction">👍 9</div>
+              <div class="reaction">🚀 6</div>
             </div>
           </div>
-          <div style="font-size:12px;color:var(--muted);margin-top:8px">
-            ℹ️ Video mora sadržati: demonstraciju rešenja, tehnički stack i ključne izazove. Prezentacija pred žirijem je <strong style="color:var(--text)">odvojena</strong> od video predaje.
+        </div>
+        <div class="msg" style="margin-top:10px">
+          <div class="msg-av pav-v">F</div>
+          <div class="msg-body">
+            <div class="msg-meta-row"><span class="msg-author msg-author-v">fenjer</span><span
+                class="msg-time">08:14</span></div>
+            <div class="msg-text">Konačno! Prošle godine tema bila dosadna, ovo je mnogo bolje 🙌</div>
+          </div>
+        </div>
+        <div class="msg msg-grouped">
+          <div class="msg-av pav-v">F</div>
+          <div class="msg-body">
+            <div class="msg-text"><span class="mention">@moljac</span> jesi već napravio repo?</div>
+          </div>
+        </div>
+        <div class="msg" style="margin-top:10px">
+          <div class="msg-av pav-l">M</div>
+          <div class="msg-body">
+            <div class="msg-meta-row"><span class="msg-author msg-author-g">moljac</span><span
+                class="msg-time">08:17</span></div>
+            <div class="reply-bar"><strong>fenjer</strong> — jesi već napravio repo?</div>
+            <div class="msg-text">Da, push-ovao sam skeleton.</div>
+            <div style="margin-top:6px">
+              <div class="msg-attachment"><span class="msg-attachment-icon">🔗</span>
+                <div>
+                  <div class="msg-attachment-name">github.com/moljac/etf-hackweek-2026</div>
+                  <div class="msg-attachment-sub">digitalci · public repo</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="msg" style="margin-top:10px">
+          <div class="msg-av" style="background:#160D0D;color:#ff9ff3;border:1px solid #3D1A3D">NS</div>
+          <div class="msg-body">
+            <div class="msg-meta-row"><span class="msg-author msg-author-p">Nenad Skoković</span><span
+                class="msg-time">08:23</span></div>
+            <div class="msg-text">alo</div>
+          </div>
+        </div>
+        <div class="msg msg-grouped">
+          <div class="msg-av" style="background:#160D0D;color:#ff9ff3;border:1px solid #3D1A3D;visibility:hidden">NS
+          </div>
+          <div class="msg-body">
+            <div class="msg-text">imate privatan kanal</div>
+            <div class="msg-reactions">
+              <div class="reaction">😂 11</div>
+            </div>
+          </div>
+        </div>
+        <div class="msg" style="margin-top:10px">
+          <div class="msg-av pav-v">AČ</div>
+          <div class="msg-body">
+            <div class="msg-meta-row"><span class="msg-author msg-author-v">Andrej Čolić</span><span
+                class="msg-time">08:31</span></div>
+            <div class="msg-attachment"><img src="images/cat.gif" style="max-width:200px;border-radius:6px;"></div>
+          </div>
+        </div>
+        <div class="msg-date-sep">Nedavno</div>
+        <div class="msg">
+          <div class="msg-av pav-t">MA</div>
+          <div class="msg-body">
+            <div class="msg-meta-row"><span class="msg-author msg-author-t">Mohammed Avdol</span><span
+                class="msg-role-badge mrb-org">organizator</span><span class="msg-time">09:58</span></div>
+            <div class="msg-text">📢 <span class="mention">@everyone</span> Počinjemo za <strong>10 minuta</strong>! Svi
+              timovi da zauzmu mesta. Kick-off u Amfiteatru 1.</div>
           </div>
         </div>
       </div>
 
-      <!-- Video section -->
-      <div style="padding:0 28px 20px;">
-        <div id="video-empty-state">
-          <div style="font-size:12px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Video prezentacija</div>
-          <div id="video-drop-zone"
-            style="border:1.5px dashed var(--border);border-radius:12px;padding:36px 20px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;"
-            onclick="document.getElementById('video-file-input').click()"
-            ondragover="event.preventDefault();this.style.borderColor='var(--violet-light)';this.style.background='rgba(107,70,193,0.07)'"
-            ondragleave="this.style.borderColor='var(--border)';this.style.background=''"
-            ondrop="handleVideoDrop(event)">
-            <div style="margin-bottom:14px">
-              <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity:.55">
-                <circle cx="32" cy="32" r="30" fill="#1A1133" stroke="#3D2E6B" stroke-width="1.5"/>
-                <ellipse cx="18" cy="16" rx="5" ry="7" fill="#2D1A55"/>
-                <ellipse cx="18" cy="16" rx="3" ry="4.5" fill="#7C5CBF" opacity=".6"/>
-                <ellipse cx="46" cy="16" rx="5" ry="7" fill="#2D1A55"/>
-                <ellipse cx="46" cy="16" rx="3" ry="4.5" fill="#7C5CBF" opacity=".6"/>
-                <ellipse cx="32" cy="34" rx="16" ry="14" fill="#2D1A55"/>
-                <circle cx="26" cy="30" r="4" fill="#1A1133"/>
-                <circle cx="38" cy="30" r="4" fill="#1A1133"/>
-                <circle cx="27" cy="29" r="1.5" fill="#C9B8FF"/>
-                <circle cx="39" cy="29" r="1.5" fill="#C9B8FF"/>
-                <ellipse cx="32" cy="36" rx="3" ry="2" fill="#7C5CBF"/>
-                <path d="M28 40 Q32 44 36 40" stroke="#7C5CBF" stroke-width="1.5" stroke-linecap="round" fill="none"/>
-                <line x1="14" y1="36" x2="26" y2="37" stroke="#7C5CBF" stroke-width=".8" opacity=".7"/>
-                <line x1="14" y1="39" x2="26" y2="39" stroke="#7C5CBF" stroke-width=".8" opacity=".7"/>
-                <line x1="38" y1="37" x2="50" y2="36" stroke="#7C5CBF" stroke-width=".8" opacity=".7"/>
-                <line x1="38" y1="39" x2="50" y2="39" stroke="#7C5CBF" stroke-width=".8" opacity=".7"/>
-              </svg>
-            </div>
-            <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px">Tim još nije otpremio video</div>
-            <div style="font-size:12px;color:var(--muted);margin-bottom:16px">Klikni ovde ili prevuci video fajl (MP4, MOV, AVI · maks. 500 MB)</div>
-            <div style="display:inline-flex;align-items:center;gap:7px;background:var(--violet);color:var(--lemon-vivid);border:0.5px solid var(--violet-light);border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;"
-                 onmouseover="this.style.background='#8B5CF6'" onmouseout="this.style.background='var(--violet)'">
-              <span style="font-size:15px">⬆</span> Otpremi video
-            </div>
-            <input type="file" id="video-file-input" accept="video/mp4,video/quicktime,video/avi,video/*" style="display:none" onchange="handleVideoSelect(this)">
-          </div>
-        </div>
-        <div id="video-uploaded-state" style="display:none;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-            <div style="font-size:12px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)">Video prezentacija</div>
-            <div style="display:flex;gap:6px">
-              <div onclick="document.getElementById('video-replace-input').click()" style="font-size:12px;color:var(--muted);background:var(--surface2);border:0.5px solid var(--border);border-radius:6px;padding:4px 10px;cursor:pointer;transition:color .15s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">↺ Zameni</div>
-              <input type="file" id="video-replace-input" accept="video/*" style="display:none" onchange="handleVideoReplace(this)">
-              <div onclick="removeVideo()" style="font-size:12px;color:#F87171;background:var(--surface2);border:0.5px solid #3D1A1A;border-radius:6px;padding:4px 10px;cursor:pointer;transition:color .15s,border-color .15s" onmouseover="this.style.color='#FF6B6B';this.style.borderColor='#F87171'" onmouseout="this.style.color='#F87171';this.style.borderColor='#3D1A1A'">✕ Ukloni</div>
-            </div>
-          </div>
-          <div style="background:#000;border-radius:12px;overflow:hidden;border:0.5px solid var(--border);margin-bottom:8px;">
-            <video id="video-player" controls style="width:100%;display:block;max-height:340px;background:#000">
-              Vaš pregledač ne podržava HTML5 video.
-            </video>
-          </div>
-          <div style="display:flex;align-items:center;gap:8px;background:var(--surface);border:0.5px solid var(--border);border-radius:8px;padding:9px 12px;">
-            <span style="font-size:16px">🎬</span>
-            <div style="flex:1;min-width:0;">
-              <div id="video-filename" style="font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">prezentacija.mp4</div>
-              <div id="video-meta" style="font-size:11px;color:var(--muted);margin-top:1px">otpremljeno malopre</div>
-            </div>
-            <span style="font-size:11px;background:#04342C;color:#5DCAA5;border:0.5px solid #0F3D30;border-radius:20px;padding:2px 8px;font-weight:600;flex-shrink:0">✓ OK</span>
-          </div>
-        </div>
-      </div>
+      <!-- DM messages (hidden initially) -->
+      <div class="messages dm-hidden" id="messages-dm"></div>
 
-      <!-- GitHub repo section -->
-      <div style="padding:0 28px 20px;">
-        <div style="font-size:12px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">GitHub repozitorijum</div>
-        <div id="github-display" style="display:none;background:var(--surface);border:0.5px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px;align-items:center;gap:10px;">
-          <span style="font-size:18px;flex-shrink:0">🔗</span>
-          <div style="flex:1;min-width:0">
-            <div id="github-link-display" style="font-size:13px;font-weight:500;color:var(--violet-light);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer" onclick="openGithub()"></div>
-            <div style="font-size:11px;color:var(--muted);margin-top:2px">digitalci · public repo</div>
-          </div>
-          <div onclick="editGithub()" style="font-size:12px;color:var(--muted);background:var(--surface2);border:0.5px solid var(--border);border-radius:6px;padding:4px 10px;cursor:pointer;flex-shrink:0;transition:color .15s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">Uredi</div>
-        </div>
-        <div id="github-input-wrap" style="display:flex;gap:8px;align-items:center;">
-          <div style="display:flex;align-items:center;flex:1;background:var(--surface);border:0.5px solid var(--border);border-radius:8px;overflow:hidden;transition:border-color .15s;" id="github-input-box">
-            <span style="padding:0 10px;font-size:16px;color:var(--muted);flex-shrink:0">🔗</span>
-            <input type="text" id="github-url-input" placeholder="https://github.com/tim/repo"
-              style="flex:1;background:transparent;border:none;outline:none;padding:10px 10px 10px 0;font-family:var(--font);font-size:13px;color:var(--text);"
-              onfocus="document.getElementById('github-input-box').style.borderColor='var(--violet)'"
-              onblur="document.getElementById('github-input-box').style.borderColor='var(--border)'"
-              onkeydown="if(event.key==='Enter')saveGithub()">
-          </div>
-          <div onclick="saveGithub()" style="background:var(--violet);color:var(--lemon-vivid);border:0.5px solid var(--violet-light);border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .15s;flex-shrink:0" onmouseover="this.style.background='#8B5CF6'" onmouseout="this.style.background='var(--violet)'">Sačuvaj</div>
-        </div>
-        <div id="github-error" style="font-size:12px;color:#F87171;margin-top:6px;display:none">⚠ Unesite ispravan GitHub URL (npr. https://github.com/user/repo)</div>
-      </div>
+      <!-- ── PREDAJA PROJEKTA PANEL (inside chat-area) ── -->
+      <div id="predaja-panel" style="display:none;flex:1;flex-direction:column;overflow-y:auto;background:var(--bg);">
 
-      <!-- Status summary -->
-      <div style="padding:0 28px 32px;">
-        <div style="font-size:12px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">Status predaje</div>
-        <div style="background:var(--surface);border:0.5px solid var(--border);border-radius:10px;overflow:hidden">
-          <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:0.5px solid var(--border);">
-            <span id="status-video-icon" style="font-size:16px">⬜</span>
+        <!-- Organizator brief -->
+        <div style="padding:24px 28px 0;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+            <div
+              style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#04342C,#0F5C47);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#5DCAA5;flex-shrink:0">
+              MA</div>
+            <div>
+              <span style="font-size:13px;font-weight:600;color:#5DCAA5">Mohammed Avdol</span>
+              <span
+                style="font-size:11px;background:#04342C;color:#5DCAA5;border:0.5px solid #0F3D30;border-radius:20px;padding:1px 7px;margin-left:7px;font-weight:600">organizator</span>
+              <div style="font-size:11px;color:var(--muted);margin-top:1px">11. april 2026. u 09:00</div>
+            </div>
+          </div>
+          <div
+            style="background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:20px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+              <span style="font-size:16px">📋</span>
+              <span style="font-size:14px;font-weight:600;color:var(--text)">Uputstvo za predaju video
+                prezentacije</span>
+            </div>
+            <div style="font-size:13px;color:var(--text);line-height:1.7;margin-bottom:14px">
+              Svaki tim je dužan da otpremi finalnu video prezentaciju svog rešenja pre isteka roka.
+              Video ostaje vidljiv i nakon završetka hakathona kao deo portfolija tima.
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px">
+              <div
+                style="background:var(--surface2);border:0.5px solid var(--border);border-radius:8px;padding:10px 12px;">
+                <div
+                  style="font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">
+                  Trajanje</div>
+                <div style="font-size:13px;font-weight:600;color:var(--violet-light)">3 – 5 minuta</div>
+              </div>
+              <div
+                style="background:var(--surface2);border:0.5px solid var(--border);border-radius:8px;padding:10px 12px;">
+                <div
+                  style="font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">
+                  Maks. veličina</div>
+                <div style="font-size:13px;font-weight:600;color:var(--violet-light)">500 MB</div>
+              </div>
+              <div
+                style="background:var(--surface2);border:0.5px solid var(--border);border-radius:8px;padding:10px 12px;">
+                <div
+                  style="font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">
+                  Formati</div>
+                <div style="font-size:13px;font-weight:600;color:var(--violet-light)">MP4, MOV, AVI</div>
+              </div>
+              <div
+                style="background:var(--surface2);border:0.5px solid var(--border);border-radius:8px;padding:10px 12px;">
+                <div
+                  style="font-size:10px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:4px">
+                  Rok za predaju</div>
+                <div style="font-size:13px;font-weight:600;color:var(--lemon-vivid)">12. april, 10:00</div>
+              </div>
+            </div>
+            <div style="font-size:12px;color:var(--muted);margin-top:8px">
+              ℹ️ Video mora sadržati: demonstraciju rešenja, tehnički stack i ključne izazove. Prezentacija pred žirijem
+              je <strong style="color:var(--text)">odvojena</strong> od video predaje.
+            </div>
+          </div>
+        </div>
+
+        <!-- Video section -->
+        <div style="padding:0 28px 20px;">
+          <div id="video-empty-state">
+            <div
+              style="font-size:12px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">
+              Video prezentacija</div>
+            <div id="video-drop-zone"
+              style="border:1.5px dashed var(--border);border-radius:12px;padding:36px 20px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;"
+              onclick="document.getElementById('video-file-input').click()"
+              ondragover="event.preventDefault();this.style.borderColor='var(--violet-light)';this.style.background='rgba(107,70,193,0.07)'"
+              ondragleave="this.style.borderColor='var(--border)';this.style.background=''"
+              ondrop="handleVideoDrop(event)">
+              <div style="margin-bottom:14px">
+                <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"
+                  style="opacity:.55">
+                  <circle cx="32" cy="32" r="30" fill="#1A1133" stroke="#3D2E6B" stroke-width="1.5" />
+                  <ellipse cx="18" cy="16" rx="5" ry="7" fill="#2D1A55" />
+                  <ellipse cx="18" cy="16" rx="3" ry="4.5" fill="#7C5CBF" opacity=".6" />
+                  <ellipse cx="46" cy="16" rx="5" ry="7" fill="#2D1A55" />
+                  <ellipse cx="46" cy="16" rx="3" ry="4.5" fill="#7C5CBF" opacity=".6" />
+                  <ellipse cx="32" cy="34" rx="16" ry="14" fill="#2D1A55" />
+                  <circle cx="26" cy="30" r="4" fill="#1A1133" />
+                  <circle cx="38" cy="30" r="4" fill="#1A1133" />
+                  <circle cx="27" cy="29" r="1.5" fill="#C9B8FF" />
+                  <circle cx="39" cy="29" r="1.5" fill="#C9B8FF" />
+                  <ellipse cx="32" cy="36" rx="3" ry="2" fill="#7C5CBF" />
+                  <path d="M28 40 Q32 44 36 40" stroke="#7C5CBF" stroke-width="1.5" stroke-linecap="round"
+                    fill="none" />
+                  <line x1="14" y1="36" x2="26" y2="37" stroke="#7C5CBF" stroke-width=".8" opacity=".7" />
+                  <line x1="14" y1="39" x2="26" y2="39" stroke="#7C5CBF" stroke-width=".8" opacity=".7" />
+                  <line x1="38" y1="37" x2="50" y2="36" stroke="#7C5CBF" stroke-width=".8" opacity=".7" />
+                  <line x1="38" y1="39" x2="50" y2="39" stroke="#7C5CBF" stroke-width=".8" opacity=".7" />
+                </svg>
+              </div>
+              <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px">Tim još nije otpremio
+                video</div>
+              <div style="font-size:12px;color:var(--muted);margin-bottom:16px">Klikni ovde ili prevuci video fajl (MP4,
+                MOV, AVI · maks. 500 MB)</div>
+              <div
+                style="display:inline-flex;align-items:center;gap:7px;background:var(--violet);color:var(--lemon-vivid);border:0.5px solid var(--violet-light);border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;"
+                onmouseover="this.style.background='#8B5CF6'" onmouseout="this.style.background='var(--violet)'">
+                <span style="font-size:15px">⬆</span> Otpremi video
+              </div>
+              <input type="file" id="video-file-input" accept="video/mp4,video/quicktime,video/avi,video/*"
+                style="display:none" onchange="handleVideoSelect(this)">
+            </div>
+          </div>
+          <div id="video-uploaded-state" style="display:none;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+              <div
+                style="font-size:12px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)">
+                Video prezentacija</div>
+              <div style="display:flex;gap:6px">
+                <div onclick="document.getElementById('video-replace-input').click()"
+                  style="font-size:12px;color:var(--muted);background:var(--surface2);border:0.5px solid var(--border);border-radius:6px;padding:4px 10px;cursor:pointer;transition:color .15s"
+                  onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">↺ Zameni
+                </div>
+                <input type="file" id="video-replace-input" accept="video/*" style="display:none"
+                  onchange="handleVideoReplace(this)">
+                <div onclick="removeVideo()"
+                  style="font-size:12px;color:#F87171;background:var(--surface2);border:0.5px solid #3D1A1A;border-radius:6px;padding:4px 10px;cursor:pointer;transition:color .15s,border-color .15s"
+                  onmouseover="this.style.color='#FF6B6B';this.style.borderColor='#F87171'"
+                  onmouseout="this.style.color='#F87171';this.style.borderColor='#3D1A1A'">✕ Ukloni</div>
+              </div>
+            </div>
+            <div
+              style="background:#000;border-radius:12px;overflow:hidden;border:0.5px solid var(--border);margin-bottom:8px;">
+              <video id="video-player" controls style="width:100%;display:block;max-height:340px;background:#000">
+                Vaš pregledač ne podržava HTML5 video.
+              </video>
+            </div>
+            <div
+              style="display:flex;align-items:center;gap:8px;background:var(--surface);border:0.5px solid var(--border);border-radius:8px;padding:9px 12px;">
+              <span style="font-size:16px">🎬</span>
+              <div style="flex:1;min-width:0;">
+                <div id="video-filename"
+                  style="font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+                  prezentacija.mp4</div>
+                <div id="video-meta" style="font-size:11px;color:var(--muted);margin-top:1px">otpremljeno malopre</div>
+              </div>
+              <span
+                style="font-size:11px;background:#04342C;color:#5DCAA5;border:0.5px solid #0F3D30;border-radius:20px;padding:2px 8px;font-weight:600;flex-shrink:0">✓
+                OK</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- GitHub repo section -->
+        <div style="padding:0 28px 20px;">
+          <div
+            style="font-size:12px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">
+            GitHub repozitorijum</div>
+          <div id="github-display"
+            style="display:none;background:var(--surface);border:0.5px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px;align-items:center;gap:10px;">
+            <span style="font-size:18px;flex-shrink:0">🔗</span>
+            <div style="flex:1;min-width:0">
+              <div id="github-link-display"
+                style="font-size:13px;font-weight:500;color:var(--violet-light);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer"
+                onclick="openGithub()"></div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px">digitalci · public repo</div>
+            </div>
+            <div onclick="editGithub()"
+              style="font-size:12px;color:var(--muted);background:var(--surface2);border:0.5px solid var(--border);border-radius:6px;padding:4px 10px;cursor:pointer;flex-shrink:0;transition:color .15s"
+              onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">Uredi</div>
+          </div>
+          <div id="github-input-wrap" style="display:flex;gap:8px;align-items:center;">
+            <div
+              style="display:flex;align-items:center;flex:1;background:var(--surface);border:0.5px solid var(--border);border-radius:8px;overflow:hidden;transition:border-color .15s;"
+              id="github-input-box">
+              <span style="padding:0 10px;font-size:16px;color:var(--muted);flex-shrink:0">🔗</span>
+              <input type="text" id="github-url-input" placeholder="https://github.com/tim/repo"
+                style="flex:1;background:transparent;border:none;outline:none;padding:10px 10px 10px 0;font-family:var(--font);font-size:13px;color:var(--text);"
+                onfocus="document.getElementById('github-input-box').style.borderColor='var(--violet)'"
+                onblur="document.getElementById('github-input-box').style.borderColor='var(--border)'"
+                onkeydown="if(event.key==='Enter')saveGithub()">
+            </div>
+            <div onclick="saveGithub()"
+              style="background:var(--violet);color:var(--lemon-vivid);border:0.5px solid var(--violet-light);border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;transition:background .15s;flex-shrink:0"
+              onmouseover="this.style.background='#8B5CF6'" onmouseout="this.style.background='var(--violet)'">Sačuvaj
+            </div>
+          </div>
+          <div id="github-error" style="font-size:12px;color:#F87171;margin-top:6px;display:none">⚠ Unesite ispravan
+            GitHub URL (npr. https://github.com/user/repo)</div>
+        </div>
+
+        <!-- Status summary -->
+        <div style="padding:0 28px 32px;">
+          <div
+            style="font-size:12px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;">
+            Status predaje</div>
+          <div style="background:var(--surface);border:0.5px solid var(--border);border-radius:10px;overflow:hidden">
+            <div
+              style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:0.5px solid var(--border);">
+              <span id="status-video-icon" style="font-size:16px">⬜</span>
+              <div style="flex:1">
+                <div style="font-size:13px;font-weight:500;color:var(--text)">Video prezentacija</div>
+                <div id="status-video-txt" style="font-size:11px;color:var(--muted)">Nije otpremljeno</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;">
+              <span id="status-github-icon" style="font-size:16px">⬜</span>
+              <div style="flex:1">
+                <div style="font-size:13px;font-weight:500;color:var(--text)">GitHub repozitorijum</div>
+                <div id="status-github-txt" style="font-size:11px;color:var(--muted)">Link nije dodat</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end predaja-panel -->
+
+      <!-- ── GLASANJE PUBLIKE PANEL ── -->
+      <div id="glasanje-panel" style="display:none;flex:1;flex-direction:column;overflow-y:auto;background:var(--bg);">
+
+        <!-- Header brief od organizatora -->
+        <div style="padding:24px 28px 0;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+            <div
+              style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#04342C,#0F5C47);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#5DCAA5;flex-shrink:0">
+              MA</div>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:#5DCAA5">Mohammed Avdol <span
+                  style="font-size:11px;font-weight:500;color:var(--muted);margin-left:4px">organizator · danas
+                  09:58</span></div>
+              <div style="font-size:13px;color:var(--text);margin-top:2px">🗳 Glasanje publike biće otvoreno u <strong
+                  style="color:var(--lemon-vivid)">poslednjih 2h</strong> hakathona. Svaki učesnik može da glasa za
+                jedan projekat koji mu se najviše dopao.</div>
+            </div>
+          </div>
+
+          <!-- Status baner: glasanje nije aktivno -->
+          <div id="voting-locked-banner"
+            style="background:#0D0A1A;border:0.5px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:24px;display:flex;align-items:center;gap:16px;">
+            <div
+              style="width:44px;height:44px;border-radius:50%;background:#1A1133;border:1px solid #3D2E6B;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">
+              🔒</div>
             <div style="flex:1">
-              <div style="font-size:13px;font-weight:500;color:var(--text)">Video prezentacija</div>
-              <div id="status-video-txt" style="font-size:11px;color:var(--muted)">Nije otpremljeno</div>
+              <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:3px">Glasanje još nije počelo
+              </div>
+              <div style="font-size:12px;color:var(--muted);line-height:1.5">Organizator otvara glasanje u poslednjih 2h
+                hakathona. Možete pregledati projekte, ali glasanje još uvek nije dostupno.</div>
+            </div>
+            <div id="voting-countdown-pill"
+              style="background:#1A1133;border:0.5px solid #3D2E6B;border-radius:20px;padding:6px 14px;font-size:12px;font-weight:600;color:#C9B8FF;white-space:nowrap;flex-shrink:0">
+              <span id="voting-opens-in">otvara se za ~46h</span>
             </div>
           </div>
-          <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;">
-            <span id="status-github-icon" style="font-size:16px">⬜</span>
-            <div style="flex:1">
-              <div style="font-size:13px;font-weight:500;color:var(--text)">GitHub repozitorijum</div>
-              <div id="status-github-txt" style="font-size:11px;color:var(--muted)">Link nije dodat</div>
+
+          <!-- Lista projekata -->
+          <div
+            style="font-size:12px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;">
+            Projekti — 28 timova</div>
+
+          <div id="projects-list" style="display:flex;flex-direction:column;gap:10px;padding-bottom:32px;">
+
+            <!-- Tim 1: digitalci -->
+            <div class="project-card" data-team="digitalci">
+              <div class="project-card-left">
+                <div class="project-av" style="background:#1A1133;color:var(--violet-light);border-color:#3D2E6B">DC
+                </div>
+                <div class="project-info">
+                  <div class="project-name">EduBot <span class="project-team-badge"
+                      style="background:#1A1133;color:var(--violet-light);border-color:#3D2E6B">★ digitalci</span></div>
+                  <div class="project-desc">AI asistent za personalizovano učenje — adaptira sadržaj u realnom vremenu
+                    na osnovu napretka studenta.</div>
+                  <div class="project-tags"><span class="project-tag">Python</span><span
+                      class="project-tag">LLM</span><span class="project-tag">FastAPI</span></div>
+                </div>
+              </div>
+              <div class="project-card-right">
+                <div class="project-votes"><span class="project-votes-num" id="votes-digitalci">—</span><span
+                    class="project-votes-label">glasova</span></div>
+                <button class="vote-btn" id="vote-btn-digitalci" disabled
+                  onclick="castVote('digitalci')">Glasaj</button>
+              </div>
             </div>
+
+            <!-- Tim 2: ukohorisani -->
+            <div class="project-card" data-team="ukohorisani">
+              <div class="project-card-left">
+                <div class="project-av" style="background:#0D1A0D;color:#5DCAA5;border-color:#0F3D30">UK</div>
+                <div class="project-info">
+                  <div class="project-name">ClassroomOS <span class="project-team-badge"
+                      style="background:#0D1A0D;color:#5DCAA5;border-color:#0F3D30">ukohorisani</span></div>
+                  <div class="project-desc">Pametna platforma za upravljanje učionicom sa real-time praćenjem pažnje
+                    učenika putem CV.</div>
+                  <div class="project-tags"><span class="project-tag">React</span><span
+                      class="project-tag">OpenCV</span><span class="project-tag">WebSocket</span></div>
+                </div>
+              </div>
+              <div class="project-card-right">
+                <div class="project-votes"><span class="project-votes-num" id="votes-bytecraft">—</span><span
+                    class="project-votes-label">glasova</span></div>
+                <button class="vote-btn" id="vote-btn-bytecraft" disabled
+                  onclick="castVote('bytecraft')">Glasaj</button>
+              </div>
+            </div>
+
+            <!-- Tim 3: nullptr -->
+            <div class="project-card" data-team="nullptr">
+              <div class="project-card-left">
+                <div class="project-av" style="background:#1A0D0D;color:#F87171;border-color:#3D1A1A">NP</div>
+                <div class="project-info">
+                  <div class="project-name">QuizForge <span class="project-team-badge"
+                      style="background:#1A0D0D;color:#F87171;border-color:#3D1A1A">nullptr</span></div>
+                  <div class="project-desc">Generator testova i kvizova iz nastavnog materijala koristeći GPT-4 sa
+                    automatskim ocenjivanjem.</div>
+                  <div class="project-tags"><span class="project-tag">Next.js</span><span
+                      class="project-tag">GPT-4</span><span class="project-tag">PostgreSQL</span></div>
+                </div>
+              </div>
+              <div class="project-card-right">
+                <div class="project-votes"><span class="project-votes-num" id="votes-nullptr">—</span><span
+                    class="project-votes-label">glasova</span></div>
+                <button class="vote-btn" id="vote-btn-nullptr" disabled onclick="castVote('nullptr')">Glasaj</button>
+              </div>
+            </div>
+
+            <!-- Tim 4: lale -->
+            <div class="project-card" data-team="lale">
+              <div class="project-card-left">
+                <div class="project-av" style="background:#1A1500;color:var(--lemon-vivid);border-color:#3A3600">LA
+                </div>
+                <div class="project-info">
+                  <div class="project-name">MathPath <span class="project-team-badge"
+                      style="background:#1A1500;color:var(--lemon-vivid);border-color:#3A3600">lale</span></div>
+                  <div class="project-desc">Interaktivni 3D vizualizator matematičkih koncepata za srednje škole sa
+                    glasovnom navigacijom.</div>
+                  <div class="project-tags"><span class="project-tag">Three.js</span><span
+                      class="project-tag">WebGL</span><span class="project-tag">SpeechAPI</span></div>
+                </div>
+              </div>
+              <div class="project-card-right">
+                <div class="project-votes"><span class="project-votes-num" id="votes-stackframe">—</span><span
+                    class="project-votes-label">glasova</span></div>
+                <button class="vote-btn" id="vote-btn-stackframe" disabled
+                  onclick="castVote('stackframe')">Glasaj</button>
+              </div>
+            </div>
+
+            <!-- Tim 5: menjači -->
+            <div class="project-card" data-team="menjači">
+              <div class="project-card-left">
+                <div class="project-av" style="background:#0D0D1A;color:#C9B8FF;border-color:#2D1A55">ME</div>
+                <div class="project-info">
+                  <div class="project-name">PeerLearn <span class="project-team-badge"
+                      style="background:#0D0D1A;color:#C9B8FF;border-color:#2D1A55">menjači</span></div>
+                  <div class="project-desc">P2P platforma za vršnjačko tutorstvo sa AI matchingom na osnovu stilova
+                    učenja i rasporeda.</div>
+                  <div class="project-tags"><span class="project-tag">Vue.js</span><span
+                      class="project-tag">Node</span><span class="project-tag">ML</span></div>
+                </div>
+              </div>
+              <div class="project-card-right">
+                <div class="project-votes"><span class="project-votes-num" id="votes-menjači">—</span><span
+                    class="project-votes-label">glasova</span></div>
+                <button class="vote-btn" id="vote-btn-menjači" disabled
+                  onclick="castVote('menjači')">Glasaj</button>
+              </div>
+            </div>
+
+            <!-- Ostatak timova (collapsed) -->
+            <div id="more-projects-stub"
+              style="background:var(--surface);border:0.5px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;justify-content:center;gap:8px;color:var(--muted);font-size:13px;cursor:pointer;"
+              onclick="this.style.display='none'">
+              <span>+23 projekta</span><span style="font-size:11px;opacity:.6">· klikni da proširis</span>
+            </div>
+
+          </div>
+        </div>
+      </div><!-- end glasanje-panel -->
+
+      <!-- ── REZULTATI PANEL ── -->
+      <div id="rezultati-panel" style="display:none;flex:1;flex-direction:column;overflow-y:auto;background:var(--bg);">
+
+        <!-- Locked state (while hackathon is active) -->
+        <div id="rezultati-locked"
+          style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 28px;text-align:center;">
+          <div
+            style="width:72px;height:72px;border-radius:50%;background:#1A1133;border:1.5px solid #3D2E6B;display:flex;align-items:center;justify-content:center;font-size:30px;margin-bottom:20px;box-shadow:0 0 32px rgba(109,40,217,.18)">
+            🔒</div>
+          <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:8px">Rezultati još nisu dostupni
+          </div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.7;max-width:340px;margin-bottom:20px">Organizator
+            može uneti zvanične rezultate tek nakon što hakathon bude završen. Kanal se otključava automatski.</div>
+          <div id="rezultati-locked-pill"
+            style="background:#1A1133;border:0.5px solid #3D2E6B;border-radius:20px;padding:8px 18px;font-size:12px;font-weight:600;color:#C9B8FF;display:flex;align-items:center;gap:8px;">
+            <span style="width:7px;height:7px;border-radius:50%;background:var(--violet);display:inline-block"></span>
+            <span id="rezultati-locked-countdown">Hakathon se završava za ~47h</span>
+          </div>
+        </div>
+
+        <!-- Unlocked: org form + published view -->
+        <div id="rezultati-unlocked" style="display:none;flex-direction:column;flex:1;">
+
+          <!-- Org brief header -->
+          <div style="padding:24px 28px 0;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+              <div
+                style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#04342C,#0F5C47);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#5DCAA5;flex-shrink:0">
+                MA</div>
+              <div>
+                <span style="font-size:13px;font-weight:600;color:#5DCAA5">Mohammed Avdol</span>
+                <span
+                  style="font-size:11px;background:#04342C;color:#5DCAA5;border:0.5px solid #0F3D30;border-radius:20px;padding:1px 7px;margin-left:7px;font-weight:600">organizator</span>
+                <div style="font-size:11px;color:var(--muted);margin-top:1px" id="rezultati-header-time">13. april 2026.
+                  u 10:00</div>
+              </div>
+            </div>
+            <div
+              style="background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:24px;font-size:13px;color:var(--text);line-height:1.65">
+              🏆 Hakathon je završen! Organizator unosi zvanične rezultate — <strong
+                style="color:var(--lemon-vivid)">plasman timova i nagradu publike</strong>. Nakon objave, svi učesnici
+              će biti obavešteni i profili će biti automatski ažurirani.
+            </div>
+          </div>
+
+          <!-- FORM: enter results (org only) -->
+          <div id="rezultati-form-wrap" style="padding:0 28px 28px;">
+            <div
+              style="font-size:12px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;">
+              Unos rezultata — organizator</div>
+
+            <!-- Plasman -->
+            <div
+              style="background:var(--surface);border:0.5px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:16px;">
+              <div
+                style="padding:14px 16px;border-bottom:0.5px solid var(--border);font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;">
+                Plasman timova</div>
+
+              <!-- 1. mesto -->
+              <div
+                style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:0.5px solid var(--border);">
+                <div
+                  style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#1A1400,#3A2E00);border:1.5px solid #8B6914;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">
+                  🥇</div>
+                <div style="flex:1">
+                  <div style="font-size:12px;color:var(--muted);margin-bottom:5px">1. mesto</div>
+                  <div style="position:relative">
+                    <select id="rank1-select" class="rezultati-select" onchange="onRankChange()">
+                      <option value="">— Izaberi tim —</option>
+                      <option value="digitalci">digitalci</option>
+                      <option value="ukohorisani">ukohorisani</option>
+                      <option value="nullptr">nullptr</option>
+                      <option value="lale">lale</option>
+                      <option value="menjači">menjači</option>
+                    </select>
+                  </div>
+                </div>
+                <div id="rank1-badge"
+                  style="display:none;font-size:11px;font-weight:600;background:#1A1400;color:#E9B000;border:0.5px solid #5A4200;border-radius:8px;padding:3px 10px">
+                  ★ 1. mesto</div>
+              </div>
+
+              <!-- 2. mesto -->
+              <div
+                style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:0.5px solid var(--border);">
+                <div
+                  style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#12151A,#232A33);border:1.5px solid #4A5568;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">
+                  🥈</div>
+                <div style="flex:1">
+                  <div style="font-size:12px;color:var(--muted);margin-bottom:5px">2. mesto</div>
+                  <select id="rank2-select" class="rezultati-select" onchange="onRankChange()">
+                    <option value="">— Izaberi tim —</option>
+                    <option value="digitalci">digitalci</option>
+                    <option value="ukohorisani">ukohorisani</option>
+                    <option value="nullptr">nullptr</option>
+                    <option value="lale">lale</option>
+                    <option value="menjači">menjači</option>
+                  </select>
+                </div>
+                <div id="rank2-badge"
+                  style="display:none;font-size:11px;font-weight:600;background:#12151A;color:#9CA3AF;border:0.5px solid #374151;border-radius:8px;padding:3px 10px">
+                  ★ 2. mesto</div>
+              </div>
+
+              <!-- 3. mesto -->
+              <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;">
+                <div
+                  style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#1A0D00,#2E1800);border:1.5px solid #7C3D10;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">
+                  🥉</div>
+                <div style="flex:1">
+                  <div style="font-size:12px;color:var(--muted);margin-bottom:5px">3. mesto</div>
+                  <select id="rank3-select" class="rezultati-select" onchange="onRankChange()">
+                    <option value="">— Izaberi tim —</option>
+                    <option value="digitalci">digitalci</option>
+                    <option value="ukohorisani">ukohorisani</option>
+                    <option value="nullptr">nullptr</option>
+                    <option value="lale">lale</option>
+                    <option value="menjači">menjači</option>
+                  </select>
+                </div>
+                <div id="rank3-badge"
+                  style="display:none;font-size:11px;font-weight:600;background:#1A0D00;color:#CD7F32;border:0.5px solid #7C3D10;border-radius:8px;padding:3px 10px">
+                  ★ 3. mesto</div>
+              </div>
+            </div>
+
+            <!-- Nagrada publike -->
+            <div
+              style="background:var(--surface);border:0.5px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px;">
+              <div
+                style="padding:14px 16px;border-bottom:0.5px solid var(--border);font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;">
+                Nagrada publike</div>
+              <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;">
+                <div
+                  style="width:32px;height:32px;border-radius:50%;background:#1A1133;border:1.5px solid var(--violet);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">
+                  🗳</div>
+                <div style="flex:1">
+                  <div style="font-size:12px;color:var(--muted);margin-bottom:5px">Tim sa najviše glasova publike</div>
+                  <select id="publike-select" class="rezultati-select" onchange="onRankChange()">
+                    <option value="">— Izaberi tim —</option>
+                    <option value="digitalci">digitalci</option>
+                    <option value="ukohorisani">ukohorisani</option>
+                    <option value="nullptr">nullptr</option>
+                    <option value="lale">lale</option>
+                    <option value="menjači">menjači</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Error -->
+            <div id="rezultati-form-error"
+              style="display:none;background:#1A0A0A;border:0.5px solid #5C1A1A;border-radius:10px;padding:12px 14px;font-size:13px;color:#F87171;margin-bottom:14px;">
+              ⚠ <span id="rezultati-form-error-msg">Molimo izaberite sve timove i nagradu publike.</span>
+            </div>
+
+            <!-- Submit button -->
+            <button id="rezultati-submit-btn" onclick="submitRezultati()"
+              style="width:100%;background:var(--violet);color:var(--lemon-vivid);border:0.5px solid var(--violet-light);border-radius:10px;padding:13px 0;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);letter-spacing:.02em;transition:background .15s;"
+              onmouseover="this.style.background='#7C3AED'" onmouseout="this.style.background='var(--violet)'">
+              Podnesi rezultate
+            </button>
+          </div>
+
+          <!-- PUBLISHED VIEW (hidden until submitted) -->
+          <div id="rezultati-published" style="display:none;padding:0 28px 32px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+              <div
+                style="font-size:12px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);">
+                Zvanični rezultati</div>
+              <button id="rezultati-edit-btn" onclick="editRezultati()"
+                style="font-size:12px;color:var(--muted);background:var(--surface2);border:0.5px solid var(--border);border-radius:6px;padding:5px 12px;cursor:pointer;font-family:var(--font);transition:color .15s;"
+                onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--muted)'">✏ Izmeni
+                rezultate</button>
+            </div>
+
+            <!-- Podium -->
+            <div id="rezultati-podium"
+              style="background:var(--surface);border:0.5px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px;">
+              <!-- 1. mesto -->
+              <div
+                style="display:flex;align-items:center;gap:14px;padding:16px 18px;border-bottom:0.5px solid var(--border);background:linear-gradient(90deg,#1A1400 0%,transparent 60%);">
+                <div style="font-size:26px;flex-shrink:0">🥇</div>
+                <div style="flex:1">
+                  <div style="font-size:15px;font-weight:700;color:#E9B000" id="pub-rank1-name">—</div>
+                  <div style="font-size:12px;color:var(--muted);margin-top:2px">1. mesto · Pobednik</div>
+                </div>
+                <div
+                  style="font-size:12px;font-weight:700;color:#E9B000;background:#1A1400;border:0.5px solid #5A4200;border-radius:20px;padding:4px 12px;">
+                  +500 pts</div>
+              </div>
+              <!-- 2. mesto -->
+              <div
+                style="display:flex;align-items:center;gap:14px;padding:16px 18px;border-bottom:0.5px solid var(--border);background:linear-gradient(90deg,#0E1015 0%,transparent 60%);">
+                <div style="font-size:26px;flex-shrink:0">🥈</div>
+                <div style="flex:1">
+                  <div style="font-size:15px;font-weight:700;color:#9CA3AF" id="pub-rank2-name">—</div>
+                  <div style="font-size:12px;color:var(--muted);margin-top:2px">2. mesto</div>
+                </div>
+                <div
+                  style="font-size:12px;font-weight:700;color:#9CA3AF;background:#12151A;border:0.5px solid #374151;border-radius:20px;padding:4px 12px;">
+                  +300 pts</div>
+              </div>
+              <!-- 3. mesto -->
+              <div
+                style="display:flex;align-items:center;gap:14px;padding:16px 18px;border-bottom:0.5px solid var(--border);background:linear-gradient(90deg,#150900 0%,transparent 60%);">
+                <div style="font-size:26px;flex-shrink:0">🥉</div>
+                <div style="flex:1">
+                  <div style="font-size:15px;font-weight:700;color:#CD7F32" id="pub-rank3-name">—</div>
+                  <div style="font-size:12px;color:var(--muted);margin-top:2px">3. mesto</div>
+                </div>
+                <div
+                  style="font-size:12px;font-weight:700;color:#CD7F32;background:#1A0D00;border:0.5px solid #7C3D10;border-radius:20px;padding:4px 12px;">
+                  +150 pts</div>
+              </div>
+              <!-- Nagrada publike -->
+              <div
+                style="display:flex;align-items:center;gap:14px;padding:16px 18px;background:linear-gradient(90deg,#130D1A 0%,transparent 60%);">
+                <div style="font-size:26px;flex-shrink:0">🗳</div>
+                <div style="flex:1">
+                  <div style="font-size:15px;font-weight:700;color:var(--violet-light)" id="pub-publike-name">—</div>
+                  <div style="font-size:12px;color:var(--muted);margin-top:2px">Nagrada publike</div>
+                </div>
+                <div
+                  style="font-size:12px;font-weight:700;color:var(--violet-light);background:#1A1133;border:0.5px solid #3D2E6B;border-radius:20px;padding:4px 12px;">
+                  +100 pts</div>
+              </div>
+            </div>
+
+            <!-- Published info -->
+            <div
+              style="background:var(--surface);border:0.5px solid var(--border);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;">
+              <span style="font-size:16px">✅</span>
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--text)">Rezultati su objavljeni</div>
+                <div style="font-size:11px;color:var(--muted);margin-top:2px" id="pub-timestamp">Profili učesnika su
+                  ažurirani. Svi su obavešteni.</div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- end rezultati-unlocked -->
+
+      </div><!-- end rezultati-panel -->
+
+      <div class="typing-bar" id="typing-bar">
+        <div class="typing-dots">
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+          <div class="typing-dot"></div>
+        </div>
+        <span><strong style="color:var(--text)">Stevan Gnjato</strong> kuca...</span>
+      </div>
+
+      <div class="chat-input-wrap">
+        <div class="chat-input-box">
+          <div class="inp-btn">+</div>
+          <input type="text" id="msg-input" placeholder="Poruka #opšte" onkeydown="sendMsg(event)">
+          <div class="inp-actions">
+            <div class="inp-btn">😊</div>
+            <div class="inp-btn">📎</div>
+            <div class="inp-btn">@</div>
+            <div class="send-btn" onclick="sendMsgClick()">↑</div>
           </div>
         </div>
       </div>
-
-    </div><!-- end predaja-panel -->
-
-    <!-- ── GLASANJE PUBLIKE PANEL ── -->
-    <div id="glasanje-panel" style="display:none;flex:1;flex-direction:column;overflow-y:auto;background:var(--bg);">
-
-      <!-- Header brief od organizatora -->
-      <div style="padding:24px 28px 0;">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
-          <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#04342C,#0F5C47);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#5DCAA5;flex-shrink:0">MA</div>
-          <div>
-            <div style="font-size:13px;font-weight:600;color:#5DCAA5">Mohammed Avdol <span style="font-size:11px;font-weight:500;color:var(--muted);margin-left:4px">organizator · danas 09:58</span></div>
-            <div style="font-size:13px;color:var(--text);margin-top:2px">🗳 Glasanje publike biće otvoreno u <strong style="color:var(--lemon-vivid)">poslednjih 2h</strong> hakathona. Svaki učesnik može da glasa za jedan projekat koji mu se najviše dopao.</div>
-          </div>
-        </div>
-
-        <!-- Status baner: glasanje nije aktivno -->
-        <div id="voting-locked-banner" style="background:#0D0A1A;border:0.5px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:24px;display:flex;align-items:center;gap:16px;">
-          <div style="width:44px;height:44px;border-radius:50%;background:#1A1133;border:1px solid #3D2E6B;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🔒</div>
-          <div style="flex:1">
-            <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:3px">Glasanje još nije počelo</div>
-            <div style="font-size:12px;color:var(--muted);line-height:1.5">Organizator otvara glasanje u poslednjih 2h hakathona. Možete pregledati projekte, ali glasanje još uvek nije dostupno.</div>
-          </div>
-          <div id="voting-countdown-pill" style="background:#1A1133;border:0.5px solid #3D2E6B;border-radius:20px;padding:6px 14px;font-size:12px;font-weight:600;color:#C9B8FF;white-space:nowrap;flex-shrink:0">
-            <span id="voting-opens-in">otvara se za ~46h</span>
-          </div>
-        </div>
-
-        <!-- Lista projekata -->
-        <div style="font-size:12px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;">Projekti — 28 timova</div>
-
-        <div id="projects-list" style="display:flex;flex-direction:column;gap:10px;padding-bottom:32px;">
-
-          <!-- Tim 1: digitalci -->
-          <div class="project-card" data-team="digitalci">
-            <div class="project-card-left">
-              <div class="project-av" style="background:#1A1133;color:var(--violet-light);border-color:#3D2E6B">DC</div>
-              <div class="project-info">
-                <div class="project-name">EduBot <span class="project-team-badge" style="background:#1A1133;color:var(--violet-light);border-color:#3D2E6B">★ digitalci</span></div>
-                <div class="project-desc">AI asistent za personalizovano učenje — adaptira sadržaj u realnom vremenu na osnovu napretka studenta.</div>
-                <div class="project-tags"><span class="project-tag">Python</span><span class="project-tag">LLM</span><span class="project-tag">FastAPI</span></div>
-              </div>
-            </div>
-            <div class="project-card-right">
-              <div class="project-votes"><span class="project-votes-num" id="votes-digitalci">—</span><span class="project-votes-label">glasova</span></div>
-              <button class="vote-btn" id="vote-btn-digitalci" disabled onclick="castVote('digitalci')">Glasaj</button>
-            </div>
-          </div>
-
-          <!-- Tim 2: bytecraft -->
-          <div class="project-card" data-team="bytecraft">
-            <div class="project-card-left">
-              <div class="project-av" style="background:#0D1A0D;color:#5DCAA5;border-color:#0F3D30">BC</div>
-              <div class="project-info">
-                <div class="project-name">ClassroomOS <span class="project-team-badge" style="background:#0D1A0D;color:#5DCAA5;border-color:#0F3D30">ukohorisani</span></div>
-                <div class="project-desc">Pametna platforma za upravljanje učionicom sa real-time praćenjem pažnje učenika putem CV.</div>
-                <div class="project-tags"><span class="project-tag">React</span><span class="project-tag">OpenCV</span><span class="project-tag">WebSocket</span></div>
-              </div>
-            </div>
-            <div class="project-card-right">
-              <div class="project-votes"><span class="project-votes-num" id="votes-bytecraft">—</span><span class="project-votes-label">glasova</span></div>
-              <button class="vote-btn" id="vote-btn-bytecraft" disabled onclick="castVote('bytecraft')">Glasaj</button>
-            </div>
-          </div>
-
-          <!-- Tim 3: nullptr -->
-          <div class="project-card" data-team="nullptr">
-            <div class="project-card-left">
-              <div class="project-av" style="background:#1A0D0D;color:#F87171;border-color:#3D1A1A">NP</div>
-              <div class="project-info">
-                <div class="project-name">QuizForge <span class="project-team-badge" style="background:#1A0D0D;color:#F87171;border-color:#3D1A1A">nullptr</span></div>
-                <div class="project-desc">Generator testova i kvizova iz nastavnog materijala koristeći GPT-4 sa automatskim ocenjivanjem.</div>
-                <div class="project-tags"><span class="project-tag">Next.js</span><span class="project-tag">GPT-4</span><span class="project-tag">PostgreSQL</span></div>
-              </div>
-            </div>
-            <div class="project-card-right">
-              <div class="project-votes"><span class="project-votes-num" id="votes-nullptr">—</span><span class="project-votes-label">glasova</span></div>
-              <button class="vote-btn" id="vote-btn-nullptr" disabled onclick="castVote('nullptr')">Glasaj</button>
-            </div>
-          </div>
-
-          <!-- Tim 4: stackframe -->
-          <div class="project-card" data-team="stackframe">
-            <div class="project-card-left">
-              <div class="project-av" style="background:#1A1500;color:var(--lemon-vivid);border-color:#3A3600">SF</div>
-              <div class="project-info">
-                <div class="project-name">MathPath <span class="project-team-badge" style="background:#1A1500;color:var(--lemon-vivid);border-color:#3A3600">lale</span></div>
-                <div class="project-desc">Interaktivni 3D vizualizator matematičkih koncepata za srednje škole sa glasovnom navigacijom.</div>
-                <div class="project-tags"><span class="project-tag">Three.js</span><span class="project-tag">WebGL</span><span class="project-tag">SpeechAPI</span></div>
-              </div>
-            </div>
-            <div class="project-card-right">
-              <div class="project-votes"><span class="project-votes-num" id="votes-stackframe">—</span><span class="project-votes-label">glasova</span></div>
-              <button class="vote-btn" id="vote-btn-stackframe" disabled onclick="castVote('stackframe')">Glasaj</button>
-            </div>
-          </div>
-
-          <!-- Tim 5: heapoverflow -->
-          <div class="project-card" data-team="heapoverflow">
-            <div class="project-card-left">
-              <div class="project-av" style="background:#0D0D1A;color:#C9B8FF;border-color:#2D1A55">HO</div>
-              <div class="project-info">
-                <div class="project-name">PeerLearn <span class="project-team-badge" style="background:#0D0D1A;color:#C9B8FF;border-color:#2D1A55">menjači</span></div>
-                <div class="project-desc">P2P platforma za vršnjačko tutorstvo sa AI matchingom na osnovu stilova učenja i rasporeda.</div>
-                <div class="project-tags"><span class="project-tag">Vue.js</span><span class="project-tag">Node</span><span class="project-tag">ML</span></div>
-              </div>
-            </div>
-            <div class="project-card-right">
-              <div class="project-votes"><span class="project-votes-num" id="votes-heapoverflow">—</span><span class="project-votes-label">glasova</span></div>
-              <button class="vote-btn" id="vote-btn-heapoverflow" disabled onclick="castVote('heapoverflow')">Glasaj</button>
-            </div>
-          </div>
-
-          <!-- Ostatak timova (collapsed) -->
-          <div id="more-projects-stub" style="background:var(--surface);border:0.5px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;align-items:center;justify-content:center;gap:8px;color:var(--muted);font-size:13px;cursor:pointer;" onclick="this.style.display='none'">
-            <span>+23 projekta</span><span style="font-size:11px;opacity:.6">· klikni da proširis</span>
-          </div>
-
-        </div>
-      </div>
-    </div><!-- end glasanje-panel -->
-
-    <div class="typing-bar" id="typing-bar">
-      <div class="typing-dots"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>
-      <span><strong style="color:var(--text)">Stevan Gnjato</strong> kuca...</span>
     </div>
 
-    <div class="chat-input-wrap">
-      <div class="chat-input-box">
-        <div class="inp-btn">+</div>
-        <input type="text" id="msg-input" placeholder="Poruka #opšte" onkeydown="sendMsg(event)">
-        <div class="inp-actions">
-          <div class="inp-btn">😊</div>
-          <div class="inp-btn">📎</div>
-          <div class="inp-btn">@</div>
-          <div class="send-btn" onclick="sendMsgClick()">↑</div>
+    <!-- ── SERVER: MEMBERS PANEL ── -->
+    <div class="members-panel" id="panel-members">
+      <div class="members-header">Učesnici &nbsp;<span style="color:var(--muted);font-weight:400">120</span></div>
+      <div class="members-list">
+        <div class="hack-info-card">
+          <div class="hack-info-top">
+            <div class="hack-info-name">ETF HackWeek 2026</div>
+            <div class="hack-info-sub" id="hack-elapsed">počelo pre 0h 02min</div>
+          </div>
+          <div class="hack-info-stats">
+            <div class="hack-stat"><span class="hack-stat-label">Preostalo</span><span class="hack-stat-val"
+                id="timer-val">47:58:00</span></div>
+            <div class="progress-bar">
+              <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <div class="hack-stat"><span class="hack-stat-label">Timovi</span><span class="hack-stat-val">28</span>
+            </div>
+            <div class="hack-stat"><span class="hack-stat-label">Nagrada</span><span class="hack-stat-val"
+                style="color:var(--lemon-vivid)">$2,000</span></div>
+          </div>
         </div>
+        <div class="members-section">Organizatori — 2</div>
+        <div class="member-row">
+          <div class="member-av pav-t">MA<span class="si si-on"></span></div>
+          <div class="member-info">
+            <div class="member-name" style="color:#5DCAA5">Mohammed Avdol</div>
+            <div class="member-sub">Organizator</div>
+          </div>
+          <span class="member-badge mbadge-org">org</span>
+        </div>
+        <div class="member-row">
+          <div class="member-av" style="background:#0D0D1A;color:var(--muted);border:1px solid var(--border)">ET<span
+              class="si si-on"></span></div>
+          <div class="member-info">
+            <div class="member-name">etf_admin</div>
+            <div class="member-sub">Co-organizator</div>
+          </div>
+          <span class="member-badge mbadge-org">org</span>
+        </div>
+        <div class="members-section">digitalci — 4</div>
+        <div class="member-row">
+          <div class="member-av pav-v">AČ<span class="si si-on"></span></div>
+          <div class="member-info">
+            <div class="member-name" style="color:var(--violet-light)">Andrej Čolić</div>
+          </div>
+          <span class="member-badge mbadge-lead">★</span>
+        </div>
+        <div class="member-row">
+          <div class="member-av pav-l">SG<span class="si si-on"></span></div>
+          <div class="member-info">
+            <div class="member-name" style="color:var(--lemon-vivid)">Stevan Gnjato</div>
+            <div class="member-sub">kuca...</div>
+          </div>
+        </div>
+        <div class="member-row">
+          <div class="member-av pav-v">DP<span class="si si-on"></span></div>
+          <div class="member-info">
+            <div class="member-name" style="color:var(--violet-light)">Dimtrije Pešić</div>
+          </div>
+        </div>
+        <div class="member-row">
+          <div class="member-av" style="background:#160D0D;color:#ff9ff3;border:1px solid #3D1A3D">NS<span
+              class="si si-idle"></span></div>
+          <div class="member-info">
+            <div class="member-name" style="color:#ff9ff3">Nenad Skoković</div>
+            <div class="member-sub">Odsutan</div>
+          </div>
+        </div>
+        <div class="members-section">Online — 47</div>
+        <div class="member-row">
+          <div class="member-av" style="background:#14112A;color:var(--muted);border:1px solid var(--border)">TK<span
+              class="si si-on"></span></div>
+          <div class="member-info">
+            <div class="member-name">tiki</div>
+          </div>
+        </div>
+        <div class="member-row">
+          <div class="member-av" style="background:#04342C;color:#5DCAA5;border:1px solid #0D4035">MR<span
+              class="si si-on"></span></div>
+          <div class="member-info">
+            <div class="member-name">mara</div>
+          </div>
+        </div>
+        <div class="member-row">
+          <div class="member-av"
+            style="background:#14112A;color:var(--muted);border:1px solid var(--border);font-size:9px">+44<span
+              class="si si-on"></span></div>
+          <div class="member-info">
+            <div class="member-name" style="font-size:12px;color:var(--muted)">i još 44 online...</div>
+          </div>
+        </div>
+        <div class="members-section">Offline — 73</div>
+        <div style="padding:4px 14px 8px;font-size:12px;color:var(--muted)">73 učesnika offline</div>
       </div>
     </div>
+
+    <!-- ── DM: PROFILE PANEL ── -->
+    <div class="dm-profile-panel" id="panel-dm-profile"></div>
+
   </div>
 
-  <!-- ── SERVER: MEMBERS PANEL ── -->
-  <div class="members-panel" id="panel-members">
-    <div class="members-header">Učesnici &nbsp;<span style="color:var(--muted);font-weight:400">120</span></div>
-    <div class="members-list">
-      <div class="hack-info-card">
-        <div class="hack-info-top">
-          <div class="hack-info-name">ETF HackWeek 2026</div>
-          <div class="hack-info-sub" id="hack-elapsed">počelo pre 0h 02min</div>
-        </div>
-        <div class="hack-info-stats">
-          <div class="hack-stat"><span class="hack-stat-label">Preostalo</span><span class="hack-stat-val" id="timer-val">47:58:00</span></div>
-          <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
-          <div class="hack-stat"><span class="hack-stat-label">Timovi</span><span class="hack-stat-val">28</span></div>
-          <div class="hack-stat"><span class="hack-stat-label">Nagrada</span><span class="hack-stat-val" style="color:var(--lemon-vivid)">$2,000</span></div>
-        </div>
-      </div>
-      <div class="members-section">Organizatori — 2</div>
-      <div class="member-row">
-        <div class="member-av pav-t">MA<span class="si si-on"></span></div>
-        <div class="member-info"><div class="member-name" style="color:#5DCAA5">Mohammed Avdol</div><div class="member-sub">Organizator</div></div>
-        <span class="member-badge mbadge-org">org</span>
-      </div>
-      <div class="member-row">
-        <div class="member-av" style="background:#0D0D1A;color:var(--muted);border:1px solid var(--border)">ET<span class="si si-on"></span></div>
-        <div class="member-info"><div class="member-name">etf_admin</div><div class="member-sub">Co-organizator</div></div>
-        <span class="member-badge mbadge-org">org</span>
-      </div>
-      <div class="members-section">digitalci — 4</div>
-      <div class="member-row">
-        <div class="member-av pav-v">AČ<span class="si si-on"></span></div>
-        <div class="member-info"><div class="member-name" style="color:var(--violet-light)">Andrej Čolić</div></div>
-        <span class="member-badge mbadge-lead">★</span>
-      </div>
-      <div class="member-row">
-        <div class="member-av pav-l">SG<span class="si si-on"></span></div>
-        <div class="member-info"><div class="member-name" style="color:var(--lemon-vivid)">Stevan Gnjato</div><div class="member-sub">kuca...</div></div>
-      </div>
-      <div class="member-row">
-        <div class="member-av pav-v">DP<span class="si si-on"></span></div>
-        <div class="member-info"><div class="member-name" style="color:var(--violet-light)">Dimtrije Pešić</div></div>
-      </div>
-      <div class="member-row">
-        <div class="member-av" style="background:#160D0D;color:#ff9ff3;border:1px solid #3D1A3D">NS<span class="si si-idle"></span></div>
-        <div class="member-info"><div class="member-name" style="color:#ff9ff3">Nenad Skoković</div><div class="member-sub">Odsutan</div></div>
-      </div>
-      <div class="members-section">Online — 47</div>
-      <div class="member-row">
-        <div class="member-av" style="background:#14112A;color:var(--muted);border:1px solid var(--border)">TK<span class="si si-on"></span></div>
-        <div class="member-info"><div class="member-name">tiki</div></div>
-      </div>
-      <div class="member-row">
-        <div class="member-av" style="background:#04342C;color:#5DCAA5;border:1px solid #0D4035">MR<span class="si si-on"></span></div>
-        <div class="member-info"><div class="member-name">mara</div></div>
-      </div>
-      <div class="member-row">
-        <div class="member-av" style="background:#14112A;color:var(--muted);border:1px solid var(--border);font-size:9px">+44<span class="si si-on"></span></div>
-        <div class="member-info"><div class="member-name" style="font-size:12px;color:var(--muted)">i još 44 online...</div></div>
-      </div>
-      <div class="members-section">Offline — 73</div>
-      <div style="padding:4px 14px 8px;font-size:12px;color:var(--muted)">73 učesnika offline</div>
-    </div>
-  </div>
+  <script>
+    /* ── Timer ── */
+    const TOTAL_S = 48 * 3600; let rem = TOTAL_S - 120;
+    function pad(n) { return String(n).padStart(2, '0') }
+    function tick() {
+      if (rem <= 0) return;
+      const h = Math.floor(rem / 3600), m = Math.floor((rem % 3600) / 60), s = rem % 60;
+      const tv = document.getElementById('timer-val');
+      if (tv) tv.textContent = pad(h) + ':' + pad(m) + ':' + pad(s);
+      const el = TOTAL_S - rem, pct = (el / TOTAL_S * 100).toFixed(3);
+      const pf = document.getElementById('progress-fill');
+      if (pf) pf.style.width = pct + '%';
+      const he = document.getElementById('hack-elapsed');
+      if (he) he.textContent = 'počelo pre ' + Math.floor(el / 3600) + 'h ' + pad(Math.floor((el % 3600) / 60)) + 'min';
+      rem--;
+    }
+    tick(); setInterval(tick, 1000);
 
-  <!-- ── DM: PROFILE PANEL ── -->
-  <div class="dm-profile-panel" id="panel-dm-profile"></div>
+    /* ── Mode ── */
+    let appMode = 'server';
 
-</div>
+    /* ── DM data ── */
+    const DM = {
+      nenad: {
+        av: 'NS', avStyle: 'background:#160D0D;color:#ff9ff3;border:1px solid #3D1A3D',
+        statusBg: 'var(--lemon-vivid)', statusLabel: 'Odsutan',
+        fullName: 'Nenad Skoković', handle: '@nskokovic',
+        bio: 'Low level - ETF 3. god.',
+        hacks: [{ icon: 'ETF', name: 'ETF HackWeek 2026', sub: 'Isti tim · aktivan' }],
+        msgs: [
+          { av: 'NS', avS: 'background:#160D0D;color:#ff9ff3;border:1px solid #3D1A3D', name: 'Nenad Skoković', nc: 'msg-author-p', t: '08:23', text: 'kalkulator' },
+          { av: 'AČ', avS: 'background:#1A1133;color:var(--violet-light);border:1px solid #2D1A55', name: 'Andrej Čolić', nc: 'msg-author-v', t: '08:24', text: 'digitalac' },
+        ]
+      },
+      digitalci: {
+        av: 'D', avStyle: 'group',
+        statusBg: '#5DCAA5', statusLabel: '4 člana',
+        fullName: 'digitalci (tim)', handle: 'Grupni DM · 4 člana',
+        bio: 'Tim za ETF HackWeek 2026.',
+        hacks: [{ icon: 'ETF', name: 'ETF HackWeek 2026', sub: 'Svi zajedno · aktivan' }],
+        msgs: [
+          { av: 'SG', avS: 'background:#1C1A00;color:var(--lemon-vivid);border:1px solid #3A3600', name: 'Stevan Gnjato', nc: 'msg-author-g', t: '08:20', text: 'repo je up' },
+          { av: 'DP', avS: 'background:#1A1133;color:var(--violet-light);border:1px solid #2D1A55', name: 'Dimitrije Pešić', nc: 'msg-author-v', t: '08:21', text: 'super' }
+        ]
+      }
+    };
 
-<script>
-/* ── Timer ── */
-const TOTAL_S = 48*3600; let rem = TOTAL_S-120;
-function pad(n){return String(n).padStart(2,'0')}
-function tick(){
-  if(rem<=0)return;
-  const h=Math.floor(rem/3600),m=Math.floor((rem%3600)/60),s=rem%60;
-  const tv=document.getElementById('timer-val');
-  if(tv)tv.textContent=pad(h)+':'+pad(m)+':'+pad(s);
-  const el=TOTAL_S-rem, pct=(el/TOTAL_S*100).toFixed(3);
-  const pf=document.getElementById('progress-fill');
-  if(pf)pf.style.width=pct+'%';
-  const he=document.getElementById('hack-elapsed');
-  if(he)he.textContent='počelo pre '+Math.floor(el/3600)+'h '+pad(Math.floor((el%3600)/60))+'min';
-  rem--;
-}
-tick(); setInterval(tick,1000);
+    /* ── Enter DM mode ── */
+    function enterDmMode() {
+      appMode = 'dm';
+      document.querySelectorAll('.srv-icon').forEach(i => i.classList.remove('srv-active', 'srv-dm-selected'));
+      document.getElementById('srv-dm-btn').classList.add('srv-dm-selected');
+      const nb = document.getElementById('dm-strip-notif'); if (nb) nb.remove();
 
-/* ── Mode ── */
-let appMode='server';
+      document.getElementById('nav-server-mode').classList.add('dm-hidden');
+      document.getElementById('nav-dm-mode').classList.remove('dm-hidden');
+      document.getElementById('panel-ch-sidebar').classList.add('dm-hidden');
+      document.getElementById('panel-dm-sidebar').classList.add('dm-visible');
+      document.getElementById('messages-server').classList.add('dm-hidden');
+      document.getElementById('messages-dm').classList.remove('dm-hidden');
+      document.getElementById('panel-members').classList.add('dm-hidden');
+      document.getElementById('panel-dm-profile').classList.add('dm-visible');
 
-/* ── DM data ── */
-const DM={
-  nenad:{
-    av:'NS', avStyle:'background:#160D0D;color:#ff9ff3;border:1px solid #3D1A3D',
-    statusBg:'var(--lemon-vivid)', statusLabel:'Odsutan',
-    fullName:'Nenad Skoković', handle:'@nskokovic',
-    bio:'Low level - ETF 3. god.',
-    hacks:[{icon:'ETF',name:'ETF HackWeek 2026',sub:'Isti tim · aktivan'}],
-    msgs:[
-      {av:'NS',avS:'background:#160D0D;color:#ff9ff3;border:1px solid #3D1A3D',name:'Nenad Skoković',nc:'msg-author-p',t:'08:23',text:'kalkulator'},
-      {av:'AČ',avS:'background:#1A1133;color:var(--violet-light);border:1px solid #2D1A55',name:'Andrej Čolić',nc:'msg-author-v',t:'08:24',text:'digitalac'},
-    ]
-  },
-  digitalci:{
-    av:'D', avStyle:'group',
-    statusBg:'#5DCAA5', statusLabel:'4 člana',
-    fullName:'digitalci (tim)', handle:'Grupni DM · 4 člana',
-    bio:'Tim za ETF HackWeek 2026.',
-    hacks:[{icon:'ETF',name:'ETF HackWeek 2026',sub:'Svi zajedno · aktivan'}],
-    msgs:[
-      {av:'SG',avS:'background:#1C1A00;color:var(--lemon-vivid);border:1px solid #3A3600',name:'Stevan Gnjato',nc:'msg-author-g',t:'08:20',text:'repo je up'},
-      {av:'DP',avS:'background:#1A1133;color:var(--violet-light);border:1px solid #2D1A55',name:'Dimitrije Pešić',nc:'msg-author-v',t:'08:21',text:'super'}
-    ]
-  }
-};
+      // auto-open first contact
+      switchDm(document.getElementById('dm-row-moljac'), 'moljac');
+    }
 
-/* ── Enter DM mode ── */
-function enterDmMode(){
-  appMode='dm';
-  document.querySelectorAll('.srv-icon').forEach(i=>i.classList.remove('srv-active','srv-dm-selected'));
-  document.getElementById('srv-dm-btn').classList.add('srv-dm-selected');
-  const nb=document.getElementById('dm-strip-notif'); if(nb)nb.remove();
+    /* ── Enter server mode ── */
+    function enterServerMode() {
+      appMode = 'server';
+      document.querySelectorAll('.srv-icon').forEach(i => i.classList.remove('srv-active', 'srv-dm-selected'));
+      document.getElementById('srv-etf').classList.add('srv-active');
 
-  document.getElementById('nav-server-mode').classList.add('dm-hidden');
-  document.getElementById('nav-dm-mode').classList.remove('dm-hidden');
-  document.getElementById('panel-ch-sidebar').classList.add('dm-hidden');
-  document.getElementById('panel-dm-sidebar').classList.add('dm-visible');
-  document.getElementById('messages-server').classList.add('dm-hidden');
-  document.getElementById('messages-dm').classList.remove('dm-hidden');
-  document.getElementById('panel-members').classList.add('dm-hidden');
-  document.getElementById('panel-dm-profile').classList.add('dm-visible');
+      document.getElementById('nav-server-mode').classList.remove('dm-hidden');
+      document.getElementById('nav-dm-mode').classList.add('dm-hidden');
+      document.getElementById('panel-ch-sidebar').classList.remove('dm-hidden');
+      document.getElementById('panel-dm-sidebar').classList.remove('dm-visible');
+      document.getElementById('messages-server').classList.remove('dm-hidden');
+      document.getElementById('messages-dm').classList.add('dm-hidden');
+      document.getElementById('panel-members').classList.remove('dm-hidden');
+      document.getElementById('panel-dm-profile').classList.remove('dm-visible');
 
-  // auto-open first contact
-  switchDm(document.getElementById('dm-row-moljac'),'moljac');
-}
+      document.getElementById('topbar-icon').textContent = '#';
+      document.getElementById('typing-bar').style.display = '';
+    }
 
-/* ── Enter server mode ── */
-function enterServerMode(){
-  appMode='server';
-  document.querySelectorAll('.srv-icon').forEach(i=>i.classList.remove('srv-active','srv-dm-selected'));
-  document.getElementById('srv-etf').classList.add('srv-active');
+    /* ── Switch channel ── */
+    function switchChannel(el, name, desc) {
+      document.querySelectorAll('.ch-item').forEach(i => i.classList.remove('ch-active'));
+      el.classList.add('ch-active'); el.classList.remove('ch-unread');
+      const b = el.querySelector('.ch-badge'); if (b) b.remove();
+      document.getElementById('topbar-name').textContent = name;
+      document.getElementById('topbar-desc').textContent = desc || '';
+      document.getElementById('nav-ch-label').textContent = '#' + name;
+      document.getElementById('msg-input').placeholder = 'Poruka #' + name;
 
-  document.getElementById('nav-server-mode').classList.remove('dm-hidden');
-  document.getElementById('nav-dm-mode').classList.add('dm-hidden');
-  document.getElementById('panel-ch-sidebar').classList.remove('dm-hidden');
-  document.getElementById('panel-dm-sidebar').classList.remove('dm-visible');
-  document.getElementById('messages-server').classList.remove('dm-hidden');
-  document.getElementById('messages-dm').classList.add('dm-hidden');
-  document.getElementById('panel-members').classList.remove('dm-hidden');
-  document.getElementById('panel-dm-profile').classList.remove('dm-visible');
+      const serverMsgs = document.getElementById('messages-server');
+      const predajaPanel = document.getElementById('predaja-panel');
+      const typingBar = document.getElementById('typing-bar');
+      const chatInputWrap = document.querySelector('.chat-input-wrap');
 
-  document.getElementById('topbar-icon').textContent='#';
-  document.getElementById('typing-bar').style.display='';
-}
+      const glasanjePanel = document.getElementById('glasanje-panel');
+      const rezultatiPanel = document.getElementById('rezultati-panel');
 
-/* ── Switch channel ── */
-function switchChannel(el,name,desc){
-  document.querySelectorAll('.ch-item').forEach(i=>i.classList.remove('ch-active'));
-  el.classList.add('ch-active'); el.classList.remove('ch-unread');
-  const b=el.querySelector('.ch-badge'); if(b)b.remove();
-  document.getElementById('topbar-name').textContent=name;
-  document.getElementById('topbar-desc').textContent=desc||'';
-  document.getElementById('nav-ch-label').textContent='#'+name;
-  document.getElementById('msg-input').placeholder='Poruka #'+name;
+      if (name === 'predaja-projekta') {
+        serverMsgs.style.display = 'none';
+        predajaPanel.style.display = 'flex';
+        glasanjePanel.style.display = 'none';
+        rezultatiPanel.style.display = 'none';
+        typingBar.style.display = 'none';
+        chatInputWrap.style.display = 'none';
+      } else if (name === 'glasanje-publike') {
+        serverMsgs.style.display = 'none';
+        predajaPanel.style.display = 'none';
+        glasanjePanel.style.display = 'flex';
+        rezultatiPanel.style.display = 'none';
+        typingBar.style.display = 'none';
+        chatInputWrap.style.display = 'none';
+        updateVotingCountdown();
+      } else if (name === 'rezultati') {
+        if (isHackathonActive()) {
+          // channel is locked while hackathon is running
+          // revert the click visually — don't open it
+          document.querySelectorAll('.ch-item').forEach(i => i.classList.remove('ch-active'));
+          showRezultatiLockedToast();
+          return;
+        }
+        serverMsgs.style.display = 'none';
+        predajaPanel.style.display = 'none';
+        glasanjePanel.style.display = 'none';
+        rezultatiPanel.style.display = 'flex';
+        typingBar.style.display = 'none';
+        chatInputWrap.style.display = 'none';
+      } else {
+        serverMsgs.style.display = '';
+        predajaPanel.style.display = 'none';
+        glasanjePanel.style.display = 'none';
+        rezultatiPanel.style.display = 'none';
+        typingBar.style.display = '';
+        chatInputWrap.style.display = '';
+      }
+    }
 
-  const serverMsgs=document.getElementById('messages-server');
-  const predajaPanel=document.getElementById('predaja-panel');
-  const typingBar=document.getElementById('typing-bar');
-  const chatInputWrap=document.querySelector('.chat-input-wrap');
+    /* ── Video upload ── */
+    function handleVideoDrop(e) {
+      e.preventDefault();
+      document.getElementById('video-drop-zone').style.borderColor = 'var(--border)';
+      document.getElementById('video-drop-zone').style.background = '';
+      const f = e.dataTransfer.files[0];
+      if (f) processVideoFile(f);
+    }
+    function handleVideoSelect(input) {
+      const f = input.files[0];
+      if (f) processVideoFile(f);
+    }
+    function handleVideoReplace(input) {
+      const f = input.files[0];
+      if (f) processVideoFile(f);
+    }
+    function processVideoFile(f) {
+      const allowed = ['video/mp4', 'video/quicktime', 'video/avi', 'video/x-msvideo', 'video/webm', 'video/ogg'];
+      const maxBytes = 500 * 1024 * 1024;
+      if (!f.type.startsWith('video/') && !allowed.includes(f.type)) {
+        showVideoError('Format fajla nije podržan. Koristite MP4, MOV ili AVI.'); return;
+      }
+      if (f.size > maxBytes) {
+        showVideoError('Fajl je prevelik. Maksimalna dozvoljena veličina je 500 MB.'); return;
+      }
+      const url = URL.createObjectURL(f);
+      const player = document.getElementById('video-player');
+      player.src = url;
+      document.getElementById('video-filename').textContent = f.name;
+      const mb = (f.size / (1024 * 1024)).toFixed(1);
+      document.getElementById('video-meta').textContent = mb + ' MB · otpremljeno upravo';
+      document.getElementById('video-empty-state').style.display = 'none';
+      document.getElementById('video-uploaded-state').style.display = 'block';
+      updateStatus('video', true);
+    }
+    function removeVideo() {
+      const player = document.getElementById('video-player');
+      URL.revokeObjectURL(player.src);
+      player.src = '';
+      document.getElementById('video-uploaded-state').style.display = 'none';
+      document.getElementById('video-empty-state').style.display = '';
+      document.getElementById('video-file-input').value = '';
+      document.getElementById('video-replace-input').value = '';
+      updateStatus('video', false);
+    }
+    function showVideoError(msg) {
+      const dz = document.getElementById('video-drop-zone');
+      dz.style.borderColor = '#F87171';
+      let err = document.getElementById('video-upload-err');
+      if (!err) { err = document.createElement('div'); err.id = 'video-upload-err'; err.style.cssText = 'font-size:12px;color:#F87171;margin-top:8px;text-align:center'; dz.parentNode.appendChild(err); }
+      err.textContent = '⚠ ' + msg;
+      setTimeout(() => { dz.style.borderColor = 'var(--border)'; err.textContent = '' }, 4000);
+    }
 
-  const glasanjePanel=document.getElementById('glasanje-panel');
+    /* ── GitHub ── */
+    let githubSaved = '';
+    function saveGithub() {
+      const val = document.getElementById('github-url-input').value.trim();
+      const err = document.getElementById('github-error');
+      if (!val.match(/^https?:\/\/(www\.)?github\.com\/.+\/.+/)) {
+        err.style.display = 'block'; return;
+      }
+      err.style.display = 'none';
+      githubSaved = val;
+      document.getElementById('github-link-display').textContent = val.replace('https://', '');
+      document.getElementById('github-display').style.display = 'flex';
+      document.getElementById('github-input-wrap').style.display = 'none';
+      updateStatus('github', true);
+    }
+    function editGithub() {
+      document.getElementById('github-input-wrap').style.display = 'flex';
+      document.getElementById('github-display').style.display = 'none';
+      document.getElementById('github-url-input').value = githubSaved;
+    }
+    function openGithub() {
+      if (githubSaved) window.open(githubSaved, '_blank');
+    }
 
-  if(name==='predaja-projekta'){
-    serverMsgs.style.display='none';
-    predajaPanel.style.display='flex';
-    glasanjePanel.style.display='none';
-    typingBar.style.display='none';
-    chatInputWrap.style.display='none';
-  } else if(name==='glasanje-publike'){
-    serverMsgs.style.display='none';
-    predajaPanel.style.display='none';
-    glasanjePanel.style.display='flex';
-    typingBar.style.display='none';
-    chatInputWrap.style.display='none';
-    updateVotingCountdown();
-  } else {
-    serverMsgs.style.display='';
-    predajaPanel.style.display='none';
-    glasanjePanel.style.display='none';
-    typingBar.style.display='';
-    chatInputWrap.style.display='';
-  }
-}
+    /* ── Status summary ── */
+    function updateStatus(type, done) {
+      if (type === 'video') {
+        document.getElementById('status-video-icon').textContent = done ? '✅' : '⬜';
+        document.getElementById('status-video-txt').textContent = done ? 'Otpremljeno' : 'Nije otpremljeno';
+      }
+      if (type === 'github') {
+        document.getElementById('status-github-icon').textContent = done ? '✅' : '⬜';
+        document.getElementById('status-github-txt').textContent = done ? 'Link dodat' : 'Link nije dodat';
+      }
+    }
 
-/* ── Video upload ── */
-function handleVideoDrop(e){
-  e.preventDefault();
-  document.getElementById('video-drop-zone').style.borderColor='var(--border)';
-  document.getElementById('video-drop-zone').style.background='';
-  const f=e.dataTransfer.files[0];
-  if(f) processVideoFile(f);
-}
-function handleVideoSelect(input){
-  const f=input.files[0];
-  if(f) processVideoFile(f);
-}
-function handleVideoReplace(input){
-  const f=input.files[0];
-  if(f) processVideoFile(f);
-}
-function processVideoFile(f){
-  const allowed=['video/mp4','video/quicktime','video/avi','video/x-msvideo','video/webm','video/ogg'];
-  const maxBytes=500*1024*1024;
-  if(!f.type.startsWith('video/') && !allowed.includes(f.type)){
-    showVideoError('Format fajla nije podržan. Koristite MP4, MOV ili AVI.'); return;
-  }
-  if(f.size>maxBytes){
-    showVideoError('Fajl je prevelik. Maksimalna dozvoljena veličina je 500 MB.'); return;
-  }
-  const url=URL.createObjectURL(f);
-  const player=document.getElementById('video-player');
-  player.src=url;
-  document.getElementById('video-filename').textContent=f.name;
-  const mb=(f.size/(1024*1024)).toFixed(1);
-  document.getElementById('video-meta').textContent=mb+' MB · otpremljeno upravo';
-  document.getElementById('video-empty-state').style.display='none';
-  document.getElementById('video-uploaded-state').style.display='block';
-  updateStatus('video',true);
-}
-function removeVideo(){
-  const player=document.getElementById('video-player');
-  URL.revokeObjectURL(player.src);
-  player.src='';
-  document.getElementById('video-uploaded-state').style.display='none';
-  document.getElementById('video-empty-state').style.display='';
-  document.getElementById('video-file-input').value='';
-  document.getElementById('video-replace-input').value='';
-  updateStatus('video',false);
-}
-function showVideoError(msg){
-  const dz=document.getElementById('video-drop-zone');
-  dz.style.borderColor='#F87171';
-  let err=document.getElementById('video-upload-err');
-  if(!err){err=document.createElement('div');err.id='video-upload-err';err.style.cssText='font-size:12px;color:#F87171;margin-top:8px;text-align:center';dz.parentNode.appendChild(err);}
-  err.textContent='⚠ '+msg;
-  setTimeout(()=>{dz.style.borderColor='var(--border)';err.textContent=''},4000);
-}
+    /* ── Switch DM ── */
+    function switchDm(el, key) {
+      document.querySelectorAll('.dm-row').forEach(r => r.classList.remove('dm-row-active'));
+      el.classList.add('dm-row-active'); el.classList.remove('dm-row-unread');
+      const b = el.querySelector('.dm-row-badge'); if (b) b.remove();
 
-/* ── GitHub ── */
-let githubSaved='';
-function saveGithub(){
-  const val=document.getElementById('github-url-input').value.trim();
-  const err=document.getElementById('github-error');
-  if(!val.match(/^https?:\/\/(www\.)?github\.com\/.+\/.+/)){
-    err.style.display='block'; return;
-  }
-  err.style.display='none';
-  githubSaved=val;
-  document.getElementById('github-link-display').textContent=val.replace('https://','');
-  document.getElementById('github-display').style.display='flex';
-  document.getElementById('github-input-wrap').style.display='none';
-  updateStatus('github',true);
-}
-function editGithub(){
-  document.getElementById('github-input-wrap').style.display='flex';
-  document.getElementById('github-display').style.display='none';
-  document.getElementById('github-url-input').value=githubSaved;
-}
-function openGithub(){
-  if(githubSaved) window.open(githubSaved,'_blank');
-}
+      const d = DM[key]; if (!d) return;
+      document.getElementById('nav-dm-label').textContent = d.fullName;
+      document.getElementById('topbar-icon').textContent = '✉';
+      document.getElementById('topbar-name').textContent = d.fullName;
+      document.getElementById('topbar-desc').textContent = '';
+      document.getElementById('msg-input').placeholder = 'Poruka ' + d.fullName;
+      document.getElementById('typing-bar').style.display = 'none';
 
-/* ── Status summary ── */
-function updateStatus(type, done){
-  if(type==='video'){
-    document.getElementById('status-video-icon').textContent=done?'✅':'⬜';
-    document.getElementById('status-video-txt').textContent=done?'Otpremljeno':'Nije otpremljeno';
-  }
-  if(type==='github'){
-    document.getElementById('status-github-icon').textContent=done?'✅':'⬜';
-    document.getElementById('status-github-txt').textContent=done?'Link dodat':'Link nije dodat';
-  }
-}
+      // render messages
+      const msgsEl = document.getElementById('messages-dm');
+      const avHtml = d.avStyle === 'group'
+        ? `<div class="dm-group-av" style="width:52px;height:52px"><div class="ga1" style="background:#1A1133;color:var(--violet-light);border:1px solid #2D1A55;width:28px;height:28px;font-size:9px">AČ</div><div class="ga2" style="background:#1C1A00;color:var(--lemon-vivid);border:1px solid #3A3600;width:28px;height:28px;font-size:9px">SG</div></div>`
+        : `<div style="width:52px;height:52px;border-radius:50%;${d.avStyle};display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;position:relative">${d.av}<span style="position:absolute;bottom:2px;right:2px;width:14px;height:14px;border-radius:50%;border:2px solid var(--bg);background:${d.statusBg}"></span></div>`;
 
-/* ── Switch DM ── */
-function switchDm(el, key){
-  document.querySelectorAll('.dm-row').forEach(r=>r.classList.remove('dm-row-active'));
-  el.classList.add('dm-row-active'); el.classList.remove('dm-row-unread');
-  const b=el.querySelector('.dm-row-badge'); if(b)b.remove();
-
-  const d=DM[key]; if(!d)return;
-  document.getElementById('nav-dm-label').textContent=d.fullName;
-  document.getElementById('topbar-icon').textContent='✉';
-  document.getElementById('topbar-name').textContent=d.fullName;
-  document.getElementById('topbar-desc').textContent='';
-  document.getElementById('msg-input').placeholder='Poruka '+d.fullName;
-  document.getElementById('typing-bar').style.display='none';
-
-  // render messages
-  const msgsEl=document.getElementById('messages-dm');
-  const avHtml=d.avStyle==='group'
-    ?`<div class="dm-group-av" style="width:52px;height:52px"><div class="ga1" style="background:#1A1133;color:var(--violet-light);border:1px solid #2D1A55;width:28px;height:28px;font-size:9px">AČ</div><div class="ga2" style="background:#1C1A00;color:var(--lemon-vivid);border:1px solid #3A3600;width:28px;height:28px;font-size:9px">SG</div></div>`
-    :`<div style="width:52px;height:52px;border-radius:50%;${d.avStyle};display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;position:relative">${d.av}<span style="position:absolute;bottom:2px;right:2px;width:14px;height:14px;border-radius:50%;border:2px solid var(--bg);background:${d.statusBg}"></span></div>`;
-
-  let html=`<div style="flex:1"></div><div style="padding:24px 16px 20px;border-bottom:0.5px solid var(--border);margin-bottom:12px">
+      let html = `<div style="flex:1"></div><div style="padding:24px 16px 20px;border-bottom:0.5px solid var(--border);margin-bottom:12px">
     ${avHtml}
     <div style="margin-top:10px;font-size:20px;font-weight:600;color:var(--text)">${d.fullName}</div>
     <div style="font-size:13px;color:var(--muted);margin-bottom:8px">${d.handle}</div>
@@ -880,28 +1317,28 @@ function switchDm(el, key){
     <div style="font-size:12px;color:var(--muted)">Ovo je početak razgovora sa <strong style="color:var(--violet-light)">${d.fullName}</strong>.</div>
   </div><div class="msg-date-sep">Danas</div>`;
 
-  d.msgs.forEach((m,i)=>{
-    const grp=i>0 && d.msgs[i-1].av===m.av;
-    html+=`<div class="msg${grp?' msg-grouped':''}" style="${i>0&&!grp?'margin-top:10px':''}">
+      d.msgs.forEach((m, i) => {
+        const grp = i > 0 && d.msgs[i - 1].av === m.av;
+        html += `<div class="msg${grp ? ' msg-grouped' : ''}" style="${i > 0 && !grp ? 'margin-top:10px' : ''}">
       <div class="msg-av" style="${m.avS}">${m.av}</div>
       <div class="msg-body">
-        ${!grp?`<div class="msg-meta-row"><span class="msg-author ${m.nc}">${m.name}</span><span class="msg-time">${m.t}</span></div>`:''}
+        ${!grp ? `<div class="msg-meta-row"><span class="msg-author ${m.nc}">${m.name}</span><span class="msg-time">${m.t}</span></div>` : ''}
         <div class="msg-text">${m.text}</div>
-        ${m.link?`<div style="margin-top:6px"><div class="msg-attachment"><span class="msg-attachment-icon">🔗</span><div><div class="msg-attachment-name">${m.link.n}</div><div class="msg-attachment-sub">${m.link.s}</div></div></div></div>`:''}
+        ${m.link ? `<div style="margin-top:6px"><div class="msg-attachment"><span class="msg-attachment-icon">🔗</span><div><div class="msg-attachment-name">${m.link.n}</div><div class="msg-attachment-sub">${m.link.s}</div></div></div></div>` : ''}
       </div>
     </div>`;
-  });
-  msgsEl.innerHTML=html;
-  msgsEl.scrollTop=99999;
+      });
+      msgsEl.innerHTML = html;
+      msgsEl.scrollTop = 99999;
 
-  // render profile panel
-  const pp=document.getElementById('panel-dm-profile');
-  const hackCards=(d.hacks||[]).map(h=>`<div class="dm-shared-hack"><div class="dm-shared-hack-icon">${h.icon}</div><div class="dm-shared-hack-info"><div class="dm-shared-hack-name">${h.name}</div><div class="dm-shared-hack-sub">${h.sub}</div></div></div>`).join('');
-  const profAvHtml=d.avStyle==='group'
-    ?`<div class="dm-group-av" style="width:52px;height:52px"><div class="ga1" style="background:#1A1133;color:var(--violet-light);border:1px solid #2D1A55;width:28px;height:28px;font-size:9px">AČ</div><div class="ga2" style="background:#1C1A00;color:var(--lemon-vivid);border:1px solid #3A3600;width:28px;height:28px;font-size:9px">SG</div></div>`
-    :`<div class="dm-profile-av" style="${d.avStyle};font-size:15px;font-weight:600">${d.av}<span class="dm-pav-si" style="background:${d.statusBg}"></span></div>`;
+      // render profile panel
+      const pp = document.getElementById('panel-dm-profile');
+      const hackCards = (d.hacks || []).map(h => `<div class="dm-shared-hack"><div class="dm-shared-hack-icon">${h.icon}</div><div class="dm-shared-hack-info"><div class="dm-shared-hack-name">${h.name}</div><div class="dm-shared-hack-sub">${h.sub}</div></div></div>`).join('');
+      const profAvHtml = d.avStyle === 'group'
+        ? `<div class="dm-group-av" style="width:52px;height:52px"><div class="ga1" style="background:#1A1133;color:var(--violet-light);border:1px solid #2D1A55;width:28px;height:28px;font-size:9px">AČ</div><div class="ga2" style="background:#1C1A00;color:var(--lemon-vivid);border:1px solid #3A3600;width:28px;height:28px;font-size:9px">SG</div></div>`
+        : `<div class="dm-profile-av" style="${d.avStyle};font-size:15px;font-weight:600">${d.av}<span class="dm-pav-si" style="background:${d.statusBg}"></span></div>`;
 
-  pp.innerHTML=`
+      pp.innerHTML = `
     <div class="dm-profile-banner"></div>
     <div class="dm-profile-av-wrap">
       ${profAvHtml}
@@ -918,120 +1355,248 @@ function switchDm(el, key){
       <div class="dm-profile-card-label" style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Zajednički hakathoni</div>
       ${hackCards}
     </div>`;
-}
+    }
 
-/* ── Toggle right panel ── */
-function toggleRightPanel(){
-  if(appMode==='server'){
-    const p=document.getElementById('panel-members');
-    p.style.display=p.style.display==='none'?'':'none';
-  }
-}
+    /* ── Toggle right panel ── */
+    function toggleRightPanel() {
+      if (appMode === 'server') {
+        const p = document.getElementById('panel-members');
+        p.style.display = p.style.display === 'none' ? '' : 'none';
+      }
+    }
 
-/* ── Send message ── */
-function sendMsg(e){if(e.key==='Enter')sendMsgClick();}
-function sendMsgClick(){
-  const input=document.getElementById('msg-input');
-  const val=input.value.trim(); if(!val)return;
-  const msgsEl=appMode==='server'
-    ?document.getElementById('messages-server')
-    :document.getElementById('messages-dm');
-  const now=new Date(), time=pad(now.getHours())+':'+pad(now.getMinutes());
-  const div=document.createElement('div');
-  div.className='msg'; div.style.marginTop='10px';
-  div.innerHTML=`<div class="msg-av" style="background:#1A1133;color:var(--violet-light);border:1px solid #2D1A55">AČ</div>
+    /* ── Send message ── */
+    function sendMsg(e) { if (e.key === 'Enter') sendMsgClick(); }
+    function sendMsgClick() {
+      const input = document.getElementById('msg-input');
+      const val = input.value.trim(); if (!val) return;
+      const msgsEl = appMode === 'server'
+        ? document.getElementById('messages-server')
+        : document.getElementById('messages-dm');
+      const now = new Date(), time = pad(now.getHours()) + ':' + pad(now.getMinutes());
+      const div = document.createElement('div');
+      div.className = 'msg'; div.style.marginTop = '10px';
+      div.innerHTML = `<div class="msg-av" style="background:#1A1133;color:var(--violet-light);border:1px solid #2D1A55">AČ</div>
     <div class="msg-body">
       <div class="msg-meta-row"><span class="msg-author msg-author-v">Andrej Čolić</span><span class="msg-time">${time}</span></div>
-      <div class="msg-text">${val.replace(/&/g,'&amp;').replace(/</g,'&lt;')}</div>
+      <div class="msg-text">${val.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</div>
     </div>`;
-  msgsEl.appendChild(div);
-  msgsEl.scrollTop=msgsEl.scrollHeight;
-  input.value='';
-}
+      msgsEl.appendChild(div);
+      msgsEl.scrollTop = msgsEl.scrollHeight;
+      input.value = '';
+    }
 
-document.getElementById('messages-server').scrollTop=99999;
+    document.getElementById('messages-server').scrollTop = 99999;
 
-/* ── Glasanje publike ── */
-const VOTING_OPENS_AT_REM = 7200;
+    /* ── Glasanje publike ── */
+    const VOTING_OPENS_AT_REM = 7200;
 
-const voteData = {
-  digitalci:    { votes: 0, label: 'digitalci' },
-  bytecraft:    { votes: 0, label: 'bytecraft' },
-  nullptr:      { votes: 0, label: 'nullptr' },
-  stackframe:   { votes: 0, label: 'stackframe' },
-  heapoverflow: { votes: 0, label: 'heapoverflow' },
-};
-let myVote = null;
+    const voteData = {
+      digitalci:    { votes: 0, label: 'digitalci' },
+      ukohorisani:  { votes: 0, label: 'ukohorisani' },
+      nullptr:      { votes: 0, label: 'nullptr' },
+      lale:         { votes: 0, label: 'lale' },
+      menjači:      { votes: 0, label: 'menjači' },
+    };
+    let myVote = null;
 
-function isVotingOpen() { return rem <= VOTING_OPENS_AT_REM; }
+    function isVotingOpen() { return rem <= VOTING_OPENS_AT_REM; }
 
-function updateVotingCountdown() {
-  const banner = document.getElementById('voting-locked-banner');
-  const pillText = document.getElementById('voting-opens-in');
-  const buttons = document.querySelectorAll('.vote-btn');
+    function updateVotingCountdown() {
+      const banner = document.getElementById('voting-locked-banner');
+      const pillText = document.getElementById('voting-opens-in');
+      const buttons = document.querySelectorAll('.vote-btn');
 
-  if (isVotingOpen()) {
-    banner.style.display = 'none';
-    buttons.forEach(btn => {
-      const team = btn.id.replace('vote-btn-', '');
-      if (myVote === team) {
-        btn.disabled = true;
-        btn.classList.add('voted');
-        btn.textContent = '\u2713 Glasano';
-      } else if (myVote !== null) {
-        btn.disabled = true;
-        btn.classList.add('vote-btn-spent');
+      if (isVotingOpen()) {
+        banner.style.display = 'none';
+        buttons.forEach(btn => {
+          const team = btn.id.replace('vote-btn-', '');
+          if (myVote === team) {
+            btn.disabled = true;
+            btn.classList.add('voted');
+            btn.textContent = '\u2713 Glasano';
+          } else if (myVote !== null) {
+            btn.disabled = true;
+            btn.classList.add('vote-btn-spent');
+          } else {
+            btn.disabled = false;
+          }
+        });
+        for (const [team, d] of Object.entries(voteData)) {
+          const el = document.getElementById('votes-' + team);
+          if (el) el.textContent = d.votes;
+        }
       } else {
-        btn.disabled = false;
+        banner.style.display = 'flex';
+        buttons.forEach(btn => { btn.disabled = true; });
+        document.querySelectorAll('.project-votes-num').forEach(el => { el.textContent = '\u2014'; });
+        const secsUntilVoting = rem - VOTING_OPENS_AT_REM;
+        if (secsUntilVoting > 0 && pillText) {
+          const h = Math.floor(secsUntilVoting / 3600);
+          const m = Math.floor((secsUntilVoting % 3600) / 60);
+          pillText.textContent = h > 0 ? 'otvara se za ~' + h + 'h ' + String(m).padStart(2, '0') + 'min' : 'otvara se za ' + m + 'min';
+        }
       }
-    });
-    for (const [team, d] of Object.entries(voteData)) {
-      const el = document.getElementById('votes-' + team);
-      if (el) el.textContent = d.votes;
     }
-  } else {
-    banner.style.display = 'flex';
-    buttons.forEach(btn => { btn.disabled = true; });
-    document.querySelectorAll('.project-votes-num').forEach(el => { el.textContent = '\u2014'; });
-    const secsUntilVoting = rem - VOTING_OPENS_AT_REM;
-    if (secsUntilVoting > 0 && pillText) {
-      const h = Math.floor(secsUntilVoting / 3600);
-      const m = Math.floor((secsUntilVoting % 3600) / 60);
-      pillText.textContent = h > 0 ? 'otvara se za ~' + h + 'h ' + String(m).padStart(2,'0') + 'min' : 'otvara se za ' + m + 'min';
+
+    function castVote(team) {
+      if (!isVotingOpen() || myVote !== null) return;
+      myVote = team;
+      if (voteData.bytecraft.votes === 0) {
+        voteData.bytecraft.votes = 14; voteData.nullptr.votes = 11;
+        voteData.stackframe.votes = 8; voteData.heapoverflow.votes = 6;
+        if (!voteData.digitalci.votes) voteData.digitalci.votes = 9;
+      }
+      voteData[team].votes += 1;
+      updateVotingCountdown();
+      showVoteToast(team);
     }
-  }
-}
 
-function castVote(team) {
-  if (!isVotingOpen() || myVote !== null) return;
-  myVote = team;
-  if (voteData.bytecraft.votes === 0) {
-    voteData.bytecraft.votes = 14; voteData.nullptr.votes = 11;
-    voteData.stackframe.votes = 8; voteData.heapoverflow.votes = 6;
-    if (!voteData.digitalci.votes) voteData.digitalci.votes = 9;
-  }
-  voteData[team].votes += 1;
-  updateVotingCountdown();
-  showVoteToast(team);
-}
+    function showVoteToast(team) {
+      let t = document.getElementById('vote-toast');
+      if (!t) {
+        t = document.createElement('div'); t.id = 'vote-toast';
+        t.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:#1A1133;border:0.5px solid var(--violet);border-radius:10px;padding:12px 20px;font-size:13px;font-weight:500;color:var(--text);display:flex;align-items:center;gap:10px;z-index:999;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;box-shadow:0 4px 24px rgba(0,0,0,.5)';
+        document.body.appendChild(t);
+      }
+      t.innerHTML = '<span style="font-size:16px">\uD83D\uDDF3</span> Glas za <strong style="color:var(--violet-light)">' + (voteData[team]?.label || team) + '</strong> je registrovan!';
+      t.style.opacity = '1'; t.style.transform = 'translateX(-50%) translateY(0)';
+      clearTimeout(t._t);
+      t._t = setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateX(-50%) translateY(10px)'; }, 3000);
+    }
 
-function showVoteToast(team) {
-  let t = document.getElementById('vote-toast');
-  if (!t) {
-    t = document.createElement('div'); t.id = 'vote-toast';
-    t.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:#1A1133;border:0.5px solid var(--violet);border-radius:10px;padding:12px 20px;font-size:13px;font-weight:500;color:var(--text);display:flex;align-items:center;gap:10px;z-index:999;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;box-shadow:0 4px 24px rgba(0,0,0,.5)';
-    document.body.appendChild(t);
-  }
-  t.innerHTML = '<span style="font-size:16px">\uD83D\uDDF3</span> Glas za <strong style="color:var(--violet-light)">' + (voteData[team]?.label || team) + '</strong> je registrovan!';
-  t.style.opacity = '1'; t.style.transform = 'translateX(-50%) translateY(0)';
-  clearTimeout(t._t);
-  t._t = setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateX(-50%) translateY(10px)'; }, 3000);
-}
+    setInterval(() => {
+      if (document.getElementById('glasanje-panel').style.display !== 'none') updateVotingCountdown();
+    }, 5000);
 
-setInterval(() => {
-  if (document.getElementById('glasanje-panel').style.display !== 'none') updateVotingCountdown();
-}, 5000);
+    /* ── Rezultati ── */
+    // Hakathon is "active" while timer > 0. Lock the channel during active.
+    function isHackathonActive() { return rem > 0; }
 
-</script>
+    function showRezultatiLockedToast() {
+      let t = document.getElementById('rezultati-toast');
+      if (!t) {
+        t = document.createElement('div'); t.id = 'rezultati-toast';
+        t.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:#1A1133;border:0.5px solid var(--violet);border-radius:10px;padding:12px 20px;font-size:13px;font-weight:500;color:var(--text);display:flex;align-items:center;gap:10px;z-index:999;opacity:0;transition:opacity .25s,transform .25s;pointer-events:none;box-shadow:0 4px 24px rgba(0,0,0,.5)';
+        document.body.appendChild(t);
+      }
+      const h = Math.floor(rem / 3600), m = Math.floor((rem % 3600) / 60);
+      t.innerHTML = '🔒 Kanal se otključava za <strong style="color:var(--violet-light)">' + (h > 0 ? h + 'h ' + String(m).padStart(2, '0') + 'min' : m + 'min') + '</strong>';
+      t.style.opacity = '1'; t.style.transform = 'translateX(-50%) translateY(0)';
+      clearTimeout(t._t);
+      t._t = setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateX(-50%) translateY(10px)'; }, 3000);
+    }
+
+    // Update rezultati channel lock indicator in sidebar
+    function updateRezultatiLock() {
+      const lockIcon = document.getElementById('ch-rezultati-lock');
+      const chEl = document.getElementById('ch-rezultati');
+      if (!lockIcon || !chEl) return;
+      if (isHackathonActive()) {
+        lockIcon.style.display = '';
+        chEl.classList.add('ch-locked');
+        // update countdown pill if panel is visible
+        const pill = document.getElementById('rezultati-locked-countdown');
+        if (pill) {
+          const h = Math.floor(rem / 3600), m = Math.floor((rem % 3600) / 60);
+          pill.textContent = h > 0 ? 'Hakathon se završava za ~' + h + 'h ' + String(m).padStart(2, '0') + 'min' : 'Hakathon se završava za ' + m + 'min';
+        }
+      } else {
+        lockIcon.style.display = 'none';
+        chEl.classList.remove('ch-locked');
+        // reveal unlocked content if panel is open
+        const locked = document.getElementById('rezultati-locked');
+        const unlocked = document.getElementById('rezultati-unlocked');
+        if (locked && unlocked) { locked.style.display = 'none'; unlocked.style.display = 'flex'; }
+      }
+    }
+    setInterval(updateRezultatiLock, 2000);
+    updateRezultatiLock();
+
+    let rezultatiSubmitted = false;
+    let savedRezultati = null;
+
+    function onRankChange() {
+      // Clear duplicate selections
+      const ids = ['rank1-select', 'rank2-select', 'rank3-select'];
+      const vals = ids.map(id => document.getElementById(id).value);
+      // hide error on change
+      document.getElementById('rezultati-form-error').style.display = 'none';
+    }
+
+    function validateRezultati() {
+      const r1 = document.getElementById('rank1-select').value;
+      const r2 = document.getElementById('rank2-select').value;
+      const r3 = document.getElementById('rank3-select').value;
+      const rp = document.getElementById('publike-select').value;
+      if (!r1 || !r2 || !r3 || !rp) {
+        showRezultatiError('Molimo izaberite sve timove i nagradu publike.');
+        return null;
+      }
+      const plasman = [r1, r2, r3];
+      if (new Set(plasman).size !== 3) {
+        showRezultatiError('Isti tim ne može biti na više mesta. Proverite unos.');
+        return null;
+      }
+      return { r1, r2, r3, rp };
+    }
+
+    function showRezultatiError(msg) {
+      const err = document.getElementById('rezultati-form-error');
+      document.getElementById('rezultati-form-error-msg').textContent = msg;
+      err.style.display = 'block';
+    }
+
+    function submitRezultati() {
+      const data = validateRezultati();
+      if (!data) return;
+      savedRezultati = data;
+      publishRezultati(data);
+    }
+
+    function publishRezultati(data) {
+      document.getElementById('pub-rank1-name').textContent = data.r1;
+      document.getElementById('pub-rank2-name').textContent = data.r2;
+      document.getElementById('pub-rank3-name').textContent = data.r3;
+      document.getElementById('pub-publike-name').textContent = data.rp;
+      const now = new Date();
+      function pad2(n) { return String(n).padStart(2, '0') }
+      document.getElementById('pub-timestamp').textContent =
+        `Objavljeno ${now.getDate()}. ${['jan', 'feb', 'mar', 'apr', 'maj', 'jun', 'jul', 'avg', 'sep', 'okt', 'nov', 'dec'][now.getMonth()]} ${now.getFullYear()}. u ${pad2(now.getHours())}:${pad2(now.getMinutes())} · Profili ažurirani`;
+      document.getElementById('rezultati-form-wrap').style.display = 'none';
+      document.getElementById('rezultati-published').style.display = 'block';
+      rezultatiSubmitted = true;
+      // Update channel badge in sidebar
+      const chEl = document.getElementById('ch-rezultati');
+      if (chEl) {
+        let badge = chEl.querySelector('.ch-badge');
+        if (!badge) {
+          badge = document.createElement('span');
+          badge.className = 'ch-badge ch-badge-g';
+          chEl.appendChild(badge);
+        }
+        badge.textContent = 'novo';
+      }
+    }
+
+    function editRezultati() {
+      if (!savedRezultati) return;
+      // Restore form with saved values
+      document.getElementById('rank1-select').value = savedRezultati.r1;
+      document.getElementById('rank2-select').value = savedRezultati.r2;
+      document.getElementById('rank3-select').value = savedRezultati.r3;
+      document.getElementById('publike-select').value = savedRezultati.rp;
+      document.getElementById('rezultati-form-wrap').style.display = 'block';
+      document.getElementById('rezultati-published').style.display = 'none';
+      document.getElementById('rezultati-form-error').style.display = 'none';
+      // Change submit button text
+      document.getElementById('rezultati-submit-btn').textContent = 'Ažuriraj rezultate';
+      rezultatiSubmitted = false;
+    }
+
+
+
+  </script>
 </body>
+
 </html>

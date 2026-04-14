@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="tikimiki.css">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" href="images/favicon.ico">
+  <title>tikimiki · Profile Popup Demo</title>
+  <style>
+
+    .pp-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: fade-in .15s ease both;
+    }
+
+    @keyframes fade-in {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    .pp-modal {
+      position: relative;
+      z-index: 1000;
+      width: 900px;
+      height: 600px;
+      max-width: calc(100vw - 32px);
+      max-height: calc(100vh - 48px);
+      background: #0D0B18;
+      border: 0.5px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 32px 100px rgba(0,0,0,.9), 0 0 0 0.5px rgba(167,139,250,.12);
+      display: flex;
+      animation: modal-in .18s cubic-bezier(.22,.68,0,1.15) both;
+    }
+
+    @keyframes modal-in {
+      from { opacity: 0; transform: scale(.95) translateY(12px); }
+      to   { opacity: 1; transform: scale(1)  translateY(0); }
+    }
+
+    .pp-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      z-index: 10;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: rgba(0,0,0,.5);
+      border: 0.5px solid rgba(255,255,255,.1);
+      color: var(--muted);
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background .15s, color .15s;
+    }
+
+    .pp-close:hover {
+      background: rgba(95,74,139,.6);
+      color: var(--text);
+    }
+
+    /* LEFT */
+
+    .pp-left {
+      width: 300px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      border-right: 0.5px solid var(--border);
+      overflow: hidden;
+    }
+
+    .pp-banner {
+      height: 110px;
+      background: linear-gradient(135deg, #1A0E3D 0%, #3D1A6B 50%, #0E1A3D 100%);
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .pp-avatar-wrap {
+      position: absolute;
+      bottom: -38px;
+      left: 20px;
+    }
+
+    .pp-avatar {
+      width: 82px;
+      height: 82px;
+      border-radius: 50%;
+      background: var(--violet);
+      border: 5px solid #0D0B18;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--lemon);
+      position: relative;
+    }
+
+    .pp-status-dot {
+      position: absolute;
+      bottom: 3px;
+      right: 3px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #5DCAA5;
+      border: 4px solid #0D0B18;
+    }
+
+    .pp-card-body {
+      padding: 50px 20px 20px;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .pp-name {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.2;
+    }
+
+    .pp-handle {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    .pp-badges-row {
+      display: flex;
+      gap: 5px;
+      margin-top: 9px;
+      flex-wrap: wrap;
+    }
+
+    .pp-badge-icon {
+      font-size: 17px;
+      cursor: default;
+      transition: transform .15s;
+    }
+
+    .pp-badge-icon:hover { transform: scale(1.3); }
+
+    .crystal-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      border-radius: 20px;
+      padding: 3px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      margin-top: 8px;
+    }
+
+    .pp-card-divider {
+      height: 0.5px;
+      background: var(--border);
+      margin: 15px 0;
+    }
+
+    .pp-mini-stats {
+  display: grid;
+  /* Menjamo sa 1fr 1fr na repeat(3, 1fr) za tri kolone */
+  grid-template-columns: repeat(3, 1fr); 
+  gap: 8px;
+}
+
+.pp-mini-stat {
+  background: var(--surface2);
+  border: 0.5px solid var(--border);
+  border-radius: var(--r-sm);
+  /* Smanjen horizontalni padding sa 12px na 6px da bi tekst lakše stao */
+  padding: 10px 6px; 
+  text-align: center;
+}
+
+.pp-mini-stat-val {
+  font-size: 16px; /* Blago smanjen font-size sa 18px za bolji balans */
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+}
+
+.pp-mini-stat-lbl {
+  font-size: 10px; /* Blago smanjen sa 11px */
+  color: var(--muted);
+  margin-top: 4px;
+  font-weight: 500;
+  white-space: nowrap; /* Sprečava prelamanje teksta u novi red */
+}
+
+    .pp-card-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      margin-top: 4px;
+    }
+
+    .pp-btn {
+      background: var(--surface2);
+      border: 0.5px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 9px 14px;
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      transition: background .15s, border-color .15s;
+      text-align: center;
+      width: 100%;
+    }
+
+    .pp-btn:hover {
+      background: #1E1A40;
+      border-color: var(--violet);
+    }
+
+    .pp-btn.primary {
+      background: var(--violet);
+      border-color: var(--violet);
+      color: var(--lemon);
+    }
+
+    .pp-btn.primary:hover { background: #7B5FA8; }
+
+    /* RIGHT */
+
+    .pp-right {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .pp-tabs {
+      display: flex;
+      border-bottom: 0.5px solid var(--border);
+      padding: 0 20px;
+      gap: 2px;
+      flex-shrink: 0;
+    }
+
+    .pp-tab {
+      padding: 17px 17px 15px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: color .15s, border-color .15s;
+      white-space: nowrap;
+      margin-bottom: -0.5px;
+    }
+
+    .pp-tab:hover { color: var(--text); }
+
+    .pp-tab.active {
+      color: var(--violet-light);
+      border-bottom-color: var(--violet-light);
+    }
+
+    .pp-tab-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 22px;
+    }
+
+    .pp-panel { display: none; }
+    .pp-panel.active { display: block; }
+
+    .pp-section-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .pp-bio {
+      font-size: 14px;
+      color: #C5BDDF;
+      line-height: 1.7;
+      margin-bottom: 22px;
+    }
+
+    .pp-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .pp-meta-icon {
+      font-size: 15px;
+      width: 20px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .pp-meta-row a { color: var(--violet-light); text-decoration: none; }
+    .pp-meta-row a:hover { text-decoration: underline; }
+
+    .pp-verified {
+      color: #5DCAA5;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .pp-skills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 22px;
+    }
+
+    .pp-skill-chip {
+      background: #1A1133;
+      color: var(--violet-light);
+      border: 0.5px solid #3D2E6B;
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .pp-hack-list {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .pp-hack-item {
+      background: var(--surface2);
+      border: 0.5px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 13px 15px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: border-color .15s;
+      cursor: pointer;
+    }
+
+    .pp-hack-item:hover { border-color: var(--violet); }
+
+    .pp-hack-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .pp-hack-info { flex: 1; min-width: 0; }
+
+    .pp-hack-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .pp-hack-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+
+    .pp-hack-badge { font-size: 18px; flex-shrink: 0; }
+
+    .pp-badges-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .pp-badge-card {
+      background: var(--surface2);
+      border: 0.5px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 18px 10px;
+      text-align: center;
+      cursor: default;
+      transition: border-color .15s, transform .15s;
+    }
+
+    .pp-badge-card:hover {
+      border-color: var(--violet);
+      transform: translateY(-2px);
+    }
+
+    .pp-badge-card-icon { font-size: 28px; margin-bottom: 8px; }
+
+    .pp-badge-card-name {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.3;
+    }
+
+    .pp-tab-content::-webkit-scrollbar,
+    .pp-card-body::-webkit-scrollbar { width: 4px; }
+    .pp-tab-content::-webkit-scrollbar-track,
+    .pp-card-body::-webkit-scrollbar-track { background: transparent; }
+    .pp-tab-content::-webkit-scrollbar-thumb,
+    .pp-card-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+    }
+
+    .demo-note {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: 20px;
+      padding: 8px 18px;
+      font-size: 12px;
+      color: var(--muted);
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    /* Stil za kratak opis u levoj koloni */
+.pp-short-bio {
+  font-size: 13px;
+  color: #C5BDDF;
+  line-height: 1.5;
+  margin-top: 12px;
+}
+
+/* Stil za datum učlanjenja */
+.pp-joined-date {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Grupisanje bočnih informacija (konekcije, vestine, lokacija) */
+.pp-side-info {
+  margin-top: 5px;
+}
+
+.pp-side-info .pp-section-label {
+  font-size: 9px;
+  margin-bottom: 6px;
+}
+
+.pp-side-info .pp-meta-row {
+  margin-bottom: 5px;
+  font-size: 13px;
+}
+
+/* Specifično za mini-stats kada su u desnom panelu */
+#tab-hackathoni .pp-mini-stats {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="logo" onclick="window.location.href='home_page.html'" style="cursor:pointer"><span>tiki</span>miki</div>
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input type="text" placeholder="Pretraži korisnike, hackathone, organizacije...">
+    </div>
+    <div class="nav-right">
+      <div class="icon-btn">◈<span class="badge">2</span></div>
+      <div class="icon-btn">🔔<span class="badge">5</span></div>
+      <div class="avatar" onclick="openProfilePopup()" style="cursor:pointer">AČ</div>
+    </div>
+  </div>
+</nav>
+
+<div class="layout">
+  <aside class="sidebar-left">
+    <div class="menu-item"><span class="icon">⌂</span> Početna</div>
+    <div class="menu-item"><span class="icon">◈</span> Hackathoni</div>
+    <div class="menu-item"><span class="icon">👥</span> Timovi</div>
+    <div class="menu-item"><span class="icon">✉</span> Poruke</div>
+    <div class="menu-item"><span class="icon">👾</span> GameHub</div>
+    <div class="menu-item" onclick="openProfilePopup()"><span class="icon">👤</span> Profil</div>
+    <div class="menu-item" onclick="window.location.href='settings.html'"><span class="icon">⚙</span> Podešavanja</div>
+    <div class="menu-divider"></div>
+    <div class="crystal-button"><span class="crystal-icon">◆</span> Premium</div>
+  </aside>
+
+  <main class="feed" style="display:flex;align-items:center;justify-content:center;min-height:400px;color:var(--muted);font-size:14px;text-align:center;">
+    <div>
+      <div style="font-size:32px;margin-bottom:12px;">👤</div>
+      Klikni na <strong style="color:var(--violet-light)">avatar</strong> u navigaciji<br>
+      ili na <strong style="color:var(--violet-light)">Profil</strong> u levom meniju.
+    </div>
+  </main>
+
+  <aside class="sidebar-right"></aside>
+</div>
+
+
+<div class="pp-overlay" id="pp-overlay" onclick="handleOverlayClick(event)" style="display:none;">
+  <div class="pp-modal" id="pp-modal">
+  <button class="pp-close" onclick="closeProfilePopup()">✕</button>
+
+  <div class="pp-left">
+    <div class="pp-banner">
+      <div class="pp-avatar-wrap">
+        <div class="pp-avatar">AČ<div class="pp-status-dot"></div></div>
+      </div>
+    </div>
+
+    <div class="pp-card-body">
+      <div class="pp-name">Andrej Čolić</div>
+      <div class="pp-handle">@andrej</div>
+      <button class="pp-btn primary" style="margin-top: 8px; max-width: 125px;">Izmena profila</button>
+      <div class="pp-short-bio">Student 3. godine ETF-a. Volim low-level programiranje i embedded sisteme.</div>
+      
+      <div class="pp-joined-date">
+        <span class="pp-meta-icon">📅</span> Član od aprila 2024.
+      </div>
+
+
+      <div class="pp-card-divider"></div>
+
+      <div class="pp-side-info">
+        <div class="pp-section-label">Konekcije</div>
+        <div class="pp-meta-row">
+          <span class="pp-meta-icon">🐙</span> <a href="#">github.com/andrej</a>
+        </div>
+        <div class="pp-meta-row">
+          <span class="pp-meta-icon">🔗</span> <a href="#">linkedin.com/in/andrej</a>
+        </div>
+
+        <div class="pp-section-label" style="margin-top: 15px;">Lokacija</div>
+        <div class="pp-meta-row">
+          <span class="pp-meta-icon">📍</span> Beograd, Srbija
+        </div>
+
+        <div class="pp-section-label" style="margin-top: 15px;">Veštine</div>
+        <div class="pp-skills">
+          <span class="pp-skill-chip">Python</span>
+          <span class="pp-skill-chip">C++</span>
+          <span class="pp-skill-chip">Verilog</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pp-right">
+    <div class="pp-tabs">
+      <div class="pp-tab active" onclick="switchTab(event,'hackathoni')">Hackathoni</div>
+      <div class="pp-tab" onclick="switchTab(event,'bedjevi')">Bedževi</div>
+    </div>
+
+    <div class="pp-tab-content">
+      <div class="pp-panel active" id="tab-hackathoni">
+        <div class="pp-mini-stats" style="margin-bottom: 20px;">
+          <div class="pp-mini-stat">
+            <div class="pp-mini-stat-val">12</div>
+            <div class="pp-mini-stat-lbl">Hackathona</div>
+          </div>
+          <div class="pp-mini-stat">
+            <div class="pp-mini-stat-val">3</div>
+            <div class="pp-mini-stat-lbl">Pobede</div>
+          </div>
+          <div class="pp-mini-stat">
+            <div class="pp-mini-stat-val">1,840</div>
+            <div class="pp-mini-stat-lbl">XP</div>
+          </div>
+        </div>
+
+        <div class="pp-section-label">Istorija učešća</div>
+        <div class="pp-hack-list">
+          <div class="pp-hack-item">
+            <div class="pp-hack-dot" style="background:var(--lemon-vivid);"></div>
+            <div class="pp-hack-info">
+              <div class="pp-hack-name">ETF HackWeek 2026</div>
+              <div class="pp-hack-sub">Beograd · pre 2 nedelje</div>
+            </div>
+            <div class="pp-hack-badge">🏆</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pp-panel" id="tab-bedjevi">
+        <div class="pp-section-label">Zarađeni bedževi</div>
+        </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="demo-note">Demo stranica · Klikni na avatar ili Profil</div>
+
+<script>
+function openProfilePopup() {
+  const overlay = document.getElementById('pp-overlay');
+  overlay.style.display = 'flex';
+  const modal = document.getElementById('pp-modal');
+  modal.style.animation = 'none';
+  modal.offsetHeight;
+  modal.style.animation = '';
+}
+
+function closeProfilePopup() {
+  document.getElementById('pp-overlay').style.display = 'none';
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('pp-overlay')) closeProfilePopup();
+}
+
+function switchTab(e, name) {
+  document.querySelectorAll('.pp-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.pp-panel').forEach(p => p.classList.remove('active'));
+  e.target.classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeProfilePopup();
+});
+</script>
+
+</body>
+</html>
