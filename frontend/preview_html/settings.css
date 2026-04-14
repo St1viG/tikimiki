@@ -9,6 +9,10 @@ html {
     scrollbar-gutter: stable;
 }
 
+.ep-layout {
+    flex: 1;
+}
+
 
 /* ── LAYOUT OVERRIDE ──────────────────────────────────────── */
 
