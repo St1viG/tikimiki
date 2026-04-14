@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="tikimiki.css">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" href="images/favicon.ico">
+  <link rel="stylesheet" href="premium.css">
+  <title>tikimiki Premium</title>
+</head>
+
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="logo" onclick="window.location.href='home_page.html'" style="cursor:pointer"><span>tiki</span>miki</div>
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input type="text" placeholder="Pretraži korisnike, hackathone, organizacije...">
+    </div>
+    <div class="nav-right">
+      <div class="icon-btn">◈<span class="badge">2</span></div>
+      <div class="icon-btn">🔔<span class="badge">5</span></div>
+      <div class="avatar">AČ</div>
+    </div>
+  </div>
+</nav>
+
+<div class="premium-page">
+
+  <!-- HERO -->
+  <div class="premium-hero">
+    <div class="premium-hero-glow"></div>
+    <div class="premium-badge">◆ tikimiki Premium</div>
+    <h1 class="premium-title">
+      Unapredi svoje<br>
+      <span class="highlight">hackathon iskustvo</span>
+    </h1>
+    <p class="premium-subtitle">
+      Naprednija personalizacija, češće mini igre i ekskluzivni benefiti za ozbiljne takmičare.
+    </p>
+  </div>
+
+  <!-- BILLING TOGGLE -->
+  <div class="billing-toggle">
+    <span id="lbl-monthly" class="active">Mesečno</span>
+    <div class="toggle-switch" id="billing-toggle" onclick="toggleBilling()">
+      <div class="toggle-knob"></div>
+    </div>
+    <span id="lbl-annual">Godišnje</span>
+    <span class="save-pill">Uštedi 17%</span>
+  </div>
+
+  <!-- PLANS -->
+  <div class="plans-grid">
+
+    <!-- BASIC -->
+    <div class="plan-card">
+      <div class="plan-name">Osnovni</div>
+      <div class="plan-price">
+        <span class="plan-price-currency">$</span>
+        <span class="plan-price-amount" id="price-basic">0</span>
+        <span class="plan-price-period">/mes</span>
+      </div>
+      <div class="plan-price-annual" id="note-basic">&nbsp;</div>
+
+      <div class="plan-divider"></div>
+
+      <ul class="plan-features">
+        <li><span class="feat-check">✓</span> Učešće na hackathonima</li>
+        <li><span class="feat-check">✓</span> Osnovna personalizacija profila</li>
+        <li><span class="feat-check">✓</span> Daily Spin jednom dnevno</li>
+        <li><span class="feat-check">✓</span> Daily Minigame jednom dnevno</li>
+        <li><span class="feat-check">✓</span> Poruke i Cohor</li>
+      </ul>
+
+      <button class="btn-premium-cta btn-cta-outline">Trenutni plan</button>
+    </div>
+
+    <!-- PREMIUM -->
+    <div class="plan-card featured">
+      <div class="plan-popular-tag">◆ Najpopularnije</div>
+      <div class="plan-name">Premium</div>
+      <div class="plan-price">
+        <span class="plan-price-currency">$</span>
+        <span class="plan-price-amount" id="price-premium">4.99</span>
+        <span class="plan-price-period">/mes</span>
+      </div>
+      <div class="plan-price-annual" id="note-premium">&nbsp;</div>
+
+      <div class="plan-divider"></div>
+
+      <ul class="plan-features">
+        <li><span class="feat-check">✓</span> Sve iz Osnovnog plana</li>
+        <li>
+          <span class="feat-check">✓</span>
+          <span>Napredna personalizacija profila <span class="feat-new">NOVO</span></span>
+        </li>
+        <li>
+          <span class="feat-check">✓</span>
+          <span>Češće igranje mini igara <span class="feat-new">NOVO</span></span>
+        </li>
+        <li>
+          <span class="feat-check">✓</span>
+          Aktivacija putem podešavanja naloga
+        </li>
+        <li>
+          <span class="feat-check">✓</span>
+          Definisan period trajanja + automatska obnova
+        </li>
+        <li>
+          <span class="feat-check">✓</span>
+          Ekskluzivna Premium bedž oznaka na profilu
+        </li>
+      </ul>
+
+      <button class="btn-premium-cta btn-cta-crystal" onclick="activatePremium()">
+        Aktiviraj Premium
+      </button>
+    </div>
+
+  </div>
+
+  <!-- COMPARE -->
+  <div class="compare-section">
+    <div class="compare-title">Poređenje planova</div>
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Funkcija</th>
+          <th>Osnovni</th>
+          <th class="col-premium">◆ Premium</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Hackathon učešće</td>
+          <td><span class="check-yes">✓</span></td>
+          <td><span class="check-crystal">✓</span></td>
+        </tr>
+        <tr>
+          <td>GIF profilna slika</td>
+          <td><span class="check-no">—</span></td>
+          <td><span class="check-crystal">✓</span></td>
+        </tr>
+        <tr>
+          <td>GIF banner</td>
+          <td><span class="check-no">—</span></td>
+          <td><span class="check-crystal">✓</span></td>
+        </tr>
+        <tr>
+          <td>Napredne personalizacije profila</td>
+          <td><span class="check-yes">Osnovna</span></td>
+          <td><span class="check-crystal">Napredna</span></td>
+        </tr>
+        <tr>
+          <td>Daily Spin</td>
+          <td><span class="check-yes">1× dnevno</span></td>
+          <td><span class="check-crystal">3× dnevno</span></td>
+        </tr>
+        <tr>
+          <td>Premium bedž na profilu</td>
+          <td><span class="check-no">—</span></td>
+          <td><span class="check-crystal">✓</span></td>
+        </tr>
+        <tr>
+          <td>Automatska obnova</td>
+          <td><span class="check-no">—</span></td>
+          <td><span class="check-crystal">✓</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- FAQ -->
+  <div class="faq-section">
+    <div class="faq-title">Česta pitanja</div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">
+        Kako aktiviram Premium?
+        <span class="faq-arrow">›</span>
+      </div>
+      <div class="faq-a">
+        Premium aktiviraš putem namenskog ekrana unutar podešavanja naloga, ili direktno klikom na "Aktiviraj Premium" dugme ovde.
+      </div>
+    </div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">
+        Mogu li otkazati pre kraja perioda?
+        <span class="faq-arrow">›</span>
+      </div>
+      <div class="faq-a">
+        Možeš otkazati u bilo kom trenutku. Premium ostaje aktivan do kraja plaćenog perioda, nakon čega se neće automatski obnoviti.
+      </div>
+    </div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">
+        Šta znači napredna personalizacija profila?
+        <span class="faq-arrow">›</span>
+      </div>
+      <div class="faq-a">
+        Premium korisnici mogu postavljati animovane banner slike, prilagođene boje profila, istaknuti do 6 hackathona u bio sekciji i prikazivati ekskluzivne bedž oznake.
+      </div>
+    </div>
+
+    <div class="faq-item" onclick="toggleFaq(this)">
+      <div class="faq-q">
+        Da li postoji razlika između mesečnog i godišnjeg plana?
+        <span class="faq-arrow">›</span>
+      </div>
+      <div class="faq-a">
+        Sve Premium funkcije su identične. Godišnjim planom uštediš 17% u poređenju sa mesečnim plaćanjem — naplaćuje se $49.99 jednom godišnje umesto $4.99 svaki mesec.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let isAnnual = false;
+
+  function toggleBilling() {
+    isAnnual = !isAnnual;
+    const toggle = document.getElementById('billing-toggle');
+    const lblM = document.getElementById('lbl-monthly');
+    const lblA = document.getElementById('lbl-annual');
+    const priceP = document.getElementById('price-premium');
+    const noteP = document.getElementById('note-premium');
+
+    if (isAnnual) {
+      toggle.classList.add('on');
+      lblM.classList.remove('active');
+      lblA.classList.add('active');
+      priceP.textContent = '4.16';
+      noteP.innerHTML = '<span class="strike">$59.88</span> → <span class="save">$49.99/god</span>';
+    } else {
+      toggle.classList.remove('on');
+      lblM.classList.add('active');
+      lblA.classList.remove('active');
+      priceP.textContent = '4.99';
+      noteP.innerHTML = '&nbsp;';
+    }
+  }
+
+  function toggleFaq(el) {
+    el.classList.toggle('open');
+  }
+
+  function activatePremium() {
+    const btn = document.querySelector('.btn-cta-crystal');
+    btn.textContent = '✓ Aktivirano!';
+    btn.style.opacity = '.7';
+    btn.style.cursor = 'default';
+    btn.onclick = null;
+  }
+</script>
+
+</body>
+</html>
