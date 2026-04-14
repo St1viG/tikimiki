@@ -64,7 +64,8 @@
     gap:4px;
     margin-bottom:44px;
     border-bottom:0.5px solid var(--border);
-    flex-wrap:wrap;
+    flex-wrap:nowrap;
+    white-space:nowrap;
 }
 
 .tm-tab{
@@ -395,7 +396,7 @@
 
 .tm-sug-grid{
     display:grid;
-    grid-template-columns:repeat(2, 1fr);
+    grid-template-columns:1fr;
     gap:16px;
 }
 
