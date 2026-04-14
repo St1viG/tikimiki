@@ -199,7 +199,7 @@
   flex-shrink: 0;
 }
 
-.s-pending  { background: rgba(167,139,250,.12); color: var(--violet-light); border: 0.5px solid rgba(167,139,250,.3); }
+.s-pending  { background: rgba(237,217,75,.12);  color: var(--lemon-vivid);  border: 0.5px solid rgba(237,217,75,.3); }
 .s-approved { background: rgba(93,202,165,.12);  color: #5DCAA5;             border: 0.5px solid rgba(93,202,165,.35); }
 .s-rejected { background: rgba(240,112,112,.1);  color: #F07070;             border: 0.5px solid rgba(240,112,112,.25); }
 
