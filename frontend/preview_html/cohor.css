@@ -8,9 +8,6 @@ body {
 
 /* ── NAV override: align with panel widths instead of max-width centering ── */
 
-.nav-inner {
-    transform: translateX(-3px);
-}
 
 .logo-wrap {
     width: var(--sidebar-w);

@@ -75,6 +75,7 @@ nav{
     display:flex;
     align-items:center;
     gap:12px;
+    transform: translateX(2px);
 }
 
 .logo{
