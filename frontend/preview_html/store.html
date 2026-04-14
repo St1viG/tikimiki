@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="tikimiki.css">
+  <link rel="stylesheet" href="store.css">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" href="images/favicon.ico">
+  <title>tikimiki – Store</title>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="logo" onclick="window.location.href='home_page.html'" style="cursor:pointer"><span>tiki</span>miki</div>
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input type="text" placeholder="Pretraži korisnike, hackathone, organizacije...">
+    </div>
+    <div class="nav-right">
+      <div class="icon-btn" onclick="window.location.href='store.html'" title="Merch Store" style="border-color:var(--violet);">🛍️</div>
+      <div class="icon-btn">🔔<span class="badge">5</span></div>
+      <div class="avatar">AČ</div>
+    </div>
+  </div>
+</nav>
+
+<div class="layout">
+  <aside class="sidebar-left">
+    <div class="menu-item" onclick="window.location.href='home_page.html'"><span class="icon">⌂</span> Početna</div>
+    <div class="menu-item" onclick="window.location.href='hackathoni.html'"><span class="icon">◈</span> Hackathoni</div>
+    <div class="menu-item" onclick="window.location.href='timovi.html'"><span class="icon">👥</span> Timovi</div>
+    <div class="menu-item" onclick="window.location.href='cohor.html'"><span class="icon">✉</span> Poruke</div>
+    <div class="menu-item" onclick="window.location.href='gamehub.html'"><span class="icon">👾</span> GameHub</div>
+    <div class="menu-item" onclick="window.location.href='settings.html'"><span class="icon">⚙</span> Podešavanja</div>
+    <div class="menu-divider"></div>
+    <div class="crystal-button" onclick="window.location.href='premium.html'"><span class="crystal-icon">◆</span> Premium</div>
+  </aside>
+
+  <main class="feed">
+    <div class="store-header">
+      <div class="store-title">🛍️ tikimiki <span>Store</span></div>
+      <div class="store-subtitle">Zvanični merch – plaća se XP poenima osvijenim na hackathonima i mini igricama</div>
+    </div>
+
+    <div class="xp-wallet">
+      <div class="xp-wallet-icon">⚡</div>
+      <div class="xp-wallet-info">
+        <div class="xp-wallet-label">Tvoj XP balans</div>
+        <div class="xp-wallet-amount" id="xp-display">3 450 <span>XP</span></div>
+      </div>
+      <div class="xp-earn-hint" onclick="window.location.href='gamehub.html'">
+        ⚡ Zaradi više XP →
+      </div>
+    </div>
+
+    <div class="store-filters">
+      <button class="filter-btn active" onclick="filterItems('sve', this)">Sve</button>
+      <button class="filter-btn" onclick="filterItems('majice', this)">👕 Majice</button>
+      <button class="filter-btn" onclick="filterItems('duks', this)">🧥 Duksevi</button>
+      <button class="filter-btn" onclick="filterItems('solje', this)">☕ Šolje</button>
+    </div>
+
+    <div class="store-grid" id="store-grid">
+
+      <div class="merch-card" data-cat="majice" onclick="openModal(this)" data-name="tikimiki Majica" data-variant="Unisex · Pamuk 100%" data-price="6000" data-icon="👕" data-has-sizes="true">
+        <div class="merch-img">👕<div class="merch-badge-hot">🔥 POPULAR</div></div>
+        <div class="merch-body">
+          <div class="merch-name">tikimiki Majica</div>
+          <div class="merch-variant">Unisex · Pamuk 100%</div>
+          <div class="merch-foot">
+            <div class="merch-price"><span class="xp-icon">XP</span> 6 000</div>
+            <button class="btn-buy">Kupi</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="merch-card" data-cat="majice" onclick="openModal(this)" data-name="HackWeek 2026 Majica" data-variant="Limited Edition · S–XL" data-price="9000" data-icon="🏆" data-has-sizes="true">
+        <div class="merch-img">🏆<div class="merch-badge-new">LIMITED EDITION</div></div>
+        <div class="merch-body">
+          <div class="merch-name">HackWeek 2026 Majica</div>
+          <div class="merch-variant">Limited Edition · S–XL</div>
+          <div class="merch-foot">
+            <div class="merch-price"><span class="xp-icon">XP</span> 9 000</div>
+            <button class="btn-buy">Kupi</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="merch-card" data-cat="duks" onclick="openModal(this)" data-name="tikimiki Duks" data-variant="Unisex · Fleece" data-price="12000" data-icon="🧥" data-has-sizes="true">
+        <div class="merch-img">🧥</div>
+        <div class="merch-body">
+          <div class="merch-name">tikimiki Duks</div>
+          <div class="merch-variant">Unisex · Fleece</div>
+          <div class="merch-foot">
+            <div class="merch-price"><span class="xp-icon">XP</span> 12 000</div>
+            <button class="btn-buy">Kupi</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="merch-card" data-cat="duks" onclick="openModal(this)" data-name="Zip Hoodie" data-variant="Unisex · Zip-up" data-price="15000" data-icon="🫱" data-has-sizes="true">
+        <div class="merch-img">🫱<div class="merch-badge-new">NOVO</div></div>
+        <div class="merch-body">
+          <div class="merch-name">Zip Hoodie</div>
+          <div class="merch-variant">Unisex · Zip-up</div>
+          <div class="merch-foot">
+            <div class="merch-price"><span class="xp-icon">XP</span> 15 000</div>
+            <button class="btn-buy">Kupi</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="merch-card" data-cat="solje" onclick="openModal(this)" data-name="tikimiki Šolja" data-variant="Keramika · 330ml" data-price="5000" data-icon="☕" data-has-sizes="false">
+        <div class="merch-img">☕</div>
+        <div class="merch-body">
+          <div class="merch-name">tikimiki Šolja</div>
+          <div class="merch-variant">Keramika · 330ml</div>
+          <div class="merch-foot">
+            <div class="merch-price"><span class="xp-icon">XP</span> 5 000</div>
+            <button class="btn-buy">Kupi</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="merch-card" data-cat="solje" onclick="openModal(this)" data-name="Termos Boca" data-variant="Čelik · 500ml" data-price="7000" data-icon="🧃" data-has-sizes="false">
+        <div class="merch-img">🧃<div class="merch-badge-hot">🔥 POPULAR</div></div>
+        <div class="merch-body">
+          <div class="merch-name">Termos Boca</div>
+          <div class="merch-variant">Čelik · 500ml</div>
+          <div class="merch-foot">
+            <div class="merch-price"><span class="xp-icon">XP</span> 7 000</div>
+            <button class="btn-buy">Kupi</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <aside class="sidebar-right">
+    <div class="social-card">
+      <div class="social-card-header">
+        <div class="social-card-title">Kako zaraditi XP?</div>
+      </div>
+      <div class="preview-list">
+        <div class="preview-row">
+          <div class="pr-dot dot-lemon"></div>
+          <div class="pr-info">
+            <div class="pr-name">Pobedi na hackathonu</div>
+            <div class="pr-sub">Do +5 000 XP</div>
+          </div>
+        </div>
+        <div class="preview-row">
+          <div class="pr-dot" style="background:#ff9ff3"></div>
+          <div class="pr-info">
+            <div class="pr-name">Daily Minigame</div>
+            <div class="pr-sub">+50 XP dnevno</div>
+          </div>
+        </div>
+        <div class="preview-row">
+          <div class="pr-dot" style="background:#00f5ff"></div>
+          <div class="pr-info">
+            <div class="pr-name">Daily Spin</div>
+            <div class="pr-sub">Do +200 XP</div>
+          </div>
+        </div>
+        <div class="preview-row">
+          <div class="pr-dot dot-green"></div>
+          <div class="pr-info">
+            <div class="pr-name">Učešće na hackathonu</div>
+            <div class="pr-sub">+300 XP</div>
+          </div>
+        </div>
+        <div class="preview-row">
+          <div class="pr-dot dot-violet"></div>
+          <div class="pr-info">
+            <div class="pr-name">Preporuči prijatelja</div>
+            <div class="pr-sub">+100 XP</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer style="margin-top:24px;padding:0 2px;text-align:center;">
+      <div style="display:flex;flex-wrap:wrap;gap:6px 10px;margin-bottom:10px;justify-content:center;">
+        <a style="font-size:var(--fs-xs);color:var(--muted);cursor:pointer;">O nama</a> <span style="font-size:10px;color:var(--muted);">·</span>
+        <a style="font-size:var(--fs-xs);color:var(--muted);cursor:pointer;">Pristupačnost</a> <span style="font-size:10px;color:var(--muted);">·</span>
+        <a style="font-size:var(--fs-xs);color:var(--muted);cursor:pointer;">Centar za pomoć</a>
+      </div>
+      <div style="font-size:var(--fs-sm);color:var(--violet-light);">tiki<span style="color:var(--lemon)">miki</span> © 2026</div>
+    </footer>
+  </aside>
+</div>
+
+<!-- Purchase Modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-title">Potvrdi kupovinu</div>
+    <div class="modal-sub" id="modal-sub">Da li si siguran/na da želiš da kupiš ovaj artikal?</div>
+    <div class="modal-item-row">
+      <div class="modal-item-icon" id="modal-icon">👕</div>
+      <div>
+        <div class="modal-item-name" id="modal-name"></div>
+        <div class="modal-item-variant" id="modal-variant"></div>
+      </div>
+    </div>
+    <div id="size-section">
+      <div class="modal-size-label">Izaberi veličinu</div>
+      <div class="size-options">
+        <button class="size-btn" onclick="selectSize(this)">S</button>
+        <button class="size-btn" onclick="selectSize(this)">M</button>
+        <button class="size-btn selected" onclick="selectSize(this)">L</button>
+        <button class="size-btn" onclick="selectSize(this)">XL</button>
+      </div>
+    </div>
+    <div class="modal-cost-row">
+      <div class="modal-cost-label">Cena</div>
+      <div class="modal-cost-val" id="modal-price">⚡ 800 XP</div>
+    </div>
+    <div class="modal-btns">
+      <button class="modal-cancel" onclick="closeModal()">Otkaži</button>
+      <button class="modal-confirm" id="modal-confirm-btn" onclick="confirmPurchase()">Potvrdi kupovinu</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+  let xp = 25000;
+  let currentPrice = 0;
+
+  function updateXP() {
+    document.getElementById('xp-display').innerHTML = xp.toLocaleString('sr-RS') + ' <span>XP</span>';
+    // disable buttons if not enough xp
+    document.querySelectorAll('.merch-card').forEach(card => {
+      const price = parseInt(card.dataset.price);
+      const btn = card.querySelector('.btn-buy');
+      if (price > xp) {
+        btn.disabled = true;
+        btn.textContent = 'Nedovoljno XP';
+      } else {
+        btn.disabled = false;
+        btn.textContent = 'Kupi';
+      }
+    });
+  }
+
+  function openModal(card) {
+    const price = parseInt(card.dataset.price);
+    if (price > xp) return;
+    currentPrice = price;
+    document.getElementById('modal-icon').textContent = card.dataset.icon;
+    document.getElementById('modal-name').textContent = card.dataset.name;
+    document.getElementById('modal-variant').textContent = card.dataset.variant;
+    document.getElementById('modal-price').textContent = '⚡ ' + price.toLocaleString('sr-RS') + ' XP';
+    document.getElementById('size-section').style.display = card.dataset.hasSizes === 'true' ? '' : 'none';
+    // reset size selection
+    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
+    document.querySelector('.size-btn:nth-child(3)').classList.add('selected');
+    document.getElementById('modal-overlay').classList.add('open');
+  }
+
+  function closeModal(e) {
+    if (!e || e.target === document.getElementById('modal-overlay')) {
+      document.getElementById('modal-overlay').classList.remove('open');
+    }
+  }
+
+  function selectSize(btn) {
+    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+  }
+
+  function confirmPurchase() {
+    xp -= currentPrice;
+    updateXP();
+    closeModal();
+    const name = document.getElementById('modal-name').textContent;
+    showToast('✅ ' + name + ' naručena! Provjeri email za detalje.');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.innerHTML = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3200);
+  }
+
+  function filterItems(cat, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.merch-card').forEach(card => {
+      card.style.display = (cat === 'sve' || card.dataset.cat === cat) ? '' : 'none';
+    });
+  }
+
+  updateXP();
+</script>
+</body>
+</html>
