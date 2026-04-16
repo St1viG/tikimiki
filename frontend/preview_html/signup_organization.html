@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="tikimiki.css">
+  <link rel="stylesheet" href="auth.css">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" href="images/favicon.ico">
+  <title>tikimiki - Registracija organizacije</title>
+</head>
+
+<body>
+
+<div class="auth-page">
+  <div class="auth-card">
+
+    <!-- Logo -->
+    <div class="auth-logo">
+      <div class="logo" onclick="window.location.href='home_page.html'" style="cursor:pointer"><span>tiki</span>miki</div>
+    </div>
+
+    <h1 class="auth-heading">Registruj organizaciju</h1>
+
+    <!-- Admin approval notice -->
+    <div class="auth-info-banner">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="16" x2="12" y2="12"/>
+        <line x1="12" y1="8" x2="12.01" y2="8"/>
+      </svg>
+      <div class="auth-info-banner-text">
+        Organizacioni nalozi prolaze kroz administratorsko odobravanje pre aktivacije. Nakon potvrde email adrese, tvoj zahtev se prosleđuje admin timu — obaveštenje o ishodu stiže na email.
+      </div>
+    </div>
+
+    <!-- OAuth providers -->
+    <div class="auth-oauth-row">
+      <button class="auth-oauth-btn" type="button" title="Nastavi sa Google">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.97 10.97 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        <span class="auth-oauth-label">Google</span>
+      </button>
+    </div>
+
+    <!-- Divider -->
+    <div class="auth-divider">
+      <span class="auth-divider-text">ili</span>
+    </div>
+
+    <!-- Form -->
+    <form onsubmit="return false;">
+
+      <div class="auth-field">
+        <label class="auth-label">Naziv organizacije</label>
+        <input class="auth-input" type="text" placeholder="npr. Tech for Good d.o.o.">
+      </div>
+
+      <div class="auth-field">
+        <label class="auth-label">Email adresa</label>
+        <input class="auth-input" type="email" placeholder="kontakt@organizacija.com">
+      </div>
+
+      <div class="auth-field">
+        <label class="auth-label">Korisničko ime</label>
+        <div class="auth-input-wrap">
+          <span class="auth-input-prefix">@</span>
+          <input class="auth-input has-prefix" type="text" placeholder="naziv_organizacije">
+        </div>
+      </div>
+
+      <div class="auth-field">
+        <label class="auth-label">Lozinka</label>
+        <div class="auth-pw-wrap">
+          <input class="auth-input" type="password" id="pw-signup" placeholder="Najmanje 8 karaktera" oninput="checkStrength()">
+          <button class="auth-pw-toggle" type="button" onclick="togglePw('pw-signup')"><svg class="eye-open" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="eye-closed" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg></button>
+        </div>
+        <div class="auth-strength-bars" id="strength-bars">
+          <span class="auth-strength-bar"></span>
+          <span class="auth-strength-bar"></span>
+          <span class="auth-strength-bar"></span>
+          <span class="auth-strength-bar"></span>
+        </div>
+        <div class="auth-strength-text" id="strength-text"></div>
+      </div>
+
+      <div class="auth-field">
+        <label class="auth-label">Potvrda lozinke</label>
+        <div class="auth-pw-wrap">
+          <input class="auth-input" type="password" id="pw-confirm" placeholder="Ponovi lozinku" oninput="checkMatch()">
+          <button class="auth-pw-toggle" type="button" onclick="togglePw('pw-confirm')"><svg class="eye-open" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"/><circle cx="12" cy="12" r="3"/></svg><svg class="eye-closed" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg></button>
+        </div>
+        <div class="auth-error-msg" id="pw-match-msg"></div>
+      </div>
+
+      <!-- Captcha -->
+      <div class="auth-captcha">
+        <div class="auth-captcha-check" id="captcha-signup" onclick="toggleCaptcha('captcha-signup')"></div>
+        <div class="auth-captcha-info">
+          <div class="auth-captcha-text">Nisam robot</div>
+          <div class="auth-captcha-sub">Privatnost — Uslovi</div>
+        </div>
+        <div class="auth-captcha-logo">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L3 7v5c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z" fill="var(--muted)" opacity="0.3"/>
+            <path d="M12 2L3 7v5c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5zm0 2.18l7 3.82v4c0 4.52-3.13 8.69-7 9.93C8.13 20.69 5 16.52 5 12V8l7-3.82z" fill="var(--muted)"/>
+          </svg>
+          <span>Cloudflare</span>
+        </div>
+      </div>
+
+      <!-- Terms & conditions -->
+      <div class="auth-terms">
+        <label class="auth-checkbox-label">
+          <input type="checkbox" id="terms-signup" onchange="checkTerms()">
+          <span class="auth-checkbox-mark">✓</span>
+          <span>U ime organizacije prihvatam <a href="#">Uslove korišćenja</a> i <a href="#">Politiku privatnosti</a>.</span>
+        </label>
+        <div class="auth-error-msg" id="terms-msg"></div>
+      </div>
+
+      <button class="auth-btn-primary" type="button" id="submit-signup" onclick="submitSignup()">Podnesi zahtev</button>
+
+    </form>
+
+    <!-- Switch -->
+    <div class="auth-switch">
+      Već imaš nalog? <a href="login.html">Prijavi se</a>
+    </div>
+
+    <!-- Subtle link back to member signup -->
+    <a class="auth-subtle-link" href="signup.html">
+      Registruješ se kao pojedinac? <span>Kreiraj korisnički nalog</span>
+    </a>
+
+  </div>
+
+  <!-- Footer -->
+  <footer class="auth-footer">
+    <div class="auth-footer-links">
+      <a>O nama</a> <span>·</span>
+      <a>Pomoć</a> <span>·</span>
+      <a>Privatnost i uslovi</a>
+    </div>
+    <div class="auth-footer-copy">tiki<span>miki</span> &copy; 2026</div>
+  </footer>
+</div>
+
+<script>
+  function togglePw(id) {
+    var inp = document.getElementById(id);
+    var btn = inp.parentElement.querySelector('.auth-pw-toggle');
+    var isHidden = inp.type === 'password';
+    inp.type = isHidden ? 'text' : 'password';
+    btn.querySelector('.eye-open').style.display = isHidden ? 'none' : 'block';
+    btn.querySelector('.eye-closed').style.display = isHidden ? 'block' : 'none';
+  }
+
+  function toggleCaptcha(id) {
+    document.getElementById(id).classList.toggle('checked');
+  }
+
+  function checkStrength() {
+    var pw = document.getElementById('pw-signup').value;
+    var bars = document.getElementById('strength-bars');
+    var text = document.getElementById('strength-text');
+
+    bars.className = 'auth-strength-bars';
+    text.className = 'auth-strength-text';
+    text.textContent = '';
+
+    if (pw.length === 0) return;
+
+    var hasLetters = /[a-zA-Z]/.test(pw);
+    var hasNumbers = /[0-9]/.test(pw);
+    var hasSymbols = /[^a-zA-Z0-9]/.test(pw);
+
+    if (pw.length < 8) {
+      bars.classList.add('weak');
+      text.classList.add('weak');
+      text.textContent = 'Slaba';
+    } else if (hasLetters && hasNumbers && hasSymbols) {
+      bars.classList.add('strong');
+      text.classList.add('strong');
+      text.textContent = 'Odlična';
+    } else if (hasLetters && hasNumbers) {
+      bars.classList.add('good');
+      text.classList.add('good');
+      text.textContent = 'Dobra';
+    } else {
+      bars.classList.add('fair');
+      text.classList.add('fair');
+      text.textContent = 'Prihvatljiva';
+    }
+  }
+
+  function checkMatch() {
+    var pw = document.getElementById('pw-signup').value;
+    var confirm = document.getElementById('pw-confirm').value;
+    var msg = document.getElementById('pw-match-msg');
+
+    if (confirm.length === 0) {
+      msg.classList.remove('visible');
+      return;
+    }
+
+    msg.classList.add('visible');
+
+    if (pw === confirm) {
+      msg.textContent = 'Lozinke se poklapaju';
+      msg.classList.remove('error');
+      msg.classList.add('success');
+      document.getElementById('pw-confirm').classList.remove('error');
+    } else {
+      msg.textContent = 'Lozinke se ne poklapaju';
+      msg.classList.add('error');
+      msg.classList.remove('success');
+      document.getElementById('pw-confirm').classList.add('error');
+    }
+  }
+
+  function checkTerms() {
+    var msg = document.getElementById('terms-msg');
+    if (document.getElementById('terms-signup').checked) {
+      msg.classList.remove('visible');
+    }
+  }
+
+  function submitSignup() {
+    var msg = document.getElementById('terms-msg');
+    if (!document.getElementById('terms-signup').checked) {
+      msg.textContent = 'Moraš prihvatiti uslove korišćenja da bi nastavio.';
+      msg.classList.add('visible', 'error');
+      return;
+    }
+    window.location.href = 'home_page.html';
+  }
+</script>
+
+</body>
+</html>

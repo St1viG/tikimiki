@@ -1,0 +1,689 @@
+/* ============================================================
+   admin.css
+   Stilovi specifični za admin dashboard (Nadzor platforme).
+   Nastavak na tikimiki.css, hackathons.css, applications.css, settings.css.
+   ============================================================ */
+
+
+/* ── TAB SWITCHING (kopiran obrazac iz hackathons.css) ─────── */
+
+.adm-page[data-filter="pregled"]      .adm-section:not([data-section="pregled"]),
+.adm-page[data-filter="prijave"]      .adm-section:not([data-section="prijave"]),
+.adm-page[data-filter="korisnici"]    .adm-section:not([data-section="korisnici"]),
+.adm-page[data-filter="organizacije"] .adm-section:not([data-section="organizacije"]),
+.adm-page[data-filter="audit"]        .adm-section:not([data-section="audit"]) {
+    display: none;
+}
+
+.adm-section {
+    margin-bottom: 28px;
+}
+
+
+/* ── PAGE HEADER ADDITIONS ────────────────────────────────── */
+
+.adm-mode-badge {
+    display: inline-block;
+    margin-left: 10px;
+    vertical-align: middle;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    padding: 3px 8px;
+    border-radius: 20px;
+    background: rgba(240, 112, 112, 0.10);
+    color: #F07070;
+    border: 0.5px solid rgba(240, 112, 112, 0.35);
+    text-transform: uppercase;
+}
+
+.adm-admin-chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    border-radius: var(--r-md);
+    padding: 6px 12px 6px 6px;
+}
+
+.adm-admin-chip-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.2;
+}
+
+.adm-admin-chip-sub {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 2px;
+}
+
+
+/* ── KPI TREND + SPARKLINE ────────────────────────────────── */
+
+.adm-stat-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.adm-trend {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    margin-top: 6px;
+}
+
+.adm-trend-up {
+    background: rgba(93, 202, 165, 0.10);
+    color: #5DCAA5;
+    border: 0.5px solid rgba(93, 202, 165, 0.30);
+}
+
+.adm-trend-down {
+    background: rgba(240, 112, 112, 0.10);
+    color: #F07070;
+    border: 0.5px solid rgba(240, 112, 112, 0.30);
+}
+
+.adm-spark {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 22px;
+    margin-top: 8px;
+}
+
+.adm-spark-bar {
+    flex: 1;
+    background: var(--violet);
+    border-radius: 2px;
+    min-height: 3px;
+    opacity: .55;
+    transition: opacity .2s;
+}
+
+.adm-spark-bar:last-child {
+    background: var(--violet-light);
+    opacity: 1;
+}
+
+.stat-card:hover .adm-spark-bar {
+    opacity: .75;
+}
+
+.stat-card:hover .adm-spark-bar:last-child {
+    opacity: 1;
+}
+
+
+/* ── HORIZONTAL BAR CHART ─────────────────────────────────── */
+
+.adm-chart-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 16px 18px;
+}
+
+.adm-chart-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.adm-chart-title {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--text);
+}
+
+.adm-chart-hint {
+    font-size: 10px;
+    color: var(--muted);
+}
+
+.adm-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.adm-bar-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 60px;
+    align-items: center;
+    gap: 10px;
+}
+
+.adm-bar-label {
+    font-size: var(--fs-xs);
+    color: var(--muted);
+    white-space: nowrap;
+}
+
+.adm-bar-track {
+    background: var(--surface2);
+    border-radius: 20px;
+    height: 8px;
+    overflow: hidden;
+}
+
+.adm-bar-fill {
+    height: 100%;
+    border-radius: 20px;
+    background: linear-gradient(90deg, var(--violet), var(--violet-light));
+    transition: width .4s;
+}
+
+.adm-bar-fill.warn {
+    background: linear-gradient(90deg, #B89A00, var(--lemon-vivid));
+}
+
+.adm-bar-fill.crit {
+    background: linear-gradient(90deg, #C0392B, #F07070);
+}
+
+.adm-bar-fill.green {
+    background: linear-gradient(90deg, #2E7D5B, #5DCAA5);
+}
+
+.adm-bar-fill.pink {
+    background: linear-gradient(90deg, #A23D8E, #FF4FD8);
+}
+
+.adm-bar-value {
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--text);
+    text-align: right;
+}
+
+
+/* ── GRID FOR CHARTS (2 across) ───────────────────────────── */
+
+.adm-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+
+/* ── EXPORT BUTTONS ───────────────────────────────────────── */
+
+.adm-export-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    justify-content: flex-end;
+}
+
+.adm-export-btn {
+    background: transparent;
+    border: 0.5px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 7px 14px;
+    font-family: var(--font);
+    font-size: var(--fs-xs);
+    color: var(--muted);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: border-color .15s, color .15s;
+}
+
+.adm-export-btn:hover {
+    border-color: var(--violet);
+    color: var(--text);
+}
+
+
+/* ── DATA TABLE ───────────────────────────────────────────── */
+
+.adm-table-wrap {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--r-lg);
+    overflow-x: auto;
+}
+
+.adm-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--fs-xs);
+    min-width: 800px;
+}
+
+.adm-table thead th {
+    text-align: left;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--muted);
+    padding: 12px 14px;
+    background: var(--surface2);
+    border-bottom: 0.5px solid var(--border);
+    position: sticky;
+    top: 0;
+}
+
+.adm-table tbody td {
+    padding: 12px 14px;
+    border-bottom: 0.5px solid var(--border);
+    color: var(--text);
+    vertical-align: middle;
+}
+
+.adm-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.adm-table tbody tr:hover td {
+    background: rgba(95, 74, 139, 0.06);
+}
+
+.adm-table tbody tr.is-removed td {
+    opacity: .55;
+}
+
+.adm-user-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.adm-user-av {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--violet);
+    color: var(--lemon);
+    border: 1.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.adm-user-av.av-v { background: #1A1133; color: var(--violet-light); border-color: #2D1A55; }
+.adm-user-av.av-t { background: #04342C; color: #5DCAA5; border-color: #0D4035; }
+.adm-user-av.av-l { background: #1C1A00; color: var(--lemon-vivid); border-color: #3A3600; }
+.adm-user-av.av-r { background: #2B1414; color: #F07070; border-color: #451F1F; }
+
+.adm-user-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+}
+
+.adm-user-handle {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 1px;
+}
+
+.adm-email {
+    color: var(--muted);
+    font-size: var(--fs-xs);
+}
+
+.adm-reports-count {
+    font-weight: 600;
+    color: var(--text);
+}
+
+.adm-reports-count.hot {
+    color: #F07070;
+}
+
+.adm-table-actions {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+
+/* ── ROLE + STATUS PILLS (nadogradnja na status-pill) ─────── */
+
+.adm-role-admin {
+    background: rgba(240, 112, 112, 0.10);
+    color: #F07070;
+    border: 0.5px solid rgba(240, 112, 112, 0.30);
+}
+
+.adm-role-mod {
+    background: rgba(0, 245, 255, 0.08);
+    color: #7df9ff;
+    border: 0.5px solid rgba(0, 245, 255, 0.25);
+}
+
+.adm-role-org {
+    background: rgba(237, 217, 75, 0.10);
+    color: var(--lemon-vivid);
+    border: 0.5px solid rgba(237, 217, 75, 0.28);
+}
+
+.adm-role-clan {
+    background: #1A1133;
+    color: var(--violet-light);
+    border: 0.5px solid #3D2E6B;
+}
+
+.adm-status-active {
+    background: rgba(93, 202, 165, 0.10);
+    color: #5DCAA5;
+    border: 0.5px solid rgba(93, 202, 165, 0.28);
+}
+
+.adm-status-suspended {
+    background: rgba(237, 217, 75, 0.10);
+    color: var(--lemon-vivid);
+    border: 0.5px solid rgba(237, 217, 75, 0.28);
+}
+
+.adm-status-removed {
+    background: rgba(240, 112, 112, 0.10);
+    color: #F07070;
+    border: 0.5px solid rgba(240, 112, 112, 0.30);
+}
+
+
+/* ── SMALL ACTION BUTTONS FOR TABLE / ROWS ────────────────── */
+
+.adm-btn-xs {
+    background: transparent;
+    border: 0.5px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 5px 10px;
+    font-family: var(--font);
+    font-size: 11px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: border-color .15s, color .15s, background .15s;
+}
+
+.adm-btn-xs:hover {
+    border-color: var(--violet);
+    color: var(--text);
+    background: rgba(95, 74, 139, 0.08);
+}
+
+.adm-btn-xs.warn {
+    color: var(--lemon-vivid);
+    border-color: rgba(237, 217, 75, 0.35);
+}
+
+.adm-btn-xs.warn:hover {
+    background: rgba(237, 217, 75, 0.08);
+    border-color: var(--lemon-vivid);
+}
+
+.adm-btn-xs.danger {
+    color: #F07070;
+    border-color: rgba(240, 112, 112, 0.35);
+}
+
+.adm-btn-xs.danger:hover {
+    background: rgba(240, 112, 112, 0.08);
+    border-color: #F07070;
+}
+
+.adm-btn-xs.ok {
+    color: #5DCAA5;
+    border-color: rgba(93, 202, 165, 0.35);
+}
+
+.adm-btn-xs.ok:hover {
+    background: rgba(93, 202, 165, 0.08);
+    border-color: #5DCAA5;
+}
+
+
+/* ── REPORTED CONTENT QUOTE BLOCK ─────────────────────────── */
+
+.adm-report-quote {
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    border-left: 3px solid var(--violet);
+    border-radius: var(--r-sm);
+    padding: 10px 14px;
+    margin: 10px 0;
+    font-size: var(--fs-sm);
+    color: #C5BDDF;
+    line-height: 1.55;
+}
+
+.adm-report-quote.profile,
+.adm-report-quote.message {
+    border-left-color: var(--violet-light);
+}
+
+.adm-report-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px 14px;
+    margin-bottom: 10px;
+    font-size: 11px;
+    color: var(--muted);
+}
+
+.adm-report-meta strong {
+    color: var(--text);
+    font-weight: 600;
+}
+
+.adm-report-actions {
+    display: flex;
+    gap: 8px;
+    padding-top: 12px;
+    margin-top: 12px;
+    border-top: 0.5px solid var(--border);
+    flex-wrap: wrap;
+}
+
+
+/* ── SUBSECTION TITLE ─────────────────────────────────────── */
+
+.adm-subsection-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--text);
+    margin: 18px 4px 10px;
+}
+
+.adm-subsection-title .hk-tab-count {
+    font-size: 10px;
+}
+
+.adm-subsection-sub {
+    font-size: 11px;
+    color: var(--muted);
+    font-weight: 400;
+    margin-left: auto;
+}
+
+
+/* ── PENDING ORG ROW ──────────────────────────────────────── */
+
+.adm-org-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--r-md);
+    margin-bottom: 8px;
+    transition: border-color .2s;
+}
+
+.adm-org-row:hover {
+    border-color: var(--violet);
+}
+
+.adm-org-row.pending {
+    border-color: rgba(237, 217, 75, 0.35);
+    background: linear-gradient(to right, rgba(237, 217, 75, 0.04), var(--surface) 40%);
+}
+
+.adm-org-av {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--r-sm);
+    background: var(--surface2);
+    color: var(--lemon);
+    border: 0.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.adm-org-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.adm-org-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.adm-org-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+}
+
+.adm-org-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+
+/* ── AUDIT TIMELINE ───────────────────────────────────────── */
+
+.adm-timeline {
+    position: relative;
+    padding: 8px 0 8px 28px;
+    margin-top: 16px;
+}
+
+.adm-timeline::before {
+    content: "";
+    position: absolute;
+    top: 8px;
+    bottom: 8px;
+    left: 10px;
+    width: 1px;
+    background: var(--border);
+}
+
+.adm-tl-item {
+    position: relative;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--r-md);
+    margin-bottom: 10px;
+    transition: border-color .2s;
+}
+
+.adm-tl-item:hover {
+    border-color: var(--violet);
+}
+
+.adm-tl-dot {
+    position: absolute;
+    left: -23px;
+    top: 16px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--violet);
+    border: 2px solid var(--bg);
+    box-shadow: 0 0 0 1px var(--border);
+}
+
+.adm-tl-dot.danger { background: #F07070; }
+.adm-tl-dot.warn   { background: var(--lemon-vivid); }
+.adm-tl-dot.ok     { background: #5DCAA5; }
+.adm-tl-dot.info   { background: #7df9ff; }
+
+.adm-tl-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+    flex-wrap: wrap;
+}
+
+.adm-tl-admin {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--text);
+}
+
+.adm-tl-action {
+    font-size: var(--fs-sm);
+    color: #C5BDDF;
+}
+
+.adm-tl-time {
+    font-size: 10px;
+    color: var(--muted);
+    margin-left: auto;
+}
+
+.adm-tl-target {
+    font-size: 11px;
+    color: var(--muted);
+}
+
+.adm-tl-target strong {
+    color: var(--violet-light);
+    font-weight: 500;
+}
+
+
+/* ── RESPONSIVE ───────────────────────────────────────────── */
+
+@media (max-width: 900px) {
+    .adm-grid-2 {
+        grid-template-columns: 1fr;
+    }
+    .stats-bar {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+@media (max-width: 760px) {
+    .adm-bar-row {
+        grid-template-columns: 90px 1fr 50px;
+    }
+    .adm-admin-chip {
+        display: none;
+    }
+}

@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="tikimiki.css">
+  <link rel="stylesheet" href="hackathons.css">
+  <link rel="stylesheet" href="applications.css">
+  <link rel="stylesheet" href="settings.css">
+  <link rel="stylesheet" href="admin.css">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" href="images/favicon.ico">
+  <title>tikimiki · Nadzor platforme</title>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="logo" onclick="window.location.href='home_page.html'" style="cursor:pointer"><span>tiki</span>miki</div>
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input type="text" placeholder="Pretraži korisnike, hackathone, organizacije...">
+    </div>
+    <div class="nav-right">
+      <div class="icon-btn">🔔<span class="badge">9</span></div>
+      <div class="avatar" style="background:#2B1414;color:#F07070;border-color:#451F1F;">AD</div>
+    </div>
+  </div>
+</nav>
+
+<div class="layout" style="grid-template-columns:var(--sidebar-w) 1fr;">
+
+  <aside class="sidebar-left">
+    <div class="menu-item" onclick="window.location.href='home_page.html'"><span class="icon">⌂</span> Početna</div>
+    <div class="menu-item" onclick="window.location.href='hackathons.html'"><span class="icon">◈</span> Hackathoni</div>
+    <div class="menu-item" onclick="window.location.href='teams.html'"><span class="icon">👥</span> Timovi</div>
+    <div class="menu-item" onclick="window.location.href='cohor.html'"><span class="icon">✉</span> Poruke</div>
+    <div class="menu-item" onclick="window.location.href='gamehub.html'"><span class="icon">👾</span> GameHub</div>
+    <div class="menu-item" onclick="window.location.href='settings.html'"><span class="icon">⚙</span> Podešavanja</div>
+    <div class="menu-divider"></div>
+    <div class="menu-label">Admin</div>
+    <div class="menu-item active"><span class="icon">🛡</span> Nadzor</div>
+    <div class="menu-divider"></div>
+    <div class="crystal-button" onclick="window.location.href='premium.html'"><span class="crystal-icon">◆</span> Premium</div>
+  </aside>
+
+  <div class="adm-page" data-filter="pregled" style="max-width:none;margin:0;padding:4px 14px 40px;min-width:0;">
+
+    <div class="back-link" onclick="window.location.href='home_page.html'">← Nazad na početnu</div>
+
+    <!-- PAGE HEADER -->
+    <header class="hk-header">
+      <div>
+        <h1 class="hk-title">
+          Nadzor platforme<span class="adm-mode-badge">Admin</span>
+        </h1>
+        <div class="hk-sub">Pregled sistema, prijava sadržaja i upravljanje nalozima.</div>
+      </div>
+      <div class="adm-admin-chip">
+        <div class="avatar" style="width:28px;height:28px;font-size:10px;background:#2B1414;color:#F07070;border-color:#451F1F;">AD</div>
+        <div>
+          <div class="adm-admin-chip-name">Admin Đurić</div>
+          <div class="adm-admin-chip-sub">Poslednja prijava: 15.04.2026 14:22</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- KPI ROW -->
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="adm-stat-top">
+          <div>
+            <div class="stat-label">Aktivni korisnici (24h)</div>
+            <div class="stat-val v-violet">2 847</div>
+          </div>
+        </div>
+        <div class="adm-trend adm-trend-up">▲ 12% od prošle nedelje</div>
+        <div class="adm-spark">
+          <span class="adm-spark-bar" style="height:45%"></span>
+          <span class="adm-spark-bar" style="height:60%"></span>
+          <span class="adm-spark-bar" style="height:52%"></span>
+          <span class="adm-spark-bar" style="height:72%"></span>
+          <span class="adm-spark-bar" style="height:68%"></span>
+          <span class="adm-spark-bar" style="height:85%"></span>
+          <span class="adm-spark-bar" style="height:100%"></span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="adm-stat-top">
+          <div>
+            <div class="stat-label">Nove registracije (7d)</div>
+            <div class="stat-val v-green">184</div>
+          </div>
+        </div>
+        <div class="adm-trend adm-trend-up">▲ 8% od prošle nedelje</div>
+        <div class="adm-spark">
+          <span class="adm-spark-bar" style="height:55%"></span>
+          <span class="adm-spark-bar" style="height:65%"></span>
+          <span class="adm-spark-bar" style="height:48%"></span>
+          <span class="adm-spark-bar" style="height:75%"></span>
+          <span class="adm-spark-bar" style="height:62%"></span>
+          <span class="adm-spark-bar" style="height:70%"></span>
+          <span class="adm-spark-bar" style="height:88%"></span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="adm-stat-top">
+          <div>
+            <div class="stat-label">Aktivni hackathoni</div>
+            <div class="stat-val v-lemon">12</div>
+          </div>
+        </div>
+        <div class="adm-trend adm-trend-up">▲ 2 nova ove nedelje</div>
+        <div class="adm-spark">
+          <span class="adm-spark-bar" style="height:70%"></span>
+          <span class="adm-spark-bar" style="height:70%"></span>
+          <span class="adm-spark-bar" style="height:80%"></span>
+          <span class="adm-spark-bar" style="height:80%"></span>
+          <span class="adm-spark-bar" style="height:85%"></span>
+          <span class="adm-spark-bar" style="height:90%"></span>
+          <span class="adm-spark-bar" style="height:100%"></span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="adm-stat-top">
+          <div>
+            <div class="stat-label">Otvorene prijave</div>
+            <div class="stat-val v-red">23</div>
+          </div>
+        </div>
+        <div class="adm-trend adm-trend-down">▼ 4 od juče</div>
+        <div class="adm-spark">
+          <span class="adm-spark-bar" style="height:80%;background:#F07070;opacity:.5"></span>
+          <span class="adm-spark-bar" style="height:95%;background:#F07070;opacity:.55"></span>
+          <span class="adm-spark-bar" style="height:70%;background:#F07070;opacity:.6"></span>
+          <span class="adm-spark-bar" style="height:85%;background:#F07070;opacity:.65"></span>
+          <span class="adm-spark-bar" style="height:75%;background:#F07070;opacity:.7"></span>
+          <span class="adm-spark-bar" style="height:65%;background:#F07070;opacity:.8"></span>
+          <span class="adm-spark-bar" style="height:55%;background:#F07070;opacity:1"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="hk-tabs">
+      <div class="hk-tab hk-tab-active" data-filter="pregled" onclick="switchTab('pregled')">Pregled</div>
+      <div class="hk-tab" data-filter="prijave" onclick="switchTab('prijave')">Prijave sadržaja <span class="hk-tab-count">23</span></div>
+      <div class="hk-tab" data-filter="korisnici" onclick="switchTab('korisnici')">Korisnici</div>
+      <div class="hk-tab" data-filter="organizacije" onclick="switchTab('organizacije')">Organizacije <span class="hk-tab-count">7</span></div>
+      <div class="hk-tab" data-filter="audit" onclick="switchTab('audit')">Audit log</div>
+    </div>
+
+
+    <!-- ============================================================
+         SECTION: PREGLED
+         ============================================================ -->
+    <section class="adm-section" data-section="pregled">
+
+      <div class="adm-grid-2">
+
+        <!-- Activity chart -->
+        <div class="adm-chart-card">
+          <div class="adm-chart-head">
+            <div class="adm-chart-title">Aktivnost (poslednjih 7 dana)</div>
+            <div class="adm-chart-hint">prijavljeni korisnici</div>
+          </div>
+          <div class="adm-chart">
+            <div class="adm-bar-row">
+              <div class="adm-bar-label">Pon, 10.04</div>
+              <div class="adm-bar-track"><div class="adm-bar-fill" style="width:62%"></div></div>
+              <div class="adm-bar-value">1 850</div>
+            </div>
+            <div class="adm-bar-row">
+              <div class="adm-bar-label">Uto, 11.04</div>
+              <div class="adm-bar-track"><div class="adm-bar-fill" style="width:71%"></div></div>
+              <div class="adm-bar-value">2 128</div>
+            </div>
+            <div class="adm-bar-row">
+              <div class="adm-bar-label">Sre, 12.04</div>
+              <div class="adm-bar-track"><div class="adm-bar-fill" style="width:68%"></div></div>
+              <div class="adm-bar-value">2 042</div>
+            </div>
+            <div class="adm-bar-row">
+              <div class="adm-bar-label">Čet, 13.04</div>
+              <div class="adm-bar-track"><div class="adm-bar-fill" style="width:79%"></div></div>
+              <div class="adm-bar-value">2 370</div>
+            </div>
+            <div class="adm-bar-row">
+              <div class="adm-bar-label">Pet, 14.04</div>
+              <div class="adm-bar-track"><div class="adm-bar-fill" style="width:82%"></div></div>
+              <div class="adm-bar-value">2 461</div>
+            </div>
+            <div class="adm-bar-row">
+              <div class="adm-bar-label">Sub, 15.04</div>
+              <div class="adm-bar-track"><div class="adm-bar-fill" style="width:95%"></div></div>
+              <div class="adm-bar-value">2 850</div>
+            </div>
+            <div class="adm-bar-row">
+              <div class="adm-bar-label"><strong>Ned, 16.04</strong></div>
+              <div class="adm-bar-track"><div class="adm-bar-fill" style="width:100%"></div></div>
+              <div class="adm-bar-value">2 847</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reports by category chart -->
+        <div class="adm-chart-card">
+          <div class="adm-chart-head">
+            <div class="adm-chart-title">Prijave po kategoriji (30 dana)</div>
+            <div class="adm-chart-hint">ukupno 142</div>
+          </div>
+          <div class="adm-chart">
+            <div class="adm-bar-row">
+              <div class="adm-bar-label">Spam</div>
+              <div class="adm-bar-track"><div class="adm-bar-fill" style="width:82%"></div></div>
+              <div class="adm-bar-value">58</div>
+            </div>
+            <div class="adm-bar-row">
+              <div class="adm-bar-label">Uvredljiv</div>
+              <div class="adm-bar-track"><div class="adm-bar-fill pink" style="width:52%"></div></div>
+              <div class="adm-bar-value">37</div>
+            </div>
+            <div class="adm-bar-row">
+              <div class="adm-bar-label">Uznemiravanje</div>
+              <div class="adm-bar-track"><div class="adm-bar-fill crit" style="width:32%"></div></div>
+              <div class="adm-bar-value">23</div>
+            </div>
+            <div class="adm-bar-row">
+              <div class="adm-bar-label">Lažne info</div>
+              <div class="adm-bar-track"><div class="adm-bar-fill warn" style="width:25%"></div></div>
+              <div class="adm-bar-value">18</div>
+            </div>
+            <div class="adm-bar-row">
+              <div class="adm-bar-label">Drugo</div>
+              <div class="adm-bar-track"><div class="adm-bar-fill green" style="width:8%"></div></div>
+              <div class="adm-bar-value">6</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Server health -->
+      <div class="adm-chart-card">
+        <div class="adm-chart-head">
+          <div class="adm-chart-title">Zdravlje sistema</div>
+          <div class="adm-chart-hint">trenutno · osveženo pre 3 sekunde</div>
+        </div>
+        <div class="adm-chart">
+          <div class="adm-bar-row">
+            <div class="adm-bar-label">CPU</div>
+            <div class="adm-bar-track"><div class="adm-bar-fill" style="width:34%"></div></div>
+            <div class="adm-bar-value">34%</div>
+          </div>
+          <div class="adm-bar-row">
+            <div class="adm-bar-label">Memorija</div>
+            <div class="adm-bar-track"><div class="adm-bar-fill warn" style="width:72%"></div></div>
+            <div class="adm-bar-value">72%</div>
+          </div>
+          <div class="adm-bar-row">
+            <div class="adm-bar-label">Disk</div>
+            <div class="adm-bar-track"><div class="adm-bar-fill" style="width:41%"></div></div>
+            <div class="adm-bar-value">41%</div>
+          </div>
+          <div class="adm-bar-row">
+            <div class="adm-bar-label">Latencija</div>
+            <div class="adm-bar-track"><div class="adm-bar-fill green" style="width:18%"></div></div>
+            <div class="adm-bar-value">84ms</div>
+          </div>
+          <div class="adm-bar-row">
+            <div class="adm-bar-label">Uptime (30d)</div>
+            <div class="adm-bar-track"><div class="adm-bar-fill green" style="width:99.8%"></div></div>
+            <div class="adm-bar-value">99.8%</div>
+          </div>
+        </div>
+
+        <div class="adm-export-row">
+          <button class="adm-export-btn" onclick="showToast('PDF izveštaj je pripremljen za preuzimanje.', 'green')">📄 Izvezi PDF</button>
+          <button class="adm-export-btn" onclick="showToast('CSV izveštaj je pripremljen za preuzimanje.', 'green')">📊 Izvezi CSV</button>
+        </div>
+      </div>
+
+    </section>
+
+
+    <!-- ============================================================
+         SECTION: PRIJAVE SADRŽAJA
+         ============================================================ -->
+    <section class="adm-section" data-section="prijave">
+
+      <div class="hk-filter-bar">
+        <div class="hk-search">
+          <span class="search-icon">⌕</span>
+          <input type="text" placeholder="Pretraži prijave po korisniku ili sadržaju...">
+        </div>
+        <div class="hk-chips-row">
+          <div class="hk-chip hk-chip-active">Status: Otvorene <span class="hk-chip-arrow">▾</span></div>
+          <div class="hk-chip">Kategorija <span class="hk-chip-arrow">▾</span></div>
+          <div class="hk-chip">Tip sadržaja <span class="hk-chip-arrow">▾</span></div>
+          <div class="hk-chip-sort">Sortiraj: <strong>Najnovije</strong> <span class="hk-chip-arrow">▾</span></div>
+        </div>
+      </div>
+
+      <!-- Report 1: offensive comment -->
+      <div class="app-card">
+        <div class="app-header">
+          <div class="app-avatar av-r">MŠ</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:14px;font-weight:600;color:var(--text);">Prijava objave</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">Prijavio <strong style="color:var(--text);">@markos</strong> · pre 12 minuta</div>
+          </div>
+          <span class="status-pill adm-role-admin">Uvredljiv</span>
+        </div>
+        <div class="adm-report-meta">
+          <span>Autor: <strong>@anon_player</strong></span>
+          <span>Kontekst: <strong>ETF HackWeek 2026 - opšti kanal</strong></span>
+          <span>Broj prijava: <strong>4</strong></span>
+        </div>
+        <div class="adm-report-quote">
+          „Svi vi iz vašeg tima ste <span style="opacity:.6;filter:blur(2px)">*****</span>, ne zaslužujete da budete ovde. Idite kući."
+        </div>
+        <div class="adm-report-actions">
+          <button class="adm-btn-xs danger" onclick="openModal('modal-remove')">Ukloni sadržaj</button>
+          <button class="adm-btn-xs warn" onclick="openModal('modal-warn')">Upozori korisnika</button>
+          <button class="adm-btn-xs danger" onclick="openModal('modal-suspend')">Suspenduj nalog</button>
+          <button class="adm-btn-xs">Odbaci prijavu</button>
+          <button class="adm-btn-xs" style="margin-left:auto;">Pregledaj profil →</button>
+        </div>
+      </div>
+
+      <!-- Report 2: spam message -->
+      <div class="app-card">
+        <div class="app-header">
+          <div class="app-avatar av-t">NK</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:14px;font-weight:600;color:var(--text);">Prijava poruke</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">Prijavio <strong style="color:var(--text);">@nenadk</strong> · pre 47 minuta</div>
+          </div>
+          <span class="status-pill adm-role-org">Spam</span>
+        </div>
+        <div class="adm-report-meta">
+          <span>Autor: <strong>@crypto_bot_42</strong></span>
+          <span>Kontekst: <strong>Direktna poruka</strong></span>
+          <span>Broj prijava: <strong>11</strong></span>
+        </div>
+        <div class="adm-report-quote message">
+          „Ćao! Pridruži se našoj ekskluzivnoj invest grupi i udvostruči investiciju za 24h. Pišite na telegram @xxx..."
+        </div>
+        <div class="adm-report-actions">
+          <button class="adm-btn-xs danger" onclick="openModal('modal-remove')">Ukloni sadržaj</button>
+          <button class="adm-btn-xs danger" onclick="openModal('modal-suspend')">Suspenduj nalog</button>
+          <button class="adm-btn-xs">Odbaci prijavu</button>
+          <button class="adm-btn-xs" style="margin-left:auto;">Pregledaj profil →</button>
+        </div>
+      </div>
+
+      <!-- Report 3: fake profile -->
+      <div class="app-card">
+        <div class="app-header">
+          <div class="app-avatar av-v">SG</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:14px;font-weight:600;color:var(--text);">Prijava profila</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">Prijavio <strong style="color:var(--text);">@stivig</strong> · pre 2 sata</div>
+          </div>
+          <span class="status-pill s-pending">Lažni identitet</span>
+        </div>
+        <div class="adm-report-meta">
+          <span>Prijavljeni profil: <strong>@real_elon_musk</strong></span>
+          <span>Broj prijava: <strong>7</strong></span>
+        </div>
+        <div class="adm-report-quote profile">
+          Profil tvrdi da je zvanični nalog Elon Musk-a, ali nije verifikovan od strane platforme i ima sumnjivu GitHub aktivnost (0 repozitorijuma, kreiran pre 3 dana).
+        </div>
+        <div class="adm-report-actions">
+          <button class="adm-btn-xs danger" onclick="openModal('modal-suspend')">Suspenduj nalog</button>
+          <button class="adm-btn-xs warn" onclick="openModal('modal-warn')">Upozori korisnika</button>
+          <button class="adm-btn-xs">Odbaci prijavu</button>
+          <button class="adm-btn-xs" style="margin-left:auto;">Pregledaj profil →</button>
+        </div>
+      </div>
+
+      <!-- Report 4: harassment -->
+      <div class="app-card">
+        <div class="app-header">
+          <div class="app-avatar av-l">AP</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:14px;font-weight:600;color:var(--text);">Prijava serije poruka</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">Prijavio <strong style="color:var(--text);">@annap</strong> · pre 5 sati</div>
+          </div>
+          <span class="status-pill adm-role-admin">Uznemiravanje</span>
+        </div>
+        <div class="adm-report-meta">
+          <span>Autor: <strong>@xUser99</strong></span>
+          <span>Kontekst: <strong>Direktne poruke · 14 poruka tokom 2h</strong></span>
+          <span>Broj prijava: <strong>3</strong></span>
+        </div>
+        <div class="adm-report-quote message">
+          „Zašto me ignorišeš? Odgovori mi. Reci nešto. Reci NEŠTO. Vidim da si online. Odgovori mi odmah..." <em style="color:var(--muted);">(+ 13 sličnih poruka)</em>
+        </div>
+        <div class="adm-report-actions">
+          <button class="adm-btn-xs danger" onclick="openModal('modal-suspend')">Suspenduj nalog (30d)</button>
+          <button class="adm-btn-xs danger" onclick="openModal('modal-remove')">Ukloni poruke</button>
+          <button class="adm-btn-xs">Odbaci prijavu</button>
+          <button class="adm-btn-xs" style="margin-left:auto;">Pregledaj profil →</button>
+        </div>
+      </div>
+
+      <!-- Report 5: misinformation -->
+      <div class="app-card">
+        <div class="app-header">
+          <div class="app-avatar av-t">DP</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:14px;font-weight:600;color:var(--text);">Prijava objave</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">Prijavio <strong style="color:var(--text);">@dimitrijep</strong> · pre 8 sati</div>
+          </div>
+          <span class="status-pill s-pending">Lažne info</span>
+        </div>
+        <div class="adm-report-meta">
+          <span>Autor: <strong>@fakeNews</strong></span>
+          <span>Kontekst: <strong>Feed · javna objava</strong></span>
+          <span>Broj prijava: <strong>2</strong></span>
+        </div>
+        <div class="adm-report-quote">
+          „ETF HackWeek 2026 je otkazan! Organizatori su pobegli sa sponzorskim parama. Ne prijavljujte se!"
+        </div>
+        <div class="adm-report-actions">
+          <button class="adm-btn-xs danger" onclick="openModal('modal-remove')">Ukloni objavu</button>
+          <button class="adm-btn-xs warn" onclick="openModal('modal-warn')">Upozori korisnika</button>
+          <button class="adm-btn-xs">Odbaci prijavu</button>
+          <button class="adm-btn-xs" style="margin-left:auto;">Pregledaj profil →</button>
+        </div>
+      </div>
+
+      <div style="text-align:center;padding:16px;color:var(--muted);font-size:var(--fs-xs);">
+        Prikazano 5 od 23 otvorene prijave · <a style="color:var(--violet-light);cursor:pointer;">Učitaj još</a>
+      </div>
+
+    </section>
+
+
+    <!-- ============================================================
+         SECTION: KORISNICI
+         ============================================================ -->
+    <section class="adm-section" data-section="korisnici">
+
+      <div class="hk-filter-bar">
+        <div class="hk-search">
+          <span class="search-icon">⌕</span>
+          <input type="text" placeholder="Pretraži korisnike po username, email-u, id-ju...">
+        </div>
+        <div class="hk-chips-row">
+          <div class="hk-chip hk-chip-active">Uloga: Svi <span class="hk-chip-arrow">▾</span></div>
+          <div class="hk-chip">Status <span class="hk-chip-arrow">▾</span></div>
+          <div class="hk-chip">Datum registracije <span class="hk-chip-arrow">▾</span></div>
+          <div class="hk-chip-sort">Sortiraj: <strong>Najaktivniji</strong> <span class="hk-chip-arrow">▾</span></div>
+        </div>
+      </div>
+
+      <div class="adm-table-wrap">
+        <table class="adm-table">
+          <thead>
+            <tr>
+              <th scope="col">Korisnik</th>
+              <th scope="col">Email</th>
+              <th scope="col">Uloga</th>
+              <th scope="col">Status</th>
+              <th scope="col">Prijave</th>
+              <th scope="col" style="text-align:right;">Akcije</th>
+            </tr>
+          </thead>
+          <tbody>
+
+            <tr>
+              <td>
+                <div class="adm-user-cell">
+                  <div class="adm-user-av av-v">SG</div>
+                  <div>
+                    <div class="adm-user-name">Stevan Gnjato</div>
+                    <div class="adm-user-handle">@stivig</div>
+                  </div>
+                </div>
+              </td>
+              <td class="adm-email">stevan.gnjato@etf.edu.rs</td>
+              <td><span class="status-pill adm-role-clan">Član</span></td>
+              <td><span class="status-pill adm-status-active">Aktivan</span></td>
+              <td class="adm-reports-count">0</td>
+              <td>
+                <div class="adm-table-actions">
+                  <button class="adm-btn-xs">Profil</button>
+                  <button class="adm-btn-xs warn" onclick="openModal('modal-suspend')">Suspenduj</button>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <div class="adm-user-cell">
+                  <div class="adm-user-av av-t">AČ</div>
+                  <div>
+                    <div class="adm-user-name">Andrej Čolić</div>
+                    <div class="adm-user-handle">@andrejc</div>
+                  </div>
+                </div>
+              </td>
+              <td class="adm-email">andrej.colic@etf.edu.rs</td>
+              <td><span class="status-pill adm-role-mod">Moderator</span></td>
+              <td><span class="status-pill adm-status-active">Aktivan</span></td>
+              <td class="adm-reports-count">1</td>
+              <td>
+                <div class="adm-table-actions">
+                  <button class="adm-btn-xs">Profil</button>
+                  <button class="adm-btn-xs warn" onclick="openModal('modal-suspend')">Suspenduj</button>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <div class="adm-user-cell">
+                  <div class="adm-user-av av-l">ET</div>
+                  <div>
+                    <div class="adm-user-name">ETF Univerzitet</div>
+                    <div class="adm-user-handle">@etf_bg</div>
+                  </div>
+                </div>
+              </td>
+              <td class="adm-email">office@etf.edu.rs</td>
+              <td><span class="status-pill adm-role-org">Organizacija</span></td>
+              <td><span class="status-pill adm-status-active">Aktivan</span></td>
+              <td class="adm-reports-count">0</td>
+              <td>
+                <div class="adm-table-actions">
+                  <button class="adm-btn-xs">Profil</button>
+                  <button class="adm-btn-xs">Hackathoni</button>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <div class="adm-user-cell">
+                  <div class="adm-user-av av-r">XU</div>
+                  <div>
+                    <div class="adm-user-name">xUser99</div>
+                    <div class="adm-user-handle">@xUser99</div>
+                  </div>
+                </div>
+              </td>
+              <td class="adm-email">xuser99@protonmail.com</td>
+              <td><span class="status-pill adm-role-clan">Član</span></td>
+              <td><span class="status-pill adm-status-suspended">Suspendovan do 16.05.2026</span></td>
+              <td class="adm-reports-count hot">8</td>
+              <td>
+                <div class="adm-table-actions">
+                  <button class="adm-btn-xs">Profil</button>
+                  <button class="adm-btn-xs ok" onclick="showToast('Suspenzija je ukinuta. Korisnik je obavešten.', 'green')">Ukini suspenziju</button>
+                  <button class="adm-btn-xs danger" onclick="openModal('modal-delete')">Ukloni</button>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <div class="adm-user-cell">
+                  <div class="adm-user-av av-r">CB</div>
+                  <div>
+                    <div class="adm-user-name">crypto_bot_42</div>
+                    <div class="adm-user-handle">@crypto_bot_42</div>
+                  </div>
+                </div>
+              </td>
+              <td class="adm-email">bot42@tempmail.xyz</td>
+              <td><span class="status-pill adm-role-clan">Član</span></td>
+              <td><span class="status-pill adm-status-suspended">Suspendovan do 23.04.2026</span></td>
+              <td class="adm-reports-count hot">14</td>
+              <td>
+                <div class="adm-table-actions">
+                  <button class="adm-btn-xs">Profil</button>
+                  <button class="adm-btn-xs ok" onclick="showToast('Suspenzija je ukinuta.', 'green')">Ukini</button>
+                  <button class="adm-btn-xs danger" onclick="openModal('modal-delete')">Ukloni</button>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <div class="adm-user-cell">
+                  <div class="adm-user-av av-v">NS</div>
+                  <div>
+                    <div class="adm-user-name">Nenad Skoković</div>
+                    <div class="adm-user-handle">@nenads</div>
+                  </div>
+                </div>
+              </td>
+              <td class="adm-email">nenad.skokovic@etf.edu.rs</td>
+              <td><span class="status-pill adm-role-clan">Član</span></td>
+              <td><span class="status-pill adm-status-active">Aktivan</span></td>
+              <td class="adm-reports-count">0</td>
+              <td>
+                <div class="adm-table-actions">
+                  <button class="adm-btn-xs">Profil</button>
+                  <button class="adm-btn-xs warn" onclick="openModal('modal-suspend')">Suspenduj</button>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <div class="adm-user-cell">
+                  <div class="adm-user-av av-v">DP</div>
+                  <div>
+                    <div class="adm-user-name">Dimitrije Pešić</div>
+                    <div class="adm-user-handle">@dimitrijep</div>
+                  </div>
+                </div>
+              </td>
+              <td class="adm-email">dimitrije.pesic@etf.edu.rs</td>
+              <td><span class="status-pill adm-role-clan">Član</span></td>
+              <td><span class="status-pill adm-status-active">Aktivan</span></td>
+              <td class="adm-reports-count">2</td>
+              <td>
+                <div class="adm-table-actions">
+                  <button class="adm-btn-xs">Profil</button>
+                  <button class="adm-btn-xs warn" onclick="openModal('modal-suspend')">Suspenduj</button>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <div class="adm-user-cell">
+                  <div class="adm-user-av av-l">GH</div>
+                  <div>
+                    <div class="adm-user-name">Garaža Hub</div>
+                    <div class="adm-user-handle">@garaza_hub</div>
+                  </div>
+                </div>
+              </td>
+              <td class="adm-email">info@garaza.rs</td>
+              <td><span class="status-pill adm-role-org">Organizacija</span></td>
+              <td><span class="status-pill adm-status-active">Aktivan</span></td>
+              <td class="adm-reports-count">1</td>
+              <td>
+                <div class="adm-table-actions">
+                  <button class="adm-btn-xs">Profil</button>
+                  <button class="adm-btn-xs">Hackathoni</button>
+                </div>
+              </td>
+            </tr>
+
+            <tr class="is-removed">
+              <td>
+                <div class="adm-user-cell">
+                  <div class="adm-user-av av-r">??</div>
+                  <div>
+                    <div class="adm-user-name">[uklonjen korisnik]</div>
+                    <div class="adm-user-handle">id: 9482</div>
+                  </div>
+                </div>
+              </td>
+              <td class="adm-email">—</td>
+              <td><span class="status-pill adm-role-clan">Član</span></td>
+              <td><span class="status-pill adm-status-removed">Uklonjen</span></td>
+              <td class="adm-reports-count">—</td>
+              <td>
+                <div class="adm-table-actions">
+                  <button class="adm-btn-xs">Audit</button>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <div class="adm-user-cell">
+                  <div class="adm-user-av av-r">AD</div>
+                  <div>
+                    <div class="adm-user-name">Admin Đurić</div>
+                    <div class="adm-user-handle">@admin</div>
+                  </div>
+                </div>
+              </td>
+              <td class="adm-email">admin@tikimiki.rs</td>
+              <td><span class="status-pill adm-role-admin">Administrator</span></td>
+              <td><span class="status-pill adm-status-active">Aktivan</span></td>
+              <td class="adm-reports-count">0</td>
+              <td>
+                <div class="adm-table-actions">
+                  <button class="adm-btn-xs" disabled style="opacity:.5;cursor:not-allowed">Vaš nalog</button>
+                </div>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+
+      <div style="text-align:center;padding:16px;color:var(--muted);font-size:var(--fs-xs);">
+        Prikazano 10 od 2 847 · <a style="color:var(--violet-light);cursor:pointer;">Sledeća strana →</a>
+      </div>
+
+    </section>
+
+
+    <!-- ============================================================
+         SECTION: ORGANIZACIJE
+         ============================================================ -->
+    <section class="adm-section" data-section="organizacije">
+
+      <div class="adm-subsection-title">
+        Na verifikaciji <span class="hk-tab-count">7</span>
+        <div class="adm-subsection-sub">Čekaju odobrenje administratora</div>
+      </div>
+
+      <div class="adm-org-row pending">
+        <div class="adm-org-av">MH</div>
+        <div class="adm-org-info">
+          <div class="adm-org-name">Microsoft Hub Beograd</div>
+          <div class="adm-org-sub">microsoft.rs · zahtev podnet pre 2 sata · dokumentacija priložena</div>
+        </div>
+        <div class="adm-org-actions">
+          <button class="adm-btn-xs">Pregledaj</button>
+          <button class="adm-btn-xs ok" onclick="showToast('Organizacija je verifikovana.', 'green')">✓ Verifikuj</button>
+          <button class="adm-btn-xs danger" onclick="openModal('modal-reject')">Odbij</button>
+        </div>
+      </div>
+
+      <div class="adm-org-row pending">
+        <div class="adm-org-av">TS</div>
+        <div class="adm-org-info">
+          <div class="adm-org-name">Telekom Srbija</div>
+          <div class="adm-org-sub">telekom.rs · zahtev podnet pre 6 sati · dokumentacija priložena</div>
+        </div>
+        <div class="adm-org-actions">
+          <button class="adm-btn-xs">Pregledaj</button>
+          <button class="adm-btn-xs ok" onclick="showToast('Organizacija je verifikovana.', 'green')">✓ Verifikuj</button>
+          <button class="adm-btn-xs danger" onclick="openModal('modal-reject')">Odbij</button>
+        </div>
+      </div>
+
+      <div class="adm-org-row pending">
+        <div class="adm-org-av">RA</div>
+        <div class="adm-org-info">
+          <div class="adm-org-name">RAF (Računarski fakultet)</div>
+          <div class="adm-org-sub">raf.edu.rs · zahtev podnet juče · dokumentacija priložena</div>
+        </div>
+        <div class="adm-org-actions">
+          <button class="adm-btn-xs">Pregledaj</button>
+          <button class="adm-btn-xs ok" onclick="showToast('Organizacija je verifikovana.', 'green')">✓ Verifikuj</button>
+          <button class="adm-btn-xs danger" onclick="openModal('modal-reject')">Odbij</button>
+        </div>
+      </div>
+
+      <div class="adm-org-row pending">
+        <div class="adm-org-av">?!</div>
+        <div class="adm-org-info">
+          <div class="adm-org-name">"Ultra Crypto Exchange"</div>
+          <div class="adm-org-sub">ultracrypto.tk · zahtev podnet juče · <span style="color:#F07070;">dokumentacija nepotpuna</span></div>
+        </div>
+        <div class="adm-org-actions">
+          <button class="adm-btn-xs">Pregledaj</button>
+          <button class="adm-btn-xs danger" onclick="openModal('modal-reject')">Odbij</button>
+        </div>
+      </div>
+
+      <div class="adm-subsection-title" style="margin-top:28px;">
+        Verifikovane organizacije <span class="hk-tab-count">42</span>
+      </div>
+
+      <div class="adm-org-row">
+        <div class="adm-org-av">ET</div>
+        <div class="adm-org-info">
+          <div class="adm-org-name">ETF Univerzitet u Beogradu <span class="hk-verify" style="color:#5DCAA5;">✓</span></div>
+          <div class="adm-org-sub">etf.bg.ac.rs · verifikovan 10.02.2026 · 14 kreiranih hackathona</div>
+        </div>
+        <div class="adm-org-actions">
+          <button class="adm-btn-xs">Pregledaj</button>
+          <button class="adm-btn-xs danger" onclick="openModal('modal-revoke')">Ukini verifikaciju</button>
+        </div>
+      </div>
+
+      <div class="adm-org-row">
+        <div class="adm-org-av">GH</div>
+        <div class="adm-org-info">
+          <div class="adm-org-name">Garaža Hub <span class="hk-verify" style="color:#5DCAA5;">✓</span></div>
+          <div class="adm-org-sub">garaza.rs · verifikovan 22.01.2026 · 8 kreiranih hackathona</div>
+        </div>
+        <div class="adm-org-actions">
+          <button class="adm-btn-xs">Pregledaj</button>
+          <button class="adm-btn-xs danger" onclick="openModal('modal-revoke')">Ukini verifikaciju</button>
+        </div>
+      </div>
+
+      <div class="adm-org-row">
+        <div class="adm-org-av">MS</div>
+        <div class="adm-org-info">
+          <div class="adm-org-name">Microsoft Srbija <span class="hk-verify" style="color:#5DCAA5;">✓</span></div>
+          <div class="adm-org-sub">microsoft.com/sr · verifikovan 15.12.2025 · 3 kreirana hackathona</div>
+        </div>
+        <div class="adm-org-actions">
+          <button class="adm-btn-xs">Pregledaj</button>
+          <button class="adm-btn-xs danger" onclick="openModal('modal-revoke')">Ukini verifikaciju</button>
+        </div>
+      </div>
+
+    </section>
+
+
+    <!-- ============================================================
+         SECTION: AUDIT LOG
+         ============================================================ -->
+    <section class="adm-section" data-section="audit">
+
+      <div class="hk-filter-bar">
+        <div class="hk-search">
+          <span class="search-icon">⌕</span>
+          <input type="text" placeholder="Pretraži audit log...">
+        </div>
+        <div class="hk-chips-row">
+          <div class="hk-chip hk-chip-active">Administrator: Svi <span class="hk-chip-arrow">▾</span></div>
+          <div class="hk-chip">Tip akcije <span class="hk-chip-arrow">▾</span></div>
+          <div class="hk-chip">Period: 7 dana <span class="hk-chip-arrow">▾</span></div>
+          <div class="hk-chip-sort">Sortiraj: <strong>Najnovije</strong> <span class="hk-chip-arrow">▾</span></div>
+        </div>
+      </div>
+
+      <div class="adm-timeline">
+
+        <div class="adm-tl-item">
+          <div class="adm-tl-dot danger"></div>
+          <div class="adm-tl-head">
+            <span class="adm-tl-admin">Admin Đurić</span>
+            <span class="adm-tl-action">suspendovao nalog</span>
+            <span class="adm-tl-time">16.04.2026 14:22</span>
+          </div>
+          <div class="adm-tl-target">Cilj: <strong>@crypto_bot_42</strong> · Razlog: spam poruke (11 prijava) · Trajanje: 7 dana</div>
+        </div>
+
+        <div class="adm-tl-item">
+          <div class="adm-tl-dot ok"></div>
+          <div class="adm-tl-head">
+            <span class="adm-tl-admin">Admin Đurić</span>
+            <span class="adm-tl-action">verifikovao organizaciju</span>
+            <span class="adm-tl-time">16.04.2026 13:48</span>
+          </div>
+          <div class="adm-tl-target">Cilj: <strong>Singidunum Univerzitet</strong> · Dokumentacija pregledana i odobrena</div>
+        </div>
+
+        <div class="adm-tl-item">
+          <div class="adm-tl-dot danger"></div>
+          <div class="adm-tl-head">
+            <span class="adm-tl-admin">Admin Đurić</span>
+            <span class="adm-tl-action">uklonio sadržaj</span>
+            <span class="adm-tl-time">16.04.2026 12:15</span>
+          </div>
+          <div class="adm-tl-target">Cilj: objava <strong>#4892</strong> autora @fakeNews · Kategorija: lažne informacije</div>
+        </div>
+
+        <div class="adm-tl-item">
+          <div class="adm-tl-dot warn"></div>
+          <div class="adm-tl-head">
+            <span class="adm-tl-admin">Admin Đurić</span>
+            <span class="adm-tl-action">upozorio korisnika</span>
+            <span class="adm-tl-time">16.04.2026 11:02</span>
+          </div>
+          <div class="adm-tl-target">Cilj: <strong>@xUser99</strong> · Razlog: neprimereno ponašanje u komentarima</div>
+        </div>
+
+        <div class="adm-tl-item">
+          <div class="adm-tl-dot info"></div>
+          <div class="adm-tl-head">
+            <span class="adm-tl-admin">Admin Đurić</span>
+            <span class="adm-tl-action">izvezao metrike izveštaj</span>
+            <span class="adm-tl-time">16.04.2026 09:30</span>
+          </div>
+          <div class="adm-tl-target">Tip: <strong>PDF izveštaj (sedmična statistika)</strong></div>
+        </div>
+
+        <div class="adm-tl-item">
+          <div class="adm-tl-dot danger"></div>
+          <div class="adm-tl-head">
+            <span class="adm-tl-admin">Admin Petrović</span>
+            <span class="adm-tl-action">trajno uklonio nalog</span>
+            <span class="adm-tl-time">15.04.2026 16:45</span>
+          </div>
+          <div class="adm-tl-target">Cilj: korisnik <strong>id: 9482</strong> · Razlog: ponovljeno kršenje pravila (5+ suspenzija)</div>
+        </div>
+
+        <div class="adm-tl-item">
+          <div class="adm-tl-dot ok"></div>
+          <div class="adm-tl-head">
+            <span class="adm-tl-admin">Admin Đurić</span>
+            <span class="adm-tl-action">ukinuo suspenziju</span>
+            <span class="adm-tl-time">15.04.2026 14:10</span>
+          </div>
+          <div class="adm-tl-target">Cilj: <strong>@korisnik22</strong> · Razlog: žalba razmotrena i prihvaćena</div>
+        </div>
+
+        <div class="adm-tl-item">
+          <div class="adm-tl-dot danger"></div>
+          <div class="adm-tl-head">
+            <span class="adm-tl-admin">Admin Đurić</span>
+            <span class="adm-tl-action">odbio zahtev za verifikaciju</span>
+            <span class="adm-tl-time">15.04.2026 10:22</span>
+          </div>
+          <div class="adm-tl-target">Cilj: <strong>"FastCoin Exchange"</strong> · Razlog: nedovoljno dokumentacije o firmi</div>
+        </div>
+
+        <div class="adm-tl-item">
+          <div class="adm-tl-dot info"></div>
+          <div class="adm-tl-head">
+            <span class="adm-tl-admin">Admin Petrović</span>
+            <span class="adm-tl-action">pregledao prijave</span>
+            <span class="adm-tl-time">14.04.2026 18:40</span>
+          </div>
+          <div class="adm-tl-target">Zatvoreno 5 prijava · odbačeno 3 · uklonjeno 2 sadržaja</div>
+        </div>
+
+        <div class="adm-tl-item">
+          <div class="adm-tl-dot danger"></div>
+          <div class="adm-tl-head">
+            <span class="adm-tl-admin">Admin Đurić</span>
+            <span class="adm-tl-action">suspendovao nalog</span>
+            <span class="adm-tl-time">14.04.2026 15:18</span>
+          </div>
+          <div class="adm-tl-target">Cilj: <strong>@xUser99</strong> · Razlog: uznemiravanje (3 prijave) · Trajanje: 30 dana</div>
+        </div>
+
+        <div class="adm-tl-item">
+          <div class="adm-tl-dot ok"></div>
+          <div class="adm-tl-head">
+            <span class="adm-tl-admin">Admin Đurić</span>
+            <span class="adm-tl-action">verifikovao organizaciju</span>
+            <span class="adm-tl-time">13.04.2026 11:00</span>
+          </div>
+          <div class="adm-tl-target">Cilj: <strong>Nordeus Labs</strong> · Dokumentacija kompletna</div>
+        </div>
+
+        <div class="adm-tl-item">
+          <div class="adm-tl-dot info"></div>
+          <div class="adm-tl-head">
+            <span class="adm-tl-admin">Admin Petrović</span>
+            <span class="adm-tl-action">promenio sistemske parametre</span>
+            <span class="adm-tl-time">12.04.2026 22:15</span>
+          </div>
+          <div class="adm-tl-target">Parametar: <strong>maksimalan broj prijava po korisniku / dan</strong> (10 → 15)</div>
+        </div>
+
+      </div>
+
+      <div style="text-align:center;padding:16px;color:var(--muted);font-size:var(--fs-xs);">
+        Prikazano 12 unosa · <a style="color:var(--violet-light);cursor:pointer;">Učitaj još</a>
+      </div>
+
+    </section>
+
+    <!-- FOOTER -->
+    <div style="border-top:0.5px solid var(--border);padding:20px 0;margin-top:24px;text-align:center;">
+      <div style="display:flex;flex-wrap:wrap;gap:6px 10px;margin-bottom:10px;justify-content:center;">
+        <a style="font-size:var(--fs-xs);color:var(--muted);cursor:pointer;">O nama</a>
+        <span style="font-size:10px;color:var(--muted);">·</span>
+        <a style="font-size:var(--fs-xs);color:var(--muted);cursor:pointer;">Administratorski priručnik</a>
+        <span style="font-size:10px;color:var(--muted);">·</span>
+        <a style="font-size:var(--fs-xs);color:var(--muted);cursor:pointer;">Privatnost i uslovi</a>
+      </div>
+      <div style="font-size:var(--fs-xs);color:var(--violet-light);">tiki<span style="color:var(--lemon)">miki</span> admin © 2026</div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ============================================================
+     MODALS
+     ============================================================ -->
+
+<!-- Remove content modal -->
+<div class="modal-overlay" id="modal-remove">
+  <div class="modal">
+    <div class="modal-title">Ukloni sadržaj?</div>
+    <div class="modal-sub">Sadržaj će biti uklonjen sa platforme i vidljiv samo u audit logu. Autor će dobiti obaveštenje.</div>
+    <textarea placeholder="Obrazloženje (obavezno)..."></textarea>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal('modal-remove')">Odustani</button>
+      <button class="modal-confirm" onclick="closeModal('modal-remove');showToast('Sadržaj je uklonjen. Autor je obavešten.', 'green')">Potvrdi uklanjanje</button>
+    </div>
+  </div>
+</div>
+
+<!-- Warn user modal -->
+<div class="modal-overlay" id="modal-warn">
+  <div class="modal">
+    <div class="modal-title">Upozori korisnika</div>
+    <div class="modal-sub">Upozorenje će biti poslato korisniku email-om i zabeleženo u audit logu.</div>
+    <textarea placeholder="Obrazloženje upozorenja (obavezno)..."></textarea>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal('modal-warn')">Odustani</button>
+      <button class="modal-confirm" style="background:rgba(237,217,75,.15);border-color:rgba(237,217,75,.4);color:var(--lemon-vivid);" onclick="closeModal('modal-warn');showToast('Upozorenje je poslato korisniku.', 'green')">Pošalji upozorenje</button>
+    </div>
+  </div>
+</div>
+
+<!-- Suspend modal -->
+<div class="modal-overlay" id="modal-suspend">
+  <div class="modal">
+    <div class="modal-title">Suspenduj nalog?</div>
+    <div class="modal-sub">Korisnik neće moći da pristupi platformi tokom perioda suspenzije.</div>
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+      <button class="adm-btn-xs">7 dana</button>
+      <button class="adm-btn-xs">14 dana</button>
+      <button class="adm-btn-xs warn">30 dana</button>
+      <button class="adm-btn-xs">Prilagođen</button>
+    </div>
+    <textarea placeholder="Obrazloženje suspenzije (obavezno)..."></textarea>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal('modal-suspend')">Odustani</button>
+      <button class="modal-confirm" onclick="closeModal('modal-suspend');showToast('Nalog je suspendovan. Korisnik je obavešten.', 'green')">Potvrdi suspenziju</button>
+    </div>
+  </div>
+</div>
+
+<!-- Permanent delete modal -->
+<div class="modal-overlay" id="modal-delete">
+  <div class="modal">
+    <div class="modal-title" style="color:#F07070;">⚠ Trajno ukloni nalog?</div>
+    <div class="modal-sub">Ova akcija je nepovratna. Podaci korisnika će biti anonimizovani u skladu sa GDPR regulativom. Audit log ostaje sačuvan.</div>
+    <textarea placeholder="Obrazloženje trajnog uklanjanja (obavezno)..."></textarea>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal('modal-delete')">Odustani</button>
+      <button class="modal-confirm" onclick="closeModal('modal-delete');showToast('Nalog je trajno uklonjen.', 'red')">Trajno ukloni</button>
+    </div>
+  </div>
+</div>
+
+<!-- Reject verification modal -->
+<div class="modal-overlay" id="modal-reject">
+  <div class="modal">
+    <div class="modal-title">Odbij zahtev za verifikaciju?</div>
+    <div class="modal-sub">Organizacija će dobiti obaveštenje sa obrazloženjem i mogućnost ponovnog podnošenja zahteva.</div>
+    <textarea placeholder="Obrazloženje odbijanja (obavezno)..."></textarea>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal('modal-reject')">Odustani</button>
+      <button class="modal-confirm" onclick="closeModal('modal-reject');showToast('Zahtev za verifikaciju je odbijen.', 'green')">Odbij zahtev</button>
+    </div>
+  </div>
+</div>
+
+<!-- Revoke verification modal -->
+<div class="modal-overlay" id="modal-revoke">
+  <div class="modal">
+    <div class="modal-title" style="color:#F07070;">Ukini verifikaciju organizacije?</div>
+    <div class="modal-sub">Organizacija neće moći da kreira nove hackathone sve dok se ponovo ne verifikuje.</div>
+    <textarea placeholder="Obrazloženje (obavezno)..."></textarea>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal('modal-revoke')">Odustani</button>
+      <button class="modal-confirm" onclick="closeModal('modal-revoke');showToast('Verifikacija je ukinuta.', 'red')">Ukini verifikaciju</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- TOAST -->
+<div class="toast" id="admin-toast"></div>
+
+
+<script>
+  function switchTab(name) {
+    var page = document.querySelector('.adm-page');
+    page.setAttribute('data-filter', name);
+    var tabs = document.querySelectorAll('.hk-tab');
+    tabs.forEach(function(t){
+      if (t.getAttribute('data-filter') === name) {
+        t.classList.add('hk-tab-active');
+      } else {
+        t.classList.remove('hk-tab-active');
+      }
+    });
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  function openModal(id) {
+    document.getElementById(id).classList.add('open');
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
+  }
+
+  function showToast(msg, type) {
+    var el = document.getElementById('admin-toast');
+    el.textContent = msg;
+    el.className = 'toast t-' + (type || 'green') + ' show';
+    setTimeout(function(){ el.classList.remove('show'); }, 3500);
+  }
+
+  // Close modals on overlay click
+  document.querySelectorAll('.modal-overlay').forEach(function(overlay){
+    overlay.addEventListener('click', function(e){
+      if (e.target === overlay) overlay.classList.remove('open');
+    });
+  });
+</script>
+
+</body>
+</html>
