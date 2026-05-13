@@ -186,10 +186,77 @@ body {
     align-items: center;
     gap: 8px;
 }
-.ch-sidebar-sub { 
-    font-size: var(--fs-xs); 
-    color: var(--muted); 
-    margin-top: 3px; 
+.ch-sidebar-sub {
+    font-size: var(--fs-xs);
+    color: var(--muted);
+    margin-top: 3px;
+}
+
+.ch-admin-btns {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.ch-admin-btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    background: var(--surface2);
+    color: var(--text);
+    border: 0.5px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 6px 8px;
+    font-family: var(--font);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+}
+
+.ch-admin-btn:hover {
+    background: var(--surface);
+    border-color: var(--violet);
+}
+
+.ch-admin-btn-mod {
+    color: #5DCAA5;
+    border-color: #0F3D30;
+}
+
+.ch-admin-btn-mod:hover {
+    border-color: #5DCAA5;
+    background: #04342C;
+}
+
+.ch-create-channel {
+    padding: 8px 14px 4px;
+}
+
+.ch-create-channel-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    background: transparent;
+    color: var(--muted);
+    border: 1px dashed var(--border);
+    border-radius: var(--r-sm);
+    padding: 6px 0;
+    font-family: var(--font);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color .15s, border-color .15s, background .15s;
+}
+
+.ch-create-channel-btn:hover {
+    color: var(--violet-light);
+    border-color: var(--violet);
+    background: rgba(107, 70, 193, 0.07);
 }
 .ch-tabs {
     display: flex; 
@@ -1003,6 +1070,45 @@ body {
     margin-bottom: 8px;
 }
 
+.dm-action-btns {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.dm-action-btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    background: var(--violet);
+    color: var(--lemon-vivid);
+    border: 0.5px solid var(--violet-light);
+    border-radius: var(--r-sm);
+    padding: 7px 10px;
+    font-family: var(--font);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s;
+}
+
+.dm-action-btn:hover {
+    background: #8B5CF6;
+}
+
+.dm-action-btn-group {
+    background: var(--surface2);
+    color: var(--text);
+    border-color: var(--border);
+}
+
+.dm-action-btn-group:hover {
+    background: var(--surface);
+    border-color: var(--violet);
+}
+
 .dm-search {
     width: 100%;
     background: var(--surface2);
@@ -1660,4 +1766,216 @@ body {
     background: #0D2420 !important;
     color: #F87171 !important;
     border-color: #3D1A1A !important;
+}
+
+/* ── Kanban Panel (SSU 9) ── */
+.kanban-settings-btn {
+    background: var(--surface2);
+    color: var(--muted);
+    border: 0.5px solid var(--border);
+    border-radius: var(--r-sm);
+    padding: 6px 12px;
+    font-family: var(--font);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color .15s, border-color .15s;
+}
+
+.kanban-settings-btn:hover {
+    color: var(--text);
+    border-color: var(--violet);
+}
+
+.kanban-board {
+    display: flex;
+    gap: 14px;
+    padding: 0 28px 28px;
+    flex: 1;
+    overflow-x: auto;
+    align-items: flex-start;
+}
+
+.kanban-col {
+    flex: 1;
+    min-width: 220px;
+    max-width: 320px;
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+}
+
+.kanban-col-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px 8px;
+}
+
+.kanban-col-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.kanban-col-count {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    border-radius: 10px;
+    padding: 1px 7px;
+}
+
+.kanban-cards {
+    padding: 0 10px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.kanban-card {
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    cursor: grab;
+    transition: border-color .15s, box-shadow .15s;
+}
+
+.kanban-card:hover {
+    border-color: var(--violet);
+    box-shadow: 0 0 0 1px rgba(107, 70, 193, 0.15);
+}
+
+.kanban-card-active {
+    border-left: 2.5px solid var(--violet-light);
+}
+
+.kanban-card-done {
+    opacity: 0.6;
+    border-left: 2.5px solid #5DCAA5;
+}
+
+.kanban-card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+}
+
+.kanban-card-desc {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.5;
+    margin-bottom: 8px;
+}
+
+.kanban-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+}
+
+.kanban-tag {
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: 6px;
+    padding: 2px 7px;
+}
+
+.kanban-tag-dev {
+    background: #1A1133;
+    color: var(--violet-light);
+    border: 0.5px solid #2D1A55;
+}
+
+.kanban-tag-design {
+    background: #1A0D1A;
+    color: #ff9ff3;
+    border: 0.5px solid #3D1A3D;
+}
+
+.kanban-tag-research {
+    background: #0D1A1A;
+    color: #5DCAA5;
+    border: 0.5px solid #0F3D30;
+}
+
+.kanban-tag-docs {
+    background: #1A1500;
+    color: #D4C170;
+    border: 0.5px solid #3A3600;
+}
+
+.kanban-card-av {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.kanban-add-task {
+    width: 100%;
+    background: transparent;
+    color: var(--muted);
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    padding: 8px 0;
+    font-family: var(--font);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: color .15s, border-color .15s;
+}
+
+.kanban-add-task:hover {
+    color: var(--violet-light);
+    border-color: var(--violet);
+}
+
+/* ── Hack signup buttons (SSU 10) ── */
+.hack-signup-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 10px;
+}
+
+.hack-signup-btn {
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: var(--r-sm);
+    font-family: var(--font);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+    background: var(--violet);
+    color: var(--lemon-vivid);
+    border: 0.5px solid var(--violet-light);
+}
+
+.hack-signup-btn:hover {
+    background: #8B5CF6;
+}
+
+.hack-signup-team {
+    background: var(--surface2);
+    color: var(--text);
+    border-color: var(--border);
+}
+
+.hack-signup-team:hover {
+    background: var(--surface);
+    border-color: var(--violet);
 }

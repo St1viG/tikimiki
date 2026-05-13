@@ -93,8 +93,15 @@
             style="margin-left:auto;font-size:10px;font-weight:600;background:#04342C;color:#5DCAA5;border:0.5px solid #0F3D30;border-radius:20px;padding:2px 7px">LIVE</span>
         </div>
         <div class="ch-sidebar-sub">48h · Beograd, ETF · 120 učesnika</div>
+        <div class="ch-admin-btns">
+          <button class="ch-admin-btn" onclick="alert('Uredi hakathon – izmena detalja')">✏ Uredi hakathon</button>
+          <button class="ch-admin-btn ch-admin-btn-mod" onclick="alert('Upravljanje moderatorima')">🛡 Upravljanje moderatorima</button>
+        </div>
       </div>
       <div class="ch-list">
+        <div class="ch-create-channel">
+          <button class="ch-create-channel-btn" onclick="alert('Kreiraj kanal – unos naziva i vidljivosti')">+ Kreiraj kanal</button>
+        </div>
         <div class="ch-section">Opšte</div>
         <div class="ch-item ch-active" onclick="switchChannel(this,'opšte','Opšti razgovori i najave')">
           <span class="ch-icon">#</span><span class="ch-name">opšte</span>
@@ -154,6 +161,10 @@
     <div class="dm-sidebar" id="panel-dm-sidebar">
       <div class="dm-sidebar-header">
         <div class="dm-sidebar-title">Direktne poruke</div>
+        <div class="dm-action-btns">
+          <button class="dm-action-btn" onclick="alert('Nova poruka – pretraga korisnika')">✉ Nova poruka</button>
+          <button class="dm-action-btn dm-action-btn-group" onclick="alert('Novo grupno ćaskanje – kreiranje grupe')">👥 Novo grupno ćaskanje</button>
+        </div>
         <input class="dm-search" type="text" placeholder="Pronađi ili započni razgovor">
       </div>
       <div class="dm-list">
@@ -1030,6 +1041,103 @@
 
       </div><!-- end rezultati-panel -->
 
+      <!-- ── KANBAN PANEL (SSU 9) ── -->
+      <div id="kanban-panel" style="display:none;flex:1;flex-direction:column;overflow-y:auto;background:var(--bg);">
+        <div style="padding:20px 28px 0;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:20px">▦</span>
+              <div>
+                <div style="font-size:15px;font-weight:600;color:var(--text)">Kanban tabla — digitalci</div>
+                <div style="font-size:12px;color:var(--muted)">ETF HackWeek 2026 · 4 člana</div>
+              </div>
+            </div>
+            <button class="kanban-settings-btn" onclick="alert('Podešavanja table — dodaj/preimenuj/obriši kolone')">⚙ Podešavanja</button>
+          </div>
+        </div>
+
+        <div class="kanban-board">
+          <!-- Kolona: Za uraditi -->
+          <div class="kanban-col">
+            <div class="kanban-col-header">
+              <span class="kanban-col-title">Za uraditi</span>
+              <span class="kanban-col-count">3</span>
+            </div>
+            <div class="kanban-cards">
+              <div class="kanban-card" draggable="true">
+                <div class="kanban-card-title">Dizajn landing stranice</div>
+                <div class="kanban-card-desc">Mockup glavne stranice sa hero sekcijom</div>
+                <div class="kanban-card-footer">
+                  <span class="kanban-tag kanban-tag-design">dizajn</span>
+                  <div class="kanban-card-av" style="background:#1A1133;color:var(--violet-light);border:1px solid #2D1A55" title="Andrej Čolić">AČ</div>
+                </div>
+              </div>
+              <div class="kanban-card" draggable="true">
+                <div class="kanban-card-title">Istraživanje API-ja za AI</div>
+                <div class="kanban-card-desc">Uporediti OpenAI, Anthropic i lokalne modele</div>
+                <div class="kanban-card-footer">
+                  <span class="kanban-tag kanban-tag-research">istraživanje</span>
+                  <div class="kanban-card-av" style="background:#0D1A0D;color:var(--lemon-vivid);border:1px solid #3A3600" title="Stevan Gnjato">SG</div>
+                </div>
+              </div>
+              <div class="kanban-card" draggable="true">
+                <div class="kanban-card-title">Napisati README</div>
+                <div class="kanban-card-footer">
+                  <span class="kanban-tag kanban-tag-docs">dokumentacija</span>
+                </div>
+              </div>
+              <button class="kanban-add-task" onclick="alert('Dodaj zadatak u kolonu Za uraditi')">+ Dodaj zadatak</button>
+            </div>
+          </div>
+
+          <!-- Kolona: U toku -->
+          <div class="kanban-col">
+            <div class="kanban-col-header">
+              <span class="kanban-col-title">U toku</span>
+              <span class="kanban-col-count">2</span>
+            </div>
+            <div class="kanban-cards">
+              <div class="kanban-card kanban-card-active" draggable="true">
+                <div class="kanban-card-title">Backend autentifikacija</div>
+                <div class="kanban-card-desc">JWT tokeni + refresh mehanizam</div>
+                <div class="kanban-card-footer">
+                  <span class="kanban-tag kanban-tag-dev">razvoj</span>
+                  <div class="kanban-card-av" style="background:#1A1133;color:var(--violet-light);border:1px solid #2D1A55" title="Dimitrije Pešić">DP</div>
+                </div>
+              </div>
+              <div class="kanban-card kanban-card-active" draggable="true">
+                <div class="kanban-card-title">Baza podataka — šema</div>
+                <div class="kanban-card-desc">PostgreSQL migracije za korisnike i timove</div>
+                <div class="kanban-card-footer">
+                  <span class="kanban-tag kanban-tag-dev">razvoj</span>
+                  <div class="kanban-card-av" style="background:#160D0D;color:#ff9ff3;border:1px solid #3D1A3D" title="Nenad Skoković">NS</div>
+                </div>
+              </div>
+              <button class="kanban-add-task" onclick="alert('Dodaj zadatak u kolonu U toku')">+ Dodaj zadatak</button>
+            </div>
+          </div>
+
+          <!-- Kolona: Završeno -->
+          <div class="kanban-col">
+            <div class="kanban-col-header">
+              <span class="kanban-col-title">Završeno</span>
+              <span class="kanban-col-count">1</span>
+            </div>
+            <div class="kanban-cards">
+              <div class="kanban-card kanban-card-done" draggable="true">
+                <div class="kanban-card-title">Setup repozitorijuma</div>
+                <div class="kanban-card-desc">GitHub repo, .gitignore, CI/CD osnova</div>
+                <div class="kanban-card-footer">
+                  <span class="kanban-tag kanban-tag-dev">razvoj</span>
+                  <div class="kanban-card-av" style="background:#0D1A0D;color:var(--lemon-vivid);border:1px solid #3A3600" title="Stevan Gnjato">SG</div>
+                </div>
+              </div>
+              <button class="kanban-add-task" onclick="alert('Dodaj zadatak u kolonu Završeno')">+ Dodaj zadatak</button>
+            </div>
+          </div>
+        </div>
+      </div><!-- end kanban-panel -->
+
       <div class="typing-bar" id="typing-bar">
         <div class="typing-dots">
           <div class="typing-dot"></div>
@@ -1072,6 +1180,10 @@
             </div>
             <div class="hack-stat"><span class="hack-stat-label">Nagrada</span><span class="hack-stat-val"
                 style="color:var(--lemon-vivid)">$2,000</span></div>
+          </div>
+          <div class="hack-signup-btns">
+            <button class="hack-signup-btn" onclick="alert('Prijavi se — individualna prijava na hakathon')">Prijavi se</button>
+            <button class="hack-signup-btn hack-signup-team" onclick="alert('Prijavljujem se sa timom — dodaj članove tima')">👥 Prijavljujem se sa timom</button>
           </div>
         </div>
         <div class="members-section">Organizatori — 2</div>
@@ -1258,6 +1370,7 @@
       const glasanjePanel = document.getElementById('glasanje-panel');
       const rezultatiPanel = document.getElementById('rezultati-panel');
       const bountiesPanel = document.getElementById('bounties-panel');
+      const kanbanPanel = document.getElementById('kanban-panel');
 
       function hideAll() {
         serverMsgs.style.display = 'none';
@@ -1265,6 +1378,7 @@
         glasanjePanel.style.display = 'none';
         rezultatiPanel.style.display = 'none';
         bountiesPanel.style.display = 'none';
+        kanbanPanel.style.display = 'none';
         typingBar.style.display = 'none';
         chatInputWrap.style.display = 'none';
       }
@@ -1287,12 +1401,16 @@
       } else if (name === 'bounties') {
         hideAll();
         bountiesPanel.style.display = 'flex';
+      } else if (name === 'moj-tim-board') {
+        hideAll();
+        kanbanPanel.style.display = 'flex';
       } else {
         serverMsgs.style.display = '';
         predajaPanel.style.display = 'none';
         glasanjePanel.style.display = 'none';
         rezultatiPanel.style.display = 'none';
         bountiesPanel.style.display = 'none';
+        kanbanPanel.style.display = 'none';
         typingBar.style.display = '';
         chatInputWrap.style.display = '';
       }
