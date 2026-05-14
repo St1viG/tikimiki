@@ -96,6 +96,7 @@
         <div class="ch-admin-btns">
           <button class="ch-admin-btn" onclick="alert('Uredi hakathon – izmena detalja')">✏ Uredi hakathon</button>
           <button class="ch-admin-btn ch-admin-btn-mod" onclick="alert('Upravljanje moderatorima')">🛡 Upravljanje moderatorima</button>
+          <button class="ch-admin-btn ch-admin-btn-mod" onclick="window.location.href='moderator_panel.html'">⚑ Prijave sadržaja</button>
         </div>
       </div>
       <div class="ch-list">
@@ -836,7 +837,7 @@
             <div
               style="background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:16px 18px;margin-bottom:24px;font-size:13px;color:var(--text);line-height:1.65">
               🏆 Hakathon je završen! Organizator unosi zvanične rezultate — <strong
-                style="color:var(--lemon-vivid)">plasman timova i nagradu publike</strong>. Nakon objave, svi učesnici
+                style="color:var(--lemon-vivid)">plasman timova, nagradu publike i sponzorske nagrade</strong>. Nakon objave, svi učesnici
               će biti obavešteni i profili će biti automatski ažurirani.
             </div>
           </div>
@@ -946,22 +947,22 @@
               </div>
             </div>
 
-            <!-- Bounty pobednici -->
+            <!-- Sponzorske nagrade -->
             <div
               style="background:var(--surface);border:0.5px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px;">
               <div
                 style="padding:14px 16px;border-bottom:0.5px solid var(--border);font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;">
-                Pobednici sponzorskih izazova (Bounty)</div>
+                Sponzorske nagrade</div>
 
               <!-- Logitech -->
-              <div
-                style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:0.5px solid var(--border);">
+              <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:0.5px solid var(--border);">
                 <div
                   style="width:32px;height:32px;border-radius:50%;background:#0D1A0D;border:1.5px solid #0F3D30;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">🖱</div>
                 <div style="flex:1">
-                  <div style="font-size:12px;color:var(--muted);margin-bottom:5px">Logitech · Najbolji UX</div>
+                  <div style="font-size:12px;color:#5DCAA5;font-weight:600;margin-bottom:2px">Logitech</div>
+                  <div style="font-size:11px;color:var(--muted);margin-bottom:6px">Najbolji korisnički interfejs &amp; UX · 7 prijavljenih timova</div>
                   <select id="bounty-logitech-select" class="rezultati-select" onchange="onRankChange()">
-                    <option value="">— Izaberi tim —</option>
+                    <option value="">— Izaberi pobednika —</option>
                     <option value="digitalci">digitalci</option>
                     <option value="ukohorisani">ukohorisani</option>
                     <option value="nullptr">nullptr</option>
@@ -972,14 +973,14 @@
               </div>
 
               <!-- Anthropic -->
-              <div
-                style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:0.5px solid var(--border);">
+              <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:0.5px solid var(--border);">
                 <div
                   style="width:32px;height:32px;border-radius:50%;background:#0D0D1A;border:1.5px solid #2D1A55;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">🤖</div>
                 <div style="flex:1">
-                  <div style="font-size:12px;color:var(--muted);margin-bottom:5px">Anthropic · Najodgovornija primena AI-a</div>
+                  <div style="font-size:12px;color:#C9B8FF;font-weight:600;margin-bottom:2px">Anthropic</div>
+                  <div style="font-size:11px;color:var(--muted);margin-bottom:6px">Najodgovornija primena AI-a · 12 prijavljenih timova</div>
                   <select id="bounty-anthropic-select" class="rezultati-select" onchange="onRankChange()">
-                    <option value="">— Izaberi tim —</option>
+                    <option value="">— Izaberi pobednika —</option>
                     <option value="digitalci">digitalci</option>
                     <option value="ukohorisani">ukohorisani</option>
                     <option value="nullptr">nullptr</option>
@@ -990,14 +991,14 @@
               </div>
 
               <!-- JetBrains -->
-              <div
-                style="display:flex;align-items:center;gap:12px;padding:14px 16px;">
+              <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;">
                 <div
                   style="width:32px;height:32px;border-radius:50%;background:#1A0D0D;border:1.5px solid #3D1A1A;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">⌨</div>
                 <div style="flex:1">
-                  <div style="font-size:12px;color:var(--muted);margin-bottom:5px">JetBrains · Najčistiji kod</div>
+                  <div style="font-size:12px;color:#F87171;font-weight:600;margin-bottom:2px">JetBrains</div>
+                  <div style="font-size:11px;color:var(--muted);margin-bottom:6px">Najčistiji i najodrživiji kod · 9 prijavljenih timova</div>
                   <select id="bounty-jetbrains-select" class="rezultati-select" onchange="onRankChange()">
-                    <option value="">— Izaberi tim —</option>
+                    <option value="">— Izaberi pobednika —</option>
                     <option value="digitalci">digitalci</option>
                     <option value="ukohorisani">ukohorisani</option>
                     <option value="nullptr">nullptr</option>
@@ -1087,7 +1088,7 @@
               </div>
             </div>
 
-            <!-- Bounty pobednici -->
+            <!-- Sponzorske nagrade - objavljene -->
             <div
               style="background:var(--surface);border:0.5px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px;">
               <div
@@ -1862,7 +1863,7 @@
       const rb2 = document.getElementById('bounty-anthropic-select').value;
       const rb3 = document.getElementById('bounty-jetbrains-select').value;
       if (!r1 || !r2 || !r3 || !rp || !rb1 || !rb2 || !rb3) {
-        showRezultatiError('Molimo izaberite sve timove, nagradu publike i pobednike svih bounty izazova.');
+        showRezultatiError('Molimo izaberite sve timove, nagradu publike i pobednike svih sponzorskih izazova.');
         return null;
       }
       const plasman = [r1, r2, r3];

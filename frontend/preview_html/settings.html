@@ -44,6 +44,7 @@
     <div class="menu-item" data-panel="nalog"><span class="icon">🔑</span> Nalog</div>
     <div class="menu-item" data-panel="integracije"><span class="icon">🔗</span> Integracije</div>
     <div class="menu-item" data-panel="privatnost"><span class="icon">🔒</span> Privatnost</div>
+    <div class="menu-item" data-panel="premium"><span class="icon">◆</span> Premium</div>
     <div class="menu-item" data-panel="opasno"><span class="icon">⚠</span> Brisanje profila</div>
     <div class="menu-item" data-panel="odjava" style="color:#E74C3C"><span class="icon">↩</span> Odjavi se</div>
     <div class="menu-divider"></div>
@@ -563,6 +564,146 @@
 
     </div>
 
+    <!-- PANEL: PREMIUM -->
+    <div class="ep-panel" id="panel-premium">
+
+      <!-- Features overview card -->
+      <div class="ep-card">
+        <div class="ep-card-header">
+          <div>
+            <div class="ep-card-title" style="display:flex;align-items:center;gap:8px">
+              <span style="color:var(--lemon-vivid)">◆</span> Premium status
+            </div>
+            <div class="ep-card-sub">Otključaj napredne opcije personalizacije i ekskluzivne benefite</div>
+          </div>
+        </div>
+        <div class="ep-card-body" style="gap:10px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div style="background:var(--surface2);border:0.5px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start">
+              <span style="font-size:18px">🎭</span>
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--text)">GIF avatar i baner</div>
+                <div style="font-size:11px;color:var(--muted);margin-top:2px">Animirane slike umesto statičnih</div>
+              </div>
+            </div>
+            <div style="background:var(--surface2);border:0.5px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start">
+              <span style="font-size:18px">🎨</span>
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--text)">Boja korisničkog imena</div>
+                <div style="font-size:11px;color:var(--muted);margin-top:2px">Prilagođena boja u prikazu</div>
+              </div>
+            </div>
+            <div style="background:var(--surface2);border:0.5px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start">
+              <span style="font-size:18px">🌀</span>
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--text)">Više Daily Spin okretaja</div>
+                <div style="font-size:11px;color:var(--muted);margin-top:2px">Češće nagrade u GameHub-u</div>
+              </div>
+            </div>
+            <div style="background:var(--surface2);border:0.5px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start">
+              <span style="font-size:18px">◆</span>
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--lemon-vivid)">Premium bedž</div>
+                <div style="font-size:11px;color:var(--muted);margin-top:2px">Vidljiva oznaka na profilu</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Activation form (non-premium state) -->
+      <div id="premium-form-wrap">
+        <div class="ep-card">
+          <div class="ep-card-header">
+            <div>
+              <div class="ep-card-title">Aktiviraj Premium</div>
+              <div class="ep-card-sub">Izaberi period trajanja i plati karticom</div>
+            </div>
+          </div>
+          <div class="ep-card-body" style="gap:12px">
+
+            <!-- Plan selection -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" id="plan-selector">
+              <label id="plan-mesecno" onclick="selectPlan('mesecno')"
+                style="border:1.5px solid var(--violet);background:#1A1133;border-radius:10px;padding:14px;cursor:pointer;transition:border-color .15s">
+                <div style="font-size:12px;font-weight:600;color:var(--violet-light);margin-bottom:4px">MESEČNO</div>
+                <div style="font-size:22px;font-weight:700;color:var(--text)">€4.99</div>
+                <div style="font-size:11px;color:var(--muted);margin-top:2px">po mesecu · automatska obnova</div>
+                <div style="margin-top:8px;font-size:11px;font-weight:600;color:var(--violet-light)">● Izabrano</div>
+              </label>
+              <label id="plan-godisnje" onclick="selectPlan('godisnje')"
+                style="border:0.5px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;transition:border-color .15s;position:relative">
+                <div style="position:absolute;top:-1px;right:10px;background:var(--lemon-vivid);color:#0A0A0A;font-size:10px;font-weight:700;padding:2px 8px;border-radius:0 0 6px 6px">UŠTEDI 33%</div>
+                <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px">GODIŠNJE</div>
+                <div style="font-size:22px;font-weight:700;color:var(--text)">€39.99</div>
+                <div style="font-size:11px;color:var(--muted);margin-top:2px">po godini · automatska obnova</div>
+                <div style="margin-top:8px;font-size:11px;font-weight:600;color:var(--muted)">○ Izaberi</div>
+              </label>
+            </div>
+
+            <!-- Payment form (initially hidden) -->
+            <div id="premium-payment-form" style="display:none;flex-direction:column;gap:10px">
+              <div style="font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:2px">Podaci o kartici</div>
+              <div class="ep-field" style="margin:0">
+                <label class="ep-label">Broj kartice</label>
+                <input class="ep-input" type="text" placeholder="1234 5678 9012 3456" maxlength="19"
+                  oninput="this.value=this.value.replace(/[^0-9]/g,'').replace(/(.{4})/g,'$1 ').trim()">
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                <div class="ep-field" style="margin:0">
+                  <label class="ep-label">Datum isteka</label>
+                  <input class="ep-input" type="text" placeholder="MM/GG" maxlength="5">
+                </div>
+                <div class="ep-field" style="margin:0">
+                  <label class="ep-label">CVV</label>
+                  <input class="ep-input" type="text" placeholder="•••" maxlength="3">
+                </div>
+              </div>
+              <div class="ep-field" style="margin:0">
+                <label class="ep-label">Ime vlasnika kartice</label>
+                <input class="ep-input" type="text" placeholder="Andrej Čolić">
+              </div>
+              <div style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px">
+                🔒 Plaćanje obrađuje PCI-DSS kompatibilan gateway. Podaci o kartici se ne čuvaju.
+              </div>
+            </div>
+
+          </div>
+          <div class="ep-card-footer">
+            <button class="ep-btn-primary" id="premium-main-btn" onclick="handlePremiumBtn()"
+              style="background:linear-gradient(90deg,#5F4A8B,#A78BFA);border-color:var(--violet-light);color:var(--lemon-vivid);font-weight:700">
+              ◆ Aktiviraj Premium
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active premium state (hidden initially) -->
+      <div id="premium-active-wrap" style="display:none">
+        <div class="ep-card">
+          <div class="ep-card-header">
+            <div>
+              <div class="ep-card-title" style="display:flex;align-items:center;gap:8px">
+                <span style="font-size:14px;background:#1A1400;color:var(--lemon-vivid);border:0.5px solid #5A4200;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700">◆ AKTIVAN</span>
+                Tvoj plan
+              </div>
+            </div>
+          </div>
+          <div class="ep-card-body" style="gap:12px">
+            <div style="background:linear-gradient(90deg,#1A1400,var(--surface2));border:0.5px solid #5A4200;border-radius:10px;padding:14px 16px">
+              <div style="font-size:13px;color:var(--muted);margin-bottom:4px">Aktivan plan</div>
+              <div style="font-size:16px;font-weight:700;color:var(--lemon-vivid)" id="active-plan-name">Premium Mesečni</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:6px">Ističe: <strong style="color:var(--text)" id="active-plan-expiry">14. jun 2026.</strong> · Automatska obnova: <strong style="color:#5DCAA5" id="auto-renew-status">Uključena</strong></div>
+            </div>
+            <button class="ep-btn-secondary" style="color:#F87171;border-color:rgba(240,112,112,.35);width:fit-content" onclick="cancelAutoRenew()">
+              Otkaži automatsku obnovu
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end panel-premium -->
+
     <!-- PANEL: ODJAVA -->
     <div class="ep-panel" id="panel-odjava">
       <div class="ep-card">
@@ -783,6 +924,63 @@ function resetCard(id) {}
 
 function confirmDanger(msg) {
   if (confirm(msg)) alert('Zahtev je primljen.');
+}
+
+// ── Premium panel ──────────────────────────────────────────────
+let selectedPlan = 'mesecno';
+let paymentFormVisible = false;
+
+function selectPlan(plan) {
+  selectedPlan = plan;
+  const m = document.getElementById('plan-mesecno');
+  const g = document.getElementById('plan-godisnje');
+  if (plan === 'mesecno') {
+    m.style.border = '1.5px solid var(--violet)';
+    m.style.background = '#1A1133';
+    m.querySelector('div:last-child').style.color = 'var(--violet-light)';
+    m.querySelector('div:last-child').textContent = '● Izabrano';
+    g.style.border = '0.5px solid var(--border)';
+    g.style.background = 'transparent';
+    g.querySelector('div:last-child').style.color = 'var(--muted)';
+    g.querySelector('div:last-child').textContent = '○ Izaberi';
+  } else {
+    g.style.border = '1.5px solid var(--violet)';
+    g.style.background = '#1A1133';
+    g.querySelector('div:last-child').style.color = 'var(--violet-light)';
+    g.querySelector('div:last-child').textContent = '● Izabrano';
+    m.style.border = '0.5px solid var(--border)';
+    m.style.background = 'transparent';
+    m.querySelector('div:last-child').style.color = 'var(--muted)';
+    m.querySelector('div:last-child').textContent = '○ Izaberi';
+  }
+}
+
+function handlePremiumBtn() {
+  const pf = document.getElementById('premium-payment-form');
+  const btn = document.getElementById('premium-main-btn');
+  if (!paymentFormVisible) {
+    pf.style.display = 'flex';
+    btn.textContent = 'Potvrdi plaćanje';
+    paymentFormVisible = true;
+  } else {
+    // Simulate successful payment → show active state
+    document.getElementById('premium-form-wrap').style.display = 'none';
+    document.getElementById('premium-active-wrap').style.display = 'block';
+    document.getElementById('active-plan-name').textContent =
+      selectedPlan === 'mesecno' ? 'Premium Mesečni' : 'Premium Godišnji';
+    const exp = new Date();
+    exp.setMonth(exp.getMonth() + (selectedPlan === 'mesecno' ? 1 : 12));
+    document.getElementById('active-plan-expiry').textContent =
+      exp.getDate() + '. ' + ['jan','feb','mar','apr','maj','jun','jul','avg','sep','okt','nov','dec'][exp.getMonth()] + ' ' + exp.getFullYear() + '.';
+    alert('✓ Premium aktiviran! Račun je poslat na email.');
+  }
+}
+
+function cancelAutoRenew() {
+  if (confirm('Otkazati automatsku obnovu? Premium ostaje aktivan do datuma isteka.')) {
+    document.getElementById('auto-renew-status').textContent = 'Isključena';
+    document.getElementById('auto-renew-status').style.color = '#F87171';
+  }
 }
 
 </script>

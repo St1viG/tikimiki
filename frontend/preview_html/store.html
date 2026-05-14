@@ -10,6 +10,25 @@
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="icon" href="images/favicon.ico">
   <title>tikimiki – Store</title>
+  <style>
+    .modal-field-input {
+      width: 100%; background: var(--bg); border: 1px solid var(--border);
+      border-radius: 8px; padding: 8px 12px; color: var(--text);
+      font-family: inherit; font-size: var(--fs-sm); box-sizing: border-box; margin-top: 4px;
+    }
+    .modal-field-input:focus { outline: none; border-color: var(--violet); }
+    .modal-deficit-row {
+      display: flex; gap: 12px; align-items: flex-start;
+      background: rgba(255,100,100,.07); border: 1px solid rgba(255,100,100,.2);
+      border-radius: 10px; padding: 12px; margin-bottom: 14px;
+    }
+    .modal-deficit-icon { font-size: 22px; line-height: 1.2; }
+    .modal-deficit-title { font-size: var(--fs-sm); font-weight: 600; color: #ff6b6b; }
+    .modal-deficit-sub { font-size: var(--fs-xs); color: var(--muted); margin-top: 2px; }
+    .modal-earn-hdr { font-size: var(--fs-xs); color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+    .modal-earn-list { display: flex; flex-direction: column; gap: 5px; }
+    .modal-earn-item { font-size: var(--fs-sm); color: var(--text-2); }
+  </style>
 </head>
 <body>
 
@@ -62,6 +81,7 @@
       <button class="filter-btn" onclick="filterItems('majice', this)">👕 Majice</button>
       <button class="filter-btn" onclick="filterItems('duks', this)">🧥 Duksevi</button>
       <button class="filter-btn" onclick="filterItems('solje', this)">☕ Šolje</button>
+      <button class="filter-btn" onclick="filterItems('premium', this)" style="color:var(--lemon-vivid);border-color:rgba(237,217,75,.35)">◆ Premium</button>
     </div>
 
     <div class="store-grid" id="store-grid">
@@ -138,6 +158,38 @@
         </div>
       </div>
 
+      <!-- Premium mesec -->
+      <div class="merch-card" data-cat="premium" onclick="openPremiumModal('mesec')"
+        style="border-color:rgba(237,217,75,.35);background:linear-gradient(135deg,#1A1400,var(--surface))">
+        <div class="merch-img" style="background:linear-gradient(135deg,#2A2000,#1A1400);font-size:32px">
+          ◆<div class="merch-badge-new" style="background:var(--lemon-vivid);color:#0A0A0A">PREMIUM</div>
+        </div>
+        <div class="merch-body">
+          <div class="merch-name" style="color:var(--lemon-vivid)">Premium Mesec</div>
+          <div class="merch-variant">GIF avatar, GIF baner, custom boja · 30 dana</div>
+          <div class="merch-foot">
+            <div class="merch-price" style="color:var(--lemon-vivid)"><span class="xp-icon">XP</span> 5 000</div>
+            <button class="btn-buy" style="background:var(--lemon-vivid);color:#0A0A0A;border-color:var(--lemon-vivid)">Razmeni</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Premium godina -->
+      <div class="merch-card" data-cat="premium" onclick="openPremiumModal('godina')"
+        style="border-color:rgba(237,217,75,.35);background:linear-gradient(135deg,#1A1400,var(--surface))">
+        <div class="merch-img" style="background:linear-gradient(135deg,#2A2000,#1A1400);font-size:32px">
+          ◆<div class="merch-badge-hot" style="background:var(--lemon-vivid);color:#0A0A0A">🔥 BEST VALUE</div>
+        </div>
+        <div class="merch-body">
+          <div class="merch-name" style="color:var(--lemon-vivid)">Premium Godina</div>
+          <div class="merch-variant">Svi benefiti · 365 dana · bez auto-obnove</div>
+          <div class="merch-foot">
+            <div class="merch-price" style="color:var(--lemon-vivid)"><span class="xp-icon">XP</span> 50 000</div>
+            <button class="btn-buy" style="background:var(--lemon-vivid);color:#0A0A0A;border-color:var(--lemon-vivid)">Razmeni</button>
+          </div>
+        </div>
+      </div>
+
     </div>
   </main>
 
@@ -199,7 +251,7 @@
 <!-- Purchase Modal -->
 <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
   <div class="modal">
-    <div class="modal-title">Potvrdi kupovinu</div>
+    <div class="modal-title" id="modal-title">Potvrdi kupovinu</div>
     <div class="modal-sub" id="modal-sub">Da li si siguran/na da želiš da kupiš ovaj artikal?</div>
     <div class="modal-item-row">
       <div class="modal-item-icon" id="modal-icon">👕</div>
@@ -217,6 +269,28 @@
         <button class="size-btn" onclick="selectSize(this)">XL</button>
       </div>
     </div>
+    <div id="delivery-section">
+      <div class="modal-size-label">Adresa dostave</div>
+      <input type="text" class="modal-field-input" id="delivery-address" placeholder="Ulica i broj, grad, poštanski broj">
+      <div class="modal-size-label" style="margin-top:10px">Kontakt telefon</div>
+      <input type="text" class="modal-field-input" id="delivery-phone" placeholder="+381 6X XXX XXXX">
+    </div>
+    <div id="insufficient-section" style="display:none">
+      <div class="modal-deficit-row">
+        <div class="modal-deficit-icon">⚡</div>
+        <div>
+          <div class="modal-deficit-title">Nedostaje ti <span id="modal-deficit-amount"></span> XP</div>
+          <div class="modal-deficit-sub">Imaš <span id="modal-deficit-have"></span> XP · Potrebno <span id="modal-deficit-need"></span> XP</div>
+        </div>
+      </div>
+      <div class="modal-earn-hdr">Kako zaraditi XP?</div>
+      <div class="modal-earn-list">
+        <div class="modal-earn-item">🎮 <b>Daily Minigame</b> — do +150 XP dnevno</div>
+        <div class="modal-earn-item">🌀 <b>Daily Spin</b> — do +200 XP</div>
+        <div class="modal-earn-item">◈ <b>Hackathon učešće</b> — +300 XP</div>
+        <div class="modal-earn-item">🏆 <b>Pobeda na hackathonu</b> — do +5 000 XP</div>
+      </div>
+    </div>
     <div class="modal-cost-row">
       <div class="modal-cost-label">Cena</div>
       <div class="modal-cost-val" id="modal-price">⚡ 800 XP</div>
@@ -224,6 +298,7 @@
     <div class="modal-btns">
       <button class="modal-cancel" onclick="closeModal()">Otkaži</button>
       <button class="modal-confirm" id="modal-confirm-btn" onclick="confirmPurchase()">Potvrdi kupovinu</button>
+      <button class="modal-confirm" id="modal-earn-btn" onclick="window.location.href='gamehub.html'" style="display:none;background:var(--violet)">⚡ Zaradi XP →</button>
     </div>
   </div>
 </div>
@@ -237,32 +312,53 @@
 
   function updateXP() {
     document.getElementById('xp-display').innerHTML = xp.toLocaleString('sr-RS') + ' <span>XP</span>';
-    // disable buttons if not enough xp
     document.querySelectorAll('.merch-card').forEach(card => {
       const price = parseInt(card.dataset.price);
       const btn = card.querySelector('.btn-buy');
+      if (!btn) return;
       if (price > xp) {
-        btn.disabled = true;
         btn.textContent = 'Nedovoljno XP';
+        btn.style.opacity = '0.55';
       } else {
-        btn.disabled = false;
-        btn.textContent = 'Kupi';
+        btn.textContent = card.dataset.cat === 'premium' ? 'Razmeni' : 'Kupi';
+        btn.style.opacity = '';
       }
     });
   }
 
   function openModal(card) {
     const price = parseInt(card.dataset.price);
-    if (price > xp) return;
-    currentPrice = price;
+    const notEnough = price > xp;
+    currentPrice = notEnough ? 0 : price;
     document.getElementById('modal-icon').textContent = card.dataset.icon;
     document.getElementById('modal-name').textContent = card.dataset.name;
     document.getElementById('modal-variant').textContent = card.dataset.variant;
     document.getElementById('modal-price').textContent = '⚡ ' + price.toLocaleString('sr-RS') + ' XP';
-    document.getElementById('size-section').style.display = card.dataset.hasSizes === 'true' ? '' : 'none';
-    // reset size selection
-    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
-    document.querySelector('.size-btn:nth-child(3)').classList.add('selected');
+
+    if (notEnough) {
+      document.getElementById('modal-title').textContent = 'Nedovoljno XP poena';
+      document.getElementById('modal-sub').style.display = 'none';
+      document.getElementById('size-section').style.display = 'none';
+      document.getElementById('delivery-section').style.display = 'none';
+      document.getElementById('insufficient-section').style.display = '';
+      document.getElementById('modal-deficit-amount').textContent = (price - xp).toLocaleString('sr-RS');
+      document.getElementById('modal-deficit-have').textContent = xp.toLocaleString('sr-RS');
+      document.getElementById('modal-deficit-need').textContent = price.toLocaleString('sr-RS');
+      document.getElementById('modal-confirm-btn').style.display = 'none';
+      document.getElementById('modal-earn-btn').style.display = '';
+    } else {
+      document.getElementById('modal-title').textContent = 'Potvrdi kupovinu';
+      document.getElementById('modal-sub').style.display = '';
+      document.getElementById('size-section').style.display = card.dataset.hasSizes === 'true' ? '' : 'none';
+      document.getElementById('delivery-section').style.display = '';
+      document.getElementById('insufficient-section').style.display = 'none';
+      document.getElementById('modal-confirm-btn').style.display = '';
+      document.getElementById('modal-earn-btn').style.display = 'none';
+      document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
+      document.querySelector('.size-btn:nth-child(3)').classList.add('selected');
+      document.getElementById('delivery-address').value = '';
+      document.getElementById('delivery-phone').value = '';
+    }
     document.getElementById('modal-overlay').classList.add('open');
   }
 
@@ -278,6 +374,10 @@
   }
 
   function confirmPurchase() {
+    const addr = document.getElementById('delivery-address').value.trim();
+    const phone = document.getElementById('delivery-phone').value.trim();
+    if (!addr) { showToast('⚠️ Unesi adresu dostave.'); document.getElementById('delivery-address').focus(); return; }
+    if (!phone) { showToast('⚠️ Unesi kontakt telefon.'); document.getElementById('delivery-phone').focus(); return; }
     xp -= currentPrice;
     updateXP();
     closeModal();
@@ -301,6 +401,39 @@
   }
 
   updateXP();
+
+  const PREMIUM_PRICES = { mesec: 5000, godina: 50000 };
+  const PREMIUM_LABELS = { mesec: 'Premium Mesec (30 dana)', godina: 'Premium Godina (365 dana)' };
+
+  function openPremiumModal(period) {
+    const cost = PREMIUM_PRICES[period];
+    if (xp < cost) {
+      document.getElementById('modal-icon').textContent = '◆';
+      document.getElementById('modal-name').textContent = PREMIUM_LABELS[period];
+      document.getElementById('modal-variant').textContent = '';
+      document.getElementById('modal-price').textContent = '⚡ ' + cost.toLocaleString('sr-RS') + ' XP';
+      document.getElementById('modal-title').textContent = 'Nedovoljno XP poena';
+      document.getElementById('modal-sub').style.display = 'none';
+      document.getElementById('size-section').style.display = 'none';
+      document.getElementById('delivery-section').style.display = 'none';
+      document.getElementById('insufficient-section').style.display = '';
+      document.getElementById('modal-deficit-amount').textContent = (cost - xp).toLocaleString('sr-RS');
+      document.getElementById('modal-deficit-have').textContent = xp.toLocaleString('sr-RS');
+      document.getElementById('modal-deficit-need').textContent = cost.toLocaleString('sr-RS');
+      document.getElementById('modal-confirm-btn').style.display = 'none';
+      document.getElementById('modal-earn-btn').style.display = '';
+      document.getElementById('modal-overlay').classList.add('open');
+      return;
+    }
+    if (confirm(
+      'Razmeniti ' + cost.toLocaleString() + ' XP za ' + PREMIUM_LABELS[period] + '?\n\n' +
+      'Napomena: automatska obnova nije uključena — premium ističe po isteku perioda.'
+    )) {
+      xp -= cost;
+      updateXP();
+      showToast('◆ ' + PREMIUM_LABELS[period] + ' aktiviran!');
+    }
+  }
 </script>
 </body>
 </html>
