@@ -539,10 +539,26 @@ function showFinalScore() {
       <div class="quiz-final-title">${score >= 4 ? 'Odlično!' : score >= 2 ? 'Solidno!' : 'Probaj sutra!'}</div>
       <div class="quiz-final-score">${score}/${questions.length} tačnih · ${pct}%</div>
       <div class="quiz-final-xp">+${xpEarned} XP zarađeno</div>
-      <button class="btn-join" style="margin-top:16px" onclick="location.reload()">Igraj ponovo</button>
+      <div class="spin-cooldown" style="display:flex;justify-content:center;margin-top:16px;">
+        <span>⏳</span> Sledeći kviz za: <span id="quizTimer">23:59:59</span>
+      </div>
     </div>
   `;
   document.getElementById('progressFill').style.width = '100%';
+  startQuizCooldownTimer();
+}
+
+function startQuizCooldownTimer() {
+  let secs = 86399;
+  const iv = setInterval(() => {
+    secs--;
+    const el = document.getElementById('quizTimer');
+    if (!el || secs <= 0) { clearInterval(iv); return; }
+    const h = String(Math.floor(secs / 3600)).padStart(2, '0');
+    const m = String(Math.floor((secs % 3600) / 60)).padStart(2, '0');
+    const s = String(secs % 60).padStart(2, '0');
+    el.textContent = `${h}:${m}:${s}`;
+  }, 1000);
 }
 
 loadQuestion();

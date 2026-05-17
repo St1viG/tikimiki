@@ -55,56 +55,28 @@
   <!-- TABS -->
   <div class="tm-tabs">
     <div class="tm-tab tm-tab-active" data-filter="mine">Moj tim</div>
-    <div class="tm-tab tm-tab-disabled" title="Već si u timu">AI predlozi <span class="tm-tab-count">3</span></div>
-    <div class="tm-tab tm-tab-disabled" title="Već si u timu">Otvoreni timovi</div>
+    <div class="tm-tab" data-filter="ai">AI predlozi <span class="tm-tab-count">3</span></div>
+    <div class="tm-tab" data-filter="open">Otvoreni timovi</div>
     <div class="tm-tab" data-filter="solo">Slobodni igrači</div>
     <div class="tm-tab" data-filter="board">Leaderboard</div>
   </div>
 
-  <!-- MOJ TIM -->
+  <!-- MOJ TIM – korisnik nije u timu -->
   <section class="tm-section" data-section="mine">
-    <div class="tm-hero">
+    <div class="tm-hero tm-hero-empty">
       <span class="tm-bracket tm-bracket-tl"></span>
       <span class="tm-bracket tm-bracket-tr"></span>
       <span class="tm-bracket tm-bracket-bl"></span>
       <span class="tm-bracket tm-bracket-br"></span>
       <div class="tm-scan"></div>
 
-      <span class="tm-pill tm-pill-live"><span class="tm-live-dot"></span> LIVE · ETF HackWeek 2026</span>
-      <h2 class="tm-hero-name">digitalci</h2>
-
-      <div class="tm-hero-avs">
-        <div class="tm-av tm-av-v tm-av-xl">AČ</div>
-        <div class="tm-av tm-av-l tm-av-xl">SG</div>
-        <div class="tm-av tm-av-t tm-av-xl">DP</div>
-        <div class="tm-av tm-av-r tm-av-xl">NS</div>
-      </div>
-
-      <div class="tm-hero-meta">4 člana · 18 / 27 taskova · 420 XP</div>
+      <div class="tm-empty-icon">👥</div>
+      <h2 class="tm-empty-title">Nisi još u timu</h2>
+      <p class="tm-empty-desc">Pridruži se postojećem timu, prihvati AI predlog ili kreiraj sopstveni.</p>
 
       <div class="tm-hero-actions">
-        <button class="btn-join tm-btn-lg">Otvori server</button>
-        <button class="btn-info tm-btn-lg">Kanban tabla</button>
-      </div>
-    </div>
-
-    <div class="tm-roster-min">
-      <div class="tm-r-row">
-        <div class="tm-av tm-av-v tm-av-sm">AČ</div>
-        <span>Andrej Čolić</span>
-        <span class="tm-r-you">ti</span>
-      </div>
-      <div class="tm-r-row">
-        <div class="tm-av tm-av-l tm-av-sm">SG</div>
-        <span>Stevan Gnjato</span>
-      </div>
-      <div class="tm-r-row">
-        <div class="tm-av tm-av-t tm-av-sm">DP</div>
-        <span>Dimitrije Pešić</span>
-      </div>
-      <div class="tm-r-row">
-        <div class="tm-av tm-av-r tm-av-sm">NS</div>
-        <span>Nenad Skoković</span>
+        <button class="btn-join tm-btn-lg">Kreiraj tim</button>
+        <button class="btn-info tm-btn-lg" onclick="document.querySelector('[data-filter=ai]').click()">Pogledaj AI predloge</button>
       </div>
     </div>
   </section>
@@ -133,7 +105,10 @@
           </div>
           <div class="tm-sug-names">fenjer, vuk, mara + ti</div>
           <div class="tm-sug-why">Pokrivate ceo stack (ML + Backend + Frontend) za LLM izazov.</div>
-          <button class="btn-join">Prihvati predlog</button>
+          <div class="tm-sug-actions">
+            <button class="btn-join">Prihvati predlog</button>
+            <button class="btn-reject">Odbij i traži nov predlog ↻</button>
+          </div>
         </div>
       </div>
 
@@ -148,7 +123,10 @@
           </div>
           <div class="tm-sug-names">nona, moljac + ti</div>
           <div class="tm-sug-why">Mali precizan tim — nona radi infra, moljac high-perf backend, ti frontend.</div>
-          <button class="btn-join">Prihvati predlog</button>
+          <div class="tm-sug-actions">
+            <button class="btn-join">Prihvati predlog</button>
+            <button class="btn-reject">Odbij i traži nov predlog ↻</button>
+          </div>
         </div>
       </div>
 
@@ -164,7 +142,10 @@
           </div>
           <div class="tm-sug-names">bane_iot, jana, petar.s + ti</div>
           <div class="tm-sug-why">IoT izazov traži hardver + dashboard + analitiku — tim pokriva sve tri.</div>
-          <button class="btn-join">Prihvati predlog</button>
+          <div class="tm-sug-actions">
+            <button class="btn-join">Prihvati predlog</button>
+            <button class="btn-reject">Odbij i traži nov predlog ↻</button>
+          </div>
         </div>
       </div>
 
@@ -456,7 +437,6 @@
   const tmPage = document.querySelector('.tm-page');
 
   document.querySelectorAll('.tm-tab').forEach(t => {
-    if (t.classList.contains('tm-tab-disabled')) return;
     t.addEventListener('click', () => {
       document.querySelectorAll('.tm-tab').forEach(x => x.classList.remove('tm-tab-active'));
       t.classList.add('tm-tab-active');
@@ -467,10 +447,56 @@
 </script>
 
 <style>
-  .tm-tab-disabled {
-    opacity: 0.38;
-    cursor: not-allowed !important;
-    pointer-events: none;
+  .tm-hero-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    min-height: 280px;
+    text-align: center;
+  }
+  .tm-empty-icon {
+    font-size: 48px;
+    opacity: 0.3;
+    filter: grayscale(1);
+  }
+  .tm-empty-title {
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -.02em;
+    color: var(--text);
+    margin: 0;
+    line-height: 1.2;
+  }
+  .tm-empty-desc {
+    font-size: var(--fs-sm);
+    color: var(--muted);
+    max-width: 360px;
+    margin: 0;
+    line-height: 1.55;
+  }
+  .tm-sug-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .btn-reject {
+    background: transparent;
+    border: 0.5px solid var(--border);
+    color: var(--muted);
+    font-family: var(--font);
+    font-size: var(--fs-xs);
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: var(--r-md);
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .btn-reject:hover {
+    border-color: var(--violet);
+    color: var(--text);
   }
 </style>
 

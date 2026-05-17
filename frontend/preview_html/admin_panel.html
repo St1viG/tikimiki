@@ -152,6 +152,7 @@
       <div class="hk-tab" data-filter="korisnici" onclick="switchTab('korisnici')">Korisnici</div>
       <div class="hk-tab" data-filter="organizacije" onclick="switchTab('organizacije')">Organizacije <span class="hk-tab-count">7</span></div>
       <div class="hk-tab" data-filter="audit" onclick="switchTab('audit')">Audit log</div>
+      <div class="hk-tab" data-filter="zalbe" onclick="switchTab('zalbe')">Žalbe <span class="hk-tab-count">2</span></div>
     </div>
 
 
@@ -328,7 +329,7 @@
           <button class="adm-btn-xs warn" onclick="openModal('modal-warn')">Upozori korisnika</button>
           <button class="adm-btn-xs danger" onclick="openModal('modal-suspend')">Suspenduj nalog</button>
           <button class="adm-btn-xs">Odbaci prijavu</button>
-          <button class="adm-btn-xs" style="margin-left:auto;">Pregledaj profil →</button>
+          <button class="adm-btn-xs" style="margin-left:auto;" onclick="openProfileModal('anon_player')">Pregledaj profil →</button>
         </div>
       </div>
 
@@ -354,7 +355,7 @@
           <button class="adm-btn-xs danger" onclick="openModal('modal-remove')">Ukloni sadržaj</button>
           <button class="adm-btn-xs danger" onclick="openModal('modal-suspend')">Suspenduj nalog</button>
           <button class="adm-btn-xs">Odbaci prijavu</button>
-          <button class="adm-btn-xs" style="margin-left:auto;">Pregledaj profil →</button>
+          <button class="adm-btn-xs" style="margin-left:auto;" onclick="openProfileModal('crypto_bot_42')">Pregledaj profil →</button>
         </div>
       </div>
 
@@ -379,7 +380,7 @@
           <button class="adm-btn-xs danger" onclick="openModal('modal-suspend')">Suspenduj nalog</button>
           <button class="adm-btn-xs warn" onclick="openModal('modal-warn')">Upozori korisnika</button>
           <button class="adm-btn-xs">Odbaci prijavu</button>
-          <button class="adm-btn-xs" style="margin-left:auto;">Pregledaj profil →</button>
+          <button class="adm-btn-xs" style="margin-left:auto;" onclick="openProfileModal('real_elon_musk')">Pregledaj profil →</button>
         </div>
       </div>
 
@@ -405,7 +406,7 @@
           <button class="adm-btn-xs danger" onclick="openModal('modal-suspend')">Suspenduj nalog (30d)</button>
           <button class="adm-btn-xs danger" onclick="openModal('modal-remove')">Ukloni poruke</button>
           <button class="adm-btn-xs">Odbaci prijavu</button>
-          <button class="adm-btn-xs" style="margin-left:auto;">Pregledaj profil →</button>
+          <button class="adm-btn-xs" style="margin-left:auto;" onclick="openProfileModal('xUser99')">Pregledaj profil →</button>
         </div>
       </div>
 
@@ -431,7 +432,7 @@
           <button class="adm-btn-xs danger" onclick="openModal('modal-remove')">Ukloni objavu</button>
           <button class="adm-btn-xs warn" onclick="openModal('modal-warn')">Upozori korisnika</button>
           <button class="adm-btn-xs">Odbaci prijavu</button>
-          <button class="adm-btn-xs" style="margin-left:auto;">Pregledaj profil →</button>
+          <button class="adm-btn-xs" style="margin-left:auto;" onclick="openProfileModal('fakeNews')">Pregledaj profil →</button>
         </div>
       </div>
 
@@ -490,7 +491,7 @@
               <td class="adm-reports-count">0</td>
               <td>
                 <div class="adm-table-actions">
-                  <button class="adm-btn-xs">Profil</button>
+                  <button class="adm-btn-xs" onclick="openProfileModal('stivig')">Profil</button>
                   <button class="adm-btn-xs warn" onclick="openModal('modal-suspend')">Suspenduj</button>
                 </div>
               </td>
@@ -512,7 +513,7 @@
               <td class="adm-reports-count">1</td>
               <td>
                 <div class="adm-table-actions">
-                  <button class="adm-btn-xs">Profil</button>
+                  <button class="adm-btn-xs" onclick="openProfileModal('andrejc')">Profil</button>
                   <button class="adm-btn-xs warn" onclick="openModal('modal-suspend')">Suspenduj</button>
                 </div>
               </td>
@@ -556,7 +557,8 @@
               <td class="adm-reports-count hot">8</td>
               <td>
                 <div class="adm-table-actions">
-                  <button class="adm-btn-xs">Profil</button>
+                  <button class="adm-btn-xs" onclick="openProfileModal('xUser99')">Profil</button>
+                  <button class="adm-btn-xs" onclick="window.open('suspended.html','_blank')" title="Prikaži ekran koji vidi suspendovani korisnik">Ekran suspenzije ↗</button>
                   <button class="adm-btn-xs ok" onclick="showToast('Suspenzija je ukinuta. Korisnik je obavešten.', 'green')">Ukini suspenziju</button>
                   <button class="adm-btn-xs danger" onclick="openModal('modal-delete')">Ukloni</button>
                 </div>
@@ -579,7 +581,8 @@
               <td class="adm-reports-count hot">14</td>
               <td>
                 <div class="adm-table-actions">
-                  <button class="adm-btn-xs">Profil</button>
+                  <button class="adm-btn-xs" onclick="openProfileModal('crypto_bot_42')">Profil</button>
+                  <button class="adm-btn-xs" onclick="window.open('suspended.html','_blank')" title="Prikaži ekran koji vidi suspendovani korisnik">Ekran suspenzije ↗</button>
                   <button class="adm-btn-xs ok" onclick="showToast('Suspenzija je ukinuta.', 'green')">Ukini</button>
                   <button class="adm-btn-xs danger" onclick="openModal('modal-delete')">Ukloni</button>
                 </div>
@@ -602,7 +605,7 @@
               <td class="adm-reports-count">0</td>
               <td>
                 <div class="adm-table-actions">
-                  <button class="adm-btn-xs">Profil</button>
+                  <button class="adm-btn-xs" onclick="openProfileModal('nenads')">Profil</button>
                   <button class="adm-btn-xs warn" onclick="openModal('modal-suspend')">Suspenduj</button>
                 </div>
               </td>
@@ -624,7 +627,7 @@
               <td class="adm-reports-count">2</td>
               <td>
                 <div class="adm-table-actions">
-                  <button class="adm-btn-xs">Profil</button>
+                  <button class="adm-btn-xs" onclick="openProfileModal('dimitrijep')">Profil</button>
                   <button class="adm-btn-xs warn" onclick="openModal('modal-suspend')">Suspenduj</button>
                 </div>
               </td>
@@ -957,6 +960,147 @@
 
     </section>
 
+    <!-- ============================================================
+         SECTION: ŽALBE
+         ============================================================ -->
+    <section class="adm-section" data-section="zalbe">
+
+      <div class="hk-filter-bar">
+        <div class="hk-search">
+          <span class="search-icon">⌕</span>
+          <input type="text" placeholder="Pretraži žalbe po korisniku ili meri...">
+        </div>
+        <div class="hk-chips-row">
+          <div class="hk-chip hk-chip-active">Status: Na čekanju <span class="hk-chip-arrow">▾</span></div>
+          <div class="hk-chip">Tip mere <span class="hk-chip-arrow">▾</span></div>
+          <div class="hk-chip-sort">Sortiraj: <strong>Najnovije</strong> <span class="hk-chip-arrow">▾</span></div>
+        </div>
+      </div>
+
+      <!-- Appeal 1: xUser99 – suspenzija -->
+      <div class="app-card">
+        <div class="app-header">
+          <div class="app-avatar av-r">XU</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:14px;font-weight:600;color:var(--text);">Žalba na suspenziju</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">
+              Podneo <strong style="color:var(--text);">@xUser99</strong> · 15.04.2026 u 18:32
+            </div>
+          </div>
+          <span class="status-pill s-pending">Na čekanju</span>
+        </div>
+        <div class="adm-report-meta">
+          <span>Mera: <strong>Suspenzija 30 dana</strong></span>
+          <span>Izrečena: <strong>14.04.2026</strong></span>
+          <span>Ističe: <strong>16.05.2026</strong></span>
+          <span>Admin: <strong>Admin Đurić</strong></span>
+        </div>
+        <div class="adm-report-quote message">
+          „Smatram da je suspenzija neosnovana. Poruke koje sam slao bile su prijatnog karaktera,
+          a korisnik je pogrešno interpretirao moje namere. Nisam imao nikakvu zlonamernu nameru
+          i spreman sam da se izvinim ukoliko je to potrebno."
+        </div>
+        <div class="adm-report-actions">
+          <button class="adm-btn-xs ok" onclick="openAppealModal('approve','xUser99','Suspenzija 30 dana')">✓ Prihvati žalbu</button>
+          <button class="adm-btn-xs danger" onclick="openAppealModal('reject','xUser99','Suspenzija 30 dana')">Odbij žalbu</button>
+          <button class="adm-btn-xs" style="margin-left:auto;" onclick="openProfileModal('xUser99')">Profil korisnika →</button>
+        </div>
+      </div>
+
+      <!-- Appeal 2: crypto_bot_42 – suspenzija -->
+      <div class="app-card">
+        <div class="app-header">
+          <div class="app-avatar av-r">CB</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:14px;font-weight:600;color:var(--text);">Žalba na suspenziju</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">
+              Podneo <strong style="color:var(--text);">@crypto_bot_42</strong> · 16.04.2026 u 11:14
+            </div>
+          </div>
+          <span class="status-pill s-pending">Na čekanju</span>
+        </div>
+        <div class="adm-report-meta">
+          <span>Mera: <strong>Suspenzija 7 dana</strong></span>
+          <span>Izrečena: <strong>16.04.2026</strong></span>
+          <span>Ističe: <strong>23.04.2026</strong></span>
+          <span>Admin: <strong>Admin Đurić</strong></span>
+        </div>
+        <div class="adm-report-quote message">
+          „Nisam bot niti šaljem spam. Poruke su bile deo legitimne poslovne komunikacije.
+          Molim vas da pregledate sadržaj poruka jer smatram da nisu kršile pravila platforme."
+        </div>
+        <div class="adm-report-actions">
+          <button class="adm-btn-xs ok" onclick="openAppealModal('approve','crypto_bot_42','Suspenzija 7 dana')">✓ Prihvati žalbu</button>
+          <button class="adm-btn-xs danger" onclick="openAppealModal('reject','crypto_bot_42','Suspenzija 7 dana')">Odbij žalbu</button>
+          <button class="adm-btn-xs" style="margin-left:auto;" onclick="openProfileModal('crypto_bot_42')">Profil korisnika →</button>
+        </div>
+      </div>
+
+      <div class="adm-subsection-title" style="margin-top:24px;">
+        Zatvorene žalbe
+        <div class="adm-subsection-sub">Obrađene žalbe iz prethodnog perioda</div>
+      </div>
+
+      <!-- Appeal 3: andrejc – upozorenje (odbijena) -->
+      <div class="app-card" style="opacity:.7;">
+        <div class="app-header">
+          <div class="app-avatar av-t">AČ</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:14px;font-weight:600;color:var(--text);">Žalba na upozorenje</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">
+              Podneo <strong style="color:var(--text);">@andrejc</strong> · 11.03.2026 u 09:50
+            </div>
+          </div>
+          <span class="status-pill adm-status-removed">Odbijena</span>
+        </div>
+        <div class="adm-report-meta">
+          <span>Mera: <strong>Upozorenje</strong></span>
+          <span>Izrečena: <strong>10.03.2026</strong></span>
+          <span>Obrađeno: <strong>12.03.2026</strong></span>
+        </div>
+        <div class="adm-report-quote">
+          „Smatram da moje poruke nisu bile neprikladne u datom kontekstu razgovora."
+        </div>
+        <div class="adm-report-actions">
+          <div style="font-size:12px;color:var(--muted);">Odgovor: Žalba odbijena — sadržaj poruka jasno krši pravila komunikacije platforme.</div>
+          <button class="adm-btn-xs" style="margin-left:auto;" onclick="openProfileModal('andrejc')">Profil →</button>
+        </div>
+      </div>
+
+      <!-- Appeal 4: korisnik22 – suspenzija (prihvaćena) -->
+      <div class="app-card" style="opacity:.7;">
+        <div class="app-header">
+          <div class="app-avatar av-v">K2</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:14px;font-weight:600;color:var(--text);">Žalba na suspenziju</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px;">
+              Podneo <strong style="color:var(--text);">@korisnik22</strong> · 03.04.2026 u 14:20
+            </div>
+          </div>
+          <span class="status-pill adm-status-active">Prihvaćena</span>
+        </div>
+        <div class="adm-report-meta">
+          <span>Mera: <strong>Suspenzija 14 dana</strong></span>
+          <span>Izrečena: <strong>01.04.2026</strong></span>
+          <span>Obrađeno: <strong>15.04.2026</strong></span>
+        </div>
+        <div class="adm-report-quote message">
+          „Suspenzija je izrečena greškom — bio sam žrtva lažne prijave od strane korisnika
+          s kojim imam spora. Molim provjeru."
+        </div>
+        <div class="adm-report-actions">
+          <div style="font-size:12px;color:#5DCAA5;">Odgovor: Žalba prihvaćena — suspenzija ukinuta, korisnik obavešten.</div>
+          <button class="adm-btn-xs" style="margin-left:auto;">Profil →</button>
+        </div>
+      </div>
+
+      <div style="text-align:center;padding:16px;color:var(--muted);font-size:var(--fs-xs);">
+        Prikazano 4 od 4 žalbi · <a style="color:var(--violet-light);cursor:pointer;">Učitaj još</a>
+      </div>
+
+    </section>
+
+
     <!-- FOOTER -->
     <div style="border-top:0.5px solid var(--border);padding:20px 0;margin-top:24px;text-align:center;">
       <div style="display:flex;flex-wrap:wrap;gap:6px 10px;margin-bottom:10px;justify-content:center;">
@@ -1062,6 +1206,68 @@
 </div>
 
 
+<!-- Appeal: Approve modal -->
+<div class="modal-overlay" id="modal-appeal-approve">
+  <div class="modal">
+    <div class="modal-title" style="color:#5DCAA5;">✓ Prihvati žalbu?</div>
+    <div class="modal-sub" id="appeal-approve-sub">Mera će biti ukinuta i korisnik će biti obavešten o odluci.</div>
+    <textarea id="appeal-approve-reason" placeholder="Obrazloženje odluke (obavezno)..."></textarea>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal('modal-appeal-approve')">Odustani</button>
+      <button class="modal-confirm" style="background:rgba(93,202,165,.15);border-color:#5DCAA5;color:#5DCAA5;"
+        onclick="confirmAppeal('approve')">Prihvati i ukini meru</button>
+    </div>
+  </div>
+</div>
+
+<!-- Appeal: Reject modal -->
+<div class="modal-overlay" id="modal-appeal-reject">
+  <div class="modal">
+    <div class="modal-title">Odbij žalbu</div>
+    <div class="modal-sub" id="appeal-reject-sub">Mera ostaje na snazi. Korisnik će biti obavešten o odluci i razlogu odbijanja.</div>
+    <textarea id="appeal-reject-reason" placeholder="Obrazloženje odbijanja (obavezno)..."></textarea>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal('modal-appeal-reject')">Odustani</button>
+      <button class="modal-confirm" onclick="confirmAppeal('reject')">Odbij žalbu</button>
+    </div>
+  </div>
+</div>
+
+<!-- User Profile Modal -->
+<div class="modal-overlay" id="modal-profile" onclick="if(event.target===this)closeModal('modal-profile')">
+  <div class="modal" style="max-width:560px;max-height:82vh;overflow-y:auto;">
+    <div class="modal-title">Profil korisnika</div>
+    <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:18px;">
+      <div id="prof-av" class="adm-user-av" style="width:52px;height:52px;font-size:17px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:700;"></div>
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <div style="font-size:15px;font-weight:600;color:var(--text);" id="prof-name"></div>
+          <span class="status-pill" id="prof-role"></span>
+          <span class="status-pill" id="prof-status"></span>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px;" id="prof-handle"></div>
+        <div style="font-size:12px;color:var(--muted);margin-top:1px;" id="prof-email"></div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;font-size:12px;">
+        <div style="color:var(--muted);font-size:11px;">Registrovan</div>
+        <div style="color:var(--text-2);" id="prof-joined"></div>
+        <div style="color:var(--muted);font-size:11px;margin-top:6px;">Prijave</div>
+        <div style="font-weight:700;" id="prof-reports"></div>
+      </div>
+    </div>
+
+    <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Istorija aktivnosti</div>
+    <div class="adm-timeline" id="prof-activity" style="margin:0 0 4px;"></div>
+
+    <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin:16px 0 8px;">Prethodne mere</div>
+    <div id="prof-measures"></div>
+
+    <div class="modal-actions" style="margin-top:18px;">
+      <button class="modal-cancel" onclick="closeModal('modal-profile')">Zatvori</button>
+    </div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="admin-toast"></div>
 
@@ -1102,6 +1308,178 @@
       if (e.target === overlay) overlay.classList.remove('open');
     });
   });
+
+  var _appealAction = null;
+  var _appealUser = null;
+  var _appealMeasure = null;
+
+  function openAppealModal(action, userId, measure) {
+    _appealAction = action;
+    _appealUser = userId;
+    _appealMeasure = measure;
+    if (action === 'approve') {
+      document.getElementById('appeal-approve-sub').textContent =
+        'Mera "' + measure + '" za @' + userId + ' biće ukinuta i korisnik će biti obavešten o odluci.';
+      document.getElementById('appeal-approve-reason').value = '';
+      openModal('modal-appeal-approve');
+    } else {
+      document.getElementById('appeal-reject-sub').textContent =
+        'Mera "' + measure + '" za @' + userId + ' ostaje na snazi. Korisnik će biti obavešten o razlogu odbijanja.';
+      document.getElementById('appeal-reject-reason').value = '';
+      openModal('modal-appeal-reject');
+    }
+  }
+
+  function confirmAppeal(action) {
+    var reasonId = action === 'approve' ? 'appeal-approve-reason' : 'appeal-reject-reason';
+    var reason = document.getElementById(reasonId).value.trim();
+    if (!reason) { document.getElementById(reasonId).focus(); return; }
+    var modalId = action === 'approve' ? 'modal-appeal-approve' : 'modal-appeal-reject';
+    closeModal(modalId);
+    if (action === 'approve') {
+      showToast('✓ Žalba @' + _appealUser + ' prihvaćena. Mera "' + _appealMeasure + '" je ukinuta. Korisnik je obavešten.', 'green');
+    } else {
+      showToast('Žalba @' + _appealUser + ' odbijena. Korisnik je obavešten o razlogu.', 'green');
+    }
+  }
+
+  var USER_PROFILES = {
+    stivig: {
+      av:'SG', avCls:'av-v', name:'Stevan Gnjato', handle:'@stivig',
+      email:'stevan.gnjato@etf.edu.rs', role:'Član', roleCls:'adm-role-clan',
+      status:'Aktivan', statusCls:'adm-status-active', joined:'12.09.2023', reports:0,
+      activity:[
+        {time:'16.04.2026 10:15', action:'Prijavio se na hackathon', detail:'ETF HackWeek 2026'},
+        {time:'15.04.2026 22:30', action:'Objavio komentar', detail:'ETF HackWeek 2026 – opšti kanal'},
+        {time:'15.04.2026 18:00', action:'Odigrao Daily Spin', detail:'Osvojio 50 XP'},
+        {time:'14.04.2026 14:22', action:'Prijavio sadržaj', detail:'@real_elon_musk – lažni identitet'},
+      ],
+      measures:[]
+    },
+    andrejc: {
+      av:'AČ', avCls:'av-t', name:'Andrej Čolić', handle:'@andrejc',
+      email:'andrej.colic@etf.edu.rs', role:'Moderator', roleCls:'adm-role-mod',
+      status:'Aktivan', statusCls:'adm-status-active', joined:'05.10.2023', reports:1,
+      activity:[
+        {time:'16.04.2026 09:00', action:'Pregledao prijave sadržaja', detail:'3 prijave zatvorene'},
+        {time:'14.04.2026 11:30', action:'Objavio komentar', detail:'ETF HackWeek 2026 – opšti kanal'},
+        {time:'12.04.2026 17:00', action:'Odigrao Daily Minigame', detail:'Rezultat 5/5, +150 XP'},
+      ],
+      measures:[
+        {time:'10.03.2026', type:'Upozorenje', detail:'Neprikladna komunikacija u kanalu', by:'Admin Đurić'}
+      ]
+    },
+    xUser99: {
+      av:'XU', avCls:'av-r', name:'xUser99', handle:'@xUser99',
+      email:'xuser99@protonmail.com', role:'Član', roleCls:'adm-role-clan',
+      status:'Suspendovan do 16.05.2026', statusCls:'adm-status-suspended', joined:'01.02.2026', reports:8,
+      activity:[
+        {time:'14.04.2026 13:50', action:'Poslao 14 direktnih poruka', detail:'@annap – za 2h (uznemiravanje)'},
+        {time:'13.04.2026 20:10', action:'Objavio komentar', detail:'ETF HackWeek 2026 – opšti kanal'},
+        {time:'10.04.2026 11:00', action:'Prijavio se na hackathon', detail:'ETF HackWeek 2026'},
+      ],
+      measures:[
+        {time:'14.04.2026', type:'Suspenzija (30 dana)', detail:'Uznemiravanje – 3 prijave', by:'Admin Đurić'},
+        {time:'16.04.2026', type:'Upozorenje', detail:'Neprimereno ponašanje u komentarima', by:'Admin Đurić'},
+      ]
+    },
+    crypto_bot_42: {
+      av:'CB', avCls:'av-r', name:'crypto_bot_42', handle:'@crypto_bot_42',
+      email:'bot42@tempmail.xyz', role:'Član', roleCls:'adm-role-clan',
+      status:'Suspendovan do 23.04.2026', statusCls:'adm-status-suspended', joined:'10.03.2026', reports:14,
+      activity:[
+        {time:'16.04.2026 10:00', action:'Poslao 11 direktnih poruka', detail:'Spam/invest sadržaj'},
+        {time:'15.04.2026 22:00', action:'Registrovao nalog', detail:'Kreiran sa tempmail adresom'},
+      ],
+      measures:[
+        {time:'16.04.2026', type:'Suspenzija (7 dana)', detail:'Spam poruke – 11 prijava', by:'Admin Đurić'}
+      ]
+    },
+    nenads: {
+      av:'NS', avCls:'av-v', name:'Nenad Skoković', handle:'@nenads',
+      email:'nenad.skokovic@etf.edu.rs', role:'Član', roleCls:'adm-role-clan',
+      status:'Aktivan', statusCls:'adm-status-active', joined:'15.09.2023', reports:0,
+      activity:[
+        {time:'15.04.2026 16:00', action:'Prijavio se na hackathon', detail:'Nordeus Game Jam 2026'},
+        {time:'14.04.2026 12:00', action:'Odigrao Daily Minigame', detail:'Rezultat 4/5, +120 XP'},
+        {time:'13.04.2026 09:30', action:'Odigrao Daily Spin', detail:'Osvojio 100 XP'},
+      ],
+      measures:[]
+    },
+    dimitrijep: {
+      av:'DP', avCls:'av-v', name:'Dimitrije Pešić', handle:'@dimitrijep',
+      email:'dimitrije.pesic@etf.edu.rs', role:'Član', roleCls:'adm-role-clan',
+      status:'Aktivan', statusCls:'adm-status-active', joined:'20.09.2023', reports:2,
+      activity:[
+        {time:'16.04.2026 08:00', action:'Prijavio objavu', detail:'@fakeNews – lažne informacije'},
+        {time:'15.04.2026 15:30', action:'Kreirao tim', detail:'"Hack Attack Squad"'},
+        {time:'14.04.2026 10:00', action:'Prijavio se na hackathon', detail:'ETF HackWeek 2026'},
+      ],
+      measures:[]
+    },
+    anon_player: {
+      av:'AP', avCls:'av-r', name:'anon_player', handle:'@anon_player',
+      email:'—', role:'Član', roleCls:'adm-role-clan',
+      status:'Aktivan', statusCls:'adm-status-active', joined:'05.03.2026', reports:4,
+      activity:[
+        {time:'16.04.2026 09:30', action:'Objavio komentar', detail:'ETF HackWeek 2026 – opšti kanal (uvredljiv sadržaj)'},
+        {time:'10.03.2026 14:00', action:'Registrovao nalog', detail:'Bez GitHub veze'},
+      ],
+      measures:[]
+    },
+    real_elon_musk: {
+      av:'EM', avCls:'av-r', name:'real_elon_musk', handle:'@real_elon_musk',
+      email:'—', role:'Član', roleCls:'adm-role-clan',
+      status:'Aktivan', statusCls:'adm-status-active', joined:'13.04.2026', reports:7,
+      activity:[
+        {time:'13.04.2026 20:00', action:'Kreirao profil', detail:'Lažni identitet – verifikacija nije podneta'},
+        {time:'13.04.2026 20:05', action:'Objavio na feed-u', detail:'Lažne tvrdnje o identitetu'},
+      ],
+      measures:[]
+    },
+    fakeNews: {
+      av:'FN', avCls:'av-r', name:'fakeNews', handle:'@fakeNews',
+      email:'—', role:'Član', roleCls:'adm-role-clan',
+      status:'Aktivan', statusCls:'adm-status-active', joined:'01.04.2026', reports:2,
+      activity:[
+        {time:'16.04.2026 07:30', action:'Objavio na feed-u', detail:'Lažne informacije o HackWeek 2026 otkazivanju'},
+        {time:'01.04.2026 12:00', action:'Registrovao nalog', detail:''},
+      ],
+      measures:[]
+    },
+  };
+
+  function openProfileModal(userId) {
+    var u = USER_PROFILES[userId];
+    if (!u) return;
+    var av = document.getElementById('prof-av');
+    av.textContent = u.av;
+    av.className = 'adm-user-av ' + u.avCls;
+    av.style.cssText = 'width:52px;height:52px;font-size:17px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-weight:700;';
+    document.getElementById('prof-name').textContent = u.name;
+    document.getElementById('prof-handle').textContent = u.handle;
+    document.getElementById('prof-email').textContent = u.email;
+    var re = document.getElementById('prof-role');
+    re.textContent = u.role; re.className = 'status-pill ' + u.roleCls;
+    var se = document.getElementById('prof-status');
+    se.textContent = u.status; se.className = 'status-pill ' + u.statusCls;
+    document.getElementById('prof-joined').textContent = u.joined;
+    var rp = document.getElementById('prof-reports');
+    rp.textContent = u.reports;
+    rp.style.color = u.reports >= 5 ? '#F07070' : u.reports > 0 ? 'var(--lemon-vivid)' : 'var(--muted)';
+
+    var actEl = document.getElementById('prof-activity');
+    actEl.innerHTML = u.activity.length === 0
+      ? '<div style="color:var(--muted);font-size:13px;padding:6px 0;">Nema zabeležene aktivnosti.</div>'
+      : u.activity.map(function(a){ return '<div class="adm-tl-item"><div class="adm-tl-dot info"></div><div class="adm-tl-head"><span class="adm-tl-action">' + a.action + '</span><span class="adm-tl-time">' + a.time + '</span></div>' + (a.detail ? '<div class="adm-tl-target">' + a.detail + '</div>' : '') + '</div>'; }).join('');
+
+    var measEl = document.getElementById('prof-measures');
+    measEl.innerHTML = u.measures.length === 0
+      ? '<div style="color:var(--muted);font-size:13px;padding:6px 0;">Nema prethodnih mera.</div>'
+      : '<div class="adm-timeline" style="margin:0;">' + u.measures.map(function(m){ var dot = m.type.indexOf('Suspenzija') !== -1 ? 'danger' : m.type === 'Upozorenje' ? 'warn' : 'info'; return '<div class="adm-tl-item"><div class="adm-tl-dot ' + dot + '"></div><div class="adm-tl-head"><span class="adm-tl-action">' + m.type + '</span><span class="adm-tl-time">' + m.time + '</span></div><div class="adm-tl-target">' + m.detail + ' · Izdao: <strong>' + m.by + '</strong></div></div>'; }).join('') + '</div>';
+
+    openModal('modal-profile');
+  }
 </script>
 
 </body>
