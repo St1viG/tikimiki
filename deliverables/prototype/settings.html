@@ -1,0 +1,988 @@
+<!-- Andrej Čolić 2023/0492 -->
+<!-- Dimitrije Pešić 2023/0014 -->
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="tikimiki.css">
+  <link rel="stylesheet" href="settings.css">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" href="images/favicon.ico">
+  <title>tikimiki · Podešavanja</title>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="logo" onclick="window.location.href='home_page.html'" style="cursor:pointer"><span>tiki</span>miki</div>
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input type="text" placeholder="Pretraži korisnike, hackathone, organizacije...">
+    </div>
+    <div class="nav-right">
+      <div class="icon-btn" onclick="window.location.href='store.html'">🛒<span class="badge">2</span></div>
+      <div class="icon-btn">🔔<span class="badge">5</span></div>
+      <div class="avatar">AČ</div>
+    </div>
+  </div>
+</nav>
+
+<div class="ep-layout">
+
+  <!-- LEFT NAV — matches .sidebar-left from home_page -->
+  <div class="ep-nav">
+    <div class="menu-item" onclick="window.location.href='home_page.html'"><span class="icon">⌂</span> Početna</div>
+    <div class="menu-item" onclick="window.location.href='hackathons.html'"><span class="icon">◈</span> Hackathoni</div>
+    <div class="menu-item" onclick="window.location.href='teams.html'"><span class="icon">👥</span> Timovi</div>
+    <div class="menu-item" onclick="window.location.href='cohor.html'"><span class="icon">✉</span> Poruke</div>
+    <div class="menu-item" onclick="window.location.href='gamehub.html'"><span class="icon">👾</span> GameHub</div>
+    <div class="menu-item active"><span class="icon">⚙</span> Podešavanja</div>
+    <div class="menu-divider"></div>
+    <div class="menu-label">Podešavanja</div>
+    <div class="menu-item active" data-panel="izgled-profila"><span class="icon">🎨</span> Izgled profila</div>
+    <div class="menu-item" data-panel="nalog"><span class="icon">🔑</span> Nalog</div>
+    <div class="menu-item" data-panel="integracije"><span class="icon">🔗</span> Integracije</div>
+    <div class="menu-item" data-panel="privatnost"><span class="icon">🔒</span> Privatnost</div>
+    <div class="menu-item" data-panel="premium"><span class="icon">◆</span> Premium</div>
+    <div class="menu-item" data-panel="opasno"><span class="icon">⚠</span> Brisanje profila</div>
+    <div class="menu-item" data-panel="odjava" style="color:#E74C3C"><span class="icon">↩</span> Odjavi se</div>
+    <div class="menu-divider"></div>
+    <div class="crystal-button" onclick="window.location.href='premium.html'"><span class="crystal-icon">◆</span> Premium</div>
+  </div>
+
+  <!-- MIDDLE FEED — settings panels -->
+  <main class="ep-feed">
+
+    <!-- PANEL: IZGLED PROFILA (merged Profil + Izgled) -->
+    <div class="ep-panel active" id="panel-izgled-profila">
+
+      <div class="ep-card">
+        <div class="ep-card-header">
+          <div>
+            <div class="ep-card-title">Avatar i baner</div>
+            <div class="ep-card-sub">Personalizuj kako izgledaš na platformi</div>
+          </div>
+        </div>
+        <div class="ep-card-body">
+          <div>
+            <div class="ep-label" style="margin-bottom:8px">Baner</div>
+            <div class="ep-banner-wrap" onclick="alert('Upload banera')">
+              <div class="ep-banner" id="preview-banner-bg"></div>
+              <div class="ep-banner-overlay">📷 Promeni baner</div>
+            </div>
+            <div class="ep-banner-hint">Preporučena veličina: 1500×500px · PNG, JPG, GIF (premium)</div>
+          </div>
+
+          <div class="ep-avatar-section">
+            <div class="ep-avatar-wrap" onclick="alert('Upload avatara')">
+              <div class="ep-avatar-img" id="preview-avatar-initials">AČ</div>
+              <div class="ep-avatar-edit">✎</div>
+            </div>
+            <div class="ep-avatar-info">
+              <div class="ep-avatar-name" id="preview-name-inline">Andrej Čolić</div>
+              <div class="ep-avatar-handle">@andrej</div>
+              <div class="ep-avatar-btns">
+                <button class="ep-btn-secondary" style="font-size:12px;padding:5px 12px" onclick="alert('Upload avatara')">Promeni sliku</button>
+                <button class="ep-btn-secondary" style="font-size:12px;padding:5px 12px;color:#E74C3C;border-color:#C0392B">Ukloni</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="ep-card-footer">
+          <span class="ep-save-status" id="status-avatar">Sačuvano ✓</span>
+          <button class="ep-btn-secondary" onclick="resetCard('avatar')">Poništi</button>
+          <button class="ep-btn-primary" onclick="saveCard('avatar')">Sačuvaj</button>
+        </div>
+      </div>
+
+      <div class="ep-card">
+        <div class="ep-card-header">
+          <div>
+            <div class="ep-card-title">Osnovne informacije</div>
+            <div class="ep-card-sub">Prikazano ime, korisničko ime i opis profila</div>
+          </div>
+        </div>
+        <div class="ep-card-body">
+          <div class="ep-field">
+            <label class="ep-label">Prikazano ime</label>
+            <input class="ep-input" type="text" value="Andrej Čolić" id="inp-ime" oninput="updateChar('inp-ime','cnt-ime',40); syncPreview()">
+            <div class="ep-char-count" id="cnt-ime">12 / 40</div>
+          </div>
+
+          <div class="ep-field">
+            <label class="ep-label">Korisničko ime</label>
+            <div class="ep-input-wrap">
+              <span class="ep-input-prefix">@</span>
+              <input class="ep-input has-prefix" type="text" value="andrej" id="inp-username" oninput="updateChar('inp-username','cnt-username',20); syncPreview()">
+            </div>
+            <div class="ep-char-count" id="cnt-username">6 / 20</div>
+          </div>
+
+          <div class="ep-field">
+            <label class="ep-label">Bio</label>
+            <textarea class="ep-input" id="inp-bio" oninput="updateChar('inp-bio','cnt-bio',160); syncPreview()" placeholder="Kratko predstavi sebe...">Student 3. godine ETF-a.</textarea>
+            <div class="ep-char-count" id="cnt-bio">62 / 160</div>
+          </div>
+
+          <div class="ep-two-col">
+            <div class="ep-field">
+              <label class="ep-label">Lokacija</label>
+              <input class="ep-input" type="text" value="Beograd, Srbija" id="inp-lokacija" placeholder="Grad, Država" oninput="syncPreview()">
+            </div>
+            <div class="ep-field">
+              <label class="ep-label">Vebsajt</label>
+              <input class="ep-input" type="url">
+            </div>
+          </div>
+        </div>
+        <div class="ep-card-footer">
+          <span class="ep-save-status" id="status-info">Sačuvano ✓</span>
+          <button class="ep-btn-secondary">Poništi</button>
+          <button class="ep-btn-primary" onclick="saveCard('info')">Sačuvaj</button>
+        </div>
+      </div>
+
+      <div class="ep-card">
+        <div class="ep-card-header">
+          <div>
+            <div class="ep-card-title">Veštine</div>
+            <div class="ep-card-sub">Dodaj tehnologije koje koristiš — vidljive na profilu i koriste se za AI matching</div>
+          </div>
+        </div>
+        <div class="ep-card-body">
+          <div class="ep-field">
+            <label class="ep-label">Tehnologije i alati</label>
+            <div class="ep-skills-wrap" id="skills-wrap" onclick="document.getElementById('skills-inp').focus()">
+              <span class="ep-skill-tag">Python <span class="ep-skill-remove" onclick="removeSkill(this)">✕</span></span>
+              <span class="ep-skill-tag">C <span class="ep-skill-remove" onclick="removeSkill(this)">✕</span></span>
+              <span class="ep-skill-tag">C++ <span class="ep-skill-remove" onclick="removeSkill(this)">✕</span></span>
+              <span class="ep-skill-tag">Java <span class="ep-skill-remove" onclick="removeSkill(this)">✕</span></span>
+              <span class="ep-skill-tag">Verilog <span class="ep-skill-remove" onclick="removeSkill(this)">✕</span></span>
+              <span class="ep-skill-tag">HTML <span class="ep-skill-remove" onclick="removeSkill(this)">✕</span></span>
+              <span class="ep-skill-tag">CSS <span class="ep-skill-remove" onclick="removeSkill(this)">✕</span></span>
+              <input id="skills-inp" class="ep-skills-input" placeholder="Dodaj veštinu..." onkeydown="addSkill(event)">
+            </div>
+            <div class="ep-skills-hint">Pritisni Enter ili zarez da dodaš veštinu</div>
+          </div>
+        </div>
+        <div class="ep-card-footer">
+          <span class="ep-save-status" id="status-skills">Sačuvano ✓</span>
+          <button class="ep-btn-secondary">Poništi</button>
+          <button class="ep-btn-primary" onclick="saveCard('skills'); syncPreview()">Sačuvaj</button>
+        </div>
+      </div>
+
+      <div class="ep-card">
+        <div class="ep-card-header">
+          <div>
+            <div class="ep-card-title">Boja korisničkog imena</div>
+            <div class="ep-card-sub">Izaberi boju u kojoj se prikazuje tvoje korisničko ime</div>
+          </div>
+        </div>
+        <div class="ep-card-body">
+          <div class="ep-field">
+            <label class="ep-label">Dostupne boje</label>
+            <div class="ep-color-row">
+              <div class="ep-color-swatch selected" style="background:#A78BFA" onclick="selectColor(this,'#A78BFA')"></div>
+              <div class="ep-color-swatch" style="background:#5DCAA5" onclick="selectColor(this,'#5DCAA5')"></div>
+              <div class="ep-color-swatch" style="background:#EDD94B" onclick="selectColor(this,'#EDD94B')"></div>
+              <div class="ep-color-swatch" style="background:#ff9ff3" onclick="selectColor(this,'#ff9ff3')"></div>
+              <div class="ep-color-swatch" style="background:#00f5ff" onclick="selectColor(this,'#00f5ff')"></div>
+              <div class="ep-color-swatch" style="background:#E74C3C" onclick="selectColor(this,'#E74C3C')"></div>
+              <div class="ep-color-swatch" style="background:#E0D9FF" onclick="selectColor(this,'#E0D9FF')"></div>
+              <span class="ep-color-preview" id="color-preview" style="color:#A78BFA">Andrej Čolić</span>
+            </div>
+          </div>
+        </div>
+        <div class="ep-card-footer">
+          <span class="ep-save-status" id="status-boja">Sačuvano ✓</span>
+          <button class="ep-btn-secondary">Poništi</button>
+          <button class="ep-btn-primary" onclick="saveCard('boja')">Sačuvaj</button>
+        </div>
+      </div>
+
+      <div class="ep-card">
+        <div class="ep-card-header">
+          <div>
+            <div class="ep-card-title">Premium personalizacija</div>
+            <div class="ep-card-sub">Ekskluzivne opcije dostupne premium članovima</div>
+          </div>
+        </div>
+        <div class="ep-card-body">
+          <div class="ep-premium-lock">
+            <div class="ep-field">
+              <label class="ep-label">GIF avatar</label>
+              <div style="display:flex;gap:10px;align-items:center">
+                <div style="width:72px;height:72px;border-radius:50%;background:var(--surface2);border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;font-size:22px">AČ</div>
+                <div>
+                  <button class="ep-btn-secondary" style="font-size:12px;padding:6px 12px">Upload GIF avatara</button>
+                  <div class="ep-banner-hint" style="margin-top:5px">Maks. 8MB · GIF, APNG</div>
+                </div>
+              </div>
+            </div>
+            <div class="ep-field" style="margin-top:4px">
+              <label class="ep-label">GIF baner</label>
+              <div class="ep-banner-wrap" style="cursor:default">
+                <div class="ep-banner" style="height:70px"></div>
+              </div>
+              <div class="ep-banner-hint">Maks. 15MB · GIF, APNG</div>
+            </div>
+          </div>
+        </div>
+        <div class="ep-card-footer">
+          <span class="ep-save-status" id="status-premium-look">Sačuvano ✓</span>
+          <button class="ep-btn-secondary">Poništi</button>
+          <button class="ep-btn-primary" onclick="saveCard('premium-look')">Sačuvaj</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- PANEL: NALOG -->
+    <div class="ep-panel" id="panel-nalog">
+
+      <div class="ep-card">
+        <div class="ep-card-header">
+          <div>
+            <div class="ep-card-title">Prikazano ime</div>
+            <div class="ep-card-sub">Ime koje se prikazuje ostalim korisnicima na platformi</div>
+          </div>
+        </div>
+        <div class="ep-card-body">
+          <div class="ep-field">
+            <label class="ep-label">Prikazano ime <span class="ep-label-hint">(display name)</span></label>
+            <input class="ep-input" type="text" value="Andrej Čolić" id="inp-ime-nalog" oninput="updateChar('inp-ime-nalog','cnt-ime-nalog',40); syncDisplayName()">
+            <div class="ep-char-count" id="cnt-ime-nalog">12 / 40</div>
+          </div>
+        </div>
+        <div class="ep-card-footer">
+          <span class="ep-save-status" id="status-displayname">Sačuvano ✓</span>
+          <button class="ep-btn-secondary">Poništi</button>
+          <button class="ep-btn-primary" onclick="saveCard('displayname')">Sačuvaj</button>
+        </div>
+      </div>
+
+      <div class="ep-card">
+        <div class="ep-card-header">
+          <div>
+            <div class="ep-card-title">Email adresa</div>
+            <div class="ep-card-sub">Adresa na koju primaš obaveštenja i potvrde</div>
+          </div>
+        </div>
+        <div class="ep-card-body">
+          <div class="ep-field">
+            <label class="ep-label">Trenutni email</label>
+            <input class="ep-input" type="email" value="ca************" disabled>
+          </div>
+          <div class="ep-two-col">
+            <div class="ep-field">
+              <label class="ep-label">Novi email</label>
+              <input class="ep-input" type="email">
+            </div>
+            <div class="ep-field">
+              <label class="ep-label">Potvrdi email</label>
+              <input class="ep-input" type="email">
+            </div>
+          </div>
+        </div>
+        <div class="ep-card-footer">
+          <span class="ep-save-status" id="status-email">Poslat verifikacioni mejl ✓</span>
+          <button class="ep-btn-secondary">Poništi</button>
+          <button class="ep-btn-primary" onclick="saveCard('email')">Sačuvaj</button>
+        </div>
+      </div>
+
+      <div class="ep-card">
+        <div class="ep-card-header">
+          <div>
+            <div class="ep-card-title">Lozinka</div>
+            <div class="ep-card-sub">Preporučujemo jaku lozinku sa kombinacijom slova, brojeva i simbola</div>
+          </div>
+        </div>
+        <div class="ep-card-body">
+          <div class="ep-field">
+            <label class="ep-label">Trenutna lozinka</label>
+            <input class="ep-input" type="password">
+          </div>
+          <div class="ep-two-col">
+            <div class="ep-field">
+              <label class="ep-label">Nova lozinka</label>
+              <input class="ep-input" type="password" id="pw-new" oninput="checkPw()">
+            </div>
+            <div class="ep-field">
+              <label class="ep-label">Potvrdi novu lozinku</label>
+              <input class="ep-input" type="password" id="pw-confirm" oninput="checkPw()">
+            </div>
+          </div>
+          <div id="pw-hint" style="font-size:12px;color:var(--muted)">Lozinka mora imati najmanje 8 karaktera</div>
+        </div>
+        <div class="ep-card-footer">
+          <span class="ep-save-status" id="status-pw">Lozinka promenjena ✓</span>
+          <button class="ep-btn-secondary">Poništi</button>
+          <button class="ep-btn-primary" onclick="saveCard('pw')">Promeni lozinku</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- PANEL: INTEGRACIJE -->
+    <div class="ep-panel" id="panel-integracije">
+
+      <div class="ep-card">
+        <div class="ep-card-header">
+          <div>
+            <div class="ep-card-title">Povezani nalozi</div>
+            <div class="ep-card-sub">Integracije se koriste za verifikaciju veština i brzu prijavu</div>
+          </div>
+        </div>
+        <div class="ep-card-body">
+          <div class="ep-github-card">
+            <div class="ep-github-ico">🐙</div>
+            <div class="ep-github-info">
+              <div class="ep-github-name">GitHub · andrej-colic</div>
+              <div class="ep-github-sub">Python · TypeScript · React · 847 kontribucija</div>
+            </div>
+            <div class="ep-github-status">
+              <div class="ep-status-dot"></div> Povezan
+            </div>
+          </div>
+
+          <div class="ep-github-card">
+            <div class="ep-github-ico">💼</div>
+            <div class="ep-github-info">
+              <div class="ep-github-name">LinkedIn</div>
+              <div class="ep-github-sub">Nije povezan — poveži za profesionalnu verifikaciju</div>
+            </div>
+            <button class="ep-btn-secondary" style="font-size:12px;padding:6px 12px;flex-shrink:0">Poveži</button>
+          </div>
+
+          <div class="ep-github-card">
+            <div class="ep-github-ico">G</div>
+            <div class="ep-github-info">
+              <div class="ep-github-name">Google · <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="0e6f606a7c6b64206d6162676d4e6b7a68207c7d">[email&#160;protected]</a></div>
+              <div class="ep-github-sub">Koristi se za prijavu i kalendar integraciju</div>
+            </div>
+            <div class="ep-github-status">
+              <div class="ep-status-dot"></div> Povezan
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ep-card">
+        <div class="ep-card-header">
+          <div>
+            <div class="ep-card-title">GitHub skill sync</div>
+            <div class="ep-card-sub">Upravljanje automatskom sinhronizacijom veština sa GitHub-a</div>
+          </div>
+        </div>
+        <div class="ep-card-body">
+          <div class="ep-toggle-row">
+            <div class="ep-toggle-info">
+              <div class="ep-toggle-title">Automatska sinhronizacija</div>
+              <div class="ep-toggle-sub">Jednom dnevno povlači podatke sa GitHub-a i ažurira skill card</div>
+            </div>
+            <label class="ep-toggle">
+              <input type="checkbox" checked>
+              <div class="ep-toggle-track"></div>
+              <div class="ep-toggle-thumb"></div>
+            </label>
+          </div>
+          <div class="ep-toggle-row">
+            <div class="ep-toggle-info">
+              <div class="ep-toggle-title">Prikaži GitHub aktivnost na profilu</div>
+              <div class="ep-toggle-sub">Contribution graph vidljiv svim korisnicima</div>
+            </div>
+            <label class="ep-toggle">
+              <input type="checkbox" checked>
+              <div class="ep-toggle-track"></div>
+              <div class="ep-toggle-thumb"></div>
+            </label>
+          </div>
+          <button class="ep-btn-secondary" style="width:fit-content;font-size:13px;margin-top:4px">🔄 Ručna sinhronizacija</button>
+        </div>
+        <div class="ep-card-footer">
+          <span class="ep-save-status" id="status-github">Sačuvano ✓</span>
+          <button class="ep-btn-secondary">Poništi</button>
+          <button class="ep-btn-primary" onclick="saveCard('github')">Sačuvaj</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- PANEL: PRIVATNOST -->
+    <div class="ep-panel" id="panel-privatnost">
+
+      <div class="ep-card">
+        <div class="ep-card-header">
+          <div>
+            <div class="ep-card-title">Vidljivost profila</div>
+            <div class="ep-card-sub">Ko može da vidi tvoje informacije</div>
+          </div>
+        </div>
+        <div class="ep-card-body">
+          <div class="ep-field">
+            <label class="ep-label">Ko može videti moj profil</label>
+            <select class="ep-select">
+              <option value="all">Svi korisnici (uključujući goste)</option>
+              <option value="members" selected>Samo registrovani članovi</option>
+              <option value="none">Niko (privatan profil)</option>
+            </select>
+          </div>
+          <div class="ep-toggle-row">
+            <div class="ep-toggle-info">
+              <div class="ep-toggle-title">Vidljiv kompanijama za regrutovanje</div>
+              <div class="ep-toggle-sub">Kompanije-partneri platforme mogu pronaći tvoj profil i kontaktirati te</div>
+            </div>
+            <label class="ep-toggle">
+              <input type="checkbox" checked>
+              <div class="ep-toggle-track"></div>
+              <div class="ep-toggle-thumb"></div>
+            </label>
+          </div>
+          <div class="ep-toggle-row">
+            <div class="ep-toggle-info">
+              <div class="ep-toggle-title">Prikaži email na profilu</div>
+              <div class="ep-toggle-sub">Email adresa vidljiva korisnicima koji pregledaju tvoj profil</div>
+            </div>
+            <label class="ep-toggle">
+              <input type="checkbox">
+              <div class="ep-toggle-track"></div>
+              <div class="ep-toggle-thumb"></div>
+            </label>
+          </div>
+          <div class="ep-toggle-row">
+            <div class="ep-toggle-info">
+              <div class="ep-toggle-title">Prikaži lokaciju na profilu</div>
+              <div class="ep-toggle-sub">Grad i država vidljivi na javnom profilu</div>
+            </div>
+            <label class="ep-toggle">
+              <input type="checkbox" checked>
+              <div class="ep-toggle-track"></div>
+              <div class="ep-toggle-thumb"></div>
+            </label>
+          </div>
+        </div>
+        <div class="ep-card-footer">
+          <span class="ep-save-status" id="status-priv">Sačuvano ✓</span>
+          <button class="ep-btn-secondary">Poništi</button>
+          <button class="ep-btn-primary" onclick="saveCard('priv')">Sačuvaj</button>
+        </div>
+      </div>
+
+      <div class="ep-card">
+        <div class="ep-card-header">
+          <div>
+            <div class="ep-card-title">Obaveštenja</div>
+            <div class="ep-card-sub">Podesi kada i kako primaš notifikacije</div>
+          </div>
+        </div>
+        <div class="ep-card-body">
+          <div class="ep-toggle-row">
+            <div class="ep-toggle-info">
+              <div class="ep-toggle-title">Email obaveštenja</div>
+              <div class="ep-toggle-sub">Rezultati prijava, poruke, hackathon podsetnici</div>
+            </div>
+            <label class="ep-toggle">
+              <input type="checkbox" checked>
+              <div class="ep-toggle-track"></div>
+              <div class="ep-toggle-thumb"></div>
+            </label>
+          </div>
+          <div class="ep-toggle-row">
+            <div class="ep-toggle-info">
+              <div class="ep-toggle-title">Push obaveštenja</div>
+              <div class="ep-toggle-sub">Direktne poruke i aktivnost na hackathonima</div>
+            </div>
+            <label class="ep-toggle">
+              <input type="checkbox" checked>
+              <div class="ep-toggle-track"></div>
+              <div class="ep-toggle-thumb"></div>
+            </label>
+          </div>
+          <div class="ep-toggle-row">
+            <div class="ep-toggle-info">
+              <div class="ep-toggle-title">Dnevni podsetnici za mini igre</div>
+              <div class="ep-toggle-sub">Podsetnik kada su dostupne nove dnevne igre</div>
+            </div>
+            <label class="ep-toggle">
+              <input type="checkbox">
+              <div class="ep-toggle-track"></div>
+              <div class="ep-toggle-thumb"></div>
+            </label>
+          </div>
+        </div>
+        <div class="ep-card-footer">
+          <span class="ep-save-status" id="status-notif">Sačuvano ✓</span>
+          <button class="ep-btn-secondary">Poništi</button>
+          <button class="ep-btn-primary" onclick="saveCard('notif')">Sačuvaj</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- PANEL: OPASNO -->
+    <div class="ep-panel" id="panel-opasno">
+
+      <div class="ep-danger-card">
+        <div class="ep-danger-header">
+          <div class="ep-danger-title">⚠ Brisanje profila</div>
+        </div>
+        <div class="ep-danger-body">
+
+          <div class="ep-danger-row">
+            <div class="ep-danger-info">
+              <div class="ep-toggle-title">Deaktivacija naloga</div>
+              <div class="ep-toggle-sub" style="margin-top:2px">Privremeno sakrij nalog. Možeš se prijaviti ponovo u svakom momentu.</div>
+            </div>
+            <button class="ep-btn-danger" onclick="confirmDanger('Deaktivirati nalog?')">Deaktiviraj</button>
+          </div>
+
+          <div style="height:0.5px;background:#3D1A1A"></div>
+
+          <div class="ep-danger-row">
+            <div class="ep-danger-info">
+              <div class="ep-toggle-title">Brisanje svih podataka</div>
+              <div class="ep-toggle-sub" style="margin-top:2px">Trajno briše sve lične podatke, ali čuva anonimizovane istorije hackathona.</div>
+            </div>
+            <button class="ep-btn-danger" onclick="confirmDanger('Obrisati sve podatke?')">Obriši podatke</button>
+          </div>
+
+          <div style="height:0.5px;background:#3D1A1A"></div>
+
+          <div class="ep-danger-row">
+            <div class="ep-danger-info">
+              <div class="ep-toggle-title">Brisanje naloga</div>
+              <div class="ep-toggle-sub" style="margin-top:2px;color:#E74C3C">Trajno i nepovratno briše nalog i sve povezane podatke.</div>
+            </div>
+            <button class="ep-btn-danger" style="border-color:#E74C3C;font-weight:600" onclick="confirmDanger('Trajno obrisati nalog? Ova akcija ne može biti poništena.')">Obriši nalog</button>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- PANEL: PREMIUM -->
+    <div class="ep-panel" id="panel-premium">
+
+      <!-- Features overview card -->
+      <div class="ep-card">
+        <div class="ep-card-header">
+          <div>
+            <div class="ep-card-title" style="display:flex;align-items:center;gap:8px">
+              <span style="color:var(--lemon-vivid)">◆</span> Premium status
+            </div>
+            <div class="ep-card-sub">Otključaj napredne opcije personalizacije i ekskluzivne benefite</div>
+          </div>
+        </div>
+        <div class="ep-card-body" style="gap:10px">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div style="background:var(--surface2);border:0.5px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start">
+              <span style="font-size:18px">🎭</span>
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--text)">GIF avatar i baner</div>
+                <div style="font-size:11px;color:var(--muted);margin-top:2px">Animirane slike umesto statičnih</div>
+              </div>
+            </div>
+            <div style="background:var(--surface2);border:0.5px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start">
+              <span style="font-size:18px">🎨</span>
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--text)">Boja korisničkog imena</div>
+                <div style="font-size:11px;color:var(--muted);margin-top:2px">Prilagođena boja u prikazu</div>
+              </div>
+            </div>
+            <div style="background:var(--surface2);border:0.5px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start">
+              <span style="font-size:18px">🌀</span>
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--text)">Više Daily Spin okretaja</div>
+                <div style="font-size:11px;color:var(--muted);margin-top:2px">Češće nagrade u GameHub-u</div>
+              </div>
+            </div>
+            <div style="background:var(--surface2);border:0.5px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start">
+              <span style="font-size:18px">◆</span>
+              <div>
+                <div style="font-size:13px;font-weight:600;color:var(--lemon-vivid)">Premium bedž</div>
+                <div style="font-size:11px;color:var(--muted);margin-top:2px">Vidljiva oznaka na profilu</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Activation form (non-premium state) -->
+      <div id="premium-form-wrap">
+        <div class="ep-card">
+          <div class="ep-card-header">
+            <div>
+              <div class="ep-card-title">Aktiviraj Premium</div>
+              <div class="ep-card-sub">Izaberi period trajanja i plati karticom</div>
+            </div>
+          </div>
+          <div class="ep-card-body" style="gap:12px">
+
+            <!-- Plan selection -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px" id="plan-selector">
+              <label id="plan-mesecno" onclick="selectPlan('mesecno')"
+                style="border:1.5px solid var(--violet);background:#1A1133;border-radius:10px;padding:14px;cursor:pointer;transition:border-color .15s">
+                <div style="font-size:12px;font-weight:600;color:var(--violet-light);margin-bottom:4px">MESEČNO</div>
+                <div style="font-size:22px;font-weight:700;color:var(--text)">€4.99</div>
+                <div style="font-size:11px;color:var(--muted);margin-top:2px">po mesecu · automatska obnova</div>
+                <div style="margin-top:8px;font-size:11px;font-weight:600;color:var(--violet-light)">● Izabrano</div>
+              </label>
+              <label id="plan-godisnje" onclick="selectPlan('godisnje')"
+                style="border:0.5px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;transition:border-color .15s;position:relative">
+                <div style="position:absolute;top:-1px;right:10px;background:var(--lemon-vivid);color:#0A0A0A;font-size:10px;font-weight:700;padding:2px 8px;border-radius:0 0 6px 6px">UŠTEDI 33%</div>
+                <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px">GODIŠNJE</div>
+                <div style="font-size:22px;font-weight:700;color:var(--text)">€39.99</div>
+                <div style="font-size:11px;color:var(--muted);margin-top:2px">po godini · automatska obnova</div>
+                <div style="margin-top:8px;font-size:11px;font-weight:600;color:var(--muted)">○ Izaberi</div>
+              </label>
+            </div>
+
+            <!-- Payment form (initially hidden) -->
+            <div id="premium-payment-form" style="display:none;flex-direction:column;gap:10px">
+              <div style="font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:2px">Podaci o kartici</div>
+              <div class="ep-field" style="margin:0">
+                <label class="ep-label">Broj kartice</label>
+                <input class="ep-input" type="text" placeholder="1234 5678 9012 3456" maxlength="19"
+                  oninput="this.value=this.value.replace(/[^0-9]/g,'').replace(/(.{4})/g,'$1 ').trim()">
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                <div class="ep-field" style="margin:0">
+                  <label class="ep-label">Datum isteka</label>
+                  <input class="ep-input" type="text" placeholder="MM/GG" maxlength="5">
+                </div>
+                <div class="ep-field" style="margin:0">
+                  <label class="ep-label">CVV</label>
+                  <input class="ep-input" type="text" placeholder="•••" maxlength="3">
+                </div>
+              </div>
+              <div class="ep-field" style="margin:0">
+                <label class="ep-label">Ime vlasnika kartice</label>
+                <input class="ep-input" type="text" placeholder="Andrej Čolić">
+              </div>
+              <div style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px">
+                🔒 Plaćanje obrađuje PCI-DSS kompatibilan gateway. Podaci o kartici se ne čuvaju.
+              </div>
+            </div>
+
+          </div>
+          <div class="ep-card-footer">
+            <button class="ep-btn-primary" id="premium-main-btn" onclick="handlePremiumBtn()"
+              style="background:linear-gradient(90deg,#5F4A8B,#A78BFA);border-color:var(--violet-light);color:var(--lemon-vivid);font-weight:700">
+              ◆ Aktiviraj Premium
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active premium state (hidden initially) -->
+      <div id="premium-active-wrap" style="display:none">
+        <div class="ep-card">
+          <div class="ep-card-header">
+            <div>
+              <div class="ep-card-title" style="display:flex;align-items:center;gap:8px">
+                <span style="font-size:14px;background:#1A1400;color:var(--lemon-vivid);border:0.5px solid #5A4200;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700">◆ AKTIVAN</span>
+                Tvoj plan
+              </div>
+            </div>
+          </div>
+          <div class="ep-card-body" style="gap:12px">
+            <div style="background:linear-gradient(90deg,#1A1400,var(--surface2));border:0.5px solid #5A4200;border-radius:10px;padding:14px 16px">
+              <div style="font-size:13px;color:var(--muted);margin-bottom:4px">Aktivan plan</div>
+              <div style="font-size:16px;font-weight:700;color:var(--lemon-vivid)" id="active-plan-name">Premium Mesečni</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:6px">Ističe: <strong style="color:var(--text)" id="active-plan-expiry">14. jun 2026.</strong> · Automatska obnova: <strong style="color:#5DCAA5" id="auto-renew-status">Uključena</strong></div>
+            </div>
+            <button class="ep-btn-secondary" style="color:#F87171;border-color:rgba(240,112,112,.35);width:fit-content" onclick="cancelAutoRenew()">
+              Otkaži automatsku obnovu
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end panel-premium -->
+
+    <!-- PANEL: ODJAVA -->
+    <div class="ep-panel" id="panel-odjava">
+      <div class="ep-card">
+        <div class="ep-card-header">
+          <div>
+            <div class="ep-card-title">Odjava</div>
+            <div class="ep-card-sub">Odjavite se sa svog tikimiki naloga</div>
+          </div>
+        </div>
+        <div class="ep-card-body">
+          <div style="display:flex;align-items:center;gap:14px;padding:4px 0">
+            <div class="ep-avatar-img" style="width:44px;height:44px;font-size:13px;flex-shrink:0">AČ</div>
+            <div>
+              <div style="font-size:14px;font-weight:600;color:var(--text)">Andrej Čolić</div>
+              <div style="font-size:12px;color:var(--muted)">@andrej · <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="11707f7563747b3f727e7d7872517465773f6362">[email&#160;protected]</a></div>
+            </div>
+          </div>
+        </div>
+        <div class="ep-card-footer">
+          <button class="ep-btn-danger" style="width:100%;justify-content:center;font-size:14px;padding:10px 0" onclick="confirmDanger('Odjaviti se sa tikimiki naloga?')">↩ Odjavi se</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- RIGHT SIDEBAR — Profile Preview Card -->
+  <aside class="ep-sidebar-right">
+    <div class="profile-preview-card">
+      <div class="ppc-header">
+        <div class="ppc-title">Pregled profila</div>
+      </div>
+
+      <div class="ppc-body">
+        <!-- Banner -->
+        <div class="ppc-banner" id="ppc-banner"></div>
+
+        <!-- Avatar row -->
+        <div class="ppc-avatar-row">
+          <div class="ppc-avatar" id="ppc-avatar">
+            AČ
+            <div class="ppc-status-ring"></div>
+          </div>
+        </div>
+
+        <!-- Info -->
+        <div class="ppc-info">
+          <div class="ppc-name" id="ppc-name">Andrej Čolić</div>
+          <div class="ppc-handle" id="ppc-handle">@andrej 
+            <span class="ppc-badge-item" title="Učesnik hackathona">🏅</span>
+            <span class="ppc-badge-item" title="GitHub integrisao">🐙</span>
+          </div>
+
+          <div class="ppc-bio" id="ppc-bio">Student 3. godine ETF-a.</div>
+
+          <div class="ppc-section">Veštine</div>
+          <div class="ppc-skills" id="ppc-skills">
+            <span class="ppc-skill-chip">Python</span>
+            <span class="ppc-skill-chip">C</span>
+            <span class="ppc-skill-chip">C++</span>
+            <span class="ppc-skill-chip">Java</span>
+            <span class="ppc-skill-chip">Verilog</span>
+            <span class="ppc-skill-chip">HTML</span>
+            <span class="ppc-skill-chip">CSS</span>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="ppc-stats-row">
+          <div class="ppc-stat">
+            <div class="ppc-stat-val">12</div>
+            <div class="ppc-stat-lbl">Hackathoni</div>
+          </div>
+          <div class="ppc-stat">
+            <div class="ppc-stat-val">3</div>
+            <div class="ppc-stat-lbl">Pobede</div>
+          </div>
+          <div class="ppc-stat">
+            <div class="ppc-stat-val">1,840</div>
+            <div class="ppc-stat-lbl">XP</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-links">
+      <a>O nama</a> <span>·</span>
+      <a>Pristupačnost</a> <span>·</span>
+      <a>Centar za pomoć</a> <span>·</span>
+      <a>Privatnost i uslovi</a>
+    </div>
+    <div class="footer-copy">tiki<span>miki</span> © 2026</div>
+  </div>
+</footer>
+
+<script>
+// Panel switching
+function switchPanel(id) {
+  document.querySelectorAll('.ep-panel').forEach(p => p.classList.remove('active'));
+  const target = document.getElementById('panel-' + id);
+  if (target) target.classList.add('active');
+  document.querySelectorAll('.menu-item[data-panel]').forEach(n => n.classList.remove('active'));
+  const activeItem = document.querySelector('.menu-item[data-panel="' + id + '"]');
+  if (activeItem) activeItem.classList.add('active');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  // Panel switching via data-panel attributes
+  document.querySelectorAll('.menu-item[data-panel]').forEach(function(item) {
+    item.addEventListener('click', function() {
+      switchPanel(this.getAttribute('data-panel'));
+    });
+  });
+
+  // Sync izgled-profila display name field → nalog display name field
+  const inpIme = document.getElementById('inp-ime');
+  if (inpIme) {
+    inpIme.addEventListener('input', function() {
+      const nalozField = document.getElementById('inp-ime-nalog');
+      if (nalozField) { nalozField.value = inpIme.value; updateChar('inp-ime-nalog','cnt-ime-nalog',40); }
+    });
+  }
+});
+
+function updateChar(inputId, countId, max) {
+  const len = document.getElementById(inputId).value.length;
+  const el = document.getElementById(countId);
+  el.textContent = len + ' / ' + max;
+  el.classList.toggle('warn', len > max * 0.85);
+}
+
+function syncPreview() {
+  const name = document.getElementById('inp-ime')?.value || 'Andrej Čolić';
+  const username = document.getElementById('inp-username')?.value || 'andrej';
+  const bio = document.getElementById('inp-bio')?.value || '';
+  const ppcName = document.getElementById('ppc-name');
+  const ppcHandle = document.getElementById('ppc-handle');
+  const ppcBio = document.getElementById('ppc-bio');
+  if (ppcName) ppcName.textContent = name;
+  if (ppcHandle) ppcHandle.textContent = '@' + username + ' · digitalci';
+  if (ppcBio) ppcBio.textContent = bio;
+  const skillTags = document.querySelectorAll('#skills-wrap .ep-skill-tag');
+  const ppcSkills = document.getElementById('ppc-skills');
+  if (ppcSkills) {
+    ppcSkills.innerHTML = '';
+    skillTags.forEach(tag => {
+      const text = tag.textContent.replace('✕', '').trim();
+      if (text) {
+        const chip = document.createElement('span');
+        chip.className = 'ppc-skill-chip';
+        chip.textContent = text;
+        ppcSkills.appendChild(chip);
+      }
+    });
+  }
+}
+
+function selectColor(el, color) {
+  document.querySelectorAll('.ep-color-swatch').forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+  const preview = document.getElementById('color-preview');
+  if (preview) preview.style.color = color;
+  const ppcName = document.getElementById('ppc-name');
+  if (ppcName) ppcName.style.color = color;
+}
+
+function syncDisplayName() {
+  const val = document.getElementById('inp-ime-nalog')?.value || '';
+  const inpIme = document.getElementById('inp-ime');
+  if (inpIme && val) { inpIme.value = val; updateChar('inp-ime','cnt-ime',40); }
+  syncPreview();
+}
+
+
+function addSkill(e) {
+  if (e.key !== 'Enter' && e.key !== ',') return;
+  e.preventDefault();
+  const inp = document.getElementById('skills-inp');
+  const val = inp.value.replace(',','').trim();
+  if (!val) return;
+  const tag = document.createElement('span');
+  tag.className = 'ep-skill-tag';
+  tag.innerHTML = val + ' <span class="ep-skill-remove" onclick="removeSkill(this)">✕</span>';
+  inp.parentNode.insertBefore(tag, inp);
+  inp.value = '';
+  syncPreview();
+}
+
+function removeSkill(el) {
+  el.parentElement.remove();
+  syncPreview();
+}
+
+function checkPw() {
+  const pw = document.getElementById('pw-new')?.value;
+  const conf = document.getElementById('pw-confirm')?.value;
+  const hint = document.getElementById('pw-hint');
+  if (!pw) { hint.textContent = 'Lozinka mora imati najmanje 8 karaktera'; hint.style.color = 'var(--muted)'; return; }
+  if (pw.length < 8) { hint.textContent = 'Lozinka je prekratka'; hint.style.color = '#E74C3C'; return; }
+  if (conf && pw !== conf) { hint.textContent = 'Lozinke se ne poklapaju'; hint.style.color = '#E74C3C'; return; }
+  if (conf && pw === conf) { hint.textContent = 'Lozinke se poklapaju ✓'; hint.style.color = '#5DCAA5'; return; }
+  hint.textContent = 'Lozinka je dovoljno jaka'; hint.style.color = '#5DCAA5';
+}
+
+function saveCard(id) {
+  const el = document.getElementById('status-' + id);
+  if (!el) return;
+  el.classList.add('visible');
+  setTimeout(() => el.classList.remove('visible'), 2500);
+}
+
+function resetCard(id) {}
+
+function confirmDanger(msg) {
+  if (confirm(msg)) alert('Zahtev je primljen.');
+}
+
+// ── Premium panel ──────────────────────────────────────────────
+let selectedPlan = 'mesecno';
+let paymentFormVisible = false;
+
+function selectPlan(plan) {
+  selectedPlan = plan;
+  const m = document.getElementById('plan-mesecno');
+  const g = document.getElementById('plan-godisnje');
+  if (plan === 'mesecno') {
+    m.style.border = '1.5px solid var(--violet)';
+    m.style.background = '#1A1133';
+    m.querySelector('div:last-child').style.color = 'var(--violet-light)';
+    m.querySelector('div:last-child').textContent = '● Izabrano';
+    g.style.border = '0.5px solid var(--border)';
+    g.style.background = 'transparent';
+    g.querySelector('div:last-child').style.color = 'var(--muted)';
+    g.querySelector('div:last-child').textContent = '○ Izaberi';
+  } else {
+    g.style.border = '1.5px solid var(--violet)';
+    g.style.background = '#1A1133';
+    g.querySelector('div:last-child').style.color = 'var(--violet-light)';
+    g.querySelector('div:last-child').textContent = '● Izabrano';
+    m.style.border = '0.5px solid var(--border)';
+    m.style.background = 'transparent';
+    m.querySelector('div:last-child').style.color = 'var(--muted)';
+    m.querySelector('div:last-child').textContent = '○ Izaberi';
+  }
+}
+
+function handlePremiumBtn() {
+  const pf = document.getElementById('premium-payment-form');
+  const btn = document.getElementById('premium-main-btn');
+  if (!paymentFormVisible) {
+    pf.style.display = 'flex';
+    btn.textContent = 'Potvrdi plaćanje';
+    paymentFormVisible = true;
+  } else {
+    // Simulate successful payment → show active state
+    document.getElementById('premium-form-wrap').style.display = 'none';
+    document.getElementById('premium-active-wrap').style.display = 'block';
+    document.getElementById('active-plan-name').textContent =
+      selectedPlan === 'mesecno' ? 'Premium Mesečni' : 'Premium Godišnji';
+    const exp = new Date();
+    exp.setMonth(exp.getMonth() + (selectedPlan === 'mesecno' ? 1 : 12));
+    document.getElementById('active-plan-expiry').textContent =
+      exp.getDate() + '. ' + ['jan','feb','mar','apr','maj','jun','jul','avg','sep','okt','nov','dec'][exp.getMonth()] + ' ' + exp.getFullYear() + '.';
+    alert('✓ Premium aktiviran! Račun je poslat na email.');
+  }
+}
+
+function cancelAutoRenew() {
+  if (confirm('Otkazati automatsku obnovu? Premium ostaje aktivan do datuma isteka.')) {
+    document.getElementById('auto-renew-status').textContent = 'Isključena';
+    document.getElementById('auto-renew-status').style.color = '#F87171';
+  }
+}
+
+</script>
+</body>
+</html>

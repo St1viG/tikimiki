@@ -1,0 +1,496 @@
+<!-- Andrej Čolić 2023/0492 -->
+<!-- Dimitrije Pešić 2023/0014 -->
+<!-- Nenad Skoković 2023/0039 -->
+    <!DOCTYPE html>
+    <html lang="sr">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link rel="stylesheet" href="tikimiki.css">
+      <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+      <link rel="icon" href="images/favicon.ico">
+      <title>tikimiki</title>
+      <style>
+        .post-head { position: relative; }
+
+        .post-menu-btn {
+          margin-left: auto;
+          background: none;
+          border: none;
+          color: var(--muted);
+          font-size: 18px;
+          cursor: pointer;
+          padding: 2px 8px;
+          border-radius: 6px;
+          line-height: 1;
+          font-family: var(--font);
+          transition: background .12s, color .12s;
+          flex-shrink: 0;
+        }
+        .post-menu-btn:hover { background: var(--surface2); color: var(--text); }
+
+        .post-ctx-menu {
+          position: absolute;
+          top: calc(100% + 4px);
+          right: 0;
+          background: var(--surface2);
+          border: 0.5px solid var(--border);
+          border-radius: 10px;
+          min-width: 160px;
+          z-index: 100;
+          box-shadow: 0 8px 24px rgba(0,0,0,.45);
+          overflow: hidden;
+        }
+
+        .ctx-item {
+          padding: 10px 14px;
+          font-size: 13px;
+          color: var(--text);
+          cursor: pointer;
+          transition: background .1s;
+        }
+        .ctx-item:hover { background: var(--surface); }
+        .ctx-item.ctx-report { color: #F87171; }
+        .ctx-item.ctx-report:hover { background: #1A0A0A; }
+
+        /* Report modal */
+        .report-overlay {
+          display: none;
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,.65);
+          z-index: 1000;
+          align-items: center;
+          justify-content: center;
+        }
+        .report-overlay.open { display: flex; }
+
+        .report-modal {
+          background: var(--surface);
+          border: 0.5px solid var(--border);
+          border-radius: 14px;
+          width: 100%;
+          max-width: 420px;
+          padding: 24px;
+          margin: 16px;
+        }
+
+        .report-title {
+          font-size: 16px;
+          font-weight: 700;
+          color: var(--text);
+          margin-bottom: 4px;
+        }
+
+        .report-sub {
+          font-size: 12px;
+          color: var(--muted);
+          margin-bottom: 18px;
+        }
+
+        .report-reason-label {
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: .06em;
+          text-transform: uppercase;
+          color: var(--muted);
+          margin-bottom: 10px;
+        }
+
+        .report-options { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+
+        .report-option {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 9px 12px;
+          border: 0.5px solid var(--border);
+          border-radius: 8px;
+          cursor: pointer;
+          transition: border-color .12s, background .12s;
+        }
+        .report-option:hover { background: var(--surface2); }
+        .report-option input[type=radio] { accent-color: var(--violet-light); }
+        .report-option.selected { border-color: var(--violet); background: #1A1133; }
+        .report-option span { font-size: 13px; color: var(--text); }
+
+        .report-desc {
+          width: 100%;
+          background: var(--surface2);
+          border: 0.5px solid var(--border);
+          border-radius: 8px;
+          color: var(--text);
+          font-family: var(--font);
+          font-size: 13px;
+          padding: 10px 12px;
+          resize: vertical;
+          min-height: 72px;
+          outline: none;
+          margin-bottom: 18px;
+          box-sizing: border-box;
+        }
+        .report-desc:focus { border-color: var(--violet); }
+        .report-desc::placeholder { color: var(--muted); }
+
+        .report-actions { display: flex; gap: 10px; }
+
+        .report-cancel {
+          flex: 1;
+          padding: 11px 0;
+          background: var(--surface2);
+          border: 0.5px solid var(--border);
+          border-radius: 9px;
+          color: var(--muted);
+          font-family: var(--font);
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: color .12s;
+        }
+        .report-cancel:hover { color: var(--text); }
+
+        .report-submit {
+          flex: 2;
+          padding: 11px 0;
+          background: #5C1A1A;
+          border: 0.5px solid #7C2A2A;
+          border-radius: 9px;
+          color: #F87171;
+          font-family: var(--font);
+          font-size: 13px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: background .12s;
+        }
+        .report-submit:hover { background: #7C2020; }
+        .report-submit:disabled { opacity: .45; cursor: default; }
+
+        .report-confirm {
+          display: none;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          padding: 8px 0 4px;
+          gap: 10px;
+        }
+      </style>
+    </head>
+
+    <body>
+
+    <nav>
+      <div class="nav-inner">
+      <div class="logo" onclick="window.location.href='home_page.html'" style="cursor:pointer"><span>tiki</span>miki</div>
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+          <input type="text" placeholder="Pretraži korisnike, hackathone, organizacije...">
+        </div>
+        <div class="nav-right">
+          <div class="icon-btn" onclick="window.location.href='store.html'">🛒<span class="badge">2</span></div>
+          <div class="icon-btn">🔔<span class="badge">5</span></div>
+          <div class="avatar">AČ</div>
+        </div>
+      </div>
+    </nav>
+
+    <div class="layout">
+      <aside class="sidebar-left">
+        <div class="menu-item active"><span class="icon">⌂</span> Početna</div>
+        <div class="menu-item" onclick="window.location.href='hackathons.html'"><span class="icon">◈</span> Hackathoni</div>
+        <div class="menu-item" onclick="window.location.href='teams.html'"><span class="icon">👥</span> Timovi</div>
+        <div class="menu-item" onclick="window.location.href='leaderboard.html'"><span class="icon">🏆</span> Leaderboard</div>
+        <div class="menu-item" onclick="window.location.href='cohor.html'"><span class="icon">✉</span> Poruke</div>
+        <div class="menu-item" onclick="window.location.href='gamehub.html'"><span class="icon">👾</span> GameHub</div>
+        <div class="menu-item" onclick="window.location.href='settings.html'"><span class="icon">⚙</span> Podešavanja</div>
+        <div class="menu-divider"></div>
+        <div class="crystal-button" onclick="window.location.href='premium.html'"><span class="crystal-icon">◆</span> Premium</div>
+      </aside>
+
+      <main class="feed">
+        <div class="composer">
+          <div class="composer-top">
+            <div class="avatar" style="width:34px;height:34px;font-size:11px">AČ</div>
+            <div class="composer-fake-input">Započni objavu</div>
+          </div>
+          <div class="composer-btns">
+            <button class="comp-btn">📷 Slika</button>
+            <button class="comp-btn">🔗 Link</button>
+            <button class="comp-btn">◈ Hackathon</button>
+            <button class="post-btn">Objavi</button>
+          </div>
+        </div>
+
+        <div class="hack-card">
+          <div class="hack-banner">
+            <div class="hack-banner-name">ETF HackWeek 2026</div>
+            <div class="live-pill">● AKTIVAN</div>
+          </div>
+          <div style="padding:10px;border-bottom:0.5px solid var(--border);">
+            <img src="images/etf2.jpg" alt="ETF HackWeek 2026 - Tema Hackathona" style="width:100%;border-radius:8px;display:block;">
+          </div>
+          <div class="hack-body">
+            <div class="hack-chips">
+              <div class="chip">📍 <strong>Beograd, ETF</strong></div>
+              <div class="chip">⏱ <strong>48h</strong></div>
+              <div class="chip">👥 <strong>120 učesnika</strong></div>
+            </div>
+            <div class="p-body">Godišnji hackathon ETF-a. Timovi od 2 do 4 člana.</div>
+            <div><span class="tag t-v">AI</span><span class="tag t-t">Web</span><span class="tag t-l">Low level</span></div>
+            <div class="hack-foot">
+              <button class="btn-join">Prijavi se</button>
+              <button class="btn-info">Više info</button>
+              <div class="prize">🏆 $2,000</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="post">
+          <div class="post-head">
+            <div class="pav pav-v">F</div>
+            <div><div class="p-name">fenjer</div><div class="p-time">pre 2 sata</div></div>
+            <div style="margin-left:auto;position:relative">
+              <button class="post-menu-btn" onclick="togglePostMenu(event,'ctx-post-1')">⋯</button>
+              <div class="post-ctx-menu" id="ctx-post-1" style="display:none">
+                <div class="ctx-item" onclick="closeAllMenus();alert('Objava sakrivena.')">✕ Sakrij objavu</div>
+                <div class="ctx-item ctx-report" onclick="closeAllMenus();openReport('post-1','fenjer')">⚑ Prijavi</div>
+              </div>
+            </div>
+          </div>
+          <div class="p-body">nikad više na hackathon sa <span class="mention">@moljac</span>...</div>
+          <div class="post-actions">
+            <button class="paction liked">♥ <span>24</span></button>
+            <button class="paction">💬 <span>8</span></button>
+            <button class="paction share-btn">↗</button>
+          </div>
+        </div>
+
+        <div class="post">
+          <div class="post-head">
+            <div class="pav pav-t">MA</div>
+            <div><div class="p-name">Mohammed Avdol</div><div class="p-time">pre 5 sati</div></div>
+            <div style="margin-left:auto;position:relative">
+              <button class="post-menu-btn" onclick="togglePostMenu(event,'ctx-post-2')">⋯</button>
+              <div class="post-ctx-menu" id="ctx-post-2" style="display:none">
+                <div class="ctx-item" onclick="closeAllMenus();alert('Objava sakrivena.')">✕ Sakrij objavu</div>
+                <div class="ctx-item ctx-report" onclick="closeAllMenus();openReport('post-2','Mohammed Avdol')">⚑ Prijavi</div>
+              </div>
+            </div>
+          </div>
+          <div style="padding:10px;border-bottom:0.5px solid var(--border);">
+            <img src="images/group_photo.jpg" alt="ETF HackWeek 2026 - Tema hackathona" style="width:100%;border-radius:8px;display:block;">
+          </div>
+          <div class="p-body">Garaža Hackathon je bio super! Odlična atmosfera! <br> <span class="mention">@miki</span>, <span class="mention">@tiki</span>, <span class="mention">@mara</span> </div>
+          <div class="post-actions">
+            <button class="paction">♥ <span>67</span></button>
+            <button class="paction">💬 <span>5</span></button>
+            <button class="paction share-btn">↗</button>
+          </div>
+        </div>
+
+      </main>
+
+      <aside class="sidebar-right">
+        <div class="social-card" onclick="window.location.href='cohor.html'" style="cursor:pointer">
+          <div class="social-card-header">
+            <div class="social-card-title">Cohor</div>
+            <div class="arrow-circle">›</div>
+          </div>
+
+          <div class="preview-list">
+            <div class="preview-row">
+              <div class="pr-dot dot-green"></div>
+              <div class="pr-info">
+                <div class="pr-name">ETF HackWeek server</div>
+                <div class="pr-sub">Miki: Počinjemo za 10 min</div>
+              </div>
+              <div class="pr-badge green">12</div>
+            </div>
+            <div class="preview-row">
+              <div class="pr-dot dot-violet"></div>
+              <div class="pr-info">
+                <div class="pr-name">fenjer</div>
+                <div class="pr-sub">Ćao</div>
+              </div>
+              <div class="pr-badge">3</div>
+            </div>
+            <div class="preview-row">
+              <div class="pr-dot dot-violet"></div>
+              <div class="pr-info">
+                <div class="pr-name">digitalci</div>
+                <div class="pr-sub">StiviG: buzz</div>
+              </div>
+              <div class="pr-badge">7</div>
+            </div>
+            <div class="preview-row">
+              <div class="pr-dot" style="background:var(--muted)"></div>
+              <div class="pr-info">
+                <div class="pr-name">nona</div>
+                <div class="pr-sub" style="font-style: italic;">reaguje na poruku sa ❤️</div>
+              </div>
+            </div>
+          </div>  
+        </div>
+
+        <div class="social-card" onclick="window.location.href='gamehub.html'">
+          <div class="social-card-header">
+            <div class="social-card-title">GameHub</div>
+            <div class="arrow-circle">›</div>
+          </div>
+
+          <div class="preview-list">
+
+            <div class="preview-row" onclick="event.stopPropagation();window.location.href='gamehub.html#daily-spin'">
+              <div class="pr-dot" style="background:#00f5ff;"></div>
+              <div class="pr-info">
+                <div class="pr-name">Daily Spin</div>
+                <div class="pr-sub"></div>
+              </div>
+              <div class="pr-badge">XP</div>
+            </div>
+
+            <div class="preview-row" onclick="event.stopPropagation();window.location.href='gamehub.html#daily-minigame'">
+              <div class="pr-dot" style="background:#ff9ff3;"></div>
+              <div class="pr-info">
+                <div class="pr-name">Daily Minigame</div>
+                <div class="pr-sub">Pređi današnju igricu</div>
+              </div>
+              <div class="pr-badge">🔥</div>
+            </div>
+
+            <div class="preview-row">
+              <div class="pr-dot" style="background:var(--muted);"></div>
+              <div class="pr-info">
+                <div class="pr-name">Coming Soon</div>
+                <div class="pr-sub" style="font-style: italic;">Nove igre uskoro...</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <footer style="margin-top:24px;padding:0 2px;text-align:center;">
+          <div style="display:flex;flex-wrap:wrap;gap:6px 10px;margin-bottom:10px;justify-content:center;">
+            <a style="font-size:var(--fs-xs);color:var(--muted);cursor:pointer;">O nama</a> <span style="font-size:10px;color:var(--muted);text-decoration:none;">·</span>
+            <a style="font-size:var(--fs-xs);color:var(--muted);cursor:pointer;">Pristupačnost</a> <span style="font-size:10px;color:var(--muted);text-decoration:none;">·</span>
+            <a style="font-size:var(--fs-xs);color:var(--muted);cursor:pointer;">Centar za pomoć</a> <span style="font-size:10px;color:var(--muted);text-decoration:none;">·</span>
+            <a style="font-size:var(--fs-xs);color:var(--muted);cursor:pointer;">Privatnost i uslovi</a>
+          </div>
+          <div style="font-size:var(--fs-s);color:var(--violet-light);">tiki<span style="color:var(--lemon)">miki</span> © 2026</div>
+        </footer>
+      </aside>
+    </div>
+    <!-- Report modal -->
+    <div class="report-overlay" id="report-overlay" onclick="onOverlayClick(event)">
+      <div class="report-modal">
+
+        <!-- Form state -->
+        <div id="report-form">
+          <div class="report-title">Prijavi objavu</div>
+          <div class="report-sub" id="report-sub">Korisnik: <strong id="report-author"></strong></div>
+
+          <div class="report-reason-label">Razlog prijave</div>
+          <div class="report-options">
+            <label class="report-option" onclick="selectReason(this)">
+              <input type="radio" name="report-reason" value="uvredljiv"> <span>Uvredljiv sadržaj</span>
+            </label>
+            <label class="report-option" onclick="selectReason(this)">
+              <input type="radio" name="report-reason" value="spam"> <span>Spam</span>
+            </label>
+            <label class="report-option" onclick="selectReason(this)">
+              <input type="radio" name="report-reason" value="neistinite"> <span>Neistinite informacije</span>
+            </label>
+            <label class="report-option" onclick="selectReason(this)">
+              <input type="radio" name="report-reason" value="lazni"> <span>Lažni identitet</span>
+            </label>
+            <label class="report-option" onclick="selectReason(this)">
+              <input type="radio" name="report-reason" value="drugo"> <span>Drugo</span>
+            </label>
+          </div>
+
+          <textarea class="report-desc" id="report-desc" placeholder="Dodatni opis (opciono)..."></textarea>
+
+          <div id="report-dup-msg"
+            style="display:none;background:#1A0A0A;border:0.5px solid #5C1A1A;border-radius:8px;padding:10px 12px;font-size:12px;color:#F87171;margin-bottom:14px;">
+            ⚠ Već ste prijavili ovu objavu. Možete pratiti status prijave u podešavanjima.
+          </div>
+
+          <div class="report-actions">
+            <button class="report-cancel" onclick="closeReport()">Otkaži</button>
+            <button class="report-submit" id="report-submit-btn" onclick="submitReport()">Pošalji prijavu</button>
+          </div>
+        </div>
+
+        <!-- Confirmation state -->
+        <div class="report-confirm" id="report-confirm">
+          <div style="font-size:36px">✅</div>
+          <div style="font-size:15px;font-weight:700;color:var(--text)">Prijava primljena</div>
+          <div style="font-size:13px;color:var(--muted);line-height:1.6;max-width:300px">
+            Hvala što čuvate zajednicu. Vaša prijava je prosleđena moderatoru i dobićete povratnu informaciju o ishodu.
+          </div>
+          <button class="report-cancel" style="margin-top:8px;width:100%;flex:none" onclick="closeReport()">Zatvori</button>
+        </div>
+
+      </div>
+    </div>
+
+    <script>
+      const reportedPosts = new Set();
+      let activePostId = null;
+
+      function togglePostMenu(e, menuId) {
+        e.stopPropagation();
+        const menu = document.getElementById(menuId);
+        const isOpen = menu.style.display === 'block';
+        closeAllMenus();
+        if (!isOpen) menu.style.display = 'block';
+      }
+
+      function closeAllMenus() {
+        document.querySelectorAll('.post-ctx-menu').forEach(m => m.style.display = 'none');
+      }
+
+      document.addEventListener('click', closeAllMenus);
+
+      function openReport(postId, author) {
+        activePostId = postId;
+        const isDup = reportedPosts.has(postId);
+
+        document.getElementById('report-author').textContent = author;
+        document.getElementById('report-dup-msg').style.display = isDup ? 'block' : 'none';
+        document.getElementById('report-submit-btn').disabled = isDup;
+        document.getElementById('report-desc').value = '';
+        document.querySelectorAll('.report-option').forEach(o => o.classList.remove('selected'));
+        document.querySelectorAll('input[name=report-reason]').forEach(r => r.checked = false);
+
+        document.getElementById('report-form').style.display = 'block';
+        document.getElementById('report-confirm').style.display = 'none';
+        document.getElementById('report-overlay').classList.add('open');
+      }
+
+      function selectReason(label) {
+        document.querySelectorAll('.report-option').forEach(o => o.classList.remove('selected'));
+        label.classList.add('selected');
+      }
+
+      function submitReport() {
+        const reason = document.querySelector('input[name=report-reason]:checked');
+        if (!reason) {
+          document.querySelectorAll('.report-option')[0].style.border = '0.5px solid #F87171';
+          setTimeout(() => document.querySelectorAll('.report-option')[0].style.border = '', 1200);
+          return;
+        }
+        reportedPosts.add(activePostId);
+        document.getElementById('report-form').style.display = 'none';
+        document.getElementById('report-confirm').style.display = 'flex';
+      }
+
+      function closeReport() {
+        document.getElementById('report-overlay').classList.remove('open');
+      }
+
+      function onOverlayClick(e) {
+        if (e.target === document.getElementById('report-overlay')) closeReport();
+      }
+    </script>
+    </body>
+    </html>
