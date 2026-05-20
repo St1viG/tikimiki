@@ -1,0 +1,227 @@
+<!-- Stevan Gnjato 2023/0141 -->
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="tikimiki.css">
+  <link rel="stylesheet" href="auth.css">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" href="images/favicon.ico">
+  <title>tikimiki · Nalog suspendovan</title>
+  <style>
+    .susp-icon { font-size: 44px; text-align: center; margin-bottom: 10px; }
+    .susp-title { font-size: 20px; font-weight: 700; color: #F07070; text-align: center; margin-bottom: 6px; }
+    .susp-sub { font-size: 13px; color: var(--muted); text-align: center; margin-bottom: 22px; line-height: 1.55; }
+
+    .susp-info-box {
+      background: rgba(240,112,112,.06);
+      border: 0.5px solid rgba(240,112,112,.28);
+      border-radius: var(--r-md);
+      padding: 4px 0;
+      margin-bottom: 20px;
+    }
+    .susp-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 9px 14px;
+      border-bottom: 0.5px solid rgba(240,112,112,.12);
+      font-size: 13px;
+      gap: 12px;
+    }
+    .susp-row:last-child { border-bottom: none; }
+    .susp-label { color: var(--muted); flex-shrink: 0; }
+    .susp-val { color: var(--text); font-weight: 600; text-align: right; }
+
+    .susp-countdown {
+      text-align: center;
+      background: var(--surface2);
+      border: 0.5px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .susp-countdown-label {
+      font-size: 11px; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px;
+    }
+    .susp-countdown-timer {
+      font-size: 30px; font-weight: 700;
+      color: var(--violet-light); letter-spacing: .04em;
+      font-variant-numeric: tabular-nums;
+    }
+    .susp-countdown-date {
+      font-size: 12px; color: var(--muted); margin-top: 4px;
+    }
+
+    .susp-divider { border: none; border-top: 0.5px solid var(--border); margin: 20px 0; }
+
+    .susp-appeal-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+    .susp-appeal-sub {
+      font-size: 12px; color: var(--muted);
+      margin-bottom: 12px; line-height: 1.55;
+    }
+    .susp-textarea {
+      width: 100%;
+      background: var(--surface2);
+      border: 0.5px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 10px 12px;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 13px;
+      resize: vertical;
+      min-height: 88px;
+      outline: none;
+      box-sizing: border-box;
+      transition: border-color .2s;
+    }
+    .susp-textarea:focus { border-color: var(--violet); box-shadow: 0 0 0 3px rgba(95,74,139,.12); }
+    .susp-textarea:disabled { opacity: .5; cursor: not-allowed; }
+
+    .susp-toast {
+      display: none;
+      background: rgba(93,202,165,.1);
+      border: 0.5px solid #5DCAA5;
+      border-radius: var(--r-sm);
+      padding: 10px 12px;
+      font-size: 13px; color: #5DCAA5;
+      margin-top: 10px; text-align: center;
+    }
+    .susp-toast.show { display: block; }
+
+    .susp-already {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .susp-already strong { color: #5DCAA5; }
+  </style>
+</head>
+<body>
+
+<div class="auth-page">
+
+  <div class="auth-logo" onclick="window.location.href='home_page.html'" style="margin-bottom:20px;cursor:pointer;">
+    <div class="logo"><span>tiki</span>miki</div>
+  </div>
+
+  <div class="auth-card" style="max-width:460px;">
+
+    <div class="susp-icon">🔒</div>
+    <div class="susp-title">Nalog suspendovan</div>
+    <div class="susp-sub">
+      Tvoj nalog je privremeno suspendovan zbog kršenja pravila platforme.
+      Pristup je onemogućen do isteka perioda suspenzije.
+    </div>
+
+    <div class="susp-info-box">
+      <div class="susp-row">
+        <span class="susp-label">Razlog</span>
+        <span class="susp-val" style="color:#F07070;" id="susp-reason">Uznemiravanje korisnika</span>
+      </div>
+      <div class="susp-row">
+        <span class="susp-label">Datum suspenzije</span>
+        <span class="susp-val" id="susp-start">14.04.2026</span>
+      </div>
+      <div class="susp-row">
+        <span class="susp-label">Datum otključavanja</span>
+        <span class="susp-val" style="color:var(--lemon-vivid);" id="susp-end">16.05.2026</span>
+      </div>
+      <div class="susp-row">
+        <span class="susp-label">Izrečena od strane</span>
+        <span class="susp-val" id="susp-by">Admin Đurić</span>
+      </div>
+    </div>
+
+    <div class="susp-countdown">
+      <div class="susp-countdown-label">Otključavanje za</div>
+      <div class="susp-countdown-timer" id="countdown">--d --h --m --s</div>
+      <div class="susp-countdown-date" id="countdown-date"></div>
+    </div>
+
+    <hr class="susp-divider">
+
+    <div class="susp-appeal-title">Podnesi žalbu</div>
+    <div class="susp-appeal-sub">
+      Ako smatraš da je suspenzija neosnovana, možeš podneti žalbu.
+      Tim za moderaciju će je pregledati u roku od <strong>48 sati</strong>.
+      Žalbu možeš podneti samo jednom.
+    </div>
+
+    <textarea class="susp-textarea" id="appeal-text"
+      placeholder="Obrazloži zašto smatraš da je suspenzija neosnovana..."></textarea>
+
+    <div class="susp-toast" id="appeal-toast">
+      ✅ Žalba je uspešno podneta. Tim za moderaciju će ti odgovoriti u roku od 48 sati.
+    </div>
+
+    <button class="auth-btn-primary" id="appeal-btn" style="margin-top:12px;" onclick="submitAppeal()">
+      Podnesi žalbu
+    </button>
+
+    <div class="auth-switch" style="margin-top:18px;">
+      <a onclick="window.location.href='login.html'" style="cursor:pointer;">← Odjavi se sa naloga</a>
+    </div>
+
+  </div>
+
+  <div class="auth-footer">
+    <div class="auth-footer-links">
+      <a>Centar za pomoć</a>
+      <span>·</span>
+      <a>Pravila platforme</a>
+      <span>·</span>
+      <a>Privatnost</a>
+    </div>
+    <div class="auth-footer-copy">tiki<span>miki</span> © 2026</div>
+  </div>
+
+</div>
+
+<script>
+  var UNLOCK = new Date('2026-05-16T00:00:00');
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  function tick() {
+    var now = new Date();
+    var diff = UNLOCK - now;
+    var el = document.getElementById('countdown');
+    if (diff <= 0) {
+      el.textContent = 'Isteklo — nalog je otključan';
+      el.style.color = '#5DCAA5';
+      document.getElementById('countdown-date').textContent = '';
+      return;
+    }
+    var d = Math.floor(diff / 86400000);
+    var h = Math.floor((diff % 86400000) / 3600000);
+    var m = Math.floor((diff % 3600000) / 60000);
+    var s = Math.floor((diff % 60000) / 1000);
+    el.textContent = d + 'd ' + pad(h) + 'h ' + pad(m) + 'm ' + pad(s) + 's';
+    document.getElementById('countdown-date').textContent =
+      'Otključavanje: 16.05.2026 u 00:00';
+  }
+
+  tick();
+  setInterval(tick, 1000);
+
+  function submitAppeal() {
+    var text = document.getElementById('appeal-text').value.trim();
+    if (!text) {
+      document.getElementById('appeal-text').focus();
+      return;
+    }
+    document.getElementById('appeal-text').disabled = true;
+    var btn = document.getElementById('appeal-btn');
+    btn.disabled = true;
+    btn.style.opacity = '0.5';
+    btn.textContent = 'Žalba podneta';
+    document.getElementById('appeal-toast').classList.add('show');
+  }
+</script>
+
+</body>
+</html>

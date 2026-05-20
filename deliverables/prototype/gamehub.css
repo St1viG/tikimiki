@@ -1,0 +1,630 @@
+/* Nenad Skoković 2023/0039 */
+/* ── GAMEHUB EXTENSIONS ─────────────────────────────────────────
+   Builds on top of tikimiki.css — only new / overriding rules here.
+   Colors, typography, border-radius all from :root variables.
+──────────────────────────────────────────────────────────────── */
+
+/* Header */
+.gh-header {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 18px 20px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-image: linear-gradient(135deg, #0D0B18 60%, #150D2E);
+}
+
+.gh-title {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -.02em;
+}
+
+.gh-title span {
+  color: var(--lemon);
+}
+
+.gh-subtitle {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+.gh-xp-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #1C1A00;
+  border: 0.5px solid #3A3600;
+  border-radius: 20px;
+  padding: 6px 14px;
+}
+
+.gh-xp-icon {
+  font-size: 14px;
+}
+
+.gh-xp-val {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--lemon-vivid);
+}
+
+/* Section wrapper */
+.gh-section {
+  margin-bottom: 20px;
+}
+
+.gh-section-label {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.dot-cyan {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #00f5ff;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.dot-pink {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ff9ff3;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* ── SPIN TRIGGER CARD ──────────────────────────────────────── */
+.spin-trigger-card {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  cursor: pointer;
+  transition: border-color .2s, background .2s;
+  background-image: linear-gradient(135deg, #0D0B18 50%, #150D2E);
+}
+
+.spin-trigger-card:hover {
+  border-color: var(--violet-light);
+  background-image: linear-gradient(135deg, #12102A 50%, #1A0E3D);
+}
+
+.spin-trigger-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.spin-trigger-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Mini decorative wheel inside trigger card */
+.spin-mini-wheel-wrap {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+}
+
+.spin-mini-wheel {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  box-shadow: 0 0 16px rgba(95,74,139,.3);
+  animation: spin-idle 12s linear infinite;
+  background: conic-gradient(
+    #1A0E3D   0deg   45deg,
+    #2A0028  45deg   90deg,
+    #1C1A00  90deg  135deg,
+    #0D0B18 135deg  180deg,
+    #1A0E3D 180deg  225deg,
+    #04342C 225deg  270deg,
+    #1C1A00 270deg  315deg,
+    #0D0B18 315deg  360deg
+  );
+}
+
+@keyframes spin-idle {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.spin-mini-pointer {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: var(--lemon-vivid);
+  pointer-events: none;
+}
+
+/* ── SPIN MODAL ──────────────────────────────────────────────── */
+.spin-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(7,7,13,.75);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s ease;
+}
+
+.spin-modal-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.spin-modal {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: 18px;
+  padding: 32px 36px 28px;
+  width: 600px;
+  align-items: center;
+  max-width: calc(100vw - 32px);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 0 60px rgba(95,74,139,.2), 0 24px 48px rgba(0,0,0,.5);
+  transform: translateY(12px) scale(.97);
+  transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+}
+
+.spin-modal-overlay.open .spin-modal {
+  transform: translateY(0) scale(1);
+}
+
+.spin-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  background: var(--surface2);
+  border: 0.5px solid var(--border);
+  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  font-size: 12px;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color .15s, color .15s;
+  font-family: var(--font);
+}
+
+.spin-modal-close:hover {
+  border-color: var(--violet);
+  color: var(--text);
+}
+
+.spin-modal-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+  letter-spacing: -.02em;
+}
+
+.spin-modal-title span {
+  color: var(--lemon);
+}
+
+.spin-modal-sub {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  margin-bottom: 24px;
+}
+
+/* ── SPIN CARD (keep for shared layout) ─────────────────────── */
+
+/* Wheel */
+.spin-wheel-wrap {
+  position: relative;
+  width: 380px;
+  height: 380px;
+  flex-shrink: 0;
+}
+
+.spin-wheel {
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  display: block;
+}
+
+/* canvas replaces the old div wheel — no overflow:hidden needed */
+
+.spin-pointer {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 22px;
+  color: var(--lemon-vivid);
+  text-shadow: 0 0 8px rgba(237,217,75,.6);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.spin-center-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 2.5px solid var(--violet-light);
+  z-index: 10;
+}
+
+/* Spin info panel */
+.spin-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.spin-info-title {
+  font-size: var(--fs-lg);
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.spin-info-sub {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  line-height: 1.55;
+  margin-bottom: 14px;
+}
+
+.spin-rewards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.reward-pill {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 0.5px solid;
+}
+
+.reward-pill.cyan   { background: #002A2E; color: #00f5ff; border-color: #005F6B; }
+.reward-pill.pink   { background: #2A0028; color: #ff9ff3; border-color: #6B0069; }
+.reward-pill.lemon  { background: #1C1A00; color: var(--lemon-vivid); border-color: #3A3600; }
+.reward-pill.violet { background: #1A1133; color: var(--violet-light); border-color: #3D2E6B; }
+.reward-pill.muted  { background: var(--surface2); color: var(--muted); border-color: var(--border); }
+
+.spin-btn {
+  background: var(--violet);
+  border: none;
+  border-radius: var(--r-md);
+  padding: 9px 24px;
+  font-family: var(--font);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--lemon);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  transition: background .2s, transform .15s, box-shadow .2s;
+}
+
+.spin-btn:hover {
+  background: #7B5FA8;
+  box-shadow: 0 0 16px rgba(95,74,139,.35);
+}
+
+.spin-btn:active { transform: scale(.96); }
+
+.spin-btn:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.spin-btn-icon {
+  font-size: 14px;
+}
+
+.spin-cooldown {
+  margin-top: 10px;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.spin-result-toast {
+  margin-top: 10px;
+  background: var(--surface2);
+  border: 0.5px solid var(--violet);
+  border-radius: var(--r-md);
+  padding: 10px 16px;
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  color: var(--text);
+  animation: toast-slide .3s ease;
+}
+
+@keyframes toast-slide {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── MINIGAME / QUIZ ─────────────────────────────────────────── */
+.minigame-card {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 18px 20px;
+  transition: border-color .2s;
+}
+
+.minigame-card:hover {
+  border-color: var(--violet);
+}
+
+.minigame-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.minigame-title {
+  font-size: var(--fs-lg);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.minigame-badge {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  background: #1C1A00;
+  color: var(--lemon-vivid);
+  border: 0.5px solid #3A3600;
+  border-radius: 20px;
+  padding: 3px 10px;
+}
+
+.minigame-desc {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+.quiz-card {
+  background: var(--surface2);
+  border: 0.5px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.quiz-clue {
+  font-size: var(--fs-sm);
+  color: #C5BDDF;
+  line-height: 1.6;
+  margin-bottom: 14px;
+  font-style: italic;
+}
+
+.quiz-options {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.quiz-opt {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 9px 14px;
+  font-family: var(--font);
+  font-size: var(--fs-sm);
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color .15s, background .15s;
+}
+
+.quiz-opt:hover:not(:disabled) {
+  border-color: var(--violet-light);
+  background: #1A1133;
+}
+
+.quiz-opt.correct {
+  border-color: #5DCAA5;
+  background: #04342C;
+  color: #5DCAA5;
+}
+
+.quiz-opt.wrong {
+  border-color: #C0392B;
+  background: #2E0A08;
+  color: #E74C3C;
+}
+
+.quiz-result {
+  margin-top: 10px;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  padding: 6px 0 2px;
+}
+
+.result-correct { color: #5DCAA5; }
+.result-wrong   { color: #E74C3C; }
+
+.quiz-next {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.quiz-score-inline {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
+.minigame-progress {
+  margin-top: 4px;
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.progress-bar-wrap {
+  height: 4px;
+  background: var(--surface2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--violet), var(--violet-light));
+  border-radius: 2px;
+  transition: width .4s ease;
+}
+
+/* Quiz final screen */
+.quiz-final {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 0 8px;
+  gap: 6px;
+}
+
+.quiz-final-emoji { font-size: 40px; }
+.quiz-final-title { font-size: var(--fs-lg); font-weight: 600; color: var(--text); }
+.quiz-final-score { font-size: var(--fs-sm); color: var(--muted); }
+.quiz-final-xp    { font-size: var(--fs-sm); font-weight: 600; color: var(--lemon-vivid); }
+
+/* ── COMING SOON GRID ────────────────────────────────────────── */
+.coming-soon-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.cs-card {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  opacity: .65;
+  transition: opacity .2s, border-color .2s;
+}
+
+.cs-card:hover {
+  opacity: 1;
+  border-color: var(--border);
+}
+
+.cs-icon { font-size: 22px; margin-bottom: 4px; }
+.cs-name { font-size: var(--fs-sm); font-weight: 600; color: var(--text); }
+.cs-desc { font-size: var(--fs-xs); color: var(--muted); line-height: 1.4; }
+
+.cs-pill {
+  margin-top: 8px;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--surface2);
+  border: 0.5px solid var(--border);
+  border-radius: 20px;
+  padding: 2px 9px;
+  display: inline-block;
+  width: fit-content;
+}
+
+/* ── LEADERBOARD RANK DOTS ───────────────────────────────────── */
+.lb-rank {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.lb-rank.lemon  { background: #1C1A00; color: var(--lemon-vivid); border: 0.5px solid #3A3600; }
+.lb-rank.violet { background: #1A1133; color: var(--violet-light); border: 0.5px solid #3D2E6B; }
+.lb-rank.teal   { background: #04342C; color: #5DCAA5; border: 0.5px solid #0F3D30; }
+.lb-rank.muted  { background: var(--surface2); color: var(--muted); border: 0.5px solid var(--border); }
+
+/* ── ACHIEVEMENTS ────────────────────────────────────────────── */
+.ach-icon {
+  font-size: 20px;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ach-icon.unlocked { background: var(--surface2); border: 0.5px solid var(--border); }
+.ach-icon.locked   { background: var(--surface2); border: 0.5px solid var(--border); filter: grayscale(1); }
+
+/* Responsive */
+@media(max-width:760px) {
+  .spin-card { flex-direction: column; }
+  .spin-wheel-wrap { margin: 0 auto; }
+  .coming-soon-grid { grid-template-columns: 1fr 1fr; }
+}

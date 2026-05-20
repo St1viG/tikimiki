@@ -1,0 +1,568 @@
+<!-- Andrej Čolić 2023/0492 -->
+<!-- Nenad Skoković 2023/0039 -->
+<!-- Dimitrije Pešić 2023/0014 -->
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="tikimiki.css">
+  <link rel="stylesheet" href="gamehub.css">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" href="images/favicon.ico">
+  <title>tikimiki · GameHub</title>
+</head>
+
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="logo" onclick="window.location.href='home_page.html'" style="cursor:pointer"><span>tiki</span>miki</div>
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input type="text" placeholder="Pretraži korisnike, hackathone, organizacije...">
+    </div>
+    <div class="nav-right">
+      <div class="icon-btn" onclick="window.location.href='store.html'">🛒<span class="badge">2</span></div>
+      <div class="icon-btn">🔔<span class="badge">5</span></div>
+      <div class="avatar">AČ</div>
+    </div>
+  </div>
+</nav>
+
+<div class="layout">
+  <aside class="sidebar-left">
+    <div class="menu-item" onclick="window.location.href='home_page.html'"><span class="icon">⌂</span> Početna</div>
+    <div class="menu-item" onclick="window.location.href='hackathons.html'"><span class="icon">◈</span> Hackathoni</div>
+    <div class="menu-item" onclick="window.location.href='teams.html'"><span class="icon">👥</span> Timovi</div>
+    <div class="menu-item" onclick="window.location.href='cohor.html'"><span class="icon">✉</span> Poruke</div>
+    <div class="menu-item active"><span class="icon">👾</span> GameHub</div>
+    <div class="menu-item" onclick="window.location.href='settings.html'"><span class="icon">⚙</span> Podešavanja</div>
+    <div class="menu-divider"></div>
+    <div class="crystal-button" onclick="window.location.href='premium.html'"><span class="crystal-icon">◆</span> Premium</div>
+  </aside>
+
+  <main class="feed">
+
+    <!-- GameHub Header -->
+    <div class="gh-header">
+      <div class="gh-header-left">
+        <div class="gh-title">Game<span>Hub</span></div>
+        <div class="gh-subtitle">Igraj, zarađuj XP, osvajaj nagrade</div>
+      </div>
+      <div class="gh-xp-pill">
+        <span class="gh-xp-icon">⚡</span>
+        <span class="gh-xp-val">1,240 XP</span>
+      </div>
+    </div>
+
+    <!-- Daily Spin -->
+    <div class="gh-section" id="daily-spin">
+      <div class="gh-section-label"><span class="dot-cyan"></span> Daily Spin</div>
+
+      <!-- Trigger card -->
+      <div class="spin-trigger-card" onclick="openSpinModal()">
+        <div class="spin-trigger-left">
+          <div class="spin-mini-wheel-wrap">
+            <div class="spin-mini-wheel"></div>
+            <div class="spin-mini-pointer">▼</div>
+          </div>
+          <div>
+            <div class="spin-info-title">Daily Spin</div>
+            <div class="spin-info-sub" style="margin:0">Jednom dnevno — okreni točak i osvoji XP ili nagradu!</div>
+          </div>
+        </div>
+        <div class="spin-trigger-right">
+          <div class="spin-rewards" style="margin-bottom:10px;">
+            <div class="reward-pill cyan">50 XP</div>
+            <div class="reward-pill pink">🎁 Skin</div>
+            <div class="reward-pill lemon">100 XP</div>
+            <div class="reward-pill violet">🏆 Rare</div>
+          </div>
+          <button class="spin-btn" style="pointer-events:none">
+            <span class="spin-btn-icon">◈</span> Otvori spin
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SPIN MODAL -->
+    <div class="spin-modal-overlay" id="spinOverlay" onclick="closeSpinModal(event)">
+      <div class="spin-modal" id="spinModal">
+        <button class="spin-modal-close" onclick="closeSpinModal(null)">✕</button>
+        <div class="spin-modal-title">Daily <span>Spin</span></div>
+        <div class="spin-modal-sub">Jednom dnevno možeš okrenuti točak</div>
+
+        <div class="spin-wheel-wrap" style="margin:0 auto 28px;">
+          <canvas id="spinWheel" width="380" height="380"></canvas>
+          <div class="spin-pointer">▼</div>
+          <div class="spin-center-dot"></div>
+        </div>
+
+        <button class="spin-btn" id="spinBtn" onclick="doSpin()" style="margin:0 auto;">
+          <span class="spin-btn-icon">◈</span> Okreni
+        </button>
+        <div class="spin-cooldown" id="spinCooldown" style="display:none;justify-content:center;margin-top:10px;">
+          <span>⏳</span> Sledeći spin za: <span id="spinTimer">23:59:59</span>
+        </div>
+        <div class="spin-result-toast" id="spinToast" style="display:none;margin-top:14px;"></div>
+      </div>
+    </div>
+
+    <!-- Daily Minigame -->
+    <div class="gh-section" id="daily-minigame">
+      <div class="gh-section-label"><span class="dot-pink"></span> Daily Minigame</div>
+
+      <div class="minigame-card">
+        <div class="minigame-header">
+          <div class="minigame-title">Kviz!</div>
+          <div class="minigame-badge">🔥 +150 XP</div>
+        </div>
+        <div class="minigame-desc">Odgovori na pitanja i osvoji XP.</div>
+
+        <div class="quiz-card" id="quizCard">
+          <div class="quiz-clue" id="quizClue">Učita se...</div>
+          <div class="quiz-options" id="quizOptions"></div>
+          <div class="quiz-result" id="quizResult" style="display:none"></div>
+          <div class="quiz-next" id="quizNext" style="display:none">
+            <button class="btn-join" onclick="nextQuestion()">Sledeće pitanje →</button>
+            <div class="quiz-score-inline" id="quizScoreInline"></div>
+          </div>
+        </div>
+
+        <div class="minigame-progress">
+          <div class="progress-label">
+            <span>Pitanje <span id="qNum">1</span>/5</span>
+            <span id="scoreLabel">0 tačnih</span>
+          </div>
+          <div class="progress-bar-wrap">
+            <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Coming Soon -->
+    <div class="gh-section">
+      <div class="gh-section-label"><span style="background:var(--muted)" class="dot-cyan"></span> Uskoro</div>
+      <div class="coming-soon-grid">
+        <div class="cs-card">
+          <div class="cs-icon">🧩</div>
+          <div class="cs-name">Hack Quiz</div>
+          <div class="cs-desc">Pitanja iz oblasti programiranja</div>
+          <div class="cs-pill">Uskoro</div>
+        </div>
+        <div class="cs-card">
+          <div class="cs-icon">⚡</div>
+          <div class="cs-name">Speed Code</div>
+          <div class="cs-desc">Napiši algoritam što brže</div>
+          <div class="cs-pill">Uskoro</div>
+        </div>
+        <div class="cs-card">
+          <div class="cs-icon">🎯</div>
+          <div class="cs-name">Bug Hunt</div>
+          <div class="cs-desc">Pronađi bug u kodu</div>
+          <div class="cs-pill">Uskoro</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <aside class="sidebar-right">
+    <!-- Leaderboard -->
+    <div class="social-card">
+      <div class="social-card-header">
+        <div class="social-card-title">🏆 Top igrači</div>
+        <div class="arrow-circle">›</div>
+      </div>
+      <div class="preview-list">
+        <div class="preview-row">
+          <div class="lb-rank lemon">1</div>
+          <div class="pr-info">
+            <div class="pr-name">miki</div>
+            <div class="pr-sub">3,400 XP</div>
+          </div>
+          <div class="pr-badge" style="background:#1C1A00;color:var(--lemon-vivid);border-color:#3A3600;">🥇</div>
+        </div>
+        <div class="preview-row">
+          <div class="lb-rank violet">2</div>
+          <div class="pr-info">
+            <div class="pr-name">fenjer</div>
+            <div class="pr-sub">2,810 XP</div>
+          </div>
+          <div class="pr-badge">🥈</div>
+        </div>
+        <div class="preview-row">
+          <div class="lb-rank teal">3</div>
+          <div class="pr-info">
+            <div class="pr-name">StiviG</div>
+            <div class="pr-sub">2,200 XP</div>
+          </div>
+          <div class="pr-badge" style="background:#04342C;color:#5DCAA5;border-color:#0F3D30;">🥉</div>
+        </div>
+        <div class="preview-row">
+          <div class="lb-rank muted">67</div>
+          <div class="pr-info">
+            <div class="pr-name">rakun (Ti)</div>
+            <div class="pr-sub">1,240 XP</div>
+          </div>
+          <div class="pr-badge">·</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- My achievements -->
+    <div class="social-card">
+      <div class="social-card-header">
+        <div class="social-card-title">🎖 Dostignuća</div>
+        <div class="arrow-circle">›</div>
+      </div>
+      <div class="preview-list">
+        <div class="preview-row">
+          <div class="ach-icon unlocked">🔥</div>
+          <div class="pr-info">
+            <div class="pr-name">7-day streak</div>
+            <div class="pr-sub">Igraš 7 dana zaredom</div>
+          </div>
+        </div>
+        <div class="preview-row">
+          <div class="ach-icon unlocked">🎯</div>
+          <div class="pr-info">
+            <div class="pr-name">Sharpshooter</div>
+            <div class="pr-sub">5/5 tačnih odgovora</div>
+          </div>
+        </div>
+        <div class="preview-row" style="opacity:.45">
+          <div class="ach-icon locked">🏆</div>
+          <div class="pr-info">
+            <div class="pr-name">Top 10</div>
+            <div class="pr-sub">Uđi u top 10 igrača</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </aside>
+</div>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-links">
+      <a>O nama</a> <span>·</span>
+      <a>Pristupačnost</a> <span>·</span>
+      <a>Centar za pomoć</a><span>·</span>
+      <a>Privatnost i uslovi</a>
+    </div>
+    <div class="footer-copy">tiki<span>miki</span> © 2026</div>
+  </div>
+</footer>
+
+<script>
+// ── MODAL ───────────────────────────────────────────────────
+function openSpinModal() {
+  document.getElementById('spinOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeSpinModal(e) {
+  if (e && e.target !== document.getElementById('spinOverlay')) return;
+  document.getElementById('spinOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ── DAILY SPIN (canvas wheel) ────────────────────────────────
+const prizes = [
+  { label: '50 XP',   xp: 50,  type:'xp' },
+  { label: 'KOHOR Skin', xp: 0,   type:'skin' },
+  { label: '100 XP',  xp: 100, type:'xp' },
+  { label: 'MISS',    xp: 0,   type:'miss' },
+  { label: '25 XP',   xp: 25,  type:'xp' },
+  { label: '200 XP',  xp: 200, type:'xp' },
+  { label: '🏆 Rare Bonus', xp: 0,   type:'rare' },
+  { label: '75 XP',   xp: 75,  type:'xp' },
+];
+
+const SEG_COLORS = [
+  '#1A0E3D','#2A0028','#1C1A00','#17172A',
+  '#1A0E3D','#04342C','#1C1A00','#17172A',
+];
+const TEXT_COLORS = [
+  '#A78BFA','#ff9ff3','#ffe734','#7A7690',
+  '#A78BFA','#5DCAA5','#ffe734','#7A7690',
+];
+
+const canvas = document.getElementById('spinWheel');
+const ctx = canvas.getContext('2d');
+const N = prizes.length;
+const SEG = (2 * Math.PI) / N;
+const R = canvas.width / 2;
+let currentAngle = 0;
+let spinning = false;
+let spunToday = false;
+let rafId = null;
+
+function drawWheel(angle) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  for (let i = 0; i < N; i++) {
+    const start = angle + i * SEG;
+    const end = start + SEG;
+    const mid = start + SEG / 2;
+
+    // Segment fill
+    ctx.beginPath();
+    ctx.moveTo(R, R);
+    ctx.arc(R, R, R - 2, start, end);
+    ctx.closePath();
+    ctx.fillStyle = SEG_COLORS[i];
+    ctx.fill();
+
+    // Segment border line
+    ctx.beginPath();
+    ctx.moveTo(R, R);
+    ctx.arc(R, R, R - 2, start, end);
+    ctx.closePath();
+    ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // Text
+    ctx.save();
+    ctx.translate(R, R);
+    ctx.rotate(mid);
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = TEXT_COLORS[i];
+    ctx.font = 'bold 13px "Space Grotesk", sans-serif';
+    ctx.fillText(prizes[i].label, R - 14, 0);
+    ctx.restore();
+  }
+
+  // Outer ring
+  ctx.beginPath();
+  ctx.arc(R, R, R - 2, 0, 2 * Math.PI);
+  ctx.strokeStyle = '#2A2550';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  // Center dot (drawn by CSS, but also clear center)
+  ctx.beginPath();
+  ctx.arc(R, R, 10, 0, 2 * Math.PI);
+  ctx.fillStyle = '#07070D';
+  ctx.fill();
+}
+
+drawWheel(currentAngle);
+
+let spinning2 = false;
+let spunToday2 = false;
+let startAngle = 0;
+let targetAngle = 0;
+let startTime = null;
+const SPIN_DURATION = 4200;
+
+function easeOut(t) {
+  return 1 - Math.pow(1 - t, 4);
+}
+
+function animateSpin(ts) {
+  if (!startTime) startTime = ts;
+  const elapsed = ts - startTime;
+  const t = Math.min(elapsed / SPIN_DURATION, 1);
+  const angle = startAngle + (targetAngle - startAngle) * easeOut(t);
+  drawWheel(angle);
+  if (t < 1) {
+    rafId = requestAnimationFrame(animateSpin);
+  } else {
+    currentAngle = targetAngle % (2 * Math.PI);
+    drawWheel(currentAngle);
+    spinning2 = false;
+    spunToday2 = true;
+    const winIdx = getWinnerIndex(targetAngle);
+    showSpinResult(prizes[winIdx]);
+    document.getElementById('spinBtn').style.display = 'none';
+    document.getElementById('spinCooldown').style.display = 'flex';
+    startCooldownTimer();
+  }
+}
+
+function getWinnerIndex(angle) {
+  // Pointer is at top (angle = -PI/2 from canvas 0)
+  // Normalize angle so that "top" = 0
+  const norm = (((-angle - Math.PI / 2) % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+  return Math.floor(norm / SEG) % N;
+}
+
+function doSpin() {
+  if (spinning2 || spunToday2) return;
+  spinning2 = true;
+  document.getElementById('spinBtn').disabled = true;
+
+  const winIdx = Math.floor(Math.random() * N);
+  // We want winIdx segment to be at the top pointer
+  // Top pointer = angle where segment midpoint = -PI/2
+  const segMid = winIdx * SEG + SEG / 2;
+  // targetAngle such that: -targetAngle - PI/2 ≡ segMid  =>  targetAngle = -segMid - PI/2
+  const extraSpins = 6 * 2 * Math.PI;
+  const rawTarget = -segMid - Math.PI / 2;
+  // Normalize so we always spin forward (positive delta from current)
+  const delta = ((rawTarget - currentAngle) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+  startAngle = currentAngle;
+  targetAngle = currentAngle + extraSpins + delta;
+  startTime = null;
+  rafId = requestAnimationFrame(animateSpin);
+}
+
+function showSpinResult(prize) {
+  const toast = document.getElementById('spinToast');
+  let msg = '';
+  if (prize.type === 'miss') msg = '😬 Promašio si! Srećom sutra.';
+  else if (prize.type === 'skin') msg = '🎁 Čestitamo! Osvojio si novi skin!';
+  else if (prize.type === 'rare') msg = '🏆 NEVEROVATNO! Rare nagrada!';
+  else msg = `⚡ Sjajno! Osvajаš ${prize.label}!`;
+  toast.textContent = msg;
+  toast.style.display = 'block';
+}
+
+function startCooldownTimer() {
+  let secs = 86399;
+  const el = document.getElementById('spinTimer');
+  const iv = setInterval(() => {
+    secs--;
+    if (secs <= 0) { clearInterval(iv); return; }
+    const h = String(Math.floor(secs/3600)).padStart(2,'0');
+    const m = String(Math.floor((secs%3600)/60)).padStart(2,'0');
+    const s = String(secs%60).padStart(2,'0');
+    el.textContent = `${h}:${m}:${s}`;
+  }, 1000);
+}
+
+// ── DAILY MINIGAME (Quiz) ────────────────────────────────────
+const questions = [
+  {
+    clue: "Šta je gore biti nego digitron?",
+    options: ["digitalac", "kalkulator", "digi", "pešić"],
+    answer: 1
+  },
+  {
+    clue: "Ko je najviše u kohoru?",
+    options: ["gnjat", "ćira", "cvetko", "coa"],
+    answer: 2
+  },
+  {
+    clue: "Ko voli da menja brzine?",
+    options: ["gnjat", "čolić", "pušica", "simić"],
+    answer: 2
+  },
+  {
+    clue: "Nacrtaš autoput E-76, izvučeš jednu brzu prevarantsku...",
+    options: ["mleko u kesi", "bonus", "kohor", "RUSSSSSSS!!!!"],
+    answer: 3
+  },
+  {
+    clue: "Ko je lale",
+    options: ["lale", "simić", "pešić", "claude"],
+    answer: 0
+  }
+];
+
+let currentQ = 0;
+let score = 0;
+let answered = false;
+
+function loadQuestion() {
+  const q = questions[currentQ];
+  document.getElementById('quizClue').textContent = q.clue;
+  document.getElementById('qNum').textContent = currentQ + 1;
+  document.getElementById('progressFill').style.width = `${(currentQ / questions.length) * 100}%`;
+  document.getElementById('quizResult').style.display = 'none';
+  document.getElementById('quizNext').style.display = 'none';
+  answered = false;
+
+  const optEl = document.getElementById('quizOptions');
+  optEl.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-opt';
+    btn.textContent = opt;
+    btn.onclick = () => selectAnswer(i);
+    optEl.appendChild(btn);
+  });
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = questions[currentQ];
+  const opts = document.querySelectorAll('.quiz-opt');
+  opts.forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.answer) btn.classList.add('correct');
+    else if (i === idx) btn.classList.add('wrong');
+  });
+
+  const result = document.getElementById('quizResult');
+  result.style.display = 'block';
+  if (idx === q.answer) {
+    score++;
+    result.textContent = '✅ Tačno!';
+    result.className = 'quiz-result result-correct';
+  } else {
+    result.textContent = `❌ Netačno. Odgovor: ${q.options[q.answer]}`;
+    result.className = 'quiz-result result-wrong';
+  }
+
+  document.getElementById('scoreLabel').textContent = `${score} tačnih`;
+  document.getElementById('quizNext').style.display = 'flex';
+
+  if (currentQ === questions.length - 1) {
+    document.querySelector('#quizNext .btn-join').textContent = 'Završi';
+    document.getElementById('quizScoreInline').textContent = `Rezultat: ${score}/${questions.length}`;
+  }
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= questions.length) {
+    showFinalScore();
+    return;
+  }
+  loadQuestion();
+}
+
+function showFinalScore() {
+  const card = document.getElementById('quizCard');
+  const pct = Math.round((score / questions.length) * 100);
+  const xpEarned = score * 30;
+  card.innerHTML = `
+    <div class="quiz-final">
+      <div class="quiz-final-emoji">${score >= 4 ? '🏆' : score >= 2 ? '👏' : '😅'}</div>
+      <div class="quiz-final-title">${score >= 4 ? 'Odlično!' : score >= 2 ? 'Solidno!' : 'Probaj sutra!'}</div>
+      <div class="quiz-final-score">${score}/${questions.length} tačnih · ${pct}%</div>
+      <div class="quiz-final-xp">+${xpEarned} XP zarađeno</div>
+      <div class="spin-cooldown" style="display:flex;justify-content:center;margin-top:16px;">
+        <span>⏳</span> Sledeći kviz za: <span id="quizTimer">23:59:59</span>
+      </div>
+    </div>
+  `;
+  document.getElementById('progressFill').style.width = '100%';
+  startQuizCooldownTimer();
+}
+
+function startQuizCooldownTimer() {
+  let secs = 86399;
+  const iv = setInterval(() => {
+    secs--;
+    const el = document.getElementById('quizTimer');
+    if (!el || secs <= 0) { clearInterval(iv); return; }
+    const h = String(Math.floor(secs / 3600)).padStart(2, '0');
+    const m = String(Math.floor((secs % 3600) / 60)).padStart(2, '0');
+    const s = String(secs % 60).padStart(2, '0');
+    el.textContent = `${h}:${m}:${s}`;
+  }, 1000);
+}
+
+loadQuestion();
+</script>
+
+</body>
+</html>

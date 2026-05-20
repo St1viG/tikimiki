@@ -1,0 +1,504 @@
+<!-- Dimitrije Pešić 2023/0014 -->
+<!-- Andrej Čolić 2023/0492 -->
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="tikimiki.css">
+  <link rel="stylesheet" href="teams.css">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="icon" href="images/favicon.ico">
+  <title>tikimiki · Timovi</title>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="logo" onclick="window.location.href='home_page.html'" style="cursor:pointer"><span>tiki</span>miki</div>
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input type="text" placeholder="Pretraži korisnike, hackathone, organizacije...">
+    </div>
+    <div class="nav-right">
+      <div class="icon-btn" onclick="window.location.href='store.html'">🛒<span class="badge">2</span></div>
+      <div class="icon-btn">🔔<span class="badge">5</span></div>
+      <div class="avatar">AČ</div>
+    </div>
+  </div>
+</nav>
+
+<div class="layout">
+
+  <aside class="sidebar-left">
+    <div class="menu-item" onclick="window.location.href='home_page.html'"><span class="icon">⌂</span> Početna</div>
+    <div class="menu-item" onclick="window.location.href='hackathons.html'"><span class="icon">◈</span> Hackathoni</div>
+    <div class="menu-item active" onclick="window.location.href='teams.html'"><span class="icon">👥</span> Timovi</div>
+    <div class="menu-item" onclick="window.location.href='cohor.html'"><span class="icon">✉</span> Poruke</div>
+    <div class="menu-item" onclick="window.location.href='gamehub.html'"><span class="icon">👾</span> GameHub</div>
+    <div class="menu-item" onclick="window.location.href='settings.html'"><span class="icon">⚙</span> Podešavanja</div>
+    <div class="menu-divider"></div>
+    <div class="crystal-button" onclick="window.location.href='premium.html'"><span class="crystal-icon">◆</span> Premium</div>
+  </aside>
+
+<div class="tm-page" data-filter="mine" style="max-width:none;margin:0;padding:4px 14px 40px;min-width:0;">
+
+  <header class="tm-header">
+    <div>
+      <h1 class="tm-title">Timovi</h1>
+      <div class="tm-sub">Saigrači za naredni hackathon.</div>
+    </div>
+    <button class="tm-create-btn"><span>+</span> Kreiraj tim</button>
+  </header>
+
+  <!-- TABS -->
+  <div class="tm-tabs">
+    <div class="tm-tab tm-tab-active" data-filter="mine">Moj tim</div>
+    <div class="tm-tab" data-filter="ai">AI predlozi <span class="tm-tab-count">3</span></div>
+    <div class="tm-tab" data-filter="open">Otvoreni timovi</div>
+    <div class="tm-tab" data-filter="solo">Slobodni igrači</div>
+    <div class="tm-tab" data-filter="board">Leaderboard</div>
+  </div>
+
+  <!-- MOJ TIM – korisnik nije u timu -->
+  <section class="tm-section" data-section="mine">
+    <div class="tm-hero tm-hero-empty">
+      <span class="tm-bracket tm-bracket-tl"></span>
+      <span class="tm-bracket tm-bracket-tr"></span>
+      <span class="tm-bracket tm-bracket-bl"></span>
+      <span class="tm-bracket tm-bracket-br"></span>
+      <div class="tm-scan"></div>
+
+      <div class="tm-empty-icon">👥</div>
+      <h2 class="tm-empty-title">Nisi još u timu</h2>
+      <p class="tm-empty-desc">Pridruži se postojećem timu, prihvati AI predlog ili kreiraj sopstveni.</p>
+
+      <div class="tm-hero-actions">
+        <button class="btn-join tm-btn-lg">Kreiraj tim</button>
+        <button class="btn-info tm-btn-lg" onclick="document.querySelector('[data-filter=ai]').click()">Pogledaj AI predloge</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- AI PREDLOZI -->
+  <section class="tm-section" data-section="ai">
+    <div class="tm-ai-head">
+      <div>
+        <div class="tm-ai-eyebrow">◆ AI UPARIVANJE</div>
+        <h2 class="tm-ai-h">Pronašao sam ti tim za naredna 3 hackathona.</h2>
+      </div>
+      <a class="tm-ai-link">Osveži ↻</a>
+    </div>
+
+    <div class="tm-sug-grid">
+
+      <div class="tm-sug">
+        <div class="tm-sug-match px-font">92<span>%</span></div>
+        <div class="tm-sug-body">
+          <div class="tm-sug-for">AI4Good Belgrade · 02.05.</div>
+          <div class="tm-sug-avs">
+            <div class="tm-av tm-av-v tm-av-md">F</div>
+            <div class="tm-av tm-av-t tm-av-md">V</div>
+            <div class="tm-av tm-av-l tm-av-md">M</div>
+            <div class="tm-av tm-av-v tm-av-md tm-av-me">AČ</div>
+          </div>
+          <div class="tm-sug-names">fenjer, vuk, mara + ti</div>
+          <div class="tm-sug-why">Pokrivate ceo stack (ML + Backend + Frontend) za LLM izazov.</div>
+          <div class="tm-sug-actions">
+            <button class="btn-join">Prihvati predlog</button>
+            <button class="btn-reject">Odbij i traži nov predlog ↻</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tm-sug">
+        <div class="tm-sug-match px-font">87<span>%</span></div>
+        <div class="tm-sug-body">
+          <div class="tm-sug-for">FinTech Sprint · 15.05.</div>
+          <div class="tm-sug-avs">
+            <div class="tm-av tm-av-r tm-av-md">N</div>
+            <div class="tm-av tm-av-t tm-av-md">M</div>
+            <div class="tm-av tm-av-v tm-av-md tm-av-me">AČ</div>
+          </div>
+          <div class="tm-sug-names">nona, moljac + ti</div>
+          <div class="tm-sug-why">Mali precizan tim — nona radi infra, moljac high-perf backend, ti frontend.</div>
+          <div class="tm-sug-actions">
+            <button class="btn-join">Prihvati predlog</button>
+            <button class="btn-reject">Odbij i traži nov predlog ↻</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tm-sug">
+        <div class="tm-sug-match px-font">78<span>%</span></div>
+        <div class="tm-sug-body">
+          <div class="tm-sug-for">Niš TechStorm · 20.05.</div>
+          <div class="tm-sug-avs">
+            <div class="tm-av tm-av-v tm-av-md">B</div>
+            <div class="tm-av tm-av-l tm-av-md">J</div>
+            <div class="tm-av tm-av-t tm-av-md">P</div>
+            <div class="tm-av tm-av-v tm-av-md tm-av-me">AČ</div>
+          </div>
+          <div class="tm-sug-names">bane_iot, jana, petar.s + ti</div>
+          <div class="tm-sug-why">IoT izazov traži hardver + dashboard + analitiku — tim pokriva sve tri.</div>
+          <div class="tm-sug-actions">
+            <button class="btn-join">Prihvati predlog</button>
+            <button class="btn-reject">Odbij i traži nov predlog ↻</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- OTVORENI TIMOVI -->
+  <section class="tm-section" data-section="open">
+    <div class="tm-open-grid">
+
+      <div class="tm-open-card">
+        <div class="tm-open-hack">ETF HackWeek · 18.04.</div>
+        <h3 class="tm-open-name">nullptr</h3>
+        <div class="tm-open-avs">
+          <div class="tm-av tm-av-v tm-av-md">IV</div>
+          <div class="tm-av tm-av-l tm-av-md">TO</div>
+          <div class="tm-av tm-av-t tm-av-md">RA</div>
+          <div class="tm-av tm-av-slot tm-av-md">+</div>
+        </div>
+        <div class="tm-open-need">Traže <strong>Backend / Rust</strong></div>
+        <button class="btn-join">Zatraži priključenje</button>
+      </div>
+
+      <div class="tm-open-card">
+        <div class="tm-open-hack">FinTech Sprint · 15.05.</div>
+        <h3 class="tm-open-name">merge-conflict</h3>
+        <div class="tm-open-avs">
+          <div class="tm-av tm-av-v tm-av-md">MP</div>
+          <div class="tm-av tm-av-l tm-av-md">SD</div>
+          <div class="tm-av tm-av-slot tm-av-md">+</div>
+          <div class="tm-av tm-av-slot tm-av-md">+</div>
+        </div>
+        <div class="tm-open-need">Traže <strong>Frontend + Design</strong></div>
+        <button class="btn-join">Zatraži priključenje</button>
+      </div>
+
+      <div class="tm-open-card">
+        <div class="tm-open-hack">AI4Good Belgrade · 02.05.</div>
+        <h3 class="tm-open-name">404brains</h3>
+        <div class="tm-open-avs">
+          <div class="tm-av tm-av-v tm-av-md">JN</div>
+          <div class="tm-av tm-av-l tm-av-md">TM</div>
+          <div class="tm-av tm-av-t tm-av-md">KS</div>
+          <div class="tm-av tm-av-slot tm-av-md">+</div>
+        </div>
+        <div class="tm-open-need">Traže <strong>ML</strong></div>
+        <button class="btn-join">Zatraži priključenje</button>
+      </div>
+
+      <div class="tm-open-card">
+        <div class="tm-open-hack">HackNight #7 · 10.05.</div>
+        <h3 class="tm-open-name">race-condition</h3>
+        <div class="tm-open-avs">
+          <div class="tm-av tm-av-v tm-av-md">UR</div>
+          <div class="tm-av tm-av-l tm-av-md">PM</div>
+          <div class="tm-av tm-av-slot tm-av-md">+</div>
+          <div class="tm-av tm-av-slot tm-av-md">+</div>
+        </div>
+        <div class="tm-open-need">Traže <strong>Embedded + Frontend</strong></div>
+        <button class="btn-join">Zatraži priključenje</button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SLOBODNI IGRAČI -->
+  <section class="tm-section" data-section="solo">
+    <div class="tm-solo-grid">
+
+      <div class="tm-solo">
+        <div class="tm-av tm-av-v tm-av-xl">F</div>
+        <div class="tm-solo-name">fenjer</div>
+        <div class="tm-solo-role">ML</div>
+        <button class="btn-info">Pozovi u tim</button>
+      </div>
+
+      <div class="tm-solo">
+        <div class="tm-av tm-av-t tm-av-xl">M</div>
+        <div class="tm-solo-name">moljac</div>
+        <div class="tm-solo-role">Backend</div>
+        <button class="btn-info">Pozovi u tim</button>
+      </div>
+
+      <div class="tm-solo">
+        <div class="tm-av tm-av-l tm-av-xl">M</div>
+        <div class="tm-solo-name">mara</div>
+        <div class="tm-solo-role">Frontend</div>
+        <button class="btn-info">Pozovi u tim</button>
+      </div>
+
+      <div class="tm-solo">
+        <div class="tm-av tm-av-r tm-av-xl">N</div>
+        <div class="tm-solo-name">nona</div>
+        <div class="tm-solo-role">DevOps</div>
+        <button class="btn-info">Pozovi u tim</button>
+      </div>
+
+      <div class="tm-solo">
+        <div class="tm-av tm-av-v tm-av-xl">V</div>
+        <div class="tm-solo-name">vuk</div>
+        <div class="tm-solo-role">ML</div>
+        <button class="btn-info">Pozovi u tim</button>
+      </div>
+
+      <div class="tm-solo">
+        <div class="tm-av tm-av-l tm-av-xl">J</div>
+        <div class="tm-solo-name">jana</div>
+        <div class="tm-solo-role">Frontend</div>
+        <button class="btn-info">Pozovi u tim</button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- LEADERBOARD -->
+  <section class="tm-section" data-section="board">
+    <div class="tm-lb">
+
+      <div class="tm-lb-row tm-lb-gold">
+        <div class="tm-lb-rank">
+          <svg class="px-medal" viewBox="0 0 9 11" shape-rendering="crispEdges" aria-hidden="true">
+            <rect x="2" y="0" width="1" height="4" fill="#E87082"/>
+            <rect x="6" y="0" width="1" height="4" fill="#E87082"/>
+            <rect x="1" y="3" width="7" height="1" fill="#C4A400"/>
+            <rect x="0" y="4" width="9" height="5" fill="#FFE44D"/>
+            <rect x="1" y="9" width="7" height="1" fill="#C4A400"/>
+            <rect x="2" y="10" width="5" height="1" fill="#8A7300"/>
+            <rect x="1" y="5" width="1" height="1" fill="#FFF9C4"/>
+            <rect x="2" y="4" width="1" height="1" fill="#FFF9C4"/>
+            <rect x="7" y="7" width="1" height="2" fill="#C4A400"/>
+          </svg>
+          <span class="px-font">1</span>
+        </div>
+        <div class="tm-lb-avs">
+          <div class="tm-av tm-av-l tm-av-sm">MV</div>
+          <div class="tm-av tm-av-v tm-av-sm">LJ</div>
+          <div class="tm-av tm-av-t tm-av-sm">BA</div>
+          <div class="tm-av tm-av-r tm-av-sm">DK</div>
+        </div>
+        <div class="tm-lb-name">commit-n-chill</div>
+        <div class="tm-lb-xp"><svg class="px-spark" viewBox="0 0 5 9" shape-rendering="crispEdges" aria-hidden="true"><rect x="2" y="0" width="2" height="1" fill="currentColor"/><rect x="1" y="1" width="2" height="1" fill="currentColor"/><rect x="1" y="2" width="2" height="1" fill="currentColor"/><rect x="0" y="3" width="3" height="1" fill="currentColor"/><rect x="1" y="4" width="4" height="1" fill="currentColor"/><rect x="2" y="5" width="2" height="1" fill="currentColor"/><rect x="1" y="6" width="2" height="1" fill="currentColor"/><rect x="1" y="7" width="2" height="1" fill="currentColor"/><rect x="0" y="8" width="2" height="1" fill="currentColor"/></svg><span class="px-font">720</span> XP</div>
+      </div>
+
+      <div class="tm-lb-row tm-lb-silver">
+        <div class="tm-lb-rank">
+          <svg class="px-medal" viewBox="0 0 9 11" shape-rendering="crispEdges" aria-hidden="true">
+            <rect x="2" y="0" width="1" height="4" fill="#5FA8C4"/>
+            <rect x="6" y="0" width="1" height="4" fill="#5FA8C4"/>
+            <rect x="1" y="3" width="7" height="1" fill="#7A8A99"/>
+            <rect x="0" y="4" width="9" height="5" fill="#C4CCD4"/>
+            <rect x="1" y="9" width="7" height="1" fill="#7A8A99"/>
+            <rect x="2" y="10" width="5" height="1" fill="#525B66"/>
+            <rect x="1" y="5" width="1" height="1" fill="#F2F5F8"/>
+            <rect x="2" y="4" width="1" height="1" fill="#F2F5F8"/>
+            <rect x="7" y="7" width="1" height="2" fill="#7A8A99"/>
+          </svg>
+          <span class="px-font">2</span>
+        </div>
+        <div class="tm-lb-avs">
+          <div class="tm-av tm-av-v tm-av-sm">BA</div>
+          <div class="tm-av tm-av-l tm-av-sm">MI</div>
+          <div class="tm-av tm-av-t tm-av-sm">LZ</div>
+          <div class="tm-av tm-av-r tm-av-sm">KO</div>
+        </div>
+        <div class="tm-lb-name">bytecraft</div>
+        <div class="tm-lb-xp"><svg class="px-spark" viewBox="0 0 5 9" shape-rendering="crispEdges" aria-hidden="true"><rect x="2" y="0" width="2" height="1" fill="currentColor"/><rect x="1" y="1" width="2" height="1" fill="currentColor"/><rect x="1" y="2" width="2" height="1" fill="currentColor"/><rect x="0" y="3" width="3" height="1" fill="currentColor"/><rect x="1" y="4" width="4" height="1" fill="currentColor"/><rect x="2" y="5" width="2" height="1" fill="currentColor"/><rect x="1" y="6" width="2" height="1" fill="currentColor"/><rect x="1" y="7" width="2" height="1" fill="currentColor"/><rect x="0" y="8" width="2" height="1" fill="currentColor"/></svg><span class="px-font">680</span> XP</div>
+      </div>
+
+      <div class="tm-lb-row tm-lb-bronze">
+        <div class="tm-lb-rank">
+          <svg class="px-medal" viewBox="0 0 9 11" shape-rendering="crispEdges" aria-hidden="true">
+            <rect x="2" y="0" width="1" height="4" fill="#5DCAA5"/>
+            <rect x="6" y="0" width="1" height="4" fill="#5DCAA5"/>
+            <rect x="1" y="3" width="7" height="1" fill="#73401A"/>
+            <rect x="0" y="4" width="9" height="5" fill="#C97C3D"/>
+            <rect x="1" y="9" width="7" height="1" fill="#73401A"/>
+            <rect x="2" y="10" width="5" height="1" fill="#4A2A10"/>
+            <rect x="1" y="5" width="1" height="1" fill="#E8A26B"/>
+            <rect x="2" y="4" width="1" height="1" fill="#E8A26B"/>
+            <rect x="7" y="7" width="1" height="2" fill="#73401A"/>
+          </svg>
+          <span class="px-font">3</span>
+        </div>
+        <div class="tm-lb-avs">
+          <div class="tm-av tm-av-v tm-av-sm">AČ</div>
+          <div class="tm-av tm-av-l tm-av-sm">SG</div>
+          <div class="tm-av tm-av-t tm-av-sm">DP</div>
+          <div class="tm-av tm-av-r tm-av-sm">NS</div>
+        </div>
+        <div class="tm-lb-name">digitalci <span class="tm-r-you">ti</span></div>
+        <div class="tm-lb-xp"><svg class="px-spark" viewBox="0 0 5 9" shape-rendering="crispEdges" aria-hidden="true"><rect x="2" y="0" width="2" height="1" fill="currentColor"/><rect x="1" y="1" width="2" height="1" fill="currentColor"/><rect x="1" y="2" width="2" height="1" fill="currentColor"/><rect x="0" y="3" width="3" height="1" fill="currentColor"/><rect x="1" y="4" width="4" height="1" fill="currentColor"/><rect x="2" y="5" width="2" height="1" fill="currentColor"/><rect x="1" y="6" width="2" height="1" fill="currentColor"/><rect x="1" y="7" width="2" height="1" fill="currentColor"/><rect x="0" y="8" width="2" height="1" fill="currentColor"/></svg><span class="px-font">420</span> XP</div>
+      </div>
+
+      <div class="tm-lb-row">
+        <div class="tm-lb-rank"><span class="px-font">4</span></div>
+        <div class="tm-lb-avs">
+          <div class="tm-av tm-av-v tm-av-sm">IV</div>
+          <div class="tm-av tm-av-l tm-av-sm">TO</div>
+          <div class="tm-av tm-av-t tm-av-sm">RA</div>
+        </div>
+        <div class="tm-lb-name">nullptr</div>
+        <div class="tm-lb-xp"><svg class="px-spark" viewBox="0 0 5 9" shape-rendering="crispEdges" aria-hidden="true"><rect x="2" y="0" width="2" height="1" fill="currentColor"/><rect x="1" y="1" width="2" height="1" fill="currentColor"/><rect x="1" y="2" width="2" height="1" fill="currentColor"/><rect x="0" y="3" width="3" height="1" fill="currentColor"/><rect x="1" y="4" width="4" height="1" fill="currentColor"/><rect x="2" y="5" width="2" height="1" fill="currentColor"/><rect x="1" y="6" width="2" height="1" fill="currentColor"/><rect x="1" y="7" width="2" height="1" fill="currentColor"/><rect x="0" y="8" width="2" height="1" fill="currentColor"/></svg><span class="px-font">410</span> XP</div>
+      </div>
+
+      <div class="tm-lb-row">
+        <div class="tm-lb-rank"><span class="px-font">5</span></div>
+        <div class="tm-lb-avs">
+          <div class="tm-av tm-av-v tm-av-sm">UR</div>
+          <div class="tm-av tm-av-l tm-av-sm">PM</div>
+          <div class="tm-av tm-av-t tm-av-sm">ZV</div>
+          <div class="tm-av tm-av-r tm-av-sm">AD</div>
+        </div>
+        <div class="tm-lb-name">race-condition</div>
+        <div class="tm-lb-xp"><svg class="px-spark" viewBox="0 0 5 9" shape-rendering="crispEdges" aria-hidden="true"><rect x="2" y="0" width="2" height="1" fill="currentColor"/><rect x="1" y="1" width="2" height="1" fill="currentColor"/><rect x="1" y="2" width="2" height="1" fill="currentColor"/><rect x="0" y="3" width="3" height="1" fill="currentColor"/><rect x="1" y="4" width="4" height="1" fill="currentColor"/><rect x="2" y="5" width="2" height="1" fill="currentColor"/><rect x="1" y="6" width="2" height="1" fill="currentColor"/><rect x="1" y="7" width="2" height="1" fill="currentColor"/><rect x="0" y="8" width="2" height="1" fill="currentColor"/></svg><span class="px-font">290</span> XP</div>
+      </div>
+
+    </div>
+  </section>
+
+</div>
+
+  <aside class="sidebar-right">
+    <div class="social-card" onclick="window.location.href='cohor.html'" style="cursor:pointer">
+      <div class="social-card-header">
+        <div class="social-card-title">Cohor</div>
+        <div class="arrow-circle">›</div>
+      </div>
+      <div class="preview-list">
+        <div class="preview-row">
+          <div class="pr-dot dot-green"></div>
+          <div class="pr-info">
+            <div class="pr-name">digitalci</div>
+            <div class="pr-sub">StiviG: buzz</div>
+          </div>
+          <div class="pr-badge green">7</div>
+        </div>
+        <div class="preview-row">
+          <div class="pr-dot dot-violet"></div>
+          <div class="pr-info">
+            <div class="pr-name">fenjer</div>
+            <div class="pr-sub">Ćao</div>
+          </div>
+          <div class="pr-badge">3</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="social-card" onclick="window.location.href='hackathoni.html'">
+      <div class="social-card-header">
+        <div class="social-card-title">Hackathoni</div>
+        <div class="arrow-circle">›</div>
+      </div>
+      <div class="preview-list">
+        <div class="preview-row">
+          <div class="pr-dot dot-green"></div>
+          <div class="pr-info">
+            <div class="pr-name">ETF HackWeek 2026</div>
+            <div class="pr-sub">Aktivan · 23h 41min</div>
+          </div>
+          <div class="pr-badge green">LIVE</div>
+        </div>
+        <div class="preview-row">
+          <div class="pr-dot dot-violet"></div>
+          <div class="pr-info">
+            <div class="pr-name">AI4Good Belgrade</div>
+            <div class="pr-sub">za 18 dana</div>
+          </div>
+          <div class="pr-badge">◈</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-links">
+      <a>O nama</a> <span>·</span>
+      <a>Pristupačnost</a> <span>·</span>
+      <a>Centar za pomoć</a> <span>·</span>
+      <a>Privatnost i uslovi</a>
+    </div>
+    <div class="footer-copy">tiki<span>miki</span> © 2026</div>
+  </div>
+</footer>
+
+<script>
+  const tmPage = document.querySelector('.tm-page');
+
+  document.querySelectorAll('.tm-tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.tm-tab').forEach(x => x.classList.remove('tm-tab-active'));
+      t.classList.add('tm-tab-active');
+      tmPage.setAttribute('data-filter', t.dataset.filter || 'mine');
+      window.scrollTo({top:0, behavior:'smooth'});
+    });
+  });
+</script>
+
+<style>
+  .tm-hero-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    min-height: 280px;
+    text-align: center;
+  }
+  .tm-empty-icon {
+    font-size: 48px;
+    opacity: 0.3;
+    filter: grayscale(1);
+  }
+  .tm-empty-title {
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -.02em;
+    color: var(--text);
+    margin: 0;
+    line-height: 1.2;
+  }
+  .tm-empty-desc {
+    font-size: var(--fs-sm);
+    color: var(--muted);
+    max-width: 360px;
+    margin: 0;
+    line-height: 1.55;
+  }
+  .tm-sug-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 4px;
+  }
+  .btn-reject {
+    background: transparent;
+    border: 0.5px solid var(--border);
+    color: var(--muted);
+    font-family: var(--font);
+    font-size: var(--fs-xs);
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: var(--r-md);
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .btn-reject:hover {
+    border-color: var(--violet);
+    color: var(--text);
+  }
+</style>
+
+</body>
+</html>

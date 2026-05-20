@@ -1,0 +1,374 @@
+<!-- Nenad Skoković 2023/0039 -->
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="tikimiki.css">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>tikimiki · Notification Popup Demo</title>
+  <style>
+
+    /* ── NOTIFICATION DROPDOWN ── */
+
+    .notif-anchor {
+      position: relative;
+    }
+
+    .notif-dropdown {
+      position: absolute;
+      top: calc(100% + 10px);
+      right: -8px;
+      width: 360px;
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: var(--r-lg);
+      box-shadow: 0 24px 80px rgba(0,0,0,.85), 0 0 0 0.5px rgba(95,74,139,.15);
+      overflow: hidden;
+      z-index: 500;
+      transform-origin: top right;
+      animation: dropdown-in .18s cubic-bezier(.22,.68,0,1.15) both;
+    }
+
+    .notif-dropdown.closing {
+      animation: dropdown-out .14s ease forwards;
+    }
+
+    @keyframes dropdown-in {
+      from { opacity: 0; transform: scale(.93) translateY(-8px); }
+      to   { opacity: 1; transform: scale(1)   translateY(0);    }
+    }
+
+    @keyframes dropdown-out {
+      from { opacity: 1; transform: scale(1)   translateY(0);    }
+      to   { opacity: 0; transform: scale(.93) translateY(-8px); }
+    }
+
+    .notif-dropdown::before {
+      content: '';
+      position: absolute;
+      top: -5px;
+      right: 17px;
+      width: 10px;
+      height: 10px;
+      background: var(--surface);
+      border-top: 0.5px solid var(--border);
+      border-left: 0.5px solid var(--border);
+      transform: rotate(45deg);
+    }
+
+    .notif-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px 12px;
+      border-bottom: 0.5px solid var(--border);
+    }
+
+    .notif-title {
+      font-size: var(--fs-base);
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .notif-mark-all {
+      font-size: var(--fs-xs);
+      font-weight: 600;
+      color: var(--violet-light);
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: var(--font);
+      padding: 0;
+      transition: opacity .15s;
+    }
+
+    .notif-mark-all:hover { opacity: .65; }
+
+    .notif-list {
+      max-height: 320px;
+      overflow-y: auto;
+    }
+
+    .notif-list::-webkit-scrollbar { width: 3px; }
+    .notif-list::-webkit-scrollbar-track { background: transparent; }
+    .notif-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .notif-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 11px;
+      padding: 12px 16px;
+      border-bottom: 0.5px solid var(--border);
+      cursor: pointer;
+      transition: background .15s;
+      position: relative;
+    }
+
+    .notif-item:last-child { border-bottom: none; }
+    .notif-item:hover { background: var(--surface2); }
+
+    .notif-item.unread { background: rgba(95,74,139,.07); }
+    .notif-item.unread:hover { background: rgba(95,74,139,.13); }
+
+    .notif-unread-dot {
+      position: absolute;
+      top: 15px;
+      right: 13px;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--violet-light);
+    }
+
+    .notif-ava {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--fs-xs);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .notif-body { flex: 1; min-width: 0; }
+
+    .notif-sender {
+      font-size: var(--fs-sm);
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .notif-text {
+      font-size: var(--fs-sm);
+      color: var(--muted);
+      margin-top: 2px;
+      line-height: 1.4;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .notif-time {
+      font-size: 11px;
+      color: #4A4268;
+      margin-top: 5px;
+      font-weight: 500;
+    }
+
+    .notif-footer {
+      padding: 10px 16px;
+      border-top: 0.5px solid var(--border);
+      text-align: center;
+    }
+
+    .notif-see-all {
+      font-size: var(--fs-sm);
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: color .15s;
+    }
+
+    .notif-see-all:hover { color: var(--violet-light); }
+
+    .icon-btn.bell-active {
+      border-color: var(--violet);
+      background: rgba(95,74,139,.18);
+    }
+
+    .icon-btn.bell-active .badge {
+      transform: scale(0);
+      transition: transform .2s cubic-bezier(.22,.68,0,1.3);
+    }
+
+    .demo-note {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: 20px;
+      padding: 8px 18px;
+      font-size: var(--fs-xs);
+      color: var(--muted);
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="logo"><span>tiki</span>miki</div>
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input type="text" placeholder="Pretraži korisnike, hackathone, organizacije...">
+    </div>
+    <div class="nav-right">
+      <div class="icon-btn">◈<span class="badge">2</span></div>
+
+      <div class="notif-anchor">
+        <div class="icon-btn" id="bell-btn" onclick="toggleNotif(event)">
+          🔔<span class="badge" id="bell-badge">3</span>
+        </div>
+
+        <div class="notif-dropdown" id="notif-dropdown" style="display:none;">
+          <div class="notif-header">
+            <span class="notif-title">Notifikacije</span>
+            <button class="notif-mark-all" onclick="markAllRead()">Označi sve</button>
+          </div>
+
+          <div class="notif-list">
+
+            <div class="notif-item unread" onclick="markRead(this)">
+              <div class="notif-unread-dot"></div>
+              <div class="notif-ava pav-v">SG</div>
+              <div class="notif-body">
+                <div class="notif-sender">StiviG</div>
+                <div class="notif-text">au koji buzz 🔥</div>
+                <div class="notif-time">pre 3 minuta</div>
+              </div>
+            </div>
+
+            <div class="notif-item unread" onclick="markRead(this)">
+              <div class="notif-unread-dot"></div>
+              <div class="notif-ava pav-t">PŠ</div>
+              <div class="notif-body">
+                <div class="notif-sender">pesic</div>
+                <div class="notif-text">ja nekako... 😅</div>
+                <div class="notif-time">pre 11 minuta</div>
+              </div>
+            </div>
+
+            <div class="notif-item unread" onclick="markRead(this)">
+              <div class="notif-unread-dot"></div>
+              <div class="notif-ava pav-l">NK</div>
+              <div class="notif-body">
+                <div class="notif-sender">nenad1337</div>
+                <div class="notif-text">ja u kohoru 🚀</div>
+                <div class="notif-time">pre 28 minuta</div>
+              </div>
+            </div>
+
+            <div class="notif-item" onclick="markRead(this)">
+              <div class="notif-ava" style="background:#1C1A00;color:var(--lemon-vivid);border:1px solid #3A3600;">HW</div>
+              <div class="notif-body">
+                <div class="notif-sender">ETF HackWeek</div>
+                <div class="notif-text">Prijave su otvorene! Prijavi se do 20. aprila.</div>
+                <div class="notif-time">pre 2 sata</div>
+              </div>
+            </div>
+
+            <div class="notif-item" onclick="markRead(this)">
+              <div class="notif-ava" style="background:#0A1020;color:#60A5FA;border:1px solid #1A2A40;">TM</div>
+              <div class="notif-body">
+                <div class="notif-sender">tikimiki</div>
+                <div class="notif-text">Dobrodošao! Popuni profil i osvoji bedž. 🏅</div>
+                <div class="notif-time">juče</div>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="notif-footer">
+            <span class="notif-see-all">Pogledaj sve notifikacije →</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="avatar">AČ</div>
+    </div>
+  </div>
+</nav>
+
+<div class="layout">
+  <aside class="sidebar-left">
+    <div class="menu-item"><span class="icon">⌂</span> Početna</div>
+    <div class="menu-item"><span class="icon">◈</span> Hackathoni</div>
+    <div class="menu-item"><span class="icon">👥</span> Timovi</div>
+    <div class="menu-item"><span class="icon">✉</span> Poruke</div>
+    <div class="menu-item"><span class="icon">👾</span> GameHub</div>
+    <div class="menu-item"><span class="icon">⚙</span> Podešavanja</div>
+    <div class="menu-divider"></div>
+    <div class="crystal-button"><span class="crystal-icon">◆</span> Premium</div>
+  </aside>
+
+  <main class="feed" style="display:flex;align-items:center;justify-content:center;min-height:400px;text-align:center;">
+    <div>
+      <div style="font-size:36px;margin-bottom:14px;">🔔</div>
+      <span style="color:var(--muted);font-size:var(--fs-base);">
+        Klikni na <strong style="color:var(--violet-light)">zvonce</strong> u navigaciji<br>
+        da otvoriš notifikacije.
+      </span>
+    </div>
+  </main>
+
+  <aside class="sidebar-right"></aside>
+</div>
+
+<div class="demo-note">Demo stranica · Klikni na 🔔 u navigaciji</div>
+
+<script>
+  let isOpen = false;
+
+  function toggleNotif(e) {
+    e.stopPropagation();
+    isOpen ? closeNotif() : openNotif();
+  }
+
+  function openNotif() {
+    const dd = document.getElementById('notif-dropdown');
+    dd.style.display = 'block';
+    dd.classList.remove('closing');
+    document.getElementById('bell-btn').classList.add('bell-active');
+    isOpen = true;
+  }
+
+  function closeNotif() {
+    const dd = document.getElementById('notif-dropdown');
+    dd.classList.add('closing');
+    document.getElementById('bell-btn').classList.remove('bell-active');
+    isOpen = false;
+    setTimeout(() => { if (!isOpen) dd.style.display = 'none'; }, 140);
+  }
+
+  function markRead(item) {
+    item.classList.remove('unread');
+    const dot = item.querySelector('.notif-unread-dot');
+    if (dot) dot.remove();
+    updateBadge();
+  }
+
+  function markAllRead() {
+    document.querySelectorAll('.notif-item.unread').forEach(item => {
+      item.classList.remove('unread');
+      const dot = item.querySelector('.notif-unread-dot');
+      if (dot) dot.remove();
+    });
+    updateBadge();
+  }
+
+  function updateBadge() {
+    const count = document.querySelectorAll('.notif-item.unread').length;
+    const badge = document.getElementById('bell-badge');
+    badge.textContent = count;
+    badge.style.transform = count === 0 ? 'scale(0)' : 'scale(1)';
+  }
+
+  document.addEventListener('click', e => {
+    if (isOpen && !document.querySelector('.notif-anchor').contains(e.target)) closeNotif();
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && isOpen) closeNotif();
+  });
+</script>
+
+</body>
+</html>

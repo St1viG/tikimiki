@@ -1,0 +1,650 @@
+<!-- Andrej Čolić 2023/0492 -->
+<!-- Dimitrije Pešić 2023/0014 -->
+<!-- Nenad Skoković 2023/0039 -->
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tikimiki.css">
+  <link rel="stylesheet" href="applications.css">
+  <link rel="icon" href="images/favicon.ico">
+  <title>tikimiki – Upravljanje prijavama</title>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="logo" onclick="window.location.href='home_page.html'" style="cursor:pointer"><span>tiki</span>miki</div>
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input type="text" placeholder="Pretraži korisnike, hackathone, organizacije...">
+    </div>
+    <div class="nav-right">
+      <div class="icon-btn onclick="window.location.href='store.html'">🛒<span class="badge">2</span></div>
+      <div class="icon-btn">🔔<span class="badge">5</span></div>
+      <div class="avatar">AČ</div>
+    </div>
+  </div>
+</nav>
+
+<div class="layout">
+
+  <aside class="sidebar-left">
+    <div class="menu-item" onclick="window.location.href='home_page.html'"><span class="icon">⌂</span> Početna</div>
+    <div class="menu-item active" onclick="window.location.href='hackathons.html'"><span class="icon">◈</span> Hackathoni</div>
+    <div class="menu-item" onclick="window.location.href='teams.html'"><span class="icon">👥</span> Timovi</div>
+    <div class="menu-item" onclick="window.location.href='cohor.html'"><span class="icon">✉</span> Poruke</div>
+    <div class="menu-item" onclick="window.location.href='gamehub.html'"><span class="icon">👾</span> GameHub</div>
+    <div class="menu-divider"></div>
+    <div class="menu-label">Nalog</div>
+    <div class="menu-item" onclick="window.location.href='settings.html'"><span class="icon">⚙</span> Podešavanja</div>
+    <div class="menu-divider"></div>
+    <div class="crystal-button"><span class="crystal-icon">◆</span> Premium</div>
+  </aside>
+
+  <main class="feed">
+
+    <!-- Admin view — vraća se na admin stranicu hackathona -->
+    <div class="back-link" onclick="window.location.href='hackathoni_admin.html'">← Nazad na hackathone</div>
+
+    <div class="hack-card">
+      <div class="hack-banner">
+        <div class="hack-banner-name">ETF HackWeek 2026 – Prijave</div>
+        <div class="live-pill"><span class="live-dot"></span> AKTIVAN</div>
+      </div>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-label">Ukupno prijava</div>
+        <div class="stat-val v-violet" id="cnt-total">8</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Na čekanju</div>
+        <div class="stat-val v-lemon" id="cnt-pending">4</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Odobreno</div>
+        <div class="stat-val v-green" id="cnt-approved">3</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Odbijeno</div>
+        <div class="stat-val v-red" id="cnt-rejected">1</div>
+      </div>
+    </div>
+
+    <div class="capacity-wrap">
+      <div class="cap-head">
+        <span class="cap-label">Kapacitet hackathona</span>
+        <span class="cap-count"><span id="cap-cur">3</span> / 20 odobrenih mesta</span>
+      </div>
+      <div class="cap-bar-bg">
+        <div class="cap-bar-fill" id="cap-bar" style="width:15%"></div>
+      </div>
+    </div>
+
+    <!-- FIX 2: Tabovi — "Na čekanju" je prvi i defaultni -->
+    <div class="app-tabs">
+      <div class="app-tab active" data-tab="pending">
+        Na čekanju <span class="app-tab-badge pending-badge" id="tab-badge-pending">4</span>
+      </div>
+      <div class="app-tab" data-tab="approved">
+        Odobrene <span class="app-tab-badge approved-badge" id="tab-badge-approved">3</span>
+      </div>
+      <div class="app-tab" data-tab="rejected">
+        Odbijene <span class="app-tab-badge rejected-badge" id="tab-badge-rejected">1</span>
+      </div>
+      <div class="app-tab" data-tab="all">Sve</div>
+      <button class="approve-all-tab-btn" id="approve-all-btn" onclick="approveAllPending()">✓ Odobri sve</button>
+    </div>
+
+    <!-- Skill filter bar -->
+    <div class="toolbar" style="margin-top:10px">
+      <span class="toolbar-label">Veštine:</span>
+      <button class="filter-btn" data-skill="Python">Python</button>
+      <button class="filter-btn" data-skill="ML">ML</button>
+      <button class="filter-btn" data-skill="Rust">Rust</button>
+      <button class="filter-btn" data-skill="Go">Go</button>
+      <button class="filter-btn" data-skill="Java">Java</button>
+      <button class="filter-btn" data-skill="React">React</button>
+      <button class="filter-btn" data-skill="C">C / C++</button>
+    </div>
+
+    <!-- Klik otvara popup, nema expand u kartici. Svi podaci su u data- atributima. -->
+    <!-- Pending kartice su prve -->
+
+    <div class="app-card" data-status="pending"
+         data-name="Marko Ćira" data-username="ćiraDAČIA" data-av="AĆ" data-av-class="av-t"
+         data-time="pre 6 sati"
+         data-desc="Softversko inženjerstvo smer, iskustvo sa ubuntom i ukohorisanim projektima. Završio Coursera Linux specialization. Treći član tima ukohorisani."
+         data-skills-list="C/C++,Assembly,Linux"
+         data-skills-classes="sk-t,sk-t,sk-v,sk-v"
+         data-gh-contrib="147" data-gh-repos="9" data-gh-lang="C"
+         data-team="ukohorisani"
+         data-team-members='[{"av":"AR","cls":"av-v","name":"Aleksandar Rašković","status":"odobren","col":"#5DCAA5"},{"av":"AC","cls":"av-l","name":"Aleksandar Cvetković","status":"odobren","col":"#5DCAA5"},{"av":"MĆ","cls":"av-t","name":"Marko Ćira","status":"na čekanju","col":"#ffe734"}]'>
+      <div class="app-header" onclick="openPopup(this.closest('.app-card'))">
+        <div class="app-avatar av-t">MĆ</div>
+        <div class="app-meta">
+          <div class="app-name">Marko Ćira</div>
+          <div class="app-sub">@ćiraDAČIA · tim: <strong style="color:var(--violet-light)">ukohorisani</strong> · pre 6 sati</div>
+        </div>
+        <span class="status-pill s-pending">Na čekanju</span>
+        <span class="chevron">›</span>
+      </div>
+    </div>
+
+    <div class="app-card" data-status="pending"
+         data-name="Stefan Grujičić" data-username="lale" data-av="BD" data-av-class="av-l"
+         data-time="pre 8 sati"
+         data-desc="Inženjer infrastrukture i cloud arhitekture. Radi part-time kao DevOps konsultant. Iskustvo sa Kubernetes klasterima u produkciji."
+         data-skills-list="Go,Kubernetes,Docker,Terraform"
+         data-skills-classes="sk-l,sk-v,sk-t,sk-l"
+         data-gh-contrib="445" data-gh-repos="34" data-gh-lang="Go">
+      <div class="app-header" onclick="openPopup(this.closest('.app-card'))">
+        <div class="app-avatar av-l">SG</div>
+        <div class="app-meta">
+          <div class="app-name">Stefan Grujičić</div>
+          <div class="app-sub">@lale · pre 8 sati</div>
+        </div>
+        <span class="status-pill s-pending">Na čekanju</span>
+        <span class="chevron">›</span>
+      </div>
+    </div>
+
+    <div class="app-card" data-status="pending"
+         data-name="Stefan Simić" data-username="simkeBB" data-av="SS" data-av-class="av-v"
+         data-time="pre 11 sati"
+         data-desc="Backend Java developer sa iskustvom u Spring Boot mikroservisima. Razvila je mobilnu Android aplikaciju za praćenje energetske potrošnje kao seminarski rad."
+         data-skills-list="Java,Spring Boot,Android,PostgreSQL"
+         data-skills-classes="sk-v,sk-v,sk-t,sk-l"
+         data-gh-contrib="193" data-gh-repos="11" data-gh-lang="Java">
+      <div class="app-header" onclick="openPopup(this.closest('.app-card'))">
+        <div class="app-avatar av-v">SS</div>
+        <div class="app-meta">
+          <div class="app-name">Stefan Simić</div>
+          <div class="app-sub">@simkeBB · pre 11 sati</div>
+        </div>
+        <span class="status-pill s-pending">Na čekanju</span>
+        <span class="chevron">›</span>
+      </div>
+    </div>
+
+    <div class="app-card" data-status="pending"
+         data-name="Junior Pušica" data-username="junior" data-av="JP" data-av-class="av-r"
+         data-time="pre 14 sati"
+         data-desc="Student prve godine, bez prethodnog hackathon iskustva. Zanima ga nisko-nivosko programiranje i embedded sistemi. GitHub je tek pokrenut."
+         data-skills-list="C,Python"
+         data-skills-classes="sk-v,sk-l"
+         data-gh-contrib="12" data-gh-repos="2" data-gh-lang="C">
+      <div class="app-header" onclick="openPopup(this.closest('.app-card'))">
+        <div class="app-avatar av-r">JP</div>
+        <div class="app-meta">
+          <div class="app-name">Junior Pušica</div>
+          <div class="app-sub">@junior · pre 14 sati</div>
+        </div>
+        <span class="status-pill s-pending">Na čekanju</span>
+        <span class="chevron">›</span>
+      </div>
+    </div>
+
+    <div class="app-card is-approved" data-status="approved"
+         data-name="Milica Milošević" data-username="milosevicc67" data-av="MR" data-av-class="av-t"
+         data-time="pre 3 sata"
+         data-desc="Studentkinja 3. godine ETF-a, smer računarstvo. Učestvovala na dva hackathona, fokus na ML i backend razvoju. Aktivna open-source kontributorka."
+         data-skills-list="Python,Machine Learning,JavaScript,FastAPI"
+         data-skills-classes="sk-v,sk-t,sk-v,sk-t"
+         data-gh-contrib="312" data-gh-repos="18" data-gh-lang="Python"
+         data-action-hint="Odobrena pre 1 sata od strane AČ">
+      <div class="app-header" onclick="openPopup(this.closest('.app-card'))">
+        <div class="app-avatar av-t">MM</div>
+        <div class="app-meta">
+          <div class="app-name">Milica Milošević</div>
+          <div class="app-sub">@milosevicc67 · pre 3 sata</div>
+        </div>
+        <span class="status-pill s-approved">Odobrena</span>
+        <span class="chevron">›</span>
+      </div>
+    </div>
+
+    <div class="app-card is-approved" data-status="approved"
+         data-name="Maša Nikolić" data-username="masaleskovac" data-av="MN" data-av-class="av-l"
+         data-time="pre 5 sati"
+         data-desc="Master student, specijalizacija u sistemskom programiranju i bezbednosti. Koautor kernelskog modula objavljenog na GitHub-u. Pobednik HackNS 2025."
+         data-skills-list="Rust,C++,Linux Kernel,Assembly"
+         data-skills-classes="sk-l,sk-l,sk-v,sk-t"
+         data-gh-contrib="581" data-gh-repos="29" data-gh-lang="Rust"
+         data-action-hint="Odobren pre 2 sata od strane AČ">
+      <div class="app-header" onclick="openPopup(this.closest('.app-card'))">
+        <div class="app-avatar av-l">MN</div>
+        <div class="app-meta">
+          <div class="app-name">Maša Nikolić</div>
+          <div class="app-sub">@masaleskovac · pre 5 sati</div>
+        </div>
+        <span class="status-pill s-approved">Odobrena</span>
+        <span class="chevron">›</span>
+      </div>
+    </div>
+
+    <div class="app-card is-approved" data-status="approved"
+         data-name="Aleksandar Rašković" data-username="coa204" data-av="AR" data-av-class="av-v"
+         data-time="pre 6 sati"
+         data-desc="Frontend inženjer sa iskustvom u enterprise React projektima. Vodi tim ukohorisani zajedno sa još 2 člana koji su takođe aplicirani."
+         data-skills-list="CoaLinux,HTML,CSS,Sigma"
+         data-skills-classes="sk-v,sk-v,sk-t,sk-l"
+         data-gh-contrib="6767" data-gh-repos="67" data-gh-lang="CSS"
+         data-team="ukohorisani"
+         data-team-members='[{"av":"AR","cls":"av-v","name":"Aleksandar Rašković","status":"odobren","col":"#5DCAA5"},{"av":"AC","cls":"av-l","name":"Aleksandar Cvetković","status":"odobren","col":"#5DCAA5"},{"av":"MĆ","cls":"av-t","name":"Marko Ćira","status":"na čekanju","col":"#ffe734"}]'
+         data-action-hint="Tim delimično odobren">
+      <div class="app-header" onclick="openPopup(this.closest('.app-card'))">
+        <div class="app-avatar av-v">AR</div>
+        <div class="app-meta">
+          <div class="app-name">Aleksandar Rašković</div>
+          <div class="app-sub">@coa204 · tim: <strong style="color:var(--violet-light)">ukohorisani</strong> · pre 6 sati</div>
+        </div>
+        <span class="status-pill s-approved">Odobren</span>
+        <span class="chevron">›</span>
+      </div>
+    </div>
+
+    <div class="app-card is-rejected" data-status="rejected"
+         data-name="Dejan Pušica" data-username="menjac27" data-av="DP" data-av-class="av-r"
+         data-time="pre 18 sati"
+         data-desc="Web developer fokusiran na WordPress i PHP. Profil ne odgovara tehničkim zahtevima ovog hackathona (AI/systems tema)."
+         data-skills-list="PHP,WordPress,CSS"
+         data-skills-classes="sk-v,sk-l,sk-v"
+         data-gh-contrib="67" data-gh-repos="5" data-gh-lang="PHP"
+         data-reject-reason="Prijava ne odgovara tehničkom profilu koji tražimo za ovaj hackathon. Pozivamo te da se prijaviš na naredne Web-focused hackathone."
+         data-action-hint="Odbijen pre 30 min od strane AČ">
+      <div class="app-header" onclick="openPopup(this.closest('.app-card'))">
+        <div class="app-avatar av-r">DP</div>
+        <div class="app-meta">
+          <div class="app-name">Dejan Pušica</div>
+          <div class="app-sub">@menjac27 · pre 18 sati</div>
+        </div>
+        <span class="status-pill s-rejected">Odbijen</span>
+        <span class="chevron">›</span>
+      </div>
+    </div>
+
+  </main>
+
+  <aside class="sidebar-right">
+    <div class="social-card">
+      <div class="social-card-header">
+        <div class="social-card-title">Brze akcije</div>
+        <div class="arrow-circle">›</div>
+      </div>
+      <div class="preview-list">
+        <div class="preview-row" onclick="approveAllPending()">
+          <div class="pr-dot dot-green"></div>
+          <div class="pr-info">
+            <div class="pr-name">Odobri sve na čekanju</div>
+            <div class="pr-sub" id="pending-count-hint">4 prijave čekaju</div>
+          </div>
+        </div>
+        <div class="preview-row">
+          <div class="pr-dot dot-violet"></div>
+          <div class="pr-info">
+            <div class="pr-name">Exportuj listu</div>
+            <div class="pr-sub">CSV, PDF</div>
+          </div>
+        </div>
+        <div class="preview-row">
+          <div class="pr-dot" style="background:var(--muted)"></div>
+          <div class="pr-info">
+            <div class="pr-name">Pošalji obaveštenja</div>
+            <div class="pr-sub">Svim odobrenim</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="social-card">
+      <div class="social-card-header">
+        <div class="social-card-title">Tražene veštine</div>
+        <div class="arrow-circle">›</div>
+      </div>
+      <div class="preview-list">
+        <div class="preview-row">
+          <div class="pr-dot dot-violet"></div>
+          <div class="pr-info"><div class="pr-name">Python / ML</div></div>
+          <div class="pr-badge">3 prijave</div>
+        </div>
+        <div class="preview-row">
+          <div class="pr-dot" style="background:var(--lemon-vivid)"></div>
+          <div class="pr-info"><div class="pr-name">Rust / C++</div></div>
+          <div class="pr-badge">2 prijave</div>
+        </div>
+        <div class="preview-row">
+          <div class="pr-dot dot-green"></div>
+          <div class="pr-info"><div class="pr-name">Go / Cloud</div></div>
+          <div class="pr-badge">1 prijava</div>
+        </div>
+        <div class="preview-row">
+          <div class="pr-dot" style="background:var(--muted)"></div>
+          <div class="pr-info"><div class="pr-name">Ostalo</div></div>
+          <div class="pr-badge">2 prijave</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<!-- ============= CANDIDATE POPUP ============= -->
+<div class="cand-overlay" id="cand-overlay" onclick="closePopupOnBackdrop(event)">
+  <div class="cand-popup" id="cand-popup">
+
+    <div class="cand-popup-header">
+      <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0">
+        <div class="app-avatar" id="popup-avatar" style="width:46px;height:46px;font-size:15px;flex-shrink:0"></div>
+        <div style="min-width:0">
+          <div class="cand-popup-name" id="popup-name"></div>
+          <div class="cand-popup-sub" id="popup-sub"></div>
+        </div>
+        <span class="status-pill" id="popup-status-pill" style="margin-left:auto;flex-shrink:0"></span>
+      </div>
+      <button class="cand-close-btn" onclick="closePopup()">✕</button>
+    </div>
+
+    <div class="cand-popup-body">
+      <div class="cand-popup-sections">
+        <div>
+          <div class="app-section-title">O kandidatu</div>
+          <div class="app-desc" id="popup-desc"></div>
+          <div style="margin-top:14px">
+            <div class="app-section-title">Veštine</div>
+            <div class="skill-list" id="popup-skills"></div>
+          </div>
+          <div id="popup-team-wrap" style="margin-top:14px;display:none">
+            <div class="app-section-title">Tim: <span id="popup-team-name" style="color:var(--violet-light)"></span></div>
+            <div id="popup-team-list"></div>
+          </div>
+          <div id="popup-reject-wrap" style="margin-top:14px;display:none">
+            <div class="reject-reason-box">
+              <div style="font-size:var(--fs-xs);color:#F07070;font-weight:600;margin-bottom:4px">Razlog odbijanja:</div>
+              <div style="font-size:var(--fs-sm);color:#C5BDDF" id="popup-reject-text"></div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="app-section-title">GitHub aktivnost</div>
+          <div class="gh-row">
+            <div class="gh-stat"><div class="gh-val" id="popup-gh-contrib"></div><div class="gh-lbl">Doprinosi</div></div>
+            <div class="gh-stat"><div class="gh-val" id="popup-gh-repos"></div><div class="gh-lbl">Repozitorijumi</div></div>
+            <div class="gh-stat"><div class="gh-val" id="popup-gh-lang"></div><div class="gh-lbl">Top jezik</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="action-bar" id="popup-action-bar"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Reject modal -->
+<div class="modal-overlay" id="reject-modal">
+  <div class="modal">
+    <div class="modal-title">Odbij prijavu</div>
+    <div class="modal-sub" id="modal-sub-text"></div>
+    <textarea id="reject-reason" placeholder="npr. Profil ne odgovara temi hackathona..."></textarea>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeRejectModal()">Otkaži</button>
+      <button class="modal-confirm" onclick="confirmReject()">Potvrdi odbijanje</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let activePopupCard = null;
+  let activeTab = 'pending';
+
+  /* ---- TABS ---- */
+  document.querySelectorAll('.app-tab[data-tab]').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.app-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      activeTab = tab.dataset.tab;
+      applyFilter();
+    });
+  });
+
+  /* ---- SKILL FILTER ---- */
+  let activeSkill = null;
+
+  document.querySelectorAll('.filter-btn[data-skill]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const wasActive = btn.classList.contains('active');
+      document.querySelectorAll('.filter-btn[data-skill]').forEach(b => b.classList.remove('active'));
+      activeSkill = wasActive ? null : btn.dataset.skill.toLowerCase();
+      if (!wasActive) btn.classList.add('active');
+      applyFilter();
+    });
+  });
+
+  function applyFilter() {
+    document.querySelectorAll('.app-card').forEach(card => {
+      const tabOk   = activeTab === 'all' || card.dataset.status === activeTab;
+      const skills  = (card.dataset.skillsList || card.dataset.skills || '').toLowerCase();
+      const skillOk = !activeSkill || skills.includes(activeSkill);
+      card.classList.toggle('is-hidden', !(tabOk && skillOk));
+    });
+    const btn = document.getElementById('approve-all-btn');
+    btn.style.display = (activeTab === 'pending' || activeTab === 'all') ? '' : 'none';
+  }
+
+  applyFilter(); // init
+
+  /* ---- POPUP ---- */
+  function openPopup(card) {
+    activePopupCard = card;
+    const d = card.dataset;
+
+    const av = document.getElementById('popup-avatar');
+    av.className = 'app-avatar ' + d.avClass;
+    av.style.cssText = 'width:46px;height:46px;font-size:15px;flex-shrink:0';
+    av.textContent = d.av;
+
+    document.getElementById('popup-name').textContent = d.name;
+    document.getElementById('popup-sub').textContent = '@' + d.username + ' · ' + d.time;
+    document.getElementById('popup-desc').textContent = d.desc;
+    document.getElementById('popup-gh-contrib').textContent = d.ghContrib;
+    document.getElementById('popup-gh-repos').textContent = d.ghRepos;
+    document.getElementById('popup-gh-lang').textContent = d.ghLang;
+
+    // status pill
+    const pill = document.getElementById('popup-status-pill');
+    const sm = { pending: ['s-pending','Na čekanju'], approved: ['s-approved','Odobren/a'], rejected: ['s-rejected','Odbijen/a'] };
+    pill.className = 'status-pill ' + sm[d.status][0];
+    pill.textContent = sm[d.status][1];
+
+    // skills
+    const sl = document.getElementById('popup-skills');
+    sl.innerHTML = '';
+    d.skillsList.split(',').forEach((s, i) => {
+      const el = document.createElement('span');
+      el.className = 'skill-tag ' + (d.skillsClasses.split(',')[i] || 'sk-v');
+      el.textContent = s.trim();
+      sl.appendChild(el);
+    });
+
+    // team
+    const tw = document.getElementById('popup-team-wrap');
+    if (d.team) {
+      tw.style.display = '';
+      document.getElementById('popup-team-name').textContent = d.team;
+      const tl = document.getElementById('popup-team-list');
+      tl.innerHTML = '';
+      JSON.parse(d.teamMembers).forEach(m => {
+        tl.innerHTML += '<div class="team-member-row"><div class="team-av ' + m.cls + '">' + m.av + '</div><span style="font-size:var(--fs-sm);color:var(--text)">' + m.name + '</span><span style="font-size:var(--fs-xs);color:' + m.col + ';margin-left:auto">' + m.status + '</span></div>';
+      });
+    } else {
+      tw.style.display = 'none';
+    }
+
+    // reject reason
+    const rw = document.getElementById('popup-reject-wrap');
+    if (d.status === 'rejected' && d.rejectReason) {
+      rw.style.display = '';
+      document.getElementById('popup-reject-text').textContent = d.rejectReason;
+    } else {
+      rw.style.display = 'none';
+    }
+
+    buildActionBar(d.status);
+
+    document.getElementById('cand-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function buildActionBar(status) {
+    const bar = document.getElementById('popup-action-bar');
+    bar.innerHTML = '';
+    const d = activePopupCard.dataset;
+
+    if (status === 'pending') {
+      btn(bar, 'btn-approve', '✓ Odobri', applyApprove);
+      btn(bar, 'btn-reject',  '✕ Odbij',  () => openRejectModal(d.username));
+      if (d.team) btn(bar, 'btn-approve-team', '👥 Odobri tim', applyApprove);
+    } else if (status === 'approved') {
+      btn(bar, 'btn-reject', '✕ Odbij', () => openRejectModal(d.username));
+      hint(bar, d.actionHint || 'Odobreno od strane AČ');
+    } else {
+      btn(bar, 'btn-approve', '↺ Ponovo odobri', applyApprove);
+      hint(bar, d.actionHint || 'Odbijeno od strane AČ');
+    }
+  }
+
+  function btn(bar, cls, label, handler) {
+    const b = document.createElement('button');
+    b.className = cls; b.textContent = label; b.onclick = handler;
+    bar.appendChild(b);
+  }
+
+  function hint(bar, text) {
+    const s = document.createElement('span');
+    s.className = 'action-hint'; s.textContent = text;
+    bar.appendChild(s);
+  }
+
+  function applyApprove() {
+    const card = activePopupCard;
+    card.dataset.status = 'approved';
+    card.dataset.actionHint = 'Odobreno upravo';
+    card.classList.remove('is-rejected');
+    card.classList.add('is-approved');
+    card.querySelector('.status-pill').className = 'status-pill s-approved';
+    card.querySelector('.status-pill').textContent = 'Odobren/a';
+    document.getElementById('popup-status-pill').className = 'status-pill s-approved';
+    document.getElementById('popup-status-pill').textContent = 'Odobren/a';
+    buildActionBar('approved');
+    document.getElementById('popup-reject-wrap').style.display = 'none';
+    updateCounts(); applyFilter();
+    showToast('Prijava odobrena — kandidat je obavešten', 'green');
+  }
+
+  function applyReject(reason) {
+    const card = activePopupCard;
+    card.dataset.status = 'rejected';
+    card.dataset.actionHint = 'Odbijeno upravo';
+    if (reason) card.dataset.rejectReason = reason;
+    card.classList.remove('is-approved');
+    card.classList.add('is-rejected');
+    card.querySelector('.status-pill').className = 'status-pill s-rejected';
+    card.querySelector('.status-pill').textContent = 'Odbijen/a';
+    document.getElementById('popup-status-pill').className = 'status-pill s-rejected';
+    document.getElementById('popup-status-pill').textContent = 'Odbijen/a';
+    if (reason) {
+      document.getElementById('popup-reject-wrap').style.display = '';
+      document.getElementById('popup-reject-text').textContent = reason;
+    }
+    buildActionBar('rejected');
+    updateCounts(); applyFilter();
+    showToast('Prijava odbijena — kandidat je obavešten', 'red');
+  }
+
+  function closePopup() {
+    document.getElementById('cand-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+    activePopupCard = null;
+  }
+
+  function closePopupOnBackdrop(e) {
+    if (e.target === document.getElementById('cand-overlay')) closePopup();
+  }
+
+  /* ---- REJECT MODAL ---- */
+  function openRejectModal(username) {
+    document.getElementById('modal-sub-text').textContent = 'Unesite razlog odbijanja (opciono). Kandidat @' + username + ' će biti obavešten.';
+    document.getElementById('reject-reason').value = '';
+    document.getElementById('reject-modal').classList.add('open');
+  }
+
+  function closeRejectModal() {
+    document.getElementById('reject-modal').classList.remove('open');
+  }
+
+  function confirmReject() {
+    const reason = document.getElementById('reject-reason').value.trim();
+    closeRejectModal();
+    applyReject(reason);
+  }
+
+  document.getElementById('reject-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('reject-modal')) closeRejectModal();
+  });
+
+  /* ---- APPROVE ALL ---- */
+  function approveAllPending() {
+    const pending = [...document.querySelectorAll('.app-card[data-status="pending"]')];
+    if (!pending.length) { showToast('Nema prijava na čekanju', 'red'); return; }
+    pending.forEach(card => {
+      card.dataset.status = 'approved';
+      card.dataset.actionHint = 'Odobreno upravo';
+      card.classList.remove('is-rejected');
+      card.classList.add('is-approved');
+      card.querySelector('.status-pill').className = 'status-pill s-approved';
+      card.querySelector('.status-pill').textContent = 'Odobren/a';
+    });
+    updateCounts(); applyFilter();
+    showToast('Sve prijave na čekanju su odobrene', 'green');
+  }
+
+  /* ---- COUNTS ---- */
+  function updateCounts() {
+    const ap = document.querySelectorAll('.app-card[data-status="approved"]').length;
+    const rj = document.querySelectorAll('.app-card[data-status="rejected"]').length;
+    const pe = document.querySelectorAll('.app-card[data-status="pending"]').length;
+    document.getElementById('cnt-total').textContent    = ap + rj + pe;
+    document.getElementById('cnt-approved').textContent = ap;
+    document.getElementById('cnt-rejected').textContent = rj;
+    document.getElementById('cnt-pending').textContent  = pe;
+    document.getElementById('cap-cur').textContent      = ap;
+    document.getElementById('cap-bar').style.width      = Math.round(ap / 20 * 100) + '%';
+    document.getElementById('pending-count-hint').textContent = pe + ' prijave čekaju';
+    document.getElementById('tab-badge-pending').textContent  = pe;
+    document.getElementById('tab-badge-approved').textContent = ap;
+    document.getElementById('tab-badge-rejected').textContent = rj;
+  }
+
+  /* ---- TOAST ---- */
+  function showToast(msg, type) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast t-' + type + ' show';
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      if (document.getElementById('reject-modal').classList.contains('open')) closeRejectModal();
+      else if (document.getElementById('cand-overlay').classList.contains('open')) closePopup();
+    }
+  });
+</script>
+
+</body>
+</html>

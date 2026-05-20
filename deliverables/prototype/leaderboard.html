@@ -1,0 +1,566 @@
+<!-- Andrej Čolić 2023/0492 -->
+<!-- Stevan Gnjato 2023/0492 -->
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="tikimiki.css">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="icon" href="images/favicon.ico">
+  <title>tikimiki · Leaderboard</title>
+  <style>
+    .lb-main {
+      flex: 1;
+      max-width: 720px;
+      padding: 28px 0;
+    }
+
+    .lb-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .lb-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .lb-subtitle {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* Filters */
+    .lb-filters {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+    }
+
+    .lb-period-tabs {
+      display: flex;
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .lb-tab {
+      padding: 7px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: background .15s, color .15s;
+      border: none;
+      background: transparent;
+      font-family: var(--font);
+    }
+
+    .lb-tab:not(:last-child) {
+      border-right: 0.5px solid var(--border);
+    }
+
+    .lb-tab.active {
+      background: var(--violet);
+      color: var(--lemon-vivid);
+    }
+
+    .lb-tab:not(.active):hover {
+      color: var(--text);
+      background: var(--surface2);
+    }
+
+    .lb-hack-select {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 12px;
+      padding: 7px 12px;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .lb-hack-select:focus {
+      border-color: var(--violet);
+    }
+
+    /* Podium */
+    .lb-podium {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .podium-slot {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .podium-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      border: 2px solid transparent;
+      position: relative;
+    }
+
+    .podium-avatar-1 {
+      background: linear-gradient(135deg, #1A1400, #3A2E00);
+      border-color: #E9B000;
+      color: #E9B000;
+      width: 56px;
+      height: 56px;
+      font-size: 16px;
+    }
+
+    .podium-avatar-2 {
+      background: linear-gradient(135deg, #12151A, #232A33);
+      border-color: #9CA3AF;
+      color: #9CA3AF;
+    }
+
+    .podium-avatar-3 {
+      background: linear-gradient(135deg, #1A0D00, #2E1800);
+      border-color: #CD7F32;
+      color: #CD7F32;
+    }
+
+    .podium-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      text-align: center;
+    }
+
+    .podium-pts {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .podium-block {
+      border-radius: 8px 8px 0 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      width: 80px;
+    }
+
+    .podium-block-1 {
+      background: linear-gradient(180deg, #2A2000 0%, #1A1400 100%);
+      border: 0.5px solid #5A4200;
+      height: 80px;
+      width: 100px;
+    }
+
+    .podium-block-2 {
+      background: linear-gradient(180deg, #1A1E24 0%, #12151A 100%);
+      border: 0.5px solid #374151;
+      height: 60px;
+    }
+
+    .podium-block-3 {
+      background: linear-gradient(180deg, #221408 0%, #1A0D00 100%);
+      border: 0.5px solid #7C3D10;
+      height: 44px;
+    }
+
+    /* Table */
+    .lb-table {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .lb-table-head {
+      display: grid;
+      grid-template-columns: 48px 1fr 100px 80px 80px;
+      padding: 10px 16px;
+      border-bottom: 0.5px solid var(--border);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .lb-row {
+      display: grid;
+      grid-template-columns: 48px 1fr 100px 80px 80px;
+      padding: 13px 16px;
+      align-items: center;
+      border-bottom: 0.5px solid var(--border);
+      transition: background .12s;
+      cursor: default;
+    }
+
+    .lb-row:last-child {
+      border-bottom: none;
+    }
+
+    .lb-row:hover {
+      background: var(--surface2);
+    }
+
+    .lb-row.lb-me {
+      background: linear-gradient(90deg, #1A1133 0%, transparent 80%);
+      border-left: 2px solid var(--violet);
+    }
+
+    .lb-row.lb-me:hover {
+      background: linear-gradient(90deg, #221A44 0%, var(--surface2) 80%);
+    }
+
+    .lb-rank {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .lb-rank-1 { color: #E9B000; }
+    .lb-rank-2 { color: #9CA3AF; }
+    .lb-rank-3 { color: #CD7F32; }
+
+    .lb-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .lb-av {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .lb-username {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .lb-me-pill {
+      font-size: 10px;
+      font-weight: 700;
+      background: #1A1133;
+      color: var(--violet-light);
+      border: 0.5px solid #3D2E6B;
+      border-radius: 20px;
+      padding: 1px 7px;
+      margin-left: 6px;
+    }
+
+    .lb-pts {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--lemon-vivid);
+    }
+
+    .lb-badges {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .lb-hacks {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* My position banner */
+    .lb-my-pos {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .lb-my-pos-rank {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--violet-light);
+      min-width: 40px;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="logo" onclick="window.location.href='home_page.html'" style="cursor:pointer"><span>tiki</span>miki</div>
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input type="text" placeholder="Pretraži korisnike, hackathone, organizacije...">
+    </div>
+    <div class="nav-right">
+      <div class="icon-btn" onclick="window.location.href='store.html'">🛒<span class="badge">2</span></div>
+      <div class="icon-btn">🔔<span class="badge">5</span></div>
+      <div class="avatar">AČ</div>
+    </div>
+  </div>
+</nav>
+
+<div class="layout">
+  <aside class="sidebar-left">
+    <div class="menu-item" onclick="window.location.href='home_page.html'"><span class="icon">⌂</span> Početna</div>
+    <div class="menu-item" onclick="window.location.href='hackathons.html'"><span class="icon">◈</span> Hackathoni</div>
+    <div class="menu-item" onclick="window.location.href='teams.html'"><span class="icon">👥</span> Timovi</div>
+    <div class="menu-item active"><span class="icon">🏆</span> Leaderboard</div>
+    <div class="menu-item" onclick="window.location.href='cohor.html'"><span class="icon">✉</span> Poruke</div>
+    <div class="menu-item" onclick="window.location.href='gamehub.html'"><span class="icon">👾</span> GameHub</div>
+    <div class="menu-item" onclick="window.location.href='settings.html'"><span class="icon">⚙</span> Podešavanja</div>
+    <div class="menu-divider"></div>
+    <div class="crystal-button" onclick="window.location.href='premium.html'"><span class="crystal-icon">◆</span> Premium</div>
+  </aside>
+
+  <main class="feed" style="max-width:720px">
+
+    <div class="lb-main">
+
+      <!-- Header -->
+      <div class="lb-header">
+        <div style="font-size:28px">🏆</div>
+        <div>
+          <div class="lb-title">Leaderboard</div>
+          <div class="lb-subtitle">Rang lista članova po ukupnom broju poena</div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="lb-filters">
+        <div class="lb-period-tabs">
+          <button class="lb-tab active" onclick="setFilter(this,'svi')">Svi</button>
+          <button class="lb-tab" onclick="setFilter(this,'mesec')">Ovaj mesec</button>
+          <button class="lb-tab" onclick="setFilter(this,'nedelja')">Ova nedelja</button>
+        </div>
+        <select class="lb-hack-select" id="hack-filter" onchange="setHackFilter(this.value)">
+          <option value="">— Svi hakathoni —</option>
+          <option value="etf">ETF HackWeek 2026</option>
+          <option value="garaza">Garaža Hackathon '25</option>
+          <option value="hacknight">HackNight #1</option>
+          <option value="milano">MilanoInno 2024</option>
+        </select>
+      </div>
+
+      <!-- Podium top 3 -->
+      <div class="lb-podium" id="podium">
+        <!-- 2nd -->
+        <div class="podium-slot">
+          <div class="podium-avatar podium-avatar-2">MA</div>
+          <div class="podium-name">Mohammed Avdol</div>
+          <div class="podium-pts">2,850 pts</div>
+          <div class="podium-block podium-block-2">🥈</div>
+        </div>
+        <!-- 1st -->
+        <div class="podium-slot">
+          <div class="podium-avatar podium-avatar-1">MO</div>
+          <div class="podium-name">moljac</div>
+          <div class="podium-pts">3,200 pts</div>
+          <div class="podium-block podium-block-1">🥇</div>
+        </div>
+        <!-- 3rd -->
+        <div class="podium-slot">
+          <div class="podium-avatar podium-avatar-3">MI</div>
+          <div class="podium-name">miki</div>
+          <div class="podium-pts">2,600 pts</div>
+          <div class="podium-block podium-block-3">🥉</div>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="lb-table">
+        <div class="lb-table-head">
+          <div style="text-align:center">#</div>
+          <div>Korisnik</div>
+          <div>Poeni</div>
+          <div>Bedževi</div>
+          <div>Hakathoni</div>
+        </div>
+
+        <!-- Rank 1 -->
+        <div class="lb-row">
+          <div class="lb-rank lb-rank-1">1</div>
+          <div class="lb-user">
+            <div class="lb-av" style="background:#1A1500;color:#E9B000;border:1.5px solid #8B6914">MO</div>
+            <span class="lb-username">moljac</span>
+          </div>
+          <div class="lb-pts">3,200</div>
+          <div class="lb-badges">🏅 14</div>
+          <div class="lb-hacks">11</div>
+        </div>
+
+        <!-- Rank 2 -->
+        <div class="lb-row">
+          <div class="lb-rank lb-rank-2">2</div>
+          <div class="lb-user">
+            <div class="lb-av" style="background:#0D1218;color:#9CA3AF;border:1.5px solid #374151">MA</div>
+            <span class="lb-username">Mohammed Avdol</span>
+          </div>
+          <div class="lb-pts">2,850</div>
+          <div class="lb-badges">🏅 11</div>
+          <div class="lb-hacks">9</div>
+        </div>
+
+        <!-- Rank 3 -->
+        <div class="lb-row">
+          <div class="lb-rank lb-rank-3">3</div>
+          <div class="lb-user">
+            <div class="lb-av" style="background:#0D1A0D;color:#5DCAA5;border:1.5px solid #0F3D30">MI</div>
+            <span class="lb-username">miki</span>
+          </div>
+          <div class="lb-pts">2,600</div>
+          <div class="lb-badges">🏅 9</div>
+          <div class="lb-hacks">8</div>
+        </div>
+
+        <!-- Rank 4 — trenutni korisnik (Andrej Čolić) -->
+        <div class="lb-row lb-me">
+          <div class="lb-rank" style="color:var(--violet-light)">4</div>
+          <div class="lb-user">
+            <div class="lb-av" style="background:#1A1133;color:var(--violet-light);border:1.5px solid #3D2E6B">AČ</div>
+            <span class="lb-username">Andrej Čolić</span>
+            <span class="lb-me-pill">ti</span>
+          </div>
+          <div class="lb-pts">2,450</div>
+          <div class="lb-badges">🏅 8</div>
+          <div class="lb-hacks">7</div>
+        </div>
+
+        <!-- Rank 5 -->
+        <div class="lb-row">
+          <div class="lb-rank">5</div>
+          <div class="lb-user">
+            <div class="lb-av" style="background:#1A0D1A;color:#C9B8FF;border:1.5px solid #2D1A55">FE</div>
+            <span class="lb-username">fenjer</span>
+          </div>
+          <div class="lb-pts">2,100</div>
+          <div class="lb-badges">🏅 7</div>
+          <div class="lb-hacks">7</div>
+        </div>
+
+        <!-- Rank 6 -->
+        <div class="lb-row">
+          <div class="lb-rank">6</div>
+          <div class="lb-user">
+            <div class="lb-av" style="background:#0D0D1A;color:#A78BFA;border:1.5px solid #2D1A55">TI</div>
+            <span class="lb-username">tiki</span>
+          </div>
+          <div class="lb-pts">1,900</div>
+          <div class="lb-badges">🏅 6</div>
+          <div class="lb-hacks">6</div>
+        </div>
+
+        <!-- Rank 7 -->
+        <div class="lb-row">
+          <div class="lb-rank">7</div>
+          <div class="lb-user">
+            <div class="lb-av" style="background:#1A0D0D;color:#F87171;border:1.5px solid #3D1A1A">MA</div>
+            <span class="lb-username">mara</span>
+          </div>
+          <div class="lb-pts">1,750</div>
+          <div class="lb-badges">🏅 5</div>
+          <div class="lb-hacks">5</div>
+        </div>
+
+        <!-- Rank 8 -->
+        <div class="lb-row">
+          <div class="lb-rank">8</div>
+          <div class="lb-user">
+            <div class="lb-av" style="background:#0D1A0D;color:#5DCAA5;border:1.5px solid #0F3D30">NL</div>
+            <span class="lb-username">nullptr</span>
+          </div>
+          <div class="lb-pts">1,500</div>
+          <div class="lb-badges">🏅 4</div>
+          <div class="lb-hacks">4</div>
+        </div>
+
+        <!-- Rank 9 -->
+        <div class="lb-row">
+          <div class="lb-rank">9</div>
+          <div class="lb-user">
+            <div class="lb-av" style="background:#14112A;color:var(--muted);border:1.5px solid var(--border)">LA</div>
+            <span class="lb-username">lale</span>
+          </div>
+          <div class="lb-pts">1,200</div>
+          <div class="lb-badges">🏅 3</div>
+          <div class="lb-hacks">4</div>
+        </div>
+
+        <!-- Rank 10 -->
+        <div class="lb-row">
+          <div class="lb-rank">10</div>
+          <div class="lb-user">
+            <div class="lb-av" style="background:#14112A;color:var(--muted);border:1.5px solid var(--border)">ME</div>
+            <span class="lb-username">menjači</span>
+          </div>
+          <div class="lb-pts">980</div>
+          <div class="lb-badges">🏅 2</div>
+          <div class="lb-hacks">3</div>
+        </div>
+
+      </div>
+
+      <!-- My position summary -->
+      <div class="lb-my-pos">
+        <div class="lb-my-pos-rank">#4</div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600;color:var(--text)">Tvoja pozicija</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">Andrej Čolić · 2,450 poena · 8 bedževa · 7 hakathona</div>
+        </div>
+        <div style="font-size:12px;color:var(--muted);text-align:right">
+          <div>Do sledećeg mesta</div>
+          <div style="color:var(--lemon-vivid);font-weight:700;margin-top:2px">150 pts</div>
+        </div>
+      </div>
+
+    </div><!-- lb-main -->
+
+  </main>
+</div>
+
+<script>
+  function setFilter(btn, period) {
+    document.querySelectorAll('.lb-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    // In a real app this would re-fetch/re-sort data for the period
+  }
+
+  function setHackFilter(val) {
+    // In a real app this would filter the leaderboard by hackathon
+  }
+</script>
+
+</body>
+</html>
