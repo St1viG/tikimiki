@@ -6,11 +6,8 @@
   padding:48px 20px;
 }
 
-/* Grid-break: the wordmark sits slightly off-center,
-   breaking the otherwise perfectly symmetric auth column. */
 .auth-wordmark{
   align-self:center; transform-origin:left center;
-  
   font-family:var(--display); font-weight:800; font-size:40px;
   letter-spacing:-.05em; color:var(--lemon); line-height:1;
   margin-bottom:26px; transition:transform .25s var(--ease-quint);

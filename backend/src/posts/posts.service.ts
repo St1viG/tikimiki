@@ -1,5 +1,10 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import {
+  ForbiddenException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
+import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import type { FeedPost } from "@tikimiki/types";
 import { LIKE } from "../common/constants";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
@@ -31,6 +36,7 @@ function buildColumns(userId: string | null) {
     authorAvatarUrl: users.avatarUrl,
     content: posts.content,
     createdAt: posts.createdAt,
+    editedAt: posts.editedAt,
     reactionCount: sql<number>`(
       select count(*)::int from post_reactions r where r.post_id = ${posts.postId}
     )`,
@@ -61,6 +67,7 @@ type PostRow = {
   authorAvatarUrl: string | null;
   content: string;
   createdAt: Date;
+  editedAt: Date | null;
   reactionCount: number;
   commentCount: number;
   likedByMe: boolean;
@@ -76,6 +83,7 @@ function toFeedPost(r: PostRow, attachments: PostAttachment[]): FeedPostWithDisp
     authorAvatarUrl: r.authorAvatarUrl,
     content: r.content,
     createdAt: r.createdAt.toISOString(),
+    editedAt: r.editedAt ? r.editedAt.toISOString() : null,
     attachments,
     reactionCount: Number(r.reactionCount),
     commentCount: Number(r.commentCount),
@@ -158,11 +166,86 @@ export class PostsService {
       authorAvatarUrl: author.avatarUrl,
       content: row.content,
       createdAt: row.createdAt.toISOString(),
+      editedAt: null,
       attachments,
       reactionCount: 0,
       commentCount: 0,
       likedByMe: false,
       authorIsFollowing: false,
     };
+  }
+
+  /** Re-read one (non-deleted) post as a full feed row, from the viewer's POV. */
+  private async getById(
+    postId: string,
+    userId: string | null,
+  ): Promise<FeedPostWithDisplayName | null> {
+    const [row] = await this.db
+      .select(buildColumns(userId))
+      .from(posts)
+      .innerJoin(users, eq(posts.userId, users.userId))
+      .where(and(eq(posts.postId, postId), isNull(posts.deletedAt)))
+      .limit(1);
+    if (!row) return null;
+    const attMap = await this.attachmentsByPost([row.postId]);
+    return toFeedPost(row, attMap.get(row.postId) ?? []);
+  }
+
+  /** Edit a post's content + attachments. Author-only; stamps `editedAt`. */
+  async update(
+    userId: string,
+    postId: string,
+    content: string,
+    attachmentUrls: string[] = [],
+  ): Promise<FeedPostWithDisplayName> {
+    const [post] = await this.db
+      .select({ userId: posts.userId })
+      .from(posts)
+      .where(and(eq(posts.postId, postId), isNull(posts.deletedAt)))
+      .limit(1);
+    if (!post) throw new NotFoundException("Post not found");
+    if (post.userId !== userId) {
+      throw new ForbiddenException("You can only edit your own post");
+    }
+
+    await this.db.transaction(async (tx) => {
+      await tx
+        .update(posts)
+        .set({ content, editedAt: new Date() })
+        .where(eq(posts.postId, postId));
+      // Replace attachments wholesale so reordering / removal is supported.
+      await tx
+        .delete(postAttachments)
+        .where(eq(postAttachments.postId, postId));
+      if (attachmentUrls.length > 0) {
+        await tx.insert(postAttachments).values(
+          attachmentUrls.map((url, i) => ({ postId, url, position: i })),
+        );
+      }
+    });
+
+    const updated = await this.getById(postId, userId);
+    if (!updated) throw new NotFoundException("Post not found");
+    return updated;
+  }
+
+  /** Soft-delete a post. Author-only. */
+  async remove(userId: string, postId: string): Promise<{ success: true }> {
+    const [post] = await this.db
+      .select({ userId: posts.userId })
+      .from(posts)
+      .where(and(eq(posts.postId, postId), isNull(posts.deletedAt)))
+      .limit(1);
+    if (!post) throw new NotFoundException("Post not found");
+    if (post.userId !== userId) {
+      throw new ForbiddenException("You can only delete your own post");
+    }
+
+    await this.db
+      .update(posts)
+      .set({ deletedAt: new Date() })
+      .where(eq(posts.postId, postId));
+
+    return { success: true };
   }
 }

@@ -7,8 +7,7 @@ import { Icon } from "@/components/Icon";
 import { AppShell } from "@/components/shell/AppShell";
 import { RailRight } from "@/components/shell/RailRight";
 import { OrbArt } from "@/components/ui/OrbArt";
-import { PostMedia } from "@/components/PostMedia";
-import { MarkdownContent } from "@/components/MarkdownContent";
+import { PostCard } from "@/components/PostCard";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useT, useLanguage } from "@/components/i18n/LanguageProvider";
 import type { FeedPost } from "@tikimiki/types";
@@ -25,7 +24,6 @@ import {
 } from "@/lib/api";
 import { monthYear } from "@/lib/format";
 import { personName } from "@/lib/displayName";
-import { PostAuthor } from "@/components/PostAuthor";
 import { ProfilePopup } from "@/components/popups/ProfilePopup";
 
 /** Public account page at /u/[username]: profile header + posts / followers / following / badges. */
@@ -154,6 +152,12 @@ export function UserProfileClient({ username }: { username: string }) {
       });
     }
   };
+
+  // Reconcile a post in the list after a PostCard edits or deletes it.
+  const onPostEdited = (updated: FeedPost) =>
+    setPosts((prev) => prev?.map((p) => (p.postId === updated.postId ? updated : p)) ?? prev);
+  const onPostDeleted = (postId: string) =>
+    setPosts((prev) => prev?.filter((p) => p.postId !== postId) ?? prev);
 
   const name = profile?.username ?? username;
   const displayName = personName({ displayName: profile?.displayName, username: name });
@@ -336,37 +340,20 @@ export function UserProfileClient({ username }: { username: string }) {
                   </div>
                 )}
                 {posts?.length === 0 && <p className="time" style={{ padding: 8 }}>{t("noPosts")}</p>}
-                {posts?.map((p, idx) => {
-                  const liked = likedSet.has(p.postId);
-                  return (
-                    <article className="post reveal" key={p.postId} style={{ "--i": idx } as React.CSSProperties}>
-                      <div className="post-head">
-                        <PostAuthor
-                          username={p.authorUsername}
-                          displayName={p.authorDisplayName}
-                          avatarUrl={p.authorAvatarUrl}
-                          createdAt={p.createdAt}
-                          locale={locale}
-                          onOpenProfile={setPopupUser}
-                        />
-                      </div>
-                      {p.content && (
-                        <div className="post-body">
-                          <MarkdownContent>{p.content}</MarkdownContent>
-                        </div>
-                      )}
-                      {p.attachments && p.attachments.length > 0 && (
-                        <PostMedia items={p.attachments} lightbox />
-                      )}
-                      <div className="post-actions">
-                        <button className="act" aria-pressed={liked || undefined} onClick={() => toggleLike(p.postId)}>
-                          <Icon name={liked ? "like-fill" : "like"} className="heart" /> <span>{p.reactionCount}</span>
-                        </button>
-                        <span className="act"><Icon name="comment" /> <span>{p.commentCount}</span></span>
-                      </div>
-                    </article>
-                  );
-                })}
+                {posts?.map((p, idx) => (
+                  <PostCard
+                    key={p.postId}
+                    post={p}
+                    liked={likedSet.has(p.postId)}
+                    onToggleLike={toggleLike}
+                    onOpenProfile={setPopupUser}
+                    onEdited={onPostEdited}
+                    onDeleted={onPostDeleted}
+                    mediaLightbox
+                    className="reveal"
+                    style={{ "--i": idx } as React.CSSProperties}
+                  />
+                ))}
               </>
             )}
 

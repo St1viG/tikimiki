@@ -1,10 +1,25 @@
-import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
+  UseGuards,
+} from "@nestjs/common";
 import { ZodValidationPipe } from "../common/zod.pipe";
 import { CurrentUser } from "../auth/current-user.decorator";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { OptionalJwtAuthGuard } from "../auth/optional-jwt-auth.guard";
 import { OptionalUser } from "../auth/optional-user.decorator";
-import { createPostSchema, type CreatePostInput } from "./dto";
+import {
+  createPostSchema,
+  updatePostSchema,
+  type CreatePostInput,
+  type UpdatePostInput,
+} from "./dto";
 import { PostsService } from "./posts.service";
 
 @Controller()
@@ -24,5 +39,24 @@ export class PostsController {
     @Body(new ZodValidationPipe(createPostSchema)) body: CreatePostInput,
   ) {
     return this.posts.create(userId, body.content, body.attachments);
+  }
+
+  @Patch("posts/:postId")
+  @UseGuards(JwtAuthGuard)
+  update(
+    @CurrentUser() userId: string,
+    @Param("postId", ParseUUIDPipe) postId: string,
+    @Body(new ZodValidationPipe(updatePostSchema)) body: UpdatePostInput,
+  ) {
+    return this.posts.update(userId, postId, body.content, body.attachments);
+  }
+
+  @Delete("posts/:postId")
+  @UseGuards(JwtAuthGuard)
+  remove(
+    @CurrentUser() userId: string,
+    @Param("postId", ParseUUIDPipe) postId: string,
+  ) {
+    return this.posts.remove(userId, postId);
   }
 }

@@ -244,6 +244,10 @@
   font-size:var(--fs-xs); box-shadow:var(--shadow-sm); pointer-events:none;
 }
 
+/* (Own-post "⋯" menu, inline editor, "(Edited)" marker and the delete-confirm
+   dialog moved to globals.css — they ship with the shared <PostCard>, which is
+   used outside the home route too.) */
+
 /* D · HEADING — promo display name gets confident scale + tracking. */
 .promo-banner .h-name{ letter-spacing:-.045em; }
 

@@ -28,8 +28,7 @@ import {
 } from "@/lib/aspect";
 import { cropImageToRatio } from "@/lib/cropImage";
 import { coverStyle } from "@/lib/coverCrop";
-import { PostAuthor } from "@/components/PostAuthor";
-import { PostMedia } from "@/components/PostMedia";
+import { PostCard } from "@/components/PostCard";
 import { MarkdownContent } from "@/components/MarkdownContent";
 import { ImageCropper } from "@/components/ImageCropper";
 import { ProfilePopup } from "@/components/popups/ProfilePopup";
@@ -76,13 +75,9 @@ const M = {
   post:           { en: "Post",                            sr: "Objavi" },
   posting:        { en: "Posting…",                        sr: "Objavljivanje…" },
   loading:        { en: "Loading…",                        sr: "Učitavanje…" },
-  postOptions:    { en: "Post options",                   sr: "Opcije objave" },
   like:           { en: "Like",                           sr: "Sviđa mi se" },
   follow:         { en: "Follow",                         sr: "Zaprati" },
   followingBtn:   { en: "Following",                      sr: "Pratiš" },
-  comments:       { en: "Comments",                       sr: "Komentari" },
-  share:          { en: "Share",                          sr: "Podeli" },
-  linkCopied:     { en: "Link copied",                    sr: "Link kopiran" },
   close:          { en: "Close",                          sr: "Zatvori" },
   postDetail:     { en: "Post",                           sr: "Objava" },
   openPost:       { en: "Open post",                      sr: "Otvori objavu" },
@@ -183,6 +178,8 @@ export function FeedClient() {
   useEffect(() => {
     if (openPostId === null) return;
     const onKey = (e: KeyboardEvent) => {
+      // Let a layered profile popup take Escape first. (A PostCard's own
+      // confirm dialog handles Escape itself and stops here via the popup.)
       if (e.key === "Escape" && popupUser === null) setOpenPostId(null);
     };
     document.addEventListener("keydown", onKey);
@@ -222,6 +219,17 @@ export function FeedClient() {
       /* clipboard unavailable; nothing to do */
     }
   }
+
+  // Reconcile a post in the list after a PostCard edits or deletes it (the same
+  // `posts` array backs both the list and the detail modal).
+  const onPostEdited = (updated: FeedPost) =>
+    setPosts(
+      (prev) => prev?.map((p) => (p.postId === updated.postId ? updated : p)) ?? prev,
+    );
+  const onPostDeleted = (postId: string) => {
+    setPosts((prev) => prev?.filter((p) => p.postId !== postId) ?? prev);
+    setOpenPostId((id) => (id === postId ? null : id));
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -295,24 +303,11 @@ export function FeedClient() {
       });
   };
 
-  // Open the post-detail modal and ensure its comments are loaded.
+  // Open the post-detail modal and ensure its comments are loaded. (PostCard
+  // handles the "click empty card area to open" behavior via onOpenDetail.)
   const openPostModal = (postId: string) => {
     setOpenPostId(postId);
     loadComments(postId);
-  };
-
-  // Click anywhere on a post card (empty area or body text) opens its modal —
-  // but not when clicking an interactive child (avatar/name/buttons/links) or
-  // when the user is selecting text.
-  const onCardClick = (e: React.MouseEvent, postId: string) => {
-    if (window.getSelection()?.toString()) return;
-    if (
-      (e.target as HTMLElement).closest(
-        "button, a, [role='button'], input, textarea",
-      )
-    )
-      return;
-    openPostModal(postId);
   };
 
   const handleComment = async (postId: string) => {
@@ -446,14 +441,16 @@ export function FeedClient() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [preview]);
 
-  // Apply a markdown edit at the current selection and keep the caret sensible.
-  // `wrap` surrounds the selection (bold/italic/code/link); `linePrefix` prepends
-  // to the start of the caret's line (heading/list/quote).
-  const applyMd = (opts: {
-    wrap?: [string, string];
-    linePrefix?: string;
-  }) => {
-    const ta = composerTextRef.current;
+  // Apply a markdown edit to a textarea at its current selection, writing the
+  // result back via `setValue`. `wrap` surrounds the selection (bold/italic/
+  // code/link); `linePrefix` prepends to the caret's line (heading/list/quote).
+  // Shared by the composer and the inline post editor.
+  const applyMdTo = (
+    ta: HTMLTextAreaElement | null,
+    setValue: (v: string) => void,
+    opts: { wrap?: readonly [string, string]; linePrefix?: string },
+    after?: () => void,
+  ) => {
     if (!ta) return;
     const value = ta.value;
     const start = ta.selectionStart ?? value.length;
@@ -476,30 +473,35 @@ export function FeedClient() {
       caretStart = caretEnd = start + opts.linePrefix.length;
     }
 
-    setDraft(next.slice(0, MAX_LEN));
+    setValue(next.slice(0, MAX_LEN));
     requestAnimationFrame(() => {
       ta.focus();
       ta.setSelectionRange(caretStart, caretEnd);
-      autoGrow();
+      after?.();
     });
   };
 
+  const applyMd = (opts: { wrap?: readonly [string, string]; linePrefix?: string }) =>
+    applyMdTo(composerTextRef.current, setDraft, opts, autoGrow);
+
   // Toolbar buttons, in visual groups (headings · emphasis · blocks/inline).
+  // `opts` is the markdown action; the composer and the post editor each bind it
+  // to their own textarea.
   const mdGroups = [
     [
-      { key: "mdH1", label: <span className="md-h">H1</span>, run: () => applyMd({ linePrefix: "# " }) },
-      { key: "mdH2", label: <span className="md-h">H2</span>, run: () => applyMd({ linePrefix: "## " }) },
-      { key: "mdH3", label: <span className="md-h">H3</span>, run: () => applyMd({ linePrefix: "### " }) },
+      { key: "mdH1", label: <span className="md-h">H1</span>, opts: { linePrefix: "# " } },
+      { key: "mdH2", label: <span className="md-h">H2</span>, opts: { linePrefix: "## " } },
+      { key: "mdH3", label: <span className="md-h">H3</span>, opts: { linePrefix: "### " } },
     ],
     [
-      { key: "mdBold", label: <b>B</b>, run: () => applyMd({ wrap: ["**", "**"] }) },
-      { key: "mdItalic", label: <i>I</i>, run: () => applyMd({ wrap: ["_", "_"] }) },
+      { key: "mdBold", label: <b>B</b>, opts: { wrap: ["**", "**"] } },
+      { key: "mdItalic", label: <i>I</i>, opts: { wrap: ["_", "_"] } },
     ],
     [
-      { key: "mdList", label: <Icon name="list" />, run: () => applyMd({ linePrefix: "- " }) },
-      { key: "mdQuote", label: <Icon name="quote" />, run: () => applyMd({ linePrefix: "> " }) },
-      { key: "mdCode", label: <span className="md-code">{"</>"}</span>, run: () => applyMd({ wrap: ["`", "`"] }) },
-      { key: "mdLink", label: <Icon name="link" />, run: () => applyMd({ wrap: ["[", "](url)"] }) },
+      { key: "mdList", label: <Icon name="list" />, opts: { linePrefix: "- " } },
+      { key: "mdQuote", label: <Icon name="quote" />, opts: { linePrefix: "> " } },
+      { key: "mdCode", label: <span className="md-code">{"</>"}</span>, opts: { wrap: ["`", "`"] } },
+      { key: "mdLink", label: <Icon name="link" />, opts: { wrap: ["[", "](url)"] } },
     ],
   ] as const;
 
@@ -833,7 +835,7 @@ export function FeedClient() {
                           disabled={preview || posting}
                           // Keep the textarea selection while clicking the toolbar.
                           onMouseDown={(e) => e.preventDefault()}
-                          onClick={tool.run}
+                          onClick={() => applyMd(tool.opts)}
                         >
                           {tool.label}
                         </button>
@@ -1071,85 +1073,40 @@ export function FeedClient() {
             </div>
           </article>
         ))}
-      {visiblePosts?.map((p, idx) => {
-        const liked = likedSet.has(p.postId);
-        const count = p.reactionCount;
-        return (
-          <article
-            className="post reveal post-clickable"
-            key={p.postId}
-            style={{ "--i": idx + 3 } as React.CSSProperties}
-            onClick={(e) => onCardClick(e, p.postId)}
-          >
-            <div className="post-head">
-              <PostAuthor
-                username={p.authorUsername}
-                displayName={p.authorDisplayName}
-                avatarUrl={p.authorAvatarUrl}
-                createdAt={p.createdAt}
-                locale={locale}
-                onOpenProfile={setPopupUser}
-              />
-              {user && p.authorId !== user.userId && (
-                <button
-                  className={
-                    followedAuthors.has(p.authorId)
-                      ? "btn btn-ghost follow-btn"
-                      : "btn btn-violet follow-btn"
-                  }
-                  style={{
-                    marginLeft: "auto",
-                    alignSelf: "flex-start",
-                    padding: "4px 12px",
-                    fontSize: "0.8rem",
-                  }}
-                  disabled={followBusy.has(p.authorId)}
-                  onClick={() => toggleFollowAuthor(p.authorId)}
-                >
-                  {followedAuthors.has(p.authorId) ? t("followingBtn") : t("follow")}
-                </button>
-              )}
-            </div>
-            {p.content && (
-              <div className="post-body">
-                <MarkdownContent>{p.content}</MarkdownContent>
-              </div>
-            )}
-            {p.attachments && p.attachments.length > 0 && (
-              <PostMedia items={p.attachments} />
-            )}
-            <div className="post-actions">
+      {visiblePosts?.map((p, idx) => (
+        <PostCard
+          key={p.postId}
+          post={p}
+          liked={likedSet.has(p.postId)}
+          onToggleLike={toggleLike}
+          onOpenProfile={setPopupUser}
+          onEdited={onPostEdited}
+          onDeleted={onPostDeleted}
+          clickable
+          onOpenDetail={openPostModal}
+          onComment={openPostModal}
+          onShare={sharePost}
+          shareCopied={sharedId === p.postId}
+          className="reveal"
+          style={{ "--i": idx + 3 } as React.CSSProperties}
+          headExtra={
+            user && p.authorId !== user.userId ? (
               <button
-                className="act"
-                aria-pressed={liked || undefined}
-                aria-label={t("like")}
-                onClick={() => toggleLike(p.postId)}
+                className={
+                  followedAuthors.has(p.authorId)
+                    ? "btn btn-ghost follow-btn"
+                    : "btn btn-violet follow-btn"
+                }
+                style={{ padding: "4px 12px", fontSize: "0.8rem" }}
+                disabled={followBusy.has(p.authorId)}
+                onClick={() => toggleFollowAuthor(p.authorId)}
               >
-                <Icon name={liked ? "like-fill" : "like"} className="heart" />{" "}
-                <span>{count}</span>
+                {followedAuthors.has(p.authorId) ? t("followingBtn") : t("follow")}
               </button>
-              <button
-                className="act"
-                aria-label={t("comments")}
-                onClick={() => openPostModal(p.postId)}
-              >
-                <Icon name="comment" /> <span>{p.commentCount}</span>
-              </button>
-              <button
-                className="act share"
-                aria-label={t("share")}
-                onClick={() => sharePost(p)}
-              >
-                <Icon name="share" />
-                {sharedId === p.postId && (
-                  <span className="share-copied">{t("linkCopied")}</span>
-                )}
-              </button>
-            </div>
-
-          </article>
-        );
-      })}
+            ) : undefined
+          }
+        />
+      ))}
     </main>
     {openPost && (
       <div
@@ -1170,58 +1127,19 @@ export function FeedClient() {
             <Icon name="x" />
           </button>
           <div className="pm-scroll">
-            <article className="post">
-              <div className="post-head">
-                <PostAuthor
-                  username={openPost.authorUsername}
-                  displayName={openPost.authorDisplayName}
-                  avatarUrl={openPost.authorAvatarUrl}
-                  createdAt={openPost.createdAt}
-                  locale={locale}
-                  onOpenProfile={setPopupUser}
-                  stacked
-                />
-              </div>
-              {openPost.content && (
-                <div className="post-body">
-                  <MarkdownContent>{openPost.content}</MarkdownContent>
-                </div>
-              )}
-              {openPost.attachments && openPost.attachments.length > 0 && (
-                <PostMedia
-                  items={openPost.attachments}
-                  lightbox
-                  maxHeight="60vh"
-                />
-              )}
-              <div className="post-actions">
-                <button
-                  className="act"
-                  aria-pressed={likedSet.has(openPost.postId) || undefined}
-                  aria-label={t("like")}
-                  onClick={() => toggleLike(openPost.postId)}
-                >
-                  <Icon
-                    name={likedSet.has(openPost.postId) ? "like-fill" : "like"}
-                    className="heart"
-                  />{" "}
-                  <span>{openPost.reactionCount}</span>
-                </button>
-                <span className="act" aria-label={t("comments")}>
-                  <Icon name="comment" /> <span>{openPost.commentCount}</span>
-                </span>
-                <button
-                  className="act share"
-                  aria-label={t("share")}
-                  onClick={() => sharePost(openPost)}
-                >
-                  <Icon name="share" />
-                  {sharedId === openPost.postId && (
-                    <span className="share-copied">{t("linkCopied")}</span>
-                  )}
-                </button>
-              </div>
-            </article>
+            <PostCard
+              post={openPost}
+              liked={likedSet.has(openPost.postId)}
+              onToggleLike={toggleLike}
+              onOpenProfile={setPopupUser}
+              onEdited={onPostEdited}
+              onDeleted={onPostDeleted}
+              stackedAuthor
+              onShare={sharePost}
+              shareCopied={sharedId === openPost.postId}
+              mediaLightbox
+              mediaMaxHeight="60vh"
+            />
             {renderComments(openPost)}
           </div>
         </div>

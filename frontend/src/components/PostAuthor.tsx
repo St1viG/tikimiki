@@ -25,6 +25,8 @@ export function PostAuthor({
   locale,
   onOpenProfile,
   stacked = false,
+  editedAt,
+  editedLabel,
 }: {
   username: string;
   displayName?: string | null;
@@ -33,6 +35,10 @@ export function PostAuthor({
   locale: Locale;
   onOpenProfile: (username: string) => void;
   stacked?: boolean;
+  /** When set (the post was edited), shows an "(Edited)" marker after the time. */
+  editedAt?: string | null;
+  /** Localized "(Edited)" text; defaults to "(Edited)". */
+  editedLabel?: string;
 }) {
   const name = personName({ displayName, username });
   const open = () => onOpenProfile(username);
@@ -67,7 +73,17 @@ export function PostAuthor({
       @{username}
     </span>
   );
-  const timeEl = <span className="time">{relTime(createdAt, locale)}</span>;
+  const timeEl = (
+    <span className="time">
+      {relTime(createdAt, locale)}
+      {editedAt ? (
+        <span className="post-edited" title={relTime(editedAt, locale)}>
+          {" "}
+          {editedLabel ?? "(Edited)"}
+        </span>
+      ) : null}
+    </span>
+  );
 
   if (stacked) {
     // name on top; @handle · time directly beneath it

@@ -174,6 +174,19 @@ export async function createPost(
   return POST<FeedPost>("/posts", { content, attachments });
 }
 
+/** Edit your own post's text + attachments. Returns the updated post (with editedAt). */
+export async function updatePost(
+  postId: string,
+  content: string,
+  attachments: string[] = [],
+): Promise<FeedPost> {
+  return PATCH<FeedPost>(`/posts/${postId}`, { content, attachments });
+}
+
+/** Soft-delete your own post. */
+export const deletePost = (postId: string) =>
+  DELETE<{ success: true }>(`/posts/${postId}`);
+
 export interface Comment {
   commentId: string;
   postId: string;
