@@ -1,0 +1,92 @@
+/*
+   /demo/avatars — generative-avatar comparison gallery.
+   Page-specific styles only; everything reaches for design
+   tokens (var(--surface), var(--line), var(--ink), …) so the
+   gallery itself stays on-brand.
+ */
+
+.av-gallery { display: flex; flex-direction: column; gap: var(--space-5); }
+
+/* Intro / seed control */
+.av-intro { display: flex; flex-direction: column; gap: var(--space-3); }
+.av-intro p { color: var(--ink-2); font-size: 15px; line-height: 1.55; max-width: 62ch; }
+.av-intro p strong { color: var(--ink); font-weight: 600; }
+
+.av-seed { display: flex; flex-direction: column; gap: 6px; max-width: 420px; }
+.av-seed label {
+  font-size: var(--fs-label); font-weight: 700; letter-spacing: .04em;
+  text-transform: uppercase; color: var(--muted);
+}
+.av-seed input {
+  width: 100%; font-family: var(--mono); font-size: 15px; color: var(--ink);
+  background: color-mix(in srgb, var(--surface-2) 70%, transparent); border: 1px solid var(--line);
+  border-radius: var(--r-sm); padding: 11px 14px; outline: none;
+  transition: border-color var(--dur-2) var(--ease-out),
+    background var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
+}
+.av-seed input::placeholder { color: var(--muted); }
+.av-seed input:focus {
+  border-color: var(--violet-light); background: var(--surface-2);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--violet-light) 12%, transparent);
+}
+
+/* Per-variant card */
+.av-card { padding: 0; }
+.av-card-h {
+  display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap;
+  padding: 14px 18px; border-bottom: 1px solid var(--line-soft);
+}
+.av-card-h h2 { font-family: var(--display); font-size: 18px; font-weight: 700; color: var(--ink); }
+.av-card-h .av-id {
+  font-family: var(--mono); font-size: 12px; color: var(--muted);
+  background: var(--surface-2); border: 1px solid var(--line);
+  border-radius: var(--r-pill); padding: 2px 9px;
+}
+.av-card-h .av-desc { color: var(--muted); font-size: 13.5px; margin-left: auto; }
+
+.av-card-body { padding: 18px; display: flex; flex-direction: column; gap: var(--space-5); }
+
+.av-sub {
+  font-size: var(--fs-label); font-weight: 700; letter-spacing: .04em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 12px;
+}
+
+/* Size + corner-shape matrix */
+.av-shapes { display: flex; gap: var(--space-6); flex-wrap: wrap; }
+.av-shape-col { display: flex; flex-direction: column; gap: 12px; }
+.av-shape-col > .av-sub { margin: 0; }
+.av-sizes { display: flex; align-items: flex-end; gap: var(--space-4); }
+.av-size { display: flex; flex-direction: column; align-items: center; gap: 7px; }
+.av-size .av-frame {
+  overflow: hidden; background: var(--bg-2); border: 1px solid var(--line);
+  box-shadow: var(--shadow-sm); flex: none;
+}
+.av-size .av-frame.circle { border-radius: 50%; }
+.av-size .av-frame.rounded { border-radius: 18px; }
+.av-size figcaption { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+
+/* Uniqueness strip (many seeds, one style) */
+.av-strip { display: flex; flex-wrap: wrap; gap: 14px; }
+.av-strip-item { display: flex; flex-direction: column; align-items: center; gap: 5px; width: 56px; }
+.av-strip-item .av-frame {
+  width: 48px; height: 48px; border-radius: 50%; overflow: hidden;
+  border: 1px solid var(--line); box-shadow: var(--shadow-sm); flex: none;
+}
+.av-strip-item span {
+  font-family: var(--mono); font-size: 10.5px; color: var(--muted);
+  max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* In-situ profile-mini row */
+.av-situ {
+  display: inline-flex; align-items: center; gap: 11px;
+  background: var(--surface-2); border: 1px solid var(--line);
+  border-radius: var(--r-md); padding: 9px 14px 9px 10px;
+}
+.av-situ .av-frame {
+  width: 40px; height: 40px; border-radius: 50%; overflow: hidden;
+  border: 1px solid var(--line); flex: none;
+}
+.av-situ .av-meta { display: flex; flex-direction: column; line-height: 1.25; }
+.av-situ .av-name { font-size: 14px; font-weight: 600; color: var(--ink); }
+.av-situ .av-handle { font-size: 12.5px; color: var(--muted); }

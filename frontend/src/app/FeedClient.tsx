@@ -1,0 +1,1239 @@
+"use client";
+
+import { Fragment, useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import type { FeedPost } from "@tikimiki/types";
+import { Icon } from "@/components/Icon";
+import { OrbArt } from "@/components/ui/OrbArt";
+import { useT, useLanguage } from "@/components/i18n/LanguageProvider";
+import { useAuth } from "@/components/auth/AuthProvider";
+import {
+  type Comment,
+  createComment,
+  createPost,
+  getComments,
+  getFeed,
+  togglePostLike,
+  toggleCommentLike,
+  toggleFollow,
+  uploadMedia,
+} from "@/lib/api";
+import { relTime } from "@/lib/format";
+import { personName } from "@/lib/displayName";
+import {
+  ASPECTS,
+  ASPECT_ORDER,
+  snapAspectKey,
+  type AspectKey,
+} from "@/lib/aspect";
+import { cropImageToRatio } from "@/lib/cropImage";
+import { coverStyle } from "@/lib/coverCrop";
+import { PostAuthor } from "@/components/PostAuthor";
+import { PostMedia } from "@/components/PostMedia";
+import { MarkdownContent } from "@/components/MarkdownContent";
+import { ImageCropper } from "@/components/ImageCropper";
+import { ProfilePopup } from "@/components/popups/ProfilePopup";
+
+/* FeedClient — the interactive home feed.
+ *
+ * User posts are data-driven (GET /api/v1/feed); the composer creates real posts
+ * (POST /api/v1/posts) for any signed-in account (members + organizations) and
+ * prepends them. The Explore tab shows every post; Following shows only posts
+ * from followed accounts. Likes are persisted (POST /api/v1/posts/:id/like) with
+ * an optimistic toggle reconciled from the LikeResult. Comments load on demand
+ * (GET /api/v1/posts/:id/comments) and the inline composer posts via
+ * POST /api/v1/posts/:id/comments.
+ *
+ * Supplies its own `<main className="feed" id="feed">`.
+ */
+
+const M = {
+  feedLabel:      { en: "Feed source",                     sr: "Izvor feeda" },
+  tabExplore:     { en: "Explore",                         sr: "Istraži" },
+  tabFollowing:   { en: "Following",                       sr: "Pratim" },
+  composerPlaceholder: { en: "Share something…",            sr: "Podeli nešto…" },
+  addMedia:       { en: "Media",                           sr: "Mediji" },
+  removeMedia:    { en: "Remove",                          sr: "Ukloni" },
+  cropImage:      { en: "Crop & position",                 sr: "Iseci i pomeri" },
+  aspectRatio:    { en: "Aspect ratio",                    sr: "Format slike" },
+  ratioPortrait:  { en: "Portrait",                        sr: "Uspravno" },
+  ratioSquare:    { en: "Square",                          sr: "Kvadrat" },
+  ratioLandscape: { en: "Landscape",                       sr: "Položeno" },
+  cropHint:       { en: "Drag the image to reposition",    sr: "Prevuci sliku da je pomeriš" },
+  cropDone:       { en: "Done",                            sr: "Gotovo" },
+  mdBold:         { en: "Bold",                            sr: "Podebljano" },
+  mdItalic:       { en: "Italic",                          sr: "Kurziv" },
+  mdH1:           { en: "Large heading",                   sr: "Veliki naslov" },
+  mdH2:           { en: "Medium heading",                  sr: "Srednji naslov" },
+  mdH3:           { en: "Small heading",                   sr: "Mali naslov" },
+  mdList:         { en: "Bulleted list",                   sr: "Lista" },
+  mdQuote:        { en: "Quote",                           sr: "Citat" },
+  mdCode:         { en: "Code",                            sr: "Kôd" },
+  mdLink:         { en: "Link",                            sr: "Link" },
+  preview:        { en: "Preview",                         sr: "Pregled" },
+  editPost:       { en: "Edit",                            sr: "Izmeni" },
+  nothingToPreview: { en: "Nothing to preview yet — start writing.", sr: "Još nema šta da se pregleda — počni da pišeš." },
+  post:           { en: "Post",                            sr: "Objavi" },
+  posting:        { en: "Posting…",                        sr: "Objavljivanje…" },
+  loading:        { en: "Loading…",                        sr: "Učitavanje…" },
+  postOptions:    { en: "Post options",                   sr: "Opcije objave" },
+  like:           { en: "Like",                           sr: "Sviđa mi se" },
+  follow:         { en: "Follow",                         sr: "Zaprati" },
+  followingBtn:   { en: "Following",                      sr: "Pratiš" },
+  comments:       { en: "Comments",                       sr: "Komentari" },
+  share:          { en: "Share",                          sr: "Podeli" },
+  linkCopied:     { en: "Link copied",                    sr: "Link kopiran" },
+  close:          { en: "Close",                          sr: "Zatvori" },
+  postDetail:     { en: "Post",                           sr: "Objava" },
+  openPost:       { en: "Open post",                      sr: "Otvori objavu" },
+  commentPlaceholder: { en: "Write a comment…",           sr: "Napiši komentar…" },
+  reply:          { en: "Reply",                          sr: "Odgovori" },
+  replyBtn:       { en: "Reply",                          sr: "Odgovori" },
+  replyingTo:     { en: "Replying to",                   sr: "Odgovaraš na" },
+  cancelReply:    { en: "Cancel reply",                  sr: "Otkaži odgovor" },
+  noComments:     { en: "No comments yet.",               sr: "Još nema komentara." },
+} as const;
+
+type Tab = "explore" | "following";
+
+/** A media item being composed into a new post. Images are cropped to the post's
+ *  aspect ratio and uploaded on Post (not on pick), so the focal point chosen in
+ *  the cropper is baked into the uploaded file. */
+type MediaDraft = {
+  id: string;
+  type: "image" | "video";
+  file: File;
+  previewUrl: string; // local object URL for the thumbnail / cropper
+  ratio: number; // natural width/height (for the cropper's pan math)
+  focalX: number; // 0..1 object-position fraction
+  focalY: number; // 0..1
+  zoom: number; // >= 1, magnification inside the frame
+};
+
+const MAX_MEDIA = 10;
+const MAX_LEN = 5000; // matches the backend content limit
+
+const ratioLabelKey: Record<
+  AspectKey,
+  "ratioPortrait" | "ratioSquare" | "ratioLandscape"
+> = {
+  portrait: "ratioPortrait",
+  square: "ratioSquare",
+  landscape: "ratioLandscape",
+};
+
+export function FeedClient() {
+  const t = useT(M);
+  const { locale } = useLanguage();
+  const { user } = useAuth();
+  const [tab, setTab] = useState<Tab>("explore");
+
+  const [posts, setPosts] = useState<FeedPost[] | null>(null);
+  const [draft, setDraft] = useState("");
+  const [posting, setPosting] = useState(false);
+  // Media attached to the new post (uploaded as picked, max 10).
+  const [media, setMedia] = useState<MediaDraft[]>([]);
+  const mediaInputRef = useRef<HTMLInputElement>(null);
+  const composerTextRef = useRef<HTMLTextAreaElement>(null);
+  // The post's aspect ratio (all attachments share it); auto-set from the first
+  // image, changeable in the cropper. `cropId` is the image being repositioned.
+  const [postRatio, setPostRatio] = useState<AspectKey>("portrait");
+  const [cropId, setCropId] = useState<string | null>(null);
+  const [preview, setPreview] = useState(false);
+  const [composerOpen, setComposerOpen] = useState(false);
+  const [likedSet, setLikedSet] = useState<Set<string>>(new Set());
+  // Author ids the viewer follows (seeded from authorIsFollowing) + in-flight follow ids.
+  const [followedAuthors, setFollowedAuthors] = useState<Set<string>>(new Set());
+  const [followBusy, setFollowBusy] = useState<Set<string>>(new Set());
+
+  // A post opens in a focused detail modal (post + scrollable comments), like
+  // Twitter/Instagram. `comments` caches each post's fetched thread (undefined =
+  // not loaded, null = loading); `commentDrafts` holds each composer's text.
+  const [openPostId, setOpenPostId] = useState<string | null>(null);
+  const [comments, setComments] = useState<Record<string, Comment[] | null>>({});
+  const [commentDrafts, setCommentDrafts] = useState<Record<string, string>>({});
+  const [commentingOn, setCommentingOn] = useState<string | null>(null);
+  // Comment ids the viewer has liked (seeded from likedByMe on load).
+  const [likedComments, setLikedComments] = useState<Set<string>>(new Set());
+  // Which comment the viewer is currently replying to (drives the banner + parentCommentId).
+  const [replyToComment, setReplyToComment] = useState<{
+    commentId: string;
+    username: string;
+    displayName?: string | null;
+  } | null>(null);
+  // Post id whose share-link was just copied (shows brief "Link copied" feedback).
+  const [sharedId, setSharedId] = useState<string | null>(null);
+  // Author whose profile popup is open (clicked from a post/comment avatar/name/handle).
+  const [popupUser, setPopupUser] = useState<string | null>(null);
+  const onProfileKey = (e: React.KeyboardEvent, u: string) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      setPopupUser(u);
+    }
+  };
+
+  // Clear reply context whenever the modal is closed.
+  useEffect(() => {
+    if (openPostId === null) setReplyToComment(null);
+  }, [openPostId]);
+
+  // While the post-detail modal is open: lock background scroll and let Escape
+  // close it — but only when no profile popup is layered on top (so Escape
+  // dismisses the topmost layer first).
+  useEffect(() => {
+    if (openPostId === null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && popupUser === null) setOpenPostId(null);
+    };
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [openPostId, popupUser]);
+
+  /**
+   * Share a post: use the native share sheet when available, otherwise copy a
+   * link to the author's profile (there is no per-post permalink route yet) and
+   * show a brief confirmation. Replaces the previously inert share button.
+   */
+  async function sharePost(p: FeedPost) {
+    const url =
+      typeof window !== "undefined"
+        ? `${window.location.origin}/u/${p.authorUsername}`
+        : `/u/${p.authorUsername}`;
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        await navigator.share({ title: `${p.authorUsername} · tikimiki`, text: p.content, url });
+        return;
+      } catch {
+        return; // user dismissed the share sheet
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      setSharedId(p.postId);
+      window.setTimeout(
+        () => setSharedId((id) => (id === p.postId ? null : id)),
+        1600,
+      );
+    } catch {
+      /* clipboard unavailable; nothing to do */
+    }
+  }
+
+  useEffect(() => {
+    let cancelled = false;
+    getFeed()
+      .then((data) => {
+        if (!cancelled) {
+          setPosts(data);
+          // Seed the heart state so liked posts show a filled heart on load.
+          setLikedSet(new Set(data.filter((p) => p.likedByMe).map((p) => p.postId)));
+          setFollowedAuthors(
+            new Set(data.filter((p) => p.authorIsFollowing).map((p) => p.authorId)),
+          );
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setPosts([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Optimistically flip the heart, then reconcile the count from the server's
+  // LikeResult (and revert the heart on failure).
+  const toggleLike = async (id: string) => {
+    const wasLiked = likedSet.has(id);
+    setLikedSet((prev) => {
+      const next = new Set(prev);
+      wasLiked ? next.delete(id) : next.add(id);
+      return next;
+    });
+    try {
+      const result = await togglePostLike(id);
+      setLikedSet((prev) => {
+        const next = new Set(prev);
+        result.liked ? next.add(id) : next.delete(id);
+        return next;
+      });
+      setPosts((prev) =>
+        prev?.map((p) =>
+          p.postId === id ? { ...p, reactionCount: result.reactionCount } : p,
+        ) ?? prev,
+      );
+    } catch (err) {
+      console.error(err);
+      setLikedSet((prev) => {
+        const next = new Set(prev);
+        wasLiked ? next.add(id) : next.delete(id);
+        return next;
+      });
+    }
+  };
+
+  // Toggle a post's comment thread open/closed; lazily fetch on first open.
+  // Load a post's comments once (no-op if already loading/loaded).
+  const loadComments = (postId: string) => {
+    if (comments[postId] !== undefined) return;
+    setComments((c) => ({ ...c, [postId]: null }));
+    getComments(postId)
+      .then((list) => {
+        setComments((c) => ({ ...c, [postId]: list }));
+        setLikedComments((prev) => {
+          const next = new Set(prev);
+          for (const c of list) if (c.likedByMe) next.add(c.commentId);
+          return next;
+        });
+      })
+      .catch((err) => {
+        console.error(err);
+        setComments((c) => ({ ...c, [postId]: [] }));
+      });
+  };
+
+  // Open the post-detail modal and ensure its comments are loaded.
+  const openPostModal = (postId: string) => {
+    setOpenPostId(postId);
+    loadComments(postId);
+  };
+
+  // Click anywhere on a post card (empty area or body text) opens its modal —
+  // but not when clicking an interactive child (avatar/name/buttons/links) or
+  // when the user is selecting text.
+  const onCardClick = (e: React.MouseEvent, postId: string) => {
+    if (window.getSelection()?.toString()) return;
+    if (
+      (e.target as HTMLElement).closest(
+        "button, a, [role='button'], input, textarea",
+      )
+    )
+      return;
+    openPostModal(postId);
+  };
+
+  const handleComment = async (postId: string) => {
+    const content = (commentDrafts[postId] ?? "").trim();
+    if (!content || !user || commentingOn) return;
+    setCommentingOn(postId);
+    const parentCommentId = replyToComment?.commentId;
+    try {
+      const created = await createComment(postId, content, parentCommentId);
+      setComments((c) => ({ ...c, [postId]: [...(c[postId] ?? []), created] }));
+      setCommentDrafts((d) => ({ ...d, [postId]: "" }));
+      setReplyToComment(null);
+      setPosts((prev) =>
+        prev?.map((p) =>
+          p.postId === postId ? { ...p, commentCount: p.commentCount + 1 } : p,
+        ) ?? prev,
+      );
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setCommentingOn(null);
+    }
+  };
+
+  const toggleFollowAuthor = async (authorId: string) => {
+    if (followBusy.has(authorId)) return;
+    setFollowBusy((prev) => new Set(prev).add(authorId));
+    try {
+      const r = await toggleFollow(authorId);
+      setFollowedAuthors((prev) => {
+        const n = new Set(prev);
+        r.following ? n.add(authorId) : n.delete(authorId);
+        return n;
+      });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setFollowBusy((prev) => {
+        const n = new Set(prev);
+        n.delete(authorId);
+        return n;
+      });
+    }
+  };
+
+  const toggleCommentLikeFn = async (postId: string, commentId: string) => {
+    const wasLiked = likedComments.has(commentId);
+    setLikedComments((prev) => {
+      const n = new Set(prev);
+      wasLiked ? n.delete(commentId) : n.add(commentId);
+      return n;
+    });
+    try {
+      const r = await toggleCommentLike(commentId);
+      setComments((c) => ({
+        ...c,
+        [postId]: (c[postId] ?? []).map((cm) =>
+          cm.commentId === commentId
+            ? { ...cm, reactionCount: r.reactionCount }
+            : cm,
+        ),
+      }));
+      setLikedComments((prev) => {
+        const n = new Set(prev);
+        r.liked ? n.add(commentId) : n.delete(commentId);
+        return n;
+      });
+    } catch (err) {
+      console.error(err);
+      setLikedComments((prev) => {
+        const n = new Set(prev);
+        wasLiked ? n.add(commentId) : n.delete(commentId);
+        return n;
+      });
+    }
+  };
+
+  // Pick image/video files: add up to MAX_MEDIA. Images are cropped + uploaded
+  // on Post, so here we just hold the File and measure each image's ratio (for
+  // the cropper). The first image picked sets the post's aspect ratio.
+  const onPickMedia = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    e.target.value = ""; // allow re-picking the same file
+    const room = MAX_MEDIA - media.length;
+    const startEmpty = media.length === 0;
+    files.slice(0, Math.max(0, room)).forEach((file, i) => {
+      const id = `${Date.now()}-${Math.round(performance.now())}-${i}-${file.name}`;
+      const type: "image" | "video" = file.type.startsWith("video/")
+        ? "video"
+        : "image";
+      const previewUrl = URL.createObjectURL(file);
+      setMedia((prev) => [
+        ...prev,
+        { id, type, file, previewUrl, ratio: 1, focalX: 0.5, focalY: 0.5, zoom: 1 },
+      ]);
+      if (type === "image") {
+        const img = new window.Image();
+        img.onload = () => {
+          const r = img.naturalWidth / img.naturalHeight;
+          setMedia((prev) =>
+            prev.map((m) => (m.id === id ? { ...m, ratio: r } : m)),
+          );
+          // Default the post's frame to the first image's nearest allowed ratio.
+          if (startEmpty && i === 0) setPostRatio(snapAspectKey(r));
+        };
+        img.src = previewUrl;
+      }
+    });
+  };
+
+  const removeMedia = (id: string) => {
+    setMedia((prev) => {
+      const found = prev.find((m) => m.id === id);
+      if (found) URL.revokeObjectURL(found.previewUrl);
+      return prev.filter((m) => m.id !== id);
+    });
+  };
+
+  // Resize the composer textarea to fit its content (after a programmatic edit).
+  const autoGrow = () => {
+    const ta = composerTextRef.current;
+    if (!ta) return;
+    ta.style.height = "auto";
+    ta.style.height = `${Math.min(ta.scrollHeight, 340)}px`;
+  };
+
+  // Leaving preview remounts the textarea at its default height — re-grow it so
+  // the full draft stays visible instead of snapping back to one line.
+  useEffect(() => {
+    if (!preview) autoGrow();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [preview]);
+
+  // Apply a markdown edit at the current selection and keep the caret sensible.
+  // `wrap` surrounds the selection (bold/italic/code/link); `linePrefix` prepends
+  // to the start of the caret's line (heading/list/quote).
+  const applyMd = (opts: {
+    wrap?: [string, string];
+    linePrefix?: string;
+  }) => {
+    const ta = composerTextRef.current;
+    if (!ta) return;
+    const value = ta.value;
+    const start = ta.selectionStart ?? value.length;
+    const end = ta.selectionEnd ?? start;
+    let next = value;
+    let caretStart = start;
+    let caretEnd = end;
+
+    if (opts.wrap) {
+      const [open, close] = opts.wrap;
+      const selected = value.slice(start, end);
+      next = value.slice(0, start) + open + selected + close + value.slice(end);
+      // Select the inner text so the user can keep typing / see what changed.
+      caretStart = start + open.length;
+      caretEnd = caretStart + selected.length;
+    } else if (opts.linePrefix) {
+      const lineStart = value.lastIndexOf("\n", start - 1) + 1;
+      next =
+        value.slice(0, lineStart) + opts.linePrefix + value.slice(lineStart);
+      caretStart = caretEnd = start + opts.linePrefix.length;
+    }
+
+    setDraft(next.slice(0, MAX_LEN));
+    requestAnimationFrame(() => {
+      ta.focus();
+      ta.setSelectionRange(caretStart, caretEnd);
+      autoGrow();
+    });
+  };
+
+  // Toolbar buttons, in visual groups (headings · emphasis · blocks/inline).
+  const mdGroups = [
+    [
+      { key: "mdH1", label: <span className="md-h">H1</span>, run: () => applyMd({ linePrefix: "# " }) },
+      { key: "mdH2", label: <span className="md-h">H2</span>, run: () => applyMd({ linePrefix: "## " }) },
+      { key: "mdH3", label: <span className="md-h">H3</span>, run: () => applyMd({ linePrefix: "### " }) },
+    ],
+    [
+      { key: "mdBold", label: <b>B</b>, run: () => applyMd({ wrap: ["**", "**"] }) },
+      { key: "mdItalic", label: <i>I</i>, run: () => applyMd({ wrap: ["_", "_"] }) },
+    ],
+    [
+      { key: "mdList", label: <Icon name="list" />, run: () => applyMd({ linePrefix: "- " }) },
+      { key: "mdQuote", label: <Icon name="quote" />, run: () => applyMd({ linePrefix: "> " }) },
+      { key: "mdCode", label: <span className="md-code">{"</>"}</span>, run: () => applyMd({ wrap: ["`", "`"] }) },
+      { key: "mdLink", label: <Icon name="link" />, run: () => applyMd({ wrap: ["[", "](url)"] }) },
+    ],
+  ] as const;
+
+  const handlePost = async () => {
+    const content = draft.trim();
+    if (!user || posting) return;
+    if (!content && media.length === 0) return;
+    setPosting(true);
+    try {
+      // Bake each image to the post's ratio at its focal point, then upload.
+      // Videos upload as-is (display covers them to the same frame).
+      const ratioVal = ASPECTS[postRatio];
+      const urls: string[] = [];
+      for (const m of media) {
+        if (m.type === "image") {
+          const blob = await cropImageToRatio(
+            m.file,
+            ratioVal,
+            m.focalX,
+            m.focalY,
+            m.zoom,
+          );
+          const name = m.file.name.replace(/\.[^.]+$/, "") + ".jpg";
+          const { url } = await uploadMedia(
+            new File([blob], name, { type: "image/jpeg" }),
+          );
+          urls.push(url);
+        } else {
+          const { url } = await uploadMedia(m.file);
+          urls.push(url);
+        }
+      }
+      const created = await createPost(content, urls);
+      setPosts((prev) => [created, ...(prev ?? [])]);
+      setDraft("");
+      setPreview(false);
+      setComposerOpen(false);
+      if (composerTextRef.current) composerTextRef.current.style.height = "auto";
+      media.forEach((m) => URL.revokeObjectURL(m.previewUrl));
+      setMedia([]);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setPosting(false);
+    }
+  };
+
+  // The comment thread + composer for a post (rendered inside the detail modal).
+  const renderComments = (p: FeedPost) => {
+    const thread = comments[p.postId];
+
+    // Build a map for O(1) lookup and resolve which root a reply belongs to.
+    const commentMap: Record<string, Comment> = {};
+    if (thread) for (const c of thread) commentMap[c.commentId] = c;
+
+    const getRootId = (commentId: string): string => {
+      const c = commentMap[commentId];
+      if (!c?.parentCommentId) return commentId;
+      return getRootId(c.parentCommentId);
+    };
+
+    const roots: Comment[] = [];
+    const repliesByRoot: Record<string, Comment[]> = {};
+    if (thread) {
+      for (const c of thread) {
+        if (!c.parentCommentId) {
+          roots.push(c);
+        } else {
+          const rootId = getRootId(c.commentId);
+          if (!repliesByRoot[rootId]) repliesByRoot[rootId] = [];
+          repliesByRoot[rootId].push(c);
+        }
+      }
+    }
+
+    const renderCommentRow = (c: Comment, isReply = false) => {
+      const cLiked = likedComments.has(c.commentId);
+      const isTargeted = replyToComment?.commentId === c.commentId;
+      return (
+        <div
+          className="post-head"
+          key={c.commentId}
+          style={{ alignItems: "flex-start" }}
+        >
+          <span
+            className="post-av-link"
+            role="button"
+            tabIndex={0}
+            aria-label={personName({ displayName: c.authorDisplayName, username: c.authorUsername })}
+            onClick={() => setPopupUser(c.authorUsername)}
+            onKeyDown={(e) => onProfileKey(e, c.authorUsername)}
+          >
+            <span className={`avatar${isReply ? " sm" : " v"} is-orb`} aria-hidden="true">
+              <OrbArt url={c.authorAvatarUrl} seed={c.authorUsername} />
+            </span>
+          </span>
+          <span className="who">
+            <span style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+              <span
+                className="name"
+                role="button"
+                tabIndex={0}
+                onClick={() => setPopupUser(c.authorUsername)}
+                onKeyDown={(e) => onProfileKey(e, c.authorUsername)}
+              >
+                {personName({ displayName: c.authorDisplayName, username: c.authorUsername })}
+              </span>
+              <span
+                className="post-handle"
+                role="button"
+                tabIndex={0}
+                onClick={() => setPopupUser(c.authorUsername)}
+                onKeyDown={(e) => onProfileKey(e, c.authorUsername)}
+              >
+                @{c.authorUsername}
+              </span>
+              <span className="time">{relTime(c.createdAt, locale)}</span>
+              <button
+                className="act"
+                aria-pressed={cLiked || undefined}
+                aria-label={t("like")}
+                onClick={() => toggleCommentLikeFn(p.postId, c.commentId)}
+                style={{ padding: 0 }}
+              >
+                <Icon name={cLiked ? "like-fill" : "like"} className="heart" />{" "}
+                <span>{c.reactionCount}</span>
+              </button>
+              {user && (
+                <button
+                  className="act comment-reply-btn"
+                  aria-label={t("replyBtn")}
+                  aria-pressed={isTargeted || undefined}
+                  onClick={() =>
+                    isTargeted
+                      ? setReplyToComment(null)
+                      : setReplyToComment({
+                          commentId: c.commentId,
+                          username: c.authorUsername,
+                          displayName: c.authorDisplayName,
+                        })
+                  }
+                  style={{ padding: 0, color: isTargeted ? "var(--violet-light)" : undefined }}
+                >
+                  ↩ {t("replyBtn")}
+                </button>
+              )}
+            </span>
+            <span className="post-body">{c.content}</span>
+          </span>
+        </div>
+      );
+    };
+
+    return (
+      <div className="post-comments">
+        {thread == null && (
+          <p className="time" style={{ padding: "10px 4px" }}>{t("loading")}</p>
+        )}
+        {thread != null && thread.length === 0 && (
+          <p className="time" style={{ padding: "10px 4px" }}>{t("noComments")}</p>
+        )}
+
+        {roots.map((c) => (
+          <div key={c.commentId}>
+            {renderCommentRow(c, false)}
+            {repliesByRoot[c.commentId]?.length > 0 && (
+              <div className="comment-replies">
+                {repliesByRoot[c.commentId].map((r) => renderCommentRow(r, true))}
+              </div>
+            )}
+          </div>
+        ))}
+
+        {user && (
+          <div className="composer" style={{ flexDirection: "column", alignItems: "stretch", gap: 8 }}>
+            {replyToComment && (
+              <div className="comment-reply-banner">
+                <span>
+                  ↩ {t("replyingTo")}{" "}
+                  <strong>
+                    {personName({ displayName: replyToComment.displayName, username: replyToComment.username })}
+                  </strong>
+                </span>
+                <button
+                  aria-label={t("cancelReply")}
+                  onClick={() => setReplyToComment(null)}
+                >
+                  <Icon name="x" />
+                </button>
+              </div>
+            )}
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <span className="avatar brand is-orb" aria-hidden="true">
+                <OrbArt url={user.avatarUrl} seed={user.username ?? "tikimiki"} />
+              </span>
+              <input
+                className="field"
+                placeholder={
+                  replyToComment
+                    ? `${t("replyingTo")} @${replyToComment.username}…`
+                    : t("commentPlaceholder")
+                }
+                value={commentDrafts[p.postId] ?? ""}
+                onChange={(e) =>
+                  setCommentDrafts((d) => ({ ...d, [p.postId]: e.target.value }))
+                }
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleComment(p.postId);
+                }}
+                disabled={commentingOn === p.postId}
+              />
+              <button
+                className="btn btn-violet"
+                onClick={() => handleComment(p.postId)}
+                disabled={
+                  commentingOn === p.postId ||
+                  (commentDrafts[p.postId] ?? "").trim() === ""
+                }
+              >
+                {commentingOn === p.postId ? t("posting") : t("reply")}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const openPost = posts?.find((p) => p.postId === openPostId) ?? null;
+
+  // Explore shows every post; Following shows only posts from accounts the
+  // viewer follows (reflecting live follow/unfollow toggles via followedAuthors).
+  const visiblePosts =
+    tab === "following"
+      ? (posts ?? []).filter((p) => followedAuthors.has(p.authorId))
+      : posts;
+
+  return (
+    <>
+    <main className="feed" id="feed">
+      <h1 className="sr-only">Feed</h1>
+
+      <div className="feed-switch" role="tablist" aria-label={t("feedLabel")}>
+        <button
+          className="feed-tab"
+          role="tab"
+          aria-selected={tab === "explore"}
+          onClick={() => setTab("explore")}
+        >
+          {t("tabExplore")}
+        </button>
+        <button
+          className="feed-tab"
+          role="tab"
+          aria-selected={tab === "following"}
+          onClick={() => setTab("following")}
+        >
+          {t("tabFollowing")}
+        </button>
+      </div>
+
+      <div
+        className="composer composer-rich reveal"
+        style={{ "--i": 0 } as React.CSSProperties}
+        onBlur={(e) => {
+          // Collapse if focus leaves the entire composer area with an empty draft.
+          if (
+            !e.currentTarget.contains(e.relatedTarget as Node | null) &&
+            !draft.trim() &&
+            media.length === 0 &&
+            !preview
+          ) {
+            setComposerOpen(false);
+          }
+        }}
+      >
+        <div className="composer-row">
+          <span className="avatar brand is-orb" aria-hidden="true">
+            <OrbArt url={user?.avatarUrl} seed={user?.username ?? "tikimiki"} />
+          </span>
+          {preview ? (
+            <div className="field composer-text composer-preview">
+              {draft.trim() ? (
+                <MarkdownContent>{draft}</MarkdownContent>
+              ) : (
+                <span className="composer-preview-empty">
+                  {t("nothingToPreview")}
+                </span>
+              )}
+            </div>
+          ) : (
+            <textarea
+              ref={composerTextRef}
+              className="field composer-text"
+              placeholder={t("composerPlaceholder")}
+              value={draft}
+              maxLength={MAX_LEN}
+              onChange={(e) => {
+                setDraft(e.target.value);
+                // Grow to fit the content (capped by max-height in CSS).
+                e.target.style.height = "auto";
+                e.target.style.height = `${Math.min(e.target.scrollHeight, 340)}px`;
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) handlePost();
+              }}
+              onFocus={() => setComposerOpen(true)}
+              disabled={!user || posting}
+              rows={1}
+            />
+          )}
+        </div>
+
+        {/* Advanced controls — always in the DOM, animated via grid-template-rows.
+            grid 0fr→1fr avoids animating height directly (layout-safe). */}
+        <div className={`composer-advanced${composerOpen ? " is-open" : ""}`}>
+          <div className="composer-advanced-inner">
+            {user && (
+              <div className="composer-toolbar">
+                <div className="md-tools">
+                  {mdGroups.map((group, gi) => (
+                    <Fragment key={gi}>
+                      {gi > 0 && <span className="md-sep" aria-hidden="true" />}
+                      {group.map((tool) => (
+                        <button
+                          key={tool.key}
+                          type="button"
+                          className="md-btn"
+                          title={t(tool.key)}
+                          aria-label={t(tool.key)}
+                          disabled={preview || posting}
+                          // Keep the textarea selection while clicking the toolbar.
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={tool.run}
+                        >
+                          {tool.label}
+                        </button>
+                      ))}
+                    </Fragment>
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  className={`md-btn md-preview${preview ? " is-on" : ""}`}
+                  onClick={() => setPreview((p) => !p)}
+                >
+                  <Icon name={preview ? "edit" : "eye"} />
+                  {preview ? t("editPost") : t("preview")}
+                </button>
+              </div>
+            )}
+
+            {media.length > 0 && (
+              <>
+                <div className="composer-ratios" role="group" aria-label={t("aspectRatio")}>
+                  {ASPECT_ORDER.map((key) => (
+                    <button
+                      key={key}
+                      type="button"
+                      className={`ratio-btn${postRatio === key ? " is-on" : ""}`}
+                      onClick={() => setPostRatio(key)}
+                    >
+                      <span
+                        className="ratio-ico"
+                        style={{ aspectRatio: String(ASPECTS[key]) }}
+                        aria-hidden="true"
+                      />
+                      {t(ratioLabelKey[key])}
+                    </button>
+                  ))}
+                </div>
+                <div className="composer-media">
+                  {media.map((m) => (
+                    <div
+                      className="cm-thumb"
+                      key={m.id}
+                      style={{ aspectRatio: String(ASPECTS[postRatio]) }}
+                    >
+                      {m.type === "video" ? (
+                        <video
+                          className="cm-thumb-el"
+                          src={m.previewUrl}
+                          muted
+                          style={{ objectPosition: `${m.focalX * 100}% ${m.focalY * 100}%` }}
+                        />
+                      ) : (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          className="cm-thumb-el"
+                          src={m.previewUrl}
+                          alt=""
+                          draggable={false}
+                          style={coverStyle(
+                            m.ratio,
+                            ASPECTS[postRatio],
+                            m.focalX,
+                            m.focalY,
+                            m.zoom,
+                          )}
+                          onClick={() => setCropId(m.id)}
+                        />
+                      )}
+                      {m.type === "image" && (
+                        <button
+                          type="button"
+                          className="cm-crop"
+                          aria-label={t("cropImage")}
+                          title={t("cropImage")}
+                          onClick={() => setCropId(m.id)}
+                        >
+                          <Icon name="crop" />
+                        </button>
+                      )}
+                      {m.type === "video" && (
+                        <span className="cm-vid-badge" aria-hidden="true">
+                          ▶
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        className="cm-remove"
+                        aria-label={t("removeMedia")}
+                        onClick={() => removeMedia(m.id)}
+                      >
+                        <Icon name="x" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+
+            <div className="composer-bar">
+              {user && (
+                <>
+                  <input
+                    ref={mediaInputRef}
+                    type="file"
+                    accept="image/*,video/*"
+                    multiple
+                    hidden
+                    onChange={onPickMedia}
+                  />
+                  <button
+                    type="button"
+                    className="composer-add"
+                    onClick={() => mediaInputRef.current?.click()}
+                    disabled={posting || media.length >= MAX_MEDIA}
+                  >
+                    <Icon name="image" /> {t("addMedia")}
+                    {media.length >= 8 && (
+                      <span className="composer-add-count">
+                        {media.length}/{MAX_MEDIA}
+                      </span>
+                    )}
+                  </button>
+                </>
+              )}
+              {user && draft.length > MAX_LEN - 500 && (
+                <span
+                  className={`composer-count${
+                    draft.length > MAX_LEN - 50 ? " is-warn" : ""
+                  }`}
+                >
+                  {MAX_LEN - draft.length}
+                </span>
+              )}
+              {user ? (
+                <button
+                  className="btn btn-violet composer-post"
+                  onClick={handlePost}
+                  disabled={
+                    posting || (draft.trim() === "" && media.length === 0)
+                  }
+                >
+                  {posting ? t("posting") : t("post")}
+                </button>
+              ) : (
+                <Link
+                  className="btn btn-violet composer-post composer-post-solo"
+                  href="/login"
+                >
+                  {t("post")}
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {cropId &&
+        (() => {
+          const m = media.find((x) => x.id === cropId);
+          if (!m) return null;
+          return (
+            <ImageCropper
+              src={m.previewUrl}
+              imgRatio={m.ratio}
+              ratioKey={postRatio}
+              onRatioKey={setPostRatio}
+              focalX={m.focalX}
+              focalY={m.focalY}
+              zoom={m.zoom}
+              onChange={(fx, fy, z) =>
+                setMedia((prev) =>
+                  prev.map((x) =>
+                    x.id === cropId
+                      ? { ...x, focalX: fx, focalY: fy, zoom: z }
+                      : x,
+                  ),
+                )
+              }
+              onClose={() => setCropId(null)}
+              hint={t("cropHint")}
+              done={t("cropDone")}
+            />
+          );
+        })()}
+
+      {/* User posts — data-driven */}
+      {posts === null &&
+        ["a", "b", "c"].map((k) => (
+          <article className="post" key={`post-skel-${k}`} aria-busy="true">
+            <div className="post-head">
+              <span
+                className="avatar v is-orb skel skel-circle"
+                aria-hidden="true"
+              />
+              <span className="who who-inline">
+                <span
+                  className="skel skel-line"
+                  style={{ width: "30%" } as React.CSSProperties}
+                  aria-hidden="true"
+                />
+                <span
+                  className="skel skel-line"
+                  style={{ width: "18%", marginTop: 7 } as React.CSSProperties}
+                  aria-hidden="true"
+                />
+              </span>
+            </div>
+            <div className="post-body">
+              <span
+                className="skel skel-line"
+                style={{ width: "92%" } as React.CSSProperties}
+                aria-hidden="true"
+              />
+              <span
+                className="skel skel-line"
+                style={{ width: "60%", marginTop: 8 } as React.CSSProperties}
+                aria-hidden="true"
+              />
+            </div>
+            <div className="post-actions">
+              {[0, 1, 2].map((a) => (
+                <span
+                  key={a}
+                  className="skel"
+                  style={
+                    {
+                      width: 44,
+                      height: 33,
+                      borderRadius: 9,
+                    } as React.CSSProperties
+                  }
+                  aria-hidden="true"
+                />
+              ))}
+            </div>
+          </article>
+        ))}
+      {visiblePosts?.map((p, idx) => {
+        const liked = likedSet.has(p.postId);
+        const count = p.reactionCount;
+        return (
+          <article
+            className="post reveal post-clickable"
+            key={p.postId}
+            style={{ "--i": idx + 3 } as React.CSSProperties}
+            onClick={(e) => onCardClick(e, p.postId)}
+          >
+            <div className="post-head">
+              <PostAuthor
+                username={p.authorUsername}
+                displayName={p.authorDisplayName}
+                avatarUrl={p.authorAvatarUrl}
+                createdAt={p.createdAt}
+                locale={locale}
+                onOpenProfile={setPopupUser}
+              />
+              {user && p.authorId !== user.userId && (
+                <button
+                  className={
+                    followedAuthors.has(p.authorId)
+                      ? "btn btn-ghost follow-btn"
+                      : "btn btn-violet follow-btn"
+                  }
+                  style={{
+                    marginLeft: "auto",
+                    alignSelf: "flex-start",
+                    padding: "4px 12px",
+                    fontSize: "0.8rem",
+                  }}
+                  disabled={followBusy.has(p.authorId)}
+                  onClick={() => toggleFollowAuthor(p.authorId)}
+                >
+                  {followedAuthors.has(p.authorId) ? t("followingBtn") : t("follow")}
+                </button>
+              )}
+            </div>
+            {p.content && (
+              <div className="post-body">
+                <MarkdownContent>{p.content}</MarkdownContent>
+              </div>
+            )}
+            {p.attachments && p.attachments.length > 0 && (
+              <PostMedia items={p.attachments} />
+            )}
+            <div className="post-actions">
+              <button
+                className="act"
+                aria-pressed={liked || undefined}
+                aria-label={t("like")}
+                onClick={() => toggleLike(p.postId)}
+              >
+                <Icon name={liked ? "like-fill" : "like"} className="heart" />{" "}
+                <span>{count}</span>
+              </button>
+              <button
+                className="act"
+                aria-label={t("comments")}
+                onClick={() => openPostModal(p.postId)}
+              >
+                <Icon name="comment" /> <span>{p.commentCount}</span>
+              </button>
+              <button
+                className="act share"
+                aria-label={t("share")}
+                onClick={() => sharePost(p)}
+              >
+                <Icon name="share" />
+                {sharedId === p.postId && (
+                  <span className="share-copied">{t("linkCopied")}</span>
+                )}
+              </button>
+            </div>
+
+          </article>
+        );
+      })}
+    </main>
+    {openPost && (
+      <div
+        className="pm-overlay"
+        role="dialog"
+        aria-modal="true"
+        aria-label={t("postDetail")}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) setOpenPostId(null);
+        }}
+      >
+        <div className="pm-modal">
+          <button
+            className="pm-close"
+            onClick={() => setOpenPostId(null)}
+            aria-label={t("close")}
+          >
+            <Icon name="x" />
+          </button>
+          <div className="pm-scroll">
+            <article className="post">
+              <div className="post-head">
+                <PostAuthor
+                  username={openPost.authorUsername}
+                  displayName={openPost.authorDisplayName}
+                  avatarUrl={openPost.authorAvatarUrl}
+                  createdAt={openPost.createdAt}
+                  locale={locale}
+                  onOpenProfile={setPopupUser}
+                  stacked
+                />
+              </div>
+              {openPost.content && (
+                <div className="post-body">
+                  <MarkdownContent>{openPost.content}</MarkdownContent>
+                </div>
+              )}
+              {openPost.attachments && openPost.attachments.length > 0 && (
+                <PostMedia
+                  items={openPost.attachments}
+                  lightbox
+                  maxHeight="60vh"
+                />
+              )}
+              <div className="post-actions">
+                <button
+                  className="act"
+                  aria-pressed={likedSet.has(openPost.postId) || undefined}
+                  aria-label={t("like")}
+                  onClick={() => toggleLike(openPost.postId)}
+                >
+                  <Icon
+                    name={likedSet.has(openPost.postId) ? "like-fill" : "like"}
+                    className="heart"
+                  />{" "}
+                  <span>{openPost.reactionCount}</span>
+                </button>
+                <span className="act" aria-label={t("comments")}>
+                  <Icon name="comment" /> <span>{openPost.commentCount}</span>
+                </span>
+                <button
+                  className="act share"
+                  aria-label={t("share")}
+                  onClick={() => sharePost(openPost)}
+                >
+                  <Icon name="share" />
+                  {sharedId === openPost.postId && (
+                    <span className="share-copied">{t("linkCopied")}</span>
+                  )}
+                </button>
+              </div>
+            </article>
+            {renderComments(openPost)}
+          </div>
+        </div>
+      </div>
+    )}
+    <ProfilePopup
+      open={popupUser !== null}
+      username={popupUser}
+      onClose={() => setPopupUser(null)}
+    />
+    </>
+  );
+}
+
+export default FeedClient;

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="sr"><head><meta charset="utf-8">
+<title>tikimiki — teme</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Space Grotesk',system-ui,sans-serif;background:#0b0b12;color:#ddd;padding:32px}
+  h1{font-family:'Bricolage Grotesque',sans-serif;font-size:26px;margin-bottom:4px}
+  .lead{color:#8a86a0;margin-bottom:26px;font-size:14px}
+  .themes{display:grid;grid-template-columns:repeat(2,1fr);gap:22px}
+  @media(max-width:840px){.themes{grid-template-columns:1fr}}
+
+  /* token sets — mirror globals.css */
+  .t{--display:'Bricolage Grotesque',sans-serif;--body:'Space Grotesk',sans-serif;--mono:'JetBrains Mono',monospace;--btxt:#1A1500}
+  .t.default{--bg:#07060F;--surface:#100D22;--surface-2:#18142F;--line:#2B2552;--violet:#6E54B5;--violet-light:#B49BFF;--lemon:#ECE23A;--green:#4FD8A6;--ink:#EDE9FF;--ink-2:#C9C2E8;--muted:#9B95BC}
+  .t.mono{--bg:#08080A;--surface:#141417;--surface-2:#1D1D21;--line:#34343B;--violet:#6B6B76;--violet-light:#C6C6D0;--lemon:#F1F1F4;--green:#B9B9C2;--ink:#F3F3F6;--ink-2:#C5C5CE;--muted:#8C8C96}
+  .t.light{--bg:#F4F2FC;--surface:#FFFFFF;--surface-2:#F1EEFB;--line:#DAD3EF;--violet:#5F4A8B;--violet-light:#6E54B5;--lemon:#6E54B5;--green:#1E9C72;--ink:#191430;--ink-2:#3F3666;--muted:#5E567F;--btxt:#FFFFFF}
+  .t.lmono{--bg:#F5F5F7;--surface:#FFFFFF;--surface-2:#F2F2F5;--line:#DBDBE0;--violet:#4C4C54;--violet-light:#5A5A63;--lemon:#1C1C20;--green:#5E5E68;--ink:#15151A;--ink-2:#3A3A42;--muted:#67676F;--btxt:#FFFFFF}
+
+  .panel{border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,.08)}
+  .panel-h{display:flex;align-items:baseline;gap:10px;padding:14px 18px;background:#15151e}
+  .panel-h b{font-family:'Bricolage Grotesque',sans-serif;font-size:16px;color:#fff}
+  .panel-h span{font-size:12px;color:#8a86a0}
+  .stage{background:var(--bg);padding:20px;display:flex;gap:16px}
+  .rail{width:150px;flex-shrink:0;display:flex;flex-direction:column;gap:4px}
+  .wm{font-family:var(--display);font-weight:800;font-size:20px;letter-spacing:-.04em;color:var(--lemon);padding:4px 6px 8px}
+  .wm b{color:var(--violet-light)}
+  .nav{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:11px;font-size:13.5px;font-weight:500;color:var(--muted)}
+  .nav.on{color:var(--ink);font-weight:600;background:color-mix(in srgb,var(--violet) 26%,transparent);box-shadow:inset 0 0 0 1px var(--line)}
+  .nav .d{width:8px;height:8px;border-radius:3px;background:var(--lemon);flex-shrink:0}
+  .card{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .card h3{font-family:var(--display);font-weight:800;font-size:18px;color:var(--ink);letter-spacing:-.02em}
+  .card p{color:var(--ink-2);font-size:14px;line-height:1.6;margin:7px 0 4px}
+  .meta{color:var(--muted);font-size:12px;margin-bottom:13px}
+  .banner{border-radius:10px;height:60px;margin-bottom:13px;background:linear-gradient(135deg,var(--surface-2),var(--line))}
+  .default .banner{background:linear-gradient(135deg,#1B1140,#120C2C 60%,#0C0820)}
+  .row{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .btn{font-weight:700;font-size:13.5px;padding:9px 16px;border-radius:10px;border:none}
+  .btn-p{background:var(--lemon);color:var(--btxt)}
+  .btn-v{background:var(--violet);color:var(--lemon)}
+  .light .btn-v,.lmono .btn-v{color:#fff}
+  .badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;border:1px solid}
+  .b-live{color:var(--green);background:color-mix(in srgb,var(--green) 14%,transparent);border-color:color-mix(in srgb,var(--green) 40%,transparent)}
+  .b-up{color:var(--lemon);background:color-mix(in srgb,var(--lemon) 14%,transparent);border-color:color-mix(in srgb,var(--lemon) 34%,transparent)}
+  .stat{margin-top:14px;font-family:var(--mono);font-weight:600;color:var(--lemon);font-size:20px}
+  .stat small{color:var(--muted);font-family:var(--body);font-size:12px;font-weight:500}
+</style></head>
+<body>
+<h1>tikimiki — 4 teme</h1>
+<p class="lead">Sve čita iz tokena, pa je tema samo override vrednosti na <code>html[data-theme]</code>. Bira se u Podešavanja → Tema; pamti se i primenjuje pre iscrtavanja (bez treperenja). Banneri/pozadine se sada slažu sa temom.</p>
+<div class="themes">
+  <div class="panel"><div class="panel-h"><b>Midnight Voltage</b><span>default · tamna · original</span></div><div class="stage t default">
+    <div class="rail"><div class="wm"><b>tiki</b>miki</div><div class="nav on"><span class="d"></span>Početna</div><div class="nav">Hackathoni</div><div class="nav">Timovi</div></div>
+    <div class="card"><div class="banner"></div><h3>ETF HackWeek 2026</h3><p>48 sati neprekidnog koda u Beogradu.</p><div class="meta">Beograd · 14–16. jun</div>
+      <div class="row"><button class="btn btn-p">Prijavi se</button><button class="btn btn-v">Detalji</button><span class="badge b-live">UŽIVO</span><span class="badge b-up">Uskoro</span></div>
+      <div class="stat">$2,000 <small>nagradni fond</small></div></div></div></div>
+
+  <div class="panel"><div class="panel-h"><b>Ametist</b><span>mono · tamna · crno-bela</span></div><div class="stage t mono">
+    <div class="rail"><div class="wm"><b>tiki</b>miki</div><div class="nav on"><span class="d"></span>Početna</div><div class="nav">Hackathoni</div><div class="nav">Timovi</div></div>
+    <div class="card"><div class="banner"></div><h3>ETF HackWeek 2026</h3><p>48 sati neprekidnog koda u Beogradu.</p><div class="meta">Beograd · 14–16. jun</div>
+      <div class="row"><button class="btn btn-p">Prijavi se</button><button class="btn btn-v">Detalji</button><span class="badge b-live">UŽIVO</span><span class="badge b-up">Uskoro</span></div>
+      <div class="stat">$2,000 <small>nagradni fond</small></div></div></div></div>
+
+  <div class="panel"><div class="panel-h"><b>Svitanje</b><span>light · svetla · violet primarna</span></div><div class="stage t light">
+    <div class="rail"><div class="wm"><b>tiki</b>miki</div><div class="nav on"><span class="d"></span>Početna</div><div class="nav">Hackathoni</div><div class="nav">Timovi</div></div>
+    <div class="card"><div class="banner"></div><h3>ETF HackWeek 2026</h3><p>48 sati neprekidnog koda u Beogradu.</p><div class="meta">Beograd · 14–16. jun</div>
+      <div class="row"><button class="btn btn-p">Prijavi se</button><button class="btn btn-v">Detalji</button><span class="badge b-live">UŽIVO</span><span class="badge b-up">Uskoro</span></div>
+      <div class="stat">$2,000 <small>nagradni fond</small></div></div></div></div>
+
+  <div class="panel"><div class="panel-h"><b>Lavanda</b><span>light-mono · svetla · crno-bela</span></div><div class="stage t lmono">
+    <div class="rail"><div class="wm"><b>tiki</b>miki</div><div class="nav on"><span class="d"></span>Početna</div><div class="nav">Hackathoni</div><div class="nav">Timovi</div></div>
+    <div class="card"><div class="banner"></div><h3>ETF HackWeek 2026</h3><p>48 sati neprekidnog koda u Beogradu.</p><div class="meta">Beograd · 14–16. jun</div>
+      <div class="row"><button class="btn btn-p">Prijavi se</button><button class="btn btn-v">Detalji</button><span class="badge b-live">UŽIVO</span><span class="badge b-up">Uskoro</span></div>
+      <div class="stat">$2,000 <small>nagradni fond</small></div></div></div></div>
+</div>
+</body></html>

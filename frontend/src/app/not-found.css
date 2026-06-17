@@ -1,0 +1,119 @@
+/*
+   404 — calm "Midnight Voltage" page. Mascot + numeral + one way back.
+   Tokens (--bg, --violet, --lemon, --ink, --display …) come from globals.css.
+   No looping/idle animations.
+ */
+
+.nf-root {
+  position: relative;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 32px 24px;
+  overflow: clip;
+  background: var(--bg);
+}
+
+.nf-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 520px;
+}
+
+/* The numeral — "4 [mascot] 4": the lost mouse stands in for the 0. The digits
+   take the mascot's violet so the trio reads as one piece (no glow/flicker). */
+.nf-num {
+  margin: 0 0 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.04em;
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(3.75rem, 13vw, 5.5rem);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  color: var(--violet-light);
+}
+
+/* The mascot sized to the digit height so it reads as the 0. */
+.nf-mascot {
+  width: 0.86em;
+  height: 0.86em;
+  opacity: 0.85;
+  flex-shrink: 0;
+}
+
+.nf-title {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(1.4rem, 4vw, 1.9rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.nf-body {
+  margin-top: 12px;
+  font-size: 15.5px;
+  line-height: 1.6;
+  color: var(--ink-2);
+  max-width: 42ch;
+  text-wrap: pretty;
+}
+
+.nf-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 28px;
+}
+.nf-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  height: 46px;
+  padding: 0 22px;
+  border-radius: var(--r-pill, 999px);
+  font-family: var(--body);
+  font-size: 15px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  transition:
+    transform 0.2s var(--ease-out, ease),
+    background 0.2s var(--ease-out, ease),
+    border-color 0.2s var(--ease-out, ease),
+    box-shadow 0.2s var(--ease-out, ease);
+}
+.nf-btn-ic { width: 18px; height: 18px; }
+.nf-btn-primary {
+  background: var(--violet);
+  color: #fff;
+}
+.nf-btn-primary:hover {
+  background: var(--violet-light);
+  color: var(--violet-deep);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px -10px rgba(110, 84, 181, 0.55);
+}
+.nf-btn-ghost {
+  background: rgba(24, 20, 47, 0.55);
+  color: var(--ink);
+  border-color: var(--line);
+}
+.nf-btn-ghost:hover {
+  background: var(--surface-2);
+  border-color: var(--violet-light);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 480px) {
+  .nf-actions { width: 100%; flex-direction: column; }
+  .nf-btn { width: 100%; justify-content: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nf-btn:hover { transform: none; }
+}

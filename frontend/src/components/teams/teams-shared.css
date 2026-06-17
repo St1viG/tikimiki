@@ -1,0 +1,11 @@
+/* Shared Teams component styles
+ * Imported by the shared components under src/components/teams/. These rules
+ * were previously duplicated inline in teams.css / find.css; centralizing them
+ * here keeps the extracted <AvatarStack>, <PixelMedal>, <OpenTeamCard>,
+ * <SoloPlayerCard>, <InviteCard> and <TeamLeaderboardRow> visually identical
+ * on both /teams and /teams/find. (Page-level layout/grid rules stay in the
+ * co-located teams.css / find.css.)
+ * */
+
+/* Pixel medal — fills sourced from the --medal-* tokens (globals.css). */
+.px-medal{ image-rendering:pixelated; vertical-align:middle; }

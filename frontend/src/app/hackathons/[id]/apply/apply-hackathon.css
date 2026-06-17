@@ -1,0 +1,134 @@
+/* Apply to a hackathon — full page (design-system tokens) */
+
+.ap-page{ padding-bottom:48px; }
+.ap-head{ display:flex; align-items:center; gap:18px; flex-wrap:wrap; }
+
+/* Hackathon hero card */
+.ap-hero{
+  border-radius:var(--r); background:var(--surface); border:1px solid var(--line);
+  overflow:hidden; box-shadow:var(--shadow-sm); margin-bottom:22px;
+}
+.ap-hero-banner{ position:relative; height:148px; overflow:hidden; background:var(--grad-banner); }
+.ap-hero-banner img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.ap-hero-dim{ position:absolute; inset:0; background:linear-gradient(180deg, rgba(6,6,12,.1) 0%, rgba(6,6,12,.6) 100%); }
+.ap-hero-body{ padding:18px 20px 20px; }
+
+.ap-org{ display:flex; align-items:center; gap:9px; font-size:13.5px; color:var(--muted); margin-bottom:10px; }
+.ap-org-name strong{ color:var(--ink-2); font-weight:650; }
+.ap-org-av{
+  width:30px; height:30px; border-radius:10px; flex-shrink:0; display:grid; place-items:center;
+  font-family:var(--display); font-weight:800; font-size:11px;
+  background:var(--grad-plate); color:var(--lemon); border:1px solid var(--line);
+}
+.hk-verify{ display:inline-grid; place-items:center; color:var(--lemon); }
+.hk-verify .ic{ width:15px; height:15px; }
+
+.ap-hero-title{
+  font-family:var(--display); font-weight:800; font-size:clamp(22px,1.3rem + 1.4vw,30px);
+  letter-spacing:-.03em; line-height:1.05; color:var(--ink);
+}
+.ap-hero-tags{ display:flex; flex-wrap:wrap; gap:7px; margin:11px 0 14px; }
+.ap-hero-meta{ display:flex; flex-wrap:wrap; gap:8px 18px; }
+.ap-meta-item{ display:inline-flex; align-items:center; gap:7px; font-size:13px; color:var(--ink-2); }
+.ap-meta-item .ic{ width:15px; height:15px; color:var(--muted); }
+.ap-meta-prize{ color:var(--lemon-vivid); font-weight:700; }
+.ap-meta-prize .ic{ color:var(--lemon); }
+
+/* Form */
+.ap-form{ display:flex; flex-direction:column; gap:22px; max-width:680px; }
+.ap-section{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+  padding:20px 22px; box-shadow:var(--shadow-sm);
+}
+.ap-section-title{
+  font-family:var(--display); font-weight:700; font-size:16px; letter-spacing:-.01em;
+  color:var(--ink); margin-bottom:16px;
+}
+
+/* Team selection */
+.ap-team-options{ display:grid; gap:10px; }
+.ap-team-opt{
+  display:flex; align-items:center; gap:12px; padding:13px 15px; cursor:pointer;
+  border:1px solid var(--line); border-radius:12px;
+  background:color-mix(in srgb, var(--surface-2) 45%, transparent);
+  transition:border-color var(--dur-1) var(--ease-out), background var(--dur-1) var(--ease-out);
+}
+.ap-team-opt:hover{ border-color:var(--violet-light); }
+.ap-team-opt-on{
+  border-color:color-mix(in srgb, var(--lemon) 42%, transparent);
+  background:color-mix(in srgb, var(--lemon) 8%, transparent);
+}
+.ap-team-opt input{ accent-color:var(--lemon); flex-shrink:0; }
+.ap-team-body{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+.ap-team-name{ font-size:14.5px; font-weight:650; color:var(--ink); }
+.ap-team-sub{ font-size:12.5px; color:var(--muted); }
+
+/* Questions */
+.ap-q-list{ display:grid; gap:18px; }
+.ap-field{ display:flex; flex-direction:column; gap:8px; }
+.ap-q-label{ font-size:14px; font-weight:650; color:var(--ink); line-height:1.4; }
+.ap-q-req{ font-weight:400; font-size:12px; color:var(--muted); }
+.ap-q-loading{ display:flex; flex-direction:column; }
+
+.ap-input, .ap-textarea{
+  width:100%; font-family:var(--body); font-size:14.5px; color:var(--ink);
+  background:color-mix(in srgb, var(--surface-2) 60%, transparent);
+  border:1px solid var(--line); border-radius:11px; padding:11px 14px; outline:none;
+  transition:border-color var(--dur-2) var(--ease-out), background var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out);
+}
+.ap-textarea{ min-height:96px; resize:vertical; line-height:1.5; }
+.ap-input:focus, .ap-textarea:focus{
+  border-color:var(--violet-light);
+  background:color-mix(in srgb, var(--surface-2) 95%, transparent);
+  box-shadow:0 0 0 3px rgba(180,155,255,.12);
+}
+.ap-choices{ display:grid; gap:8px; }
+.ap-choice{
+  display:flex; align-items:center; gap:10px; padding:11px 13px; cursor:pointer;
+  border:1px solid var(--line); border-radius:10px; font-size:14px; color:var(--ink);
+  transition:border-color var(--dur-1) var(--ease-out), background var(--dur-1) var(--ease-out);
+}
+.ap-choice:hover{ border-color:var(--violet-light); background:color-mix(in srgb, var(--surface-2) 50%, transparent); }
+.ap-choice input{ accent-color:var(--violet); flex-shrink:0; }
+
+.ap-note{ font-size:14px; color:var(--muted); line-height:1.5; }
+.ap-err{
+  font-size:13.5px; color:var(--red); background:rgba(251,111,111,.08);
+  border:1px solid rgba(251,111,111,.3); border-radius:11px; padding:11px 14px; margin:0;
+}
+
+.ap-foot{ display:flex; justify-content:flex-end; gap:12px; flex-wrap:wrap; }
+.ap-foot .ic{ width:17px; height:17px; }
+
+/* State cards (anonymous / applied / success / not found) */
+.ap-state{
+  display:flex; flex-direction:column; align-items:center; text-align:center; gap:13px;
+  max-width:460px; margin:0 auto; padding:32px 28px;
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+  box-shadow:var(--shadow-sm);
+}
+.ap-state-icon{
+  width:52px; height:52px; border-radius:15px; display:grid; place-items:center;
+  color:var(--lemon); background:var(--grad-plate); border:1px solid var(--line);
+}
+.ap-state-icon .ic{ width:24px; height:24px; }
+.ap-state-icon-ok{ color:var(--green); }
+.ap-state-title{ font-family:var(--display); font-weight:800; font-size:20px; letter-spacing:-.02em; color:var(--ink); }
+.ap-state-body{ font-size:14px; line-height:1.6; color:var(--muted); }
+
+/* Applied status row inside the applied state */
+.ap-applied-row{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:center; }
+.ap-applied-meta{ font-size:13.5px; color:var(--muted); }
+.ap-applied-meta strong{ color:var(--ink-2); font-weight:650; }
+
+/* Status pills (self-contained — hackathons.css isn't loaded on this route) */
+.hk-apply-status{ display:inline-flex; align-items:center; gap:6px; font-size:12.5px; font-weight:700; padding:6px 12px; border-radius:999px; white-space:nowrap; }
+.hk-apply-status .ic{ width:13px; height:13px; }
+.hk-apply-pending{ color:var(--lemon); background:color-mix(in srgb, var(--lemon) 10%, transparent); border:1px solid color-mix(in srgb, var(--lemon) 30%, transparent); }
+.hk-apply-approved{ color:var(--green); background:color-mix(in srgb, var(--green) 12%, transparent); border:1px solid color-mix(in srgb, var(--green) 35%, transparent); }
+.hk-apply-rejected{ color:var(--red); background:color-mix(in srgb, var(--red) 12%, transparent); border:1px solid color-mix(in srgb, var(--red) 35%, transparent); }
+.hk-apply-waitlisted{ color:var(--violet-light); background:color-mix(in srgb, var(--violet-light) 14%, transparent); border:1px solid color-mix(in srgb, var(--violet-light) 35%, transparent); }
+
+@media (prefers-reduced-motion:reduce){
+  .ap-team-opt, .ap-input, .ap-textarea, .ap-choice{ transition:none; }
+}

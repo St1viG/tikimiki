@@ -1,0 +1,128 @@
+/* v3.0 page polish (additive; cohor.css untouched) */
+/* A · DATA LAYER — page-specific numbers not handled by shared classes.
+   (Shared classes already mono votes/stats/badges/notif/kanban-count.) */
+.bounty-prize-pill,
+.rez-podium-pts,
+.rez-spon-row-prize,
+.rez-badge,
+.msg-time,
+.dm-row-time,
+.voting-countdown-pill #voting-opens-in {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* B · SIGNATURE MICRO-INTERACTION — message hover gets an electric-violet
+   accent bar that slides in from the left, layered over the existing
+   background hover from cohor.css (purely additive, no override). */
+.msg {
+  position: relative;
+}
+.msg::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--violet-light);
+  transform: scaleY(0);
+  transform-origin: center;
+  opacity: 0;
+  transition: transform var(--dur-2, .18s) var(--ease-out, ease),
+              opacity var(--dur-2, .18s) var(--ease-out, ease);
+  pointer-events: none;
+}
+.msg:hover::before {
+  transform: scaleY(1);
+  opacity: .9;
+}
+/* echo the lift on the avatar so the hover reads as one unit */
+.msg .msg-av {
+  transition: transform var(--dur-2, .18s) var(--ease-out, ease),
+              box-shadow var(--dur-2, .18s) var(--ease-out, ease);
+}
+.msg:hover .msg-av {
+  transform: translateY(-1px);
+}
+
+/* Active-channel sharpening: a lemon rail on the selected channel so the
+   GO/NOW accent reads instantly (additive to cohor's ch-active styling). */
+.ch-item {
+  position: relative;
+}
+.ch-item.ch-active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  border-radius: 0 3px 3px 0;
+  background: var(--lemon);
+}
+
+/* C · ONE GRID-BREAKING MOMENT — oversized tilted display numeral in the
+   channel intro hash, the page's biggest piece of type. */
+.ch-intro-hash {
+  transform: rotate(-4deg);
+}
+
+/* D · TYPOGRAPHY — confident display hierarchy on the prominent headings
+   (channel name, intro title, hackathon card title). */
+.chat-topbar-name,
+.ch-intro-title,
+.dm-conv-intro-name,
+.hack-info-name {
+  font-family: var(--display);
+  letter-spacing: -0.04em;
+}
+.hack-info-name {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+/* E · MOBILE — keep the tilted numeral and prize pills from overflowing
+   on very narrow screens. */
+@media (max-width: 480px) {
+  .ch-intro-hash { transform: rotate(-3deg); }
+  .bounty-card-header { flex-wrap: wrap; gap: 6px; }
+  .bounty-prize-pill { white-space: normal; }
+}
+
+/* F · NO-ACCESS EMPTY STATE — shown in the server chat area when the user
+   belongs to zero hackathon servers (getServers() returned an empty list). */
+.ch-no-access {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 12px;
+  padding: 40px 28px;
+}
+.ch-no-access-icon {
+  font-family: var(--display);
+  font-size: 64px;
+  line-height: 1;
+  color: var(--violet-light);
+  opacity: 0.5;
+  transform: rotate(-4deg);
+}
+.ch-no-access-title {
+  font-family: var(--display);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+}
+.ch-no-access-sub {
+  max-width: 420px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--muted);
+}

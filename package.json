@@ -1,0 +1,25 @@
+{
+  "name": "tikimiki",
+  "version": "0.1.0",
+  "private": true,
+  "description": "tikimiki — all-in-one hackathon platform (monorepo)",
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter ./frontend --filter ./backend dev",
+    "dev:web": "pnpm --filter ./frontend dev",
+    "dev:api": "pnpm --filter ./backend start:dev",
+    "start:all": "pnpm db:up && pnpm dev",
+    "db:setup": "pnpm db:up && pnpm db:migrate && pnpm db:seed",
+    "db:seed": "pnpm --filter ./backend db:seed",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test",
+    "db:up": "docker compose up -d postgres redis",
+    "db:down": "docker compose down",
+    "db:generate": "pnpm --filter ./backend db:generate",
+    "db:migrate": "pnpm --filter ./backend db:migrate"
+  }
+}

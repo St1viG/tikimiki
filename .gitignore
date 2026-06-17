@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Env files (never commit secrets — see .env.example)
+.env
+.env.local
+.env.*.local
+
+# Build output
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+next-env.d.ts
+
+# Logs
+*.log
+.devserver.log
+
+# Test / coverage
+coverage/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# User-uploaded media (runtime data, not source)
+backend/uploads/*
+!backend/uploads/.gitkeep
