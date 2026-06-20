@@ -13,22 +13,28 @@ import { ZodValidationPipe } from "../common/zod.pipe";
 import { CurrentUser } from "../auth/current-user.decorator";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import {
+  addChannelMemberSchema,
   addMembersSchema,
   createChannelSchema,
   createConversationSchema,
   createGroupSchema,
   editMessageSchema,
+  muteUserSchema,
+  pinMessageSchema,
   sendChannelMessageSchema,
   sendDirectMessageSchema,
   toggleReactionSchema,
   updateChannelSchema,
   updateConversationSchema,
   updateServerSchema,
+  type AddChannelMemberInput,
   type AddMembersInput,
   type CreateChannelInput,
   type CreateConversationInput,
   type CreateGroupInput,
   type EditMessageInput,
+  type MuteUserInput,
+  type PinMessageInput,
   type SendChannelMessageInput,
   type SendDirectMessageInput,
   type ToggleReactionInput,
@@ -93,6 +99,34 @@ export class ChatController {
     return this.chat.createChannel(serverId, userId, body);
   }
 
+  /* ── Server mutes ───────────────────────────────────────── */
+
+  @Get("servers/:serverId/mutes")
+  listServerMutes(
+    @CurrentUser() userId: string,
+    @Param("serverId", new ParseUUIDPipe()) serverId: string,
+  ) {
+    return this.chat.listServerMutes(serverId, userId);
+  }
+
+  @Post("servers/:serverId/mutes")
+  muteUser(
+    @CurrentUser() userId: string,
+    @Param("serverId", new ParseUUIDPipe()) serverId: string,
+    @Body(new ZodValidationPipe(muteUserSchema)) body: MuteUserInput,
+  ) {
+    return this.chat.muteUser(serverId, userId, body);
+  }
+
+  @Delete("servers/:serverId/mutes/:targetUserId")
+  unmuteUser(
+    @CurrentUser() userId: string,
+    @Param("serverId", new ParseUUIDPipe()) serverId: string,
+    @Param("targetUserId", new ParseUUIDPipe()) targetUserId: string,
+  ) {
+    return this.chat.unmuteUser(serverId, userId, targetUserId);
+  }
+
   /* ── Channels ───────────────────────────────────────────── */
 
   @Patch("channels/:channelId")
@@ -136,6 +170,63 @@ export class ChatController {
       body.replyToId,
       body.attachments,
     );
+  }
+
+  /* ── Pinned messages ────────────────────────────────────── */
+
+  @Get("channels/:channelId/pins")
+  listChannelPins(
+    @CurrentUser() userId: string,
+    @Param("channelId", new ParseUUIDPipe()) channelId: string,
+  ) {
+    return this.chat.listChannelPins(channelId, userId);
+  }
+
+  @Post("channels/:channelId/pins")
+  pinMessage(
+    @CurrentUser() userId: string,
+    @Param("channelId", new ParseUUIDPipe()) channelId: string,
+    @Body(new ZodValidationPipe(pinMessageSchema)) body: PinMessageInput,
+  ) {
+    return this.chat.pinMessage(channelId, body.messageId, userId);
+  }
+
+  @Delete("channels/:channelId/pins/:messageId")
+  unpinMessage(
+    @CurrentUser() userId: string,
+    @Param("channelId", new ParseUUIDPipe()) channelId: string,
+    @Param("messageId", new ParseUUIDPipe()) messageId: string,
+  ) {
+    return this.chat.unpinMessage(channelId, messageId, userId);
+  }
+
+  /* ── Channel members (private ACL) ──────────────────────── */
+
+  @Get("channels/:channelId/members")
+  listChannelMembers(
+    @CurrentUser() userId: string,
+    @Param("channelId", new ParseUUIDPipe()) channelId: string,
+  ) {
+    return this.chat.listChannelMembers(channelId, userId);
+  }
+
+  @Post("channels/:channelId/members")
+  addChannelMember(
+    @CurrentUser() userId: string,
+    @Param("channelId", new ParseUUIDPipe()) channelId: string,
+    @Body(new ZodValidationPipe(addChannelMemberSchema))
+    body: AddChannelMemberInput,
+  ) {
+    return this.chat.addChannelMember(channelId, userId, body.userId);
+  }
+
+  @Delete("channels/:channelId/members/:targetUserId")
+  removeChannelMember(
+    @CurrentUser() userId: string,
+    @Param("channelId", new ParseUUIDPipe()) channelId: string,
+    @Param("targetUserId", new ParseUUIDPipe()) targetUserId: string,
+  ) {
+    return this.chat.removeChannelMember(channelId, userId, targetUserId);
   }
 
   /* ── Reactions ──────────────────────────────────────────── */

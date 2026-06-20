@@ -5,7 +5,7 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { and, asc, eq, isNull, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
 import type { HackathonSummary } from "@tikimiki/types";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import {
@@ -14,12 +14,22 @@ import {
   hackathonPrizes,
   hackathons,
   organizations,
+  permissions,
+  serverRolePermissions,
+  serverRoles,
   servers,
+  teams,
+  userRoles,
+  users,
 } from "../db/schema";
 import { AuthzService } from "../common/authz.service";
+import { NotificationsService } from "../notifications/notifications.service";
 import type {
+  AddModeratorInput,
   CreateHackathonInput,
   CreatePrizeInput,
+  ModeratorDto,
+  TeamOverviewDto,
   UpdateHackathonInput,
   UpdatePrizeInput,
   UpdateStatusInput,
@@ -110,6 +120,7 @@ export class HackathonsService {
   constructor(
     @Inject(DRIZZLE) private readonly db: DrizzleDB,
     private readonly authz: AuthzService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   async list(): Promise<HackathonSummary[]> {
@@ -578,5 +589,267 @@ export class HackathonsService {
       .where(eq(hackathonPrizes.prizeId, prizeId));
 
     return { success: true };
+  }
+
+  /* ── Moderators ──────────────────────────────────────────── */
+
+  async listModerators(hackathonId: string): Promise<ModeratorDto[]> {
+    const [server] = await this.db
+      .select({ serverId: servers.serverId })
+      .from(servers)
+      .where(eq(servers.hackathonId, hackathonId))
+      .limit(1);
+    if (!server) return [];
+
+    const [role] = await this.db
+      .select({ serverRoleId: serverRoles.serverRoleId })
+      .from(serverRoles)
+      .where(
+        and(
+          eq(serverRoles.serverId, server.serverId),
+          eq(serverRoles.name, "Moderator"),
+        ),
+      )
+      .limit(1);
+    if (!role) return [];
+
+    const rows = await this.db
+      .select({
+        userId: users.userId,
+        username: users.username,
+        displayName: users.displayName,
+        avatarUrl: users.avatarUrl,
+        assignedAt: userRoles.assignedAt,
+      })
+      .from(userRoles)
+      .innerJoin(users, eq(users.userId, userRoles.userId))
+      .where(eq(userRoles.serverRoleId, role.serverRoleId));
+
+    return rows.map((r) => ({
+      userId: r.userId,
+      username: r.username,
+      displayName: r.displayName,
+      avatarUrl: r.avatarUrl,
+      assignedAt: r.assignedAt.toISOString(),
+    }));
+  }
+
+  async addModerator(
+    hackathonId: string,
+    callerId: string,
+    input: AddModeratorInput,
+  ): Promise<ModeratorDto[]> {
+    await this.authz.assertHackathonOwnerOrAdmin(hackathonId, callerId);
+
+    const [server] = await this.db
+      .select({ serverId: servers.serverId })
+      .from(servers)
+      .where(eq(servers.hackathonId, hackathonId))
+      .limit(1);
+    if (!server) throw new NotFoundException("Hackathon server not found");
+
+    const [targetUser] = await this.db
+      .select({ userId: users.userId })
+      .from(users)
+      .where(eq(users.userId, input.userId))
+      .limit(1);
+    if (!targetUser) throw new NotFoundException("User not found");
+
+    let [role] = await this.db
+      .select({ serverRoleId: serverRoles.serverRoleId })
+      .from(serverRoles)
+      .where(
+        and(
+          eq(serverRoles.serverId, server.serverId),
+          eq(serverRoles.name, "Moderator"),
+        ),
+      )
+      .limit(1);
+
+    if (!role) {
+      [role] = await this.db
+        .insert(serverRoles)
+        .values({ serverId: server.serverId, name: "Moderator" })
+        .returning({ serverRoleId: serverRoles.serverRoleId });
+
+      const permRows = await this.db
+        .select({ permissionId: permissions.permissionId })
+        .from(permissions)
+        .where(
+          inArray(permissions.name, [
+            "manage_channels",
+            "manage_messages",
+            "kick_members",
+          ]),
+        );
+
+      if (permRows.length > 0) {
+        await this.db
+          .insert(serverRolePermissions)
+          .values(
+            permRows.map((p) => ({
+              serverRoleId: role.serverRoleId,
+              permissionId: p.permissionId,
+            })),
+          )
+          .onConflictDoNothing();
+      }
+    }
+
+    await this.db
+      .insert(userRoles)
+      .values({
+        serverRoleId: role.serverRoleId,
+        userId: input.userId,
+        assignedBy: callerId,
+      })
+      .onConflictDoNothing();
+
+    const [hk] = await this.db
+      .select({ title: hackathons.title })
+      .from(hackathons)
+      .where(eq(hackathons.hackathonId, hackathonId))
+      .limit(1);
+
+    await this.notifications.create({
+      userId: input.userId,
+      type: "position_assigned",
+      title: "Dodeljena vam je uloga moderatora",
+      body: `Postali ste moderator hakatona „${hk?.title ?? ""}".`,
+      entityType: "hackathon",
+      entityId: hackathonId,
+    });
+
+    return this.listModerators(hackathonId);
+  }
+
+  async removeModerator(
+    hackathonId: string,
+    callerId: string,
+    targetUserId: string,
+  ): Promise<{ success: true }> {
+    await this.authz.assertHackathonOwnerOrAdmin(hackathonId, callerId);
+
+    const [server] = await this.db
+      .select({ serverId: servers.serverId })
+      .from(servers)
+      .where(eq(servers.hackathonId, hackathonId))
+      .limit(1);
+    if (!server) throw new NotFoundException("Hackathon server not found");
+
+    const [role] = await this.db
+      .select({ serverRoleId: serverRoles.serverRoleId })
+      .from(serverRoles)
+      .where(
+        and(
+          eq(serverRoles.serverId, server.serverId),
+          eq(serverRoles.name, "Moderator"),
+        ),
+      )
+      .limit(1);
+    if (!role) throw new NotFoundException("No moderators assigned yet");
+
+    const deleted = await this.db
+      .delete(userRoles)
+      .where(
+        and(
+          eq(userRoles.serverRoleId, role.serverRoleId),
+          eq(userRoles.userId, targetUserId),
+        ),
+      )
+      .returning({ userId: userRoles.userId });
+
+    if (deleted.length === 0) throw new NotFoundException("User is not a moderator");
+
+    return { success: true };
+  }
+
+  /* ── Calendar export ─────────────────────────────────────── */
+
+  async getCalendar(hackathonId: string): Promise<string> {
+    const [row] = await this.db
+      .select({
+        hackathonId: hackathons.hackathonId,
+        title: hackathons.title,
+        description: hackathons.description,
+        startsAt: hackathons.startsAt,
+        endsAt: hackathons.endsAt,
+        location: hackathons.location,
+      })
+      .from(hackathons)
+      .where(and(eq(hackathons.hackathonId, hackathonId), isNull(hackathons.deletedAt)))
+      .limit(1);
+    if (!row) throw new NotFoundException("Hackathon not found");
+
+    const fmt = (d: Date) =>
+      d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+
+    const fold = (line: string): string => {
+      const parts: string[] = [];
+      while (line.length > 75) {
+        parts.push(line.slice(0, 75));
+        line = " " + line.slice(75);
+      }
+      parts.push(line);
+      return parts.join("\r\n");
+    };
+
+    const esc = (s: string) =>
+      s.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
+
+    const lines = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//tikimiki//Hackathon Calendar//EN",
+      "CALSCALE:GREGORIAN",
+      "BEGIN:VEVENT",
+      `UID:${row.hackathonId}@tikimiki`,
+      `DTSTART:${fmt(row.startsAt)}`,
+      `DTEND:${fmt(row.endsAt)}`,
+      `SUMMARY:${esc(row.title)}`,
+      `DESCRIPTION:${esc(row.description)}`,
+      ...(row.location ? [`LOCATION:${esc(row.location)}`] : []),
+      "END:VEVENT",
+      "END:VCALENDAR",
+    ];
+
+    return lines.map(fold).join("\r\n") + "\r\n";
+  }
+
+  /* ── Teams overview ──────────────────────────────────────── */
+
+  async teamsOverview(
+    hackathonId: string,
+    userId: string,
+  ): Promise<TeamOverviewDto[]> {
+    await this.authz.assertHackathonOwnerOrAdmin(hackathonId, userId);
+
+    const rows = await this.db
+      .select({
+        teamId: teams.teamId,
+        name: teams.name,
+        memberCount: sql<number>`(
+          select count(*)::int from team_members tm
+          where tm.team_id = ${teams.teamId}
+            and tm.deleted_at is null
+            and tm.left_at is null
+        )`,
+        projectStatus: sql<string | null>`(
+          select p.status from projects p
+          where p.team_id = ${teams.teamId}
+            and p.deleted_at is null
+          limit 1
+        )`,
+      })
+      .from(teams)
+      .where(and(eq(teams.hackathonId, hackathonId), isNull(teams.deletedAt)))
+      .orderBy(asc(teams.name));
+
+    return rows.map((r) => ({
+      teamId: r.teamId,
+      name: r.name,
+      memberCount: Number(r.memberCount),
+      projectStatus: r.projectStatus ?? null,
+    }));
   }
 }

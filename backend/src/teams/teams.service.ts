@@ -10,9 +10,12 @@ import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { activeTeamMember } from "../common/team.predicates";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import {
+  channelGroups,
+  channels,
   hackathons,
   memberSkills,
   members,
+  servers,
   skills,
   teamInvitations,
   teamJoinRequests,
@@ -436,7 +439,69 @@ export class TeamsService {
       return team.teamId;
     });
 
+    await this.createTeamChannel(teamId, input.hackathonId, input.name);
+
     return this.buildTeamDto(teamId);
+  }
+
+  /**
+   * Best-effort: creates a `team` channel in the hackathon server's "TIMOVI"
+   * group. Silently skips if the server or group doesn't exist; never throws.
+   */
+  private async createTeamChannel(
+    teamId: string,
+    hackathonId: string,
+    teamName: string,
+  ): Promise<void> {
+    try {
+      const [server] = await this.db
+        .select({ serverId: servers.serverId })
+        .from(servers)
+        .where(eq(servers.hackathonId, hackathonId))
+        .limit(1);
+      if (!server) return;
+
+      const groupRows = await this.db
+        .select({ groupId: channelGroups.groupId, name: channelGroups.name })
+        .from(channelGroups)
+        .where(eq(channelGroups.serverId, server.serverId))
+        .orderBy(asc(channelGroups.position));
+      if (groupRows.length === 0) return;
+
+      const targetGroup =
+        groupRows.find((g) => g.name === "TIMOVI") ?? groupRows[groupRows.length - 1];
+
+      const [{ maxPos }] = await this.db
+        .select({ maxPos: sql<number>`coalesce(max(${channels.position}), -1)` })
+        .from(channels)
+        .where(
+          and(eq(channels.groupId, targetGroup.groupId), isNull(channels.deletedAt)),
+        );
+
+      const position = Number(maxPos) + 1;
+
+      try {
+        await this.db.insert(channels).values({
+          groupId: targetGroup.groupId,
+          type: "team",
+          name: teamName.slice(0, 100),
+          teamId,
+          position,
+        });
+      } catch (err) {
+        if (!isUniqueViolation(err)) throw err;
+        // Name conflict — retry with short teamId suffix
+        await this.db.insert(channels).values({
+          groupId: targetGroup.groupId,
+          type: "team",
+          name: `${teamName.slice(0, 93)}-${teamId.slice(0, 4)}`,
+          teamId,
+          position,
+        });
+      }
+    } catch {
+      // Non-critical side effect — do not fail team creation
+    }
   }
 
   /** POST /teams/:teamId/join — join an open team as a member. */
@@ -887,4 +952,16 @@ export class TeamsService {
       createdAt: row.createdAt.toISOString(),
     };
   }
+}
+
+function isUniqueViolation(err: unknown): boolean {
+  if (typeof err !== "object" || err === null) return false;
+  const code = (err as { code?: unknown }).code;
+  if (code === "23505") return true;
+  const cause = (err as { cause?: unknown }).cause;
+  return (
+    typeof cause === "object" &&
+    cause !== null &&
+    (cause as { code?: unknown }).code === "23505"
+  );
 }

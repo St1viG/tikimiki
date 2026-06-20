@@ -76,3 +76,23 @@ export const updatePrizeSchema = z
     message: "At least one field must be provided",
   });
 export type UpdatePrizeInput = z.infer<typeof updatePrizeSchema>;
+
+export const addModeratorSchema = z.object({
+  userId: z.string().uuid(),
+});
+export type AddModeratorInput = z.infer<typeof addModeratorSchema>;
+
+export interface ModeratorDto {
+  userId: string;
+  username: string;
+  displayName: string | null;
+  avatarUrl: string | null;
+  assignedAt: string;
+}
+
+export interface TeamOverviewDto {
+  teamId: string;
+  name: string;
+  memberCount: number;
+  projectStatus: string | null;
+}

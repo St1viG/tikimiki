@@ -103,3 +103,29 @@ export const updateChannelSchema = z.object({
   name: z.string().trim().min(1).max(100),
 });
 export type UpdateChannelInput = z.infer<typeof updateChannelSchema>;
+
+/* ── Pins ─────────────────────────────────────────────────────── */
+
+/** Body for pinning a message in a channel. */
+export const pinMessageSchema = z.object({
+  messageId: z.string().uuid(),
+});
+export type PinMessageInput = z.infer<typeof pinMessageSchema>;
+
+/* ── Mutes ────────────────────────────────────────────────────── */
+
+/** Body for muting a user on a server. */
+export const muteUserSchema = z.object({
+  userId: z.string().uuid(),
+  reason: z.string().trim().min(1).max(500).optional(),
+  expiresAt: z.string().datetime().optional(),
+});
+export type MuteUserInput = z.infer<typeof muteUserSchema>;
+
+/* ── Private channel members ──────────────────────────────────── */
+
+/** Body for adding a member to a private channel. */
+export const addChannelMemberSchema = z.object({
+  userId: z.string().uuid(),
+});
+export type AddChannelMemberInput = z.infer<typeof addChannelMemberSchema>;

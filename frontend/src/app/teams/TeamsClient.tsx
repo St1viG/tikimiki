@@ -392,6 +392,13 @@ export function TeamsClient() {
                           <Link className="btn btn-violet" href="/cohor">
                             <Icon name="server" /> {t("openServer")}
                           </Link>
+                          {/* "Kanban" → team task board. */}
+                          <Link
+                            className="btn btn-ghost"
+                            href={`/teams/${team.teamId}/kanban`}
+                          >
+                            <Icon name="list" /> Kanban
+                          </Link>
                           {/* "Project" → create / edit / submit the team's
                               hackathon deliverable (ProjectPopup). */}
                           <button

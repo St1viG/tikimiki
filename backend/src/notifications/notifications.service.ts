@@ -31,7 +31,8 @@ export type NotificationType =
   | "team_request_accepted"
   | "post_comment"
   | "post_reaction"
-  | "mention";
+  | "mention"
+  | "new_application";
 
 /** Possible values for a notification's `entityType` column (entity_type enum). */
 export type NotificationEntityType =

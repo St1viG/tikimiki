@@ -19,6 +19,23 @@ export const rejectApplicationSchema = z.object({
 });
 export type RejectApplicationInput = z.infer<typeof rejectApplicationSchema>;
 
+export const withdrawApplicationSchema = z.object({});
+export type WithdrawApplicationInput = z.infer<typeof withdrawApplicationSchema>;
+
+export const createTeamApplicationSchema = z.object({
+  hackathonId: z.string().uuid(),
+  teamId: z.string().uuid(),
+  answers: z
+    .array(
+      z.object({
+        questionId: z.string().uuid(),
+        answer: z.string().max(5000),
+      }),
+    )
+    .optional(),
+});
+export type CreateTeamApplicationInput = z.infer<typeof createTeamApplicationSchema>;
+
 export const questionType = z.enum([
   "short_text",
   "long_text",

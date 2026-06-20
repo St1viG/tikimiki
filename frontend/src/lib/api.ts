@@ -1087,6 +1087,12 @@ export const updateKanbanCard = (
 ) => PATCH<KanbanCard>(`/kanban/cards/${cardId}`, input);
 export const deleteKanbanCard = (cardId: string) =>
   DELETE<{ success: true }>(`/kanban/cards/${cardId}`);
+export const addKanbanColumn = (teamId: string, name: string) =>
+  POST<KanbanColumn>(`/teams/${teamId}/kanban/columns`, { name });
+export const updateKanbanColumn = (columnId: string, name: string) =>
+  PATCH<KanbanColumn>(`/kanban/columns/${columnId}`, { name });
+export const deleteKanbanColumn = (columnId: string) =>
+  DELETE<{ success: true; movedCards: number }>(`/kanban/columns/${columnId}`);
 
 // File uploads (avatar / banner)
 /** POST a single file as multipart/form-data; retries once on a stale token. */

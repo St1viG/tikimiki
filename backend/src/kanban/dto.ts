@@ -21,3 +21,28 @@ export const updateCardSchema = z
     message: "At least one field must be provided",
   });
 export type UpdateCardInput = z.infer<typeof updateCardSchema>;
+
+/** POST /teams/:teamId/kanban/columns */
+export const createColumnSchema = z.object({
+  name: z.string().trim().min(1).max(100),
+});
+export type CreateColumnInput = z.infer<typeof createColumnSchema>;
+
+/** PATCH /kanban/columns/:columnId */
+export const updateColumnSchema = z.object({
+  name: z.string().trim().min(1).max(100),
+});
+export type UpdateColumnInput = z.infer<typeof updateColumnSchema>;
+
+/** PUT /teams/:teamId/kanban/columns/order */
+export const reorderColumnsSchema = z.object({
+  columns: z
+    .array(
+      z.object({
+        columnId: z.string().uuid(),
+        position: z.number().min(0),
+      }),
+    )
+    .min(1),
+});
+export type ReorderColumnsInput = z.infer<typeof reorderColumnsSchema>;

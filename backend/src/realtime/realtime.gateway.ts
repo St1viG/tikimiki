@@ -194,6 +194,15 @@ export class RealtimeGateway
     this.server?.to(`channel:${channelId}`).emit("messageDeleted", payload);
   }
 
+  /**
+   * Generic channel-room broadcast for pin/ACL events
+   * (`messagePinned`, `messageUnpinned`, `channelMemberAdded`,
+   * `channelMemberRemoved`). Clients refetch on receipt.
+   */
+  emitChannelEvent(channelId: string, event: string, payload: unknown): void {
+    this.server?.to(`channel:${channelId}`).emit(event, payload);
+  }
+
   /** A direct message was soft-deleted — tell the conversation room. */
   emitConversationMessageDeleted(
     conversationId: string,
@@ -202,5 +211,26 @@ export class RealtimeGateway
     this.server
       ?.to(`conversation:${conversationId}`)
       .emit("messageDeleted", payload);
+  }
+
+  @SubscribeMessage("joinKanban")
+  joinKanban(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() boardId: string,
+  ): void {
+    if (typeof boardId === "string") void client.join(`board:${boardId}`);
+  }
+
+  @SubscribeMessage("leaveKanban")
+  leaveKanban(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() boardId: string,
+  ): void {
+    if (typeof boardId === "string") void client.leave(`board:${boardId}`);
+  }
+
+  /** Broadcast a kanban board change to everyone in `board:{boardId}` room. */
+  emitKanbanUpdate(boardId: string, payload: unknown): void {
+    this.server?.to(`board:${boardId}`).emit("kanban:update", payload);
   }
 }

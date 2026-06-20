@@ -14,7 +14,9 @@ import { NotificationsService } from "../notifications/notifications.service";
 import { RealtimeGateway } from "../realtime/realtime.gateway";
 import {
   channelGroups,
+  channelMembers,
   channelMessages,
+  channelPins,
   channels,
   conversationMembers,
   conversations,
@@ -25,6 +27,7 @@ import {
   messages,
   notifications,
   organizations,
+  serverMutes,
   serverRoles,
   servers,
   teamMembers,
@@ -154,6 +157,26 @@ export interface ConversationDto {
   unreadCount: number;
 }
 
+export interface ServerMuteDto {
+  muteId: string;
+  mutedUserId: string;
+  mutedUsername: string;
+  mutedDisplayName: string | null;
+  mutedBy: string | null;
+  mutedAt: string;
+  expiresAt: string | null;
+  reason: string | null;
+}
+
+export interface ChannelMemberDto {
+  userId: string;
+  username: string;
+  displayName: string | null;
+  avatarUrl: string | null;
+  addedAt: string;
+  addedBy: string | null;
+}
+
 /* ── Row helpers ──────────────────────────────────────────── */
 
 interface ChannelMessageRow {
@@ -263,19 +286,56 @@ export class ChatService {
     }
   }
 
-  /** Resolve a channel's server and assert the user is a member of it. */
-  private async assertChannelMember(
+  /**
+   * Assert the user can access a channel.
+   * - Channel must exist and not be deleted.
+   * - User must be a server member.
+   * - For `private` channels: user must be in `channel_members`, or hold
+   *   `manage_channels` (moderators/organizers always have access).
+   *
+   * Returns `{ serverId, type }` so callers avoid a second channel query.
+   */
+  private async assertChannelAccess(
     channelId: string,
     userId: string,
-  ): Promise<void> {
+  ): Promise<{ serverId: string; type: string }> {
     const [row] = await this.db
-      .select({ serverId: channelGroups.serverId })
+      .select({
+        serverId: channelGroups.serverId,
+        type: channels.type,
+        deletedAt: channels.deletedAt,
+      })
       .from(channels)
       .innerJoin(channelGroups, eq(channelGroups.groupId, channels.groupId))
       .where(eq(channels.channelId, channelId))
       .limit(1);
-    if (!row) throw new NotFoundException("Channel not found");
+    if (!row || row.deletedAt) throw new NotFoundException("Channel not found");
+
     await this.assertServerMember(row.serverId, userId);
+
+    if (row.type === "private") {
+      const [membership] = await this.db
+        .select({ userId: channelMembers.userId })
+        .from(channelMembers)
+        .where(
+          and(
+            eq(channelMembers.channelId, channelId),
+            eq(channelMembers.userId, userId),
+          ),
+        )
+        .limit(1);
+      if (!membership) {
+        const perms = await this.authz.getServerPermissions(
+          row.serverId,
+          userId,
+        );
+        if (!perms.has("manage_channels")) {
+          throw new ForbiddenException("You are not a member of this channel");
+        }
+      }
+    }
+
+    return { serverId: row.serverId, type: row.type };
   }
 
   async listServers(userId: string): Promise<ServerDto[]> {
@@ -749,6 +809,312 @@ export class ChatService {
     return { success: true };
   }
 
+  /* ── Pinned messages ────────────────────────────────────────── */
+
+  async listChannelPins(
+    channelId: string,
+    userId: string,
+  ): Promise<MessageDto[]> {
+    await this.assertChannelAccess(channelId, userId);
+    const rows = await this.db
+      .select({
+        messageId: messages.messageId,
+        channelId: channelMessages.channelId,
+        senderId: messages.senderId,
+        senderUsername: users.username,
+        senderDisplayName: users.displayName,
+        senderAvatarUrl: users.avatarUrl,
+        content: messages.content,
+        sentAt: messages.sentAt,
+        editedAt: messages.editedAt,
+        replyToId: messages.replyToId,
+        reactionCount: sql<number>`(
+          select count(*)::int from message_reactions mr
+          where mr.message_id = ${messages.messageId}
+        )`,
+      })
+      .from(channelPins)
+      .innerJoin(messages, eq(channelPins.messageId, messages.messageId))
+      .innerJoin(channelMessages, eq(channelMessages.messageId, messages.messageId))
+      .innerJoin(users, eq(messages.senderId, users.userId))
+      .where(
+        and(eq(channelPins.channelId, channelId), isNull(messages.deletedAt)),
+      )
+      .orderBy(desc(channelPins.pinnedAt));
+    const ids = rows.map((r) => r.messageId);
+    const reactionsByMsg = await this.loadReactions(ids, userId);
+    const attachmentsByMsg = await this.loadAttachments(ids);
+    return rows.map((r) =>
+      this.toChannelMessageDto(
+        r,
+        reactionsByMsg.get(r.messageId) ?? [],
+        attachmentsByMsg.get(r.messageId) ?? [],
+      ),
+    );
+  }
+
+  async pinMessage(
+    channelId: string,
+    messageId: string,
+    userId: string,
+  ): Promise<{ success: true }> {
+    const serverId = await this.authz.serverIdForChannel(channelId);
+    await this.authz.assertServerPermission(serverId, userId, "manage_messages");
+
+    const [msg] = await this.db
+      .select({ messageId: channelMessages.messageId })
+      .from(channelMessages)
+      .innerJoin(messages, eq(messages.messageId, channelMessages.messageId))
+      .where(
+        and(
+          eq(channelMessages.channelId, channelId),
+          eq(channelMessages.messageId, messageId),
+          isNull(messages.deletedAt),
+        ),
+      )
+      .limit(1);
+    if (!msg) throw new NotFoundException("Message not found in this channel");
+
+    try {
+      await this.db
+        .insert(channelPins)
+        .values({ channelId, messageId, pinnedBy: userId });
+    } catch (err) {
+      if (isUniqueViolation(err))
+        throw new ConflictException("Message already pinned");
+      throw err;
+    }
+
+    this.realtime.emitChannelEvent(channelId, "messagePinned", {
+      channelId,
+      messageId,
+    });
+    return { success: true };
+  }
+
+  async unpinMessage(
+    channelId: string,
+    messageId: string,
+    userId: string,
+  ): Promise<{ success: true }> {
+    const serverId = await this.authz.serverIdForChannel(channelId);
+    await this.authz.assertServerPermission(serverId, userId, "manage_messages");
+
+    const result = await this.db
+      .delete(channelPins)
+      .where(
+        and(
+          eq(channelPins.channelId, channelId),
+          eq(channelPins.messageId, messageId),
+        ),
+      )
+      .returning({ messageId: channelPins.messageId });
+    if (result.length === 0) throw new NotFoundException("Pin not found");
+
+    this.realtime.emitChannelEvent(channelId, "messageUnpinned", {
+      channelId,
+      messageId,
+    });
+    return { success: true };
+  }
+
+  /* ── Server mutes ───────────────────────────────────────────── */
+
+  async listServerMutes(
+    serverId: string,
+    userId: string,
+  ): Promise<ServerMuteDto[]> {
+    await this.authz.assertServerPermission(serverId, userId, "manage_messages");
+    const rows = await this.db
+      .select({
+        muteId: serverMutes.muteId,
+        mutedUserId: serverMutes.mutedUserId,
+        mutedUsername: users.username,
+        mutedDisplayName: users.displayName,
+        mutedBy: serverMutes.mutedBy,
+        mutedAt: serverMutes.mutedAt,
+        expiresAt: serverMutes.expiresAt,
+        reason: serverMutes.reason,
+      })
+      .from(serverMutes)
+      .innerJoin(users, eq(users.userId, serverMutes.mutedUserId))
+      .where(eq(serverMutes.serverId, serverId))
+      .orderBy(desc(serverMutes.mutedAt));
+    return rows.map((r) => ({
+      muteId: r.muteId,
+      mutedUserId: r.mutedUserId,
+      mutedUsername: r.mutedUsername,
+      mutedDisplayName: r.mutedDisplayName,
+      mutedBy: r.mutedBy,
+      mutedAt: r.mutedAt.toISOString(),
+      expiresAt: r.expiresAt?.toISOString() ?? null,
+      reason: r.reason,
+    }));
+  }
+
+  async muteUser(
+    serverId: string,
+    callerId: string,
+    input: { userId: string; reason?: string; expiresAt?: string },
+  ): Promise<ServerMuteDto> {
+    await this.authz.assertServerPermission(
+      serverId,
+      callerId,
+      "manage_messages",
+    );
+    if (input.userId === callerId) {
+      throw new BadRequestException("Cannot mute yourself");
+    }
+
+    let mute;
+    try {
+      [mute] = await this.db
+        .insert(serverMutes)
+        .values({
+          serverId,
+          mutedUserId: input.userId,
+          mutedBy: callerId,
+          reason: input.reason ?? null,
+          expiresAt: input.expiresAt ? new Date(input.expiresAt) : null,
+        })
+        .returning();
+    } catch (err) {
+      if (isUniqueViolation(err))
+        throw new ConflictException("User is already muted on this server");
+      throw err;
+    }
+
+    const [mutedUser] = await this.db
+      .select({ username: users.username, displayName: users.displayName })
+      .from(users)
+      .where(eq(users.userId, input.userId))
+      .limit(1);
+
+    return {
+      muteId: mute.muteId,
+      mutedUserId: mute.mutedUserId,
+      mutedUsername: mutedUser?.username ?? "",
+      mutedDisplayName: mutedUser?.displayName ?? null,
+      mutedBy: mute.mutedBy,
+      mutedAt: mute.mutedAt.toISOString(),
+      expiresAt: mute.expiresAt?.toISOString() ?? null,
+      reason: mute.reason,
+    };
+  }
+
+  async unmuteUser(
+    serverId: string,
+    callerId: string,
+    targetUserId: string,
+  ): Promise<{ success: true }> {
+    await this.authz.assertServerPermission(
+      serverId,
+      callerId,
+      "manage_messages",
+    );
+    const result = await this.db
+      .delete(serverMutes)
+      .where(
+        and(
+          eq(serverMutes.serverId, serverId),
+          eq(serverMutes.mutedUserId, targetUserId),
+        ),
+      )
+      .returning({ muteId: serverMutes.muteId });
+    if (result.length === 0) throw new NotFoundException("Mute not found");
+    return { success: true };
+  }
+
+  /* ── Private channel members ────────────────────────────────── */
+
+  async listChannelMembers(
+    channelId: string,
+    userId: string,
+  ): Promise<ChannelMemberDto[]> {
+    const serverId = await this.authz.serverIdForChannel(channelId);
+    await this.authz.assertServerPermission(serverId, userId, "manage_channels");
+    const rows = await this.db
+      .select({
+        userId: channelMembers.userId,
+        username: users.username,
+        displayName: users.displayName,
+        avatarUrl: users.avatarUrl,
+        addedAt: channelMembers.addedAt,
+        addedBy: channelMembers.addedBy,
+      })
+      .from(channelMembers)
+      .innerJoin(users, eq(users.userId, channelMembers.userId))
+      .where(eq(channelMembers.channelId, channelId))
+      .orderBy(asc(channelMembers.addedAt));
+    return rows.map((r) => ({
+      userId: r.userId,
+      username: r.username,
+      displayName: r.displayName,
+      avatarUrl: r.avatarUrl,
+      addedAt: r.addedAt.toISOString(),
+      addedBy: r.addedBy,
+    }));
+  }
+
+  async addChannelMember(
+    channelId: string,
+    callerId: string,
+    targetUserId: string,
+  ): Promise<{ success: true }> {
+    const serverId = await this.authz.serverIdForChannel(channelId);
+    await this.authz.assertServerPermission(
+      serverId,
+      callerId,
+      "manage_channels",
+    );
+    if (!(await this.isServerMember(serverId, targetUserId))) {
+      throw new BadRequestException("Target user is not a member of this server");
+    }
+    try {
+      await this.db
+        .insert(channelMembers)
+        .values({ channelId, userId: targetUserId, addedBy: callerId });
+    } catch (err) {
+      if (isUniqueViolation(err))
+        throw new ConflictException("User is already a member of this channel");
+      throw err;
+    }
+    this.realtime.emitChannelEvent(channelId, "channelMemberAdded", {
+      channelId,
+      userId: targetUserId,
+    });
+    return { success: true };
+  }
+
+  async removeChannelMember(
+    channelId: string,
+    callerId: string,
+    targetUserId: string,
+  ): Promise<{ success: true }> {
+    const serverId = await this.authz.serverIdForChannel(channelId);
+    await this.authz.assertServerPermission(
+      serverId,
+      callerId,
+      "manage_channels",
+    );
+    const result = await this.db
+      .delete(channelMembers)
+      .where(
+        and(
+          eq(channelMembers.channelId, channelId),
+          eq(channelMembers.userId, targetUserId),
+        ),
+      )
+      .returning({ userId: channelMembers.userId });
+    if (result.length === 0)
+      throw new NotFoundException("User is not a member of this channel");
+    this.realtime.emitChannelEvent(channelId, "channelMemberRemoved", {
+      channelId,
+      userId: targetUserId,
+    });
+    return { success: true };
+  }
+
   /**
    * Soft-delete a message. The author may always delete their own; otherwise the
    * message must be a channel message and the caller needs `manage_messages` on
@@ -821,7 +1187,7 @@ export class ChatService {
     channelId: string,
     viewerId: string,
   ): Promise<MessageDto[]> {
-    await this.assertChannelMember(channelId, viewerId);
+    await this.assertChannelAccess(channelId, viewerId);
     const rows = await this.db
       .select({
         messageId: messages.messageId,
@@ -869,28 +1235,38 @@ export class ChatService {
     replyToId?: string,
     attachmentUrls: string[] = [],
   ): Promise<MessageDto> {
-    const [channel] = await this.db
-      .select({ channelId: channels.channelId, type: channels.type })
-      .from(channels)
-      .where(and(eq(channels.channelId, channelId), isNull(channels.deletedAt)))
-      .limit(1);
-    if (!channel) throw new NotFoundException("Channel not found");
-    await this.assertChannelMember(channelId, userId);
+    const { serverId, type } = await this.assertChannelAccess(channelId, userId);
 
     // `project` / `kanban` channels are app surfaces (submission form, board),
     // not text channels — they never accept messages.
-    if (channel.type === "project" || channel.type === "kanban") {
+    if (type === "project" || type === "kanban") {
       throw new BadRequestException("This channel does not accept messages");
     }
     // Announcement channels are post-restricted to members who can manage
     // messages (organizers/mods); everyone else can read but not post.
-    if (channel.type === "announcements") {
-      const serverId = await this.authz.serverIdForChannel(channelId);
-      await this.authz.assertServerPermission(
-        serverId,
-        userId,
-        "manage_messages",
-      );
+    if (type === "announcements") {
+      await this.authz.assertServerPermission(serverId, userId, "manage_messages");
+    }
+
+    // Mute check — auto-lift expired mutes.
+    const [mute] = await this.db
+      .select({ muteId: serverMutes.muteId, expiresAt: serverMutes.expiresAt })
+      .from(serverMutes)
+      .where(
+        and(
+          eq(serverMutes.serverId, serverId),
+          eq(serverMutes.mutedUserId, userId),
+        ),
+      )
+      .limit(1);
+    if (mute) {
+      if (mute.expiresAt && mute.expiresAt < new Date()) {
+        await this.db
+          .delete(serverMutes)
+          .where(eq(serverMutes.muteId, mute.muteId));
+      } else {
+        throw new ForbiddenException("You are muted on this server");
+      }
     }
 
     const message = await this.db.transaction(async (tx) => {

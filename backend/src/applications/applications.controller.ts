@@ -16,12 +16,16 @@ import { ApplicationsService } from "./applications.service";
 import {
   createApplicationSchema,
   createQuestionSchema,
+  createTeamApplicationSchema,
   rejectApplicationSchema,
   updateQuestionSchema,
+  withdrawApplicationSchema,
   type CreateApplicationInput,
   type CreateQuestionInput,
+  type CreateTeamApplicationInput,
   type RejectApplicationInput,
   type UpdateQuestionInput,
+  type WithdrawApplicationInput,
 } from "./dto";
 
 @Controller("applications")
@@ -36,6 +40,15 @@ export class ApplicationsController {
     body: CreateApplicationInput,
   ) {
     return this.svc.create(userId, body);
+  }
+
+  @Post("team")
+  createTeam(
+    @CurrentUser() userId: string,
+    @Body(new ZodValidationPipe(createTeamApplicationSchema))
+    body: CreateTeamApplicationInput,
+  ) {
+    return this.svc.createTeam(userId, body);
   }
 
   @Get("me")
@@ -100,6 +113,16 @@ export class ApplicationsController {
     @Param("id", new ParseUUIDPipe()) id: string,
   ) {
     return this.svc.getAnswers(id, userId);
+  }
+
+  @Patch(":id/withdraw")
+  withdraw(
+    @CurrentUser() userId: string,
+    @Param("id", new ParseUUIDPipe()) id: string,
+    @Body(new ZodValidationPipe(withdrawApplicationSchema))
+    body: WithdrawApplicationInput,
+  ) {
+    return this.svc.withdraw(id, userId, body);
   }
 
   @Patch(":id/approve")

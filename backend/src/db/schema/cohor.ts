@@ -286,3 +286,69 @@ export const messageReactions = pgTable(
     index("idx_message_reactions_message_id").on(t.messageId),
   ],
 );
+
+/* ── channel_pins ─────────────────────────────────────────── */
+export const channelPins = pgTable(
+  "channel_pins",
+  {
+    channelId: uuid("channel_id")
+      .notNull()
+      .references(() => channels.channelId, { onDelete: "cascade" }),
+    messageId: uuid("message_id")
+      .notNull()
+      .references(() => messages.messageId, { onDelete: "cascade" }),
+    pinnedBy: uuid("pinned_by").references(() => users.userId, {
+      onDelete: "set null",
+    }),
+    pinnedAt: timestamp("pinned_at", tz).notNull().defaultNow(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.channelId, t.messageId] }),
+    index("idx_channel_pins_channel_id").on(t.channelId),
+  ],
+);
+
+/* ── server_mutes ─────────────────────────────────────────── */
+export const serverMutes = pgTable(
+  "server_mutes",
+  {
+    muteId: uuid("mute_id").primaryKey().defaultRandom(),
+    serverId: uuid("server_id")
+      .notNull()
+      .references(() => servers.serverId, { onDelete: "cascade" }),
+    mutedUserId: uuid("muted_user_id")
+      .notNull()
+      .references(() => users.userId, { onDelete: "cascade" }),
+    mutedBy: uuid("muted_by").references(() => users.userId, {
+      onDelete: "set null",
+    }),
+    mutedAt: timestamp("muted_at", tz).notNull().defaultNow(),
+    expiresAt: timestamp("expires_at", tz),
+    reason: text("reason"),
+  },
+  (t) => [
+    uniqueIndex("uq_server_mutes_active").on(t.serverId, t.mutedUserId),
+    index("idx_server_mutes_server_id").on(t.serverId),
+  ],
+);
+
+/* ── channel_members (private channel ACL) ────────────────── */
+export const channelMembers = pgTable(
+  "channel_members",
+  {
+    channelId: uuid("channel_id")
+      .notNull()
+      .references(() => channels.channelId, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.userId, { onDelete: "cascade" }),
+    addedBy: uuid("added_by").references(() => users.userId, {
+      onDelete: "set null",
+    }),
+    addedAt: timestamp("added_at", tz).notNull().defaultNow(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.channelId, t.userId] }),
+    index("idx_channel_members_channel_id").on(t.channelId),
+  ],
+);

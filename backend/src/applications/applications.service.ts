@@ -16,17 +16,21 @@ import {
   questionAnswers,
   serverRoles,
   servers,
+  teamMembers,
   teams,
   userRoles,
   users,
 } from "../db/schema";
+import { activeTeamMember } from "../common/team.predicates";
 import { AuthzService } from "../common/authz.service";
 import { NotificationsService } from "../notifications/notifications.service";
 import type {
   CreateApplicationInput,
+  CreateTeamApplicationInput,
   CreateQuestionInput,
   RejectApplicationInput,
   UpdateQuestionInput,
+  WithdrawApplicationInput,
 } from "./dto";
 
 export type QuestionType =
@@ -117,14 +121,51 @@ export class ApplicationsService {
       throw new ForbiddenException("Only members can apply to hackathons");
     }
 
-    // Hackathon must exist.
+    // Hackathon must exist and be open for registration.
     const [hackathon] = await this.db
-      .select({ hackathonId: hackathons.hackathonId })
+      .select({
+        hackathonId: hackathons.hackathonId,
+        organizationId: hackathons.organizationId,
+        title: hackathons.title,
+        registrationDeadline: hackathons.registrationDeadline,
+        maxParticipants: hackathons.maxParticipants,
+        status: hackathons.status,
+      })
       .from(hackathons)
       .where(eq(hackathons.hackathonId, input.hackathonId))
       .limit(1);
     if (!hackathon) {
       throw new NotFoundException("Hackathon not found");
+    }
+
+    if (hackathon.status !== "upcoming") {
+      throw new BadRequestException(
+        "Registration is closed — hackathon is no longer upcoming",
+      );
+    }
+
+    if (new Date() > hackathon.registrationDeadline) {
+      throw new BadRequestException("Registration deadline has passed");
+    }
+
+    if (hackathon.maxParticipants !== null) {
+      const [{ approvedCount }] = await this.db
+        .select({
+          approvedCount: sql<number>`count(*)::int`,
+        })
+        .from(applications)
+        .where(
+          and(
+            eq(applications.hackathonId, input.hackathonId),
+            eq(applications.status, "approved"),
+            isNull(applications.deletedAt),
+          ),
+        );
+      if (Number(approvedCount) >= hackathon.maxParticipants) {
+        throw new BadRequestException(
+          "Hackathon is full — no more spots available",
+        );
+      }
     }
 
     // No active (non-deleted) application by this caller for this hackathon.
@@ -168,7 +209,152 @@ export class ApplicationsService {
       return created.applicationId;
     });
 
+    // Notify the organizer about the new application (best-effort).
+    this.notifications
+      .create({
+        userId: hackathon.organizationId,
+        type: "new_application",
+        title: "Nova prijava",
+        body: `Novi korisnik je aplicirao na vaš hakaton „${hackathon.title}".`,
+        entityType: "application",
+        entityId: applicationId,
+      })
+      .catch(() => undefined);
+
     return this.getOwnApplication(applicationId);
+  }
+
+  /* ── Team application ────────────────────────────────────── */
+
+  /**
+   * Creates individual applications for every active team member.
+   * Members who already have a non-deleted application for this hackathon are
+   * silently skipped. Returns the newly created ApplicationDtos.
+   */
+  async createTeam(
+    callerId: string,
+    input: CreateTeamApplicationInput,
+  ): Promise<ApplicationDto[]> {
+    // Caller must be a member.
+    const [member] = await this.db
+      .select({ userId: members.userId })
+      .from(members)
+      .where(eq(members.userId, callerId))
+      .limit(1);
+    if (!member) {
+      throw new ForbiddenException("Only members can apply to hackathons");
+    }
+
+    // Caller must be an active member of the team.
+    const [callerMembership] = await this.db
+      .select({ userId: teamMembers.userId })
+      .from(teamMembers)
+      .where(
+        and(
+          eq(teamMembers.teamId, input.teamId),
+          eq(teamMembers.userId, callerId),
+          activeTeamMember,
+        ),
+      )
+      .limit(1);
+    if (!callerMembership) {
+      throw new ForbiddenException("You are not an active member of this team");
+    }
+
+    // Validate hackathon.
+    const [hackathon] = await this.db
+      .select({
+        hackathonId: hackathons.hackathonId,
+        organizationId: hackathons.organizationId,
+        title: hackathons.title,
+        registrationDeadline: hackathons.registrationDeadline,
+        maxParticipants: hackathons.maxParticipants,
+        status: hackathons.status,
+      })
+      .from(hackathons)
+      .where(eq(hackathons.hackathonId, input.hackathonId))
+      .limit(1);
+    if (!hackathon) throw new NotFoundException("Hackathon not found");
+
+    if (hackathon.status !== "upcoming") {
+      throw new BadRequestException(
+        "Registration is closed — hackathon is no longer upcoming",
+      );
+    }
+    if (new Date() > hackathon.registrationDeadline) {
+      throw new BadRequestException("Registration deadline has passed");
+    }
+
+    // Fetch all active team members.
+    const teamMemberRows = await this.db
+      .select({ userId: teamMembers.userId })
+      .from(teamMembers)
+      .where(and(eq(teamMembers.teamId, input.teamId), activeTeamMember));
+
+    if (teamMemberRows.length === 0) {
+      throw new NotFoundException("Team has no active members");
+    }
+
+    const memberUserIds = teamMemberRows.map((r) => r.userId);
+
+    // Find members who already have an active application.
+    const existing = await this.db
+      .select({ userId: applications.userId })
+      .from(applications)
+      .where(
+        and(
+          eq(applications.hackathonId, input.hackathonId),
+          isNull(applications.deletedAt),
+        ),
+      );
+    const alreadyApplied = new Set(existing.map((r) => r.userId));
+
+    const toApply = memberUserIds.filter((uid) => !alreadyApplied.has(uid));
+    if (toApply.length === 0) {
+      return [];
+    }
+
+    const createdIds = await this.db.transaction(async (tx) => {
+      const inserted = await tx
+        .insert(applications)
+        .values(
+          toApply.map((uid) => ({
+            userId: uid,
+            hackathonId: input.hackathonId,
+            teamId: input.teamId,
+            status: "pending" as const,
+          })),
+        )
+        .returning({ applicationId: applications.applicationId });
+
+      if (input.answers && input.answers.length > 0) {
+        await tx.insert(questionAnswers).values(
+          inserted.flatMap((app) =>
+            input.answers!.map((a) => ({
+              applicationId: app.applicationId,
+              questionId: a.questionId,
+              answer: a.answer,
+            })),
+          ),
+        );
+      }
+
+      return inserted.map((r) => r.applicationId);
+    });
+
+    // Notify the organizer once about the batch.
+    this.notifications
+      .create({
+        userId: hackathon.organizationId,
+        type: "new_application",
+        title: "Nova timska prijava",
+        body: `Tim je aplicirao na vaš hakaton „${hackathon.title}" (${createdIds.length} ${createdIds.length === 1 ? "član" : "člana/članova"}).`,
+        entityType: "hackathon",
+        entityId: input.hackathonId,
+      })
+      .catch(() => undefined);
+
+    return Promise.all(createdIds.map((id) => this.getOwnApplication(id)));
   }
 
   /* ── Application-form questions ──────────────────────────── */
@@ -662,6 +848,43 @@ export class ApplicationsService {
       "rejected",
       input.reason,
     );
+    return this.getOwnApplication(applicationId);
+  }
+
+  async withdraw(
+    applicationId: string,
+    userId: string,
+    input: WithdrawApplicationInput,
+  ): Promise<ApplicationDto> {
+    const [existing] = await this.db
+      .select({
+        applicationId: applications.applicationId,
+        userId: applications.userId,
+        status: applications.status,
+        hackathonId: applications.hackathonId,
+      })
+      .from(applications)
+      .where(eq(applications.applicationId, applicationId))
+      .limit(1);
+
+    if (!existing) throw new NotFoundException("Application not found");
+
+    if (existing.userId !== userId) {
+      throw new ForbiddenException("You can only withdraw your own application");
+    }
+
+    const withdrawable: ApplicationStatus[] = ["pending", "approved"];
+    if (!withdrawable.includes(existing.status as ApplicationStatus)) {
+      throw new BadRequestException(
+        `Cannot withdraw an application with status '${existing.status}'`,
+      );
+    }
+
+    await this.db
+      .update(applications)
+      .set({ status: "withdrawn", deletedAt: new Date(), updatedAt: new Date() })
+      .where(eq(applications.applicationId, applicationId));
+
     return this.getOwnApplication(applicationId);
   }
 
