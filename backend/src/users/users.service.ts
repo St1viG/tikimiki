@@ -7,7 +7,7 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { hash, verify } from "@node-rs/argon2";
-import { and, asc, desc, eq, inArray, isNull, ne, sql } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, inArray, isNull, ne, or, sql } from "drizzle-orm";
 import { LIKE } from "../common/constants";
 import {
   mediaType,
@@ -503,6 +503,41 @@ export class UsersService {
       likedByMe: Boolean(r.likedByMe),
       authorIsFollowing: Boolean(r.authorIsFollowing),
     }));
+  }
+
+  /**
+   * Prefix search over username + display name for the @-mention picker.
+   * Excludes the caller; matches are case-insensitive and start-anchored.
+   * Returns an empty list for a blank query (so an empty `@` doesn't dump the
+   * whole user table).
+   */
+  async searchUsers(
+    q: string,
+    viewerId: string,
+    limit = 8,
+  ): Promise<SocialUserDto[]> {
+    const term = q.trim();
+    if (term.length === 0) return [];
+    // Escape LIKE wildcards so a literal % / _ in the query can't widen it.
+    const prefix = `${term.replace(/[\\%_]/g, "\\$&")}%`;
+    const take = Math.min(Math.max(limit, 1), 20);
+
+    return this.db
+      .select({
+        userId: users.userId,
+        username: users.username,
+        displayName: users.displayName,
+        avatarUrl: users.avatarUrl,
+      })
+      .from(users)
+      .where(
+        and(
+          ne(users.userId, viewerId),
+          or(ilike(users.username, prefix), ilike(users.displayName, prefix)),
+        ),
+      )
+      .orderBy(asc(users.username))
+      .limit(take);
   }
 
   /** Toggle the caller's follow relationship with the target user. */

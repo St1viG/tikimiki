@@ -5,3 +5,8 @@ export const createCommentSchema = z.object({
   parentCommentId: z.string().uuid().optional(),
 });
 export type CreateCommentInput = z.infer<typeof createCommentSchema>;
+
+export const updateCommentSchema = z.object({
+  content: z.string().trim().min(1).max(5000),
+});
+export type UpdateCommentInput = z.infer<typeof updateCommentSchema>;

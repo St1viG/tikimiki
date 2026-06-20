@@ -3,9 +3,10 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { and, desc, eq, isNull, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
-import { notifications } from "../db/schema";
+import { notifications, users } from "../db/schema";
+import { extractMentions } from "../common/mentions";
 import { RealtimeGateway } from "../realtime/realtime.gateway";
 
 /** Possible values for a notification's `type` column (notification_type enum). */
@@ -29,7 +30,8 @@ export type NotificationType =
   | "team_request_received"
   | "team_request_accepted"
   | "post_comment"
-  | "post_reaction";
+  | "post_reaction"
+  | "mention";
 
 /** Possible values for a notification's `entityType` column (entity_type enum). */
 export type NotificationEntityType =
@@ -140,6 +142,47 @@ export class NotificationsService {
     const dto = toDto(row);
     this.realtime.emitNotification(input.userId, dto);
     return dto;
+  }
+
+  /**
+   * Parse `@username` mentions out of `content` and notify each mentioned
+   * account (type `mention`). Skips the actor's own handle and silently drops
+   * unknown usernames. `restrictToUserIds`, when given, limits notifications to
+   * that set — used by chat so you can only ping members of the channel /
+   * conversation the message lives in.
+   */
+  async notifyMentions(opts: {
+    actorId: string;
+    actorUsername: string;
+    content: string;
+    entityType: NotificationEntityType;
+    entityId: string;
+    restrictToUserIds?: string[];
+  }): Promise<void> {
+    const handles = extractMentions(opts.content);
+    if (handles.length === 0) return;
+
+    const rows = await this.db
+      .select({ userId: users.userId })
+      .from(users)
+      .where(inArray(sql`lower(${users.username})`, handles));
+
+    const restrict = opts.restrictToUserIds
+      ? new Set(opts.restrictToUserIds)
+      : null;
+
+    for (const r of rows) {
+      if (r.userId === opts.actorId) continue;
+      if (restrict && !restrict.has(r.userId)) continue;
+      await this.create({
+        userId: r.userId,
+        type: "mention",
+        title: "Pomenuti ste",
+        body: `${opts.actorUsername} vas je pomenuo.`,
+        entityType: opts.entityType,
+        entityId: opts.entityId,
+      });
+    }
   }
 
   /** List the caller's notifications, optionally only unread, newest first. */

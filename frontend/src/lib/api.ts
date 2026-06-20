@@ -167,6 +167,9 @@ export async function getFeed(): Promise<FeedPost[]> {
   return GET<FeedPost[]>("/feed");
 }
 
+/** Fetch a single post by id (powers the shareable permalink / deep-link). */
+export const getPost = (postId: string) => GET<FeedPost>(`/posts/${postId}`);
+
 export async function createPost(
   content: string,
   attachments: string[] = [],
@@ -213,8 +216,11 @@ export const createComment = (
   content: string,
   parentCommentId?: string,
 ) => POST<Comment>(`/posts/${postId}/comments`, { content, parentCommentId });
+/** Edit your own comment's text. Returns the updated comment (with editedAt). */
+export const updateComment = (commentId: string, content: string) =>
+  PATCH<Comment>(`/comments/${commentId}`, { content });
 export const deleteComment = (commentId: string) =>
-  DELETE<{ success: true }>(`/comments/${commentId}`);
+  DELETE<{ success: true; deletedCount: number }>(`/comments/${commentId}`);
 export const togglePostLike = (postId: string) =>
   POST<LikeResult>(`/posts/${postId}/like`);
 export const toggleCommentLike = (commentId: string) =>
@@ -576,6 +582,11 @@ export interface SocialUser {
   displayName?: string | null;
   avatarUrl: string | null;
 }
+/** Prefix search over username + display name — powers @-mention autocomplete. */
+export const searchUsers = (q: string, limit = 8) =>
+  GET<SocialUser[]>(
+    `/users/search?q=${encodeURIComponent(q)}&limit=${limit}`,
+  );
 export const getFollowers = (username: string) =>
   GET<SocialUser[]>(`/users/${username}/followers`);
 export const getFollowing = (username: string) =>

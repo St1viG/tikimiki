@@ -9,6 +9,7 @@ import type { FeedPost } from "@tikimiki/types";
 import { LIKE } from "../common/constants";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import { postAttachments, posts, users } from "../db/schema";
+import { NotificationsService } from "../notifications/notifications.service";
 
 /** One image/video attached to a post. */
 export type PostAttachment = { url: string; type: "image" | "video" };
@@ -94,7 +95,10 @@ function toFeedPost(r: PostRow, attachments: PostAttachment[]): FeedPostWithDisp
 
 @Injectable()
 export class PostsService {
-  constructor(@Inject(DRIZZLE) private readonly db: DrizzleDB) {}
+  constructor(
+    @Inject(DRIZZLE) private readonly db: DrizzleDB,
+    private readonly notifications: NotificationsService,
+  ) {}
 
   /** Ordered attachments for a set of posts, grouped by post id (no N+1). */
   private async attachmentsByPost(
@@ -158,6 +162,16 @@ export class PostsService {
       .from(users)
       .where(eq(users.userId, userId))
       .limit(1);
+
+    // Ping anyone tagged with @username in the body.
+    await this.notifications.notifyMentions({
+      actorId: userId,
+      actorUsername: author.username,
+      content: row.content,
+      entityType: "post",
+      entityId: row.postId,
+    });
+
     return {
       postId: row.postId,
       authorId: userId,
@@ -173,6 +187,16 @@ export class PostsService {
       likedByMe: false,
       authorIsFollowing: false,
     };
+  }
+
+  /** Public single-post fetch (powers the shareable post permalink). */
+  async getOne(
+    postId: string,
+    userId: string | null,
+  ): Promise<FeedPostWithDisplayName> {
+    const post = await this.getById(postId, userId);
+    if (!post) throw new NotFoundException("Post not found");
+    return post;
   }
 
   /** Re-read one (non-deleted) post as a full feed row, from the viewer's POV. */

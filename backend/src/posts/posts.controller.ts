@@ -32,6 +32,15 @@ export class PostsController {
     return this.posts.listFeed(userId);
   }
 
+  @Get("posts/:postId")
+  @UseGuards(OptionalJwtAuthGuard)
+  getOne(
+    @Param("postId", ParseUUIDPipe) postId: string,
+    @OptionalUser() userId: string | null,
+  ) {
+    return this.posts.getOne(postId, userId);
+  }
+
   @Post("posts")
   @UseGuards(JwtAuthGuard)
   create(

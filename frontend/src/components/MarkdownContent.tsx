@@ -1,5 +1,7 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { linkifyMentions } from "@/lib/mentions";
+import { MentionLink } from "@/components/mentions/MentionLink";
 
 /**
  * Preserve the line breaks people actually type. Standard Markdown collapses a
@@ -29,14 +31,26 @@ export function MarkdownContent({ children }: { children: string }) {
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
-          a: ({ href, children }) => (
-            <a href={href} target="_blank" rel="noopener noreferrer">
-              {children}
-            </a>
-          ),
+          a: ({ href, children }) => {
+            // @-mention links carry a `/u/<username>` href — render them as
+            // mention buttons (host decides: profile popup, else navigate).
+            const mention = href && /^\/u\/([^/]+)$/.exec(href);
+            if (mention) {
+              return (
+                <MentionLink username={decodeURIComponent(mention[1])}>
+                  {children}
+                </MentionLink>
+              );
+            }
+            return (
+              <a href={href} target="_blank" rel="noopener noreferrer">
+                {children}
+              </a>
+            );
+          },
         }}
       >
-        {preserveLineBreaks(children)}
+        {preserveLineBreaks(linkifyMentions(children))}
       </ReactMarkdown>
     </div>
   );

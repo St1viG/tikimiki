@@ -18,6 +18,12 @@ import { useRequireAuth } from "@/components/auth/AuthProvider";
 import { GenerativeAvatar } from "@/components/ui/GenerativeAvatar";
 import { OrbArt } from "@/components/ui/OrbArt";
 import { MarkdownContent } from "@/components/MarkdownContent";
+import {
+  useMentionAutocomplete,
+  type MentionCandidate,
+} from "@/components/mentions/useMentionAutocomplete";
+import { MentionClickContext } from "@/components/mentions/MentionLink";
+import { isUserMentioned } from "@/lib/mentions";
 import { ImageLightbox } from "@/components/ImageLightbox";
 import { CohorToast, type CohorToastVariant } from "@/components/popups/CohorToast";
 import { BountyUnapplyModal } from "@/components/popups/BountyUnapplyModal";
@@ -309,6 +315,47 @@ export function CohorClient() {
   const [dmConvos, setDmConvos] = useState<Conversation[]>([]);
   const [activeConvoId, setActiveConvoId] = useState<string | null>(null);
   const [dmRealMsgs, setDmRealMsgs] = useState<ApiMessage[]>([]);
+
+  // @-mention candidates are contextual: server members in a channel, the
+  // conversation's members in a DM. Filtered client-side (no extra fetch).
+  const mentionCandidates = useMemo<MentionCandidate[]>(() => {
+    if (appMode === "server") {
+      return members.map((m) => ({
+        userId: m.userId,
+        username: m.username,
+        displayName: m.displayName,
+        avatarUrl: m.avatarUrl,
+      }));
+    }
+    const convo = dmConvos.find((c) => c.conversationId === activeConvoId);
+    return (convo?.members ?? []).map((m) => ({
+      userId: m.userId,
+      username: m.username,
+      displayName: m.displayName ?? null,
+      avatarUrl: m.avatarUrl,
+    }));
+  }, [appMode, members, dmConvos, activeConvoId]);
+  const mentionSearch = useCallback(
+    (q: string): MentionCandidate[] => {
+      const term = q.trim().toLowerCase();
+      const pool = mentionCandidates.filter((c) => c.userId !== user?.userId);
+      const matches = term
+        ? pool.filter(
+            (c) =>
+              c.username.toLowerCase().startsWith(term) ||
+              (c.displayName ?? "").toLowerCase().startsWith(term),
+          )
+        : pool;
+      return matches.slice(0, 8);
+    },
+    [mentionCandidates, user],
+  );
+  const chatMention = useMentionAutocomplete({
+    inputRef: composerRef,
+    value: draft,
+    setValue: setDraft,
+    search: mentionSearch,
+  });
 
   // Home landing view data: the user's ongoing hackathon (or null) + friends.
   const [activeHackathon, setActiveHackathon] = useState<ActiveHackathon | null>(
@@ -2172,6 +2219,7 @@ export function CohorClient() {
   }
   // Enter sends; Shift+Enter inserts a newline (multiline messages).
   function sendMsg(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (chatMention.onKeyDown(e)) return;
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMsgClick();
@@ -2550,7 +2598,7 @@ export function CohorClient() {
   );
 
   return (
-    <>
+    <MentionClickContext.Provider value={setProfileUsername}>
       <h1 className="sr-only">{t("srHeading")}</h1>
 
       <div
@@ -3015,7 +3063,12 @@ export function CohorClient() {
                 )}
                 {msgs.map((m) => (
                   <div
-                    className="msg"
+                    className={
+                      m.senderId !== user?.userId &&
+                      isUserMentioned(m.content, user?.username)
+                        ? "msg msg-mentioned"
+                        : "msg"
+                    }
                     key={m.messageId}
                     style={{ marginTop: 10 }}
                     onContextMenu={(e) => {
@@ -3158,7 +3211,12 @@ export function CohorClient() {
                 )}
                 {dmRealMsgs.map((m) => (
                   <div
-                    className="msg"
+                    className={
+                      m.senderId !== user?.userId &&
+                      isUserMentioned(m.content, user?.username)
+                        ? "msg msg-mentioned"
+                        : "msg"
+                    }
                     key={m.messageId}
                     style={{ marginTop: 10 }}
                     onContextMenu={(e) => {
@@ -4655,7 +4713,8 @@ export function CohorClient() {
                 ))}
               </div>
             )}
-            <div className="chat-input-box">
+            <div className="chat-input-box" style={{ position: "relative" }}>
+              {chatMention.menu}
               <input
                 ref={chatFileRef}
                 type="file"
@@ -6634,7 +6693,7 @@ export function CohorClient() {
           </div>
         </div>
       )}
-    </>
+    </MentionClickContext.Provider>
   );
 }
 

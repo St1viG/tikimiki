@@ -807,3 +807,30 @@ html[data-theme="light-mono"] .premium-link .ic{
 .am-foot{ display:flex; justify-content:flex-end; gap:10px; padding:16px 20px; border-top:1px solid var(--line); }
 .am-err{ margin:0; color:#ef4444; font-size:.86rem; }
 .am-note{ margin:0; color:var(--muted); font-size:.92rem; line-height:1.5; }
+
+/* ── @-mentions ─────────────────────────────────────────────
+   Inline mention links (posts, comments, messages) + the typeahead dropdown
+   shared by every composer. The dropdown anchors to a position:relative host. */
+.mention{ color:var(--violet-light, #a78bfa); font-weight:600; text-decoration:none;
+  display:inline; padding:0; border:0; background:none; font:inherit; cursor:pointer; vertical-align:baseline; }
+.mention:hover{ text-decoration:none; color:#c4b5fd; }
+
+.mention-menu{
+  position:absolute; left:0; right:0;
+  z-index:60; margin:0; padding:4px; list-style:none;
+  max-height:240px; overflow-y:auto;
+  background:var(--surface-2); border:1px solid var(--line);
+  border-radius:12px; box-shadow:0 12px 32px rgba(0,0,0,.45);
+}
+.mention-menu--up{ bottom:calc(100% + 6px); }
+.mention-menu--down{ top:calc(100% + 6px); }
+.mention-opt{
+  display:flex; align-items:center; gap:10px; width:100%;
+  padding:7px 9px; border:0; border-radius:8px;
+  background:none; color:inherit; text-align:left; cursor:pointer;
+}
+.mention-opt.is-active{ background:color-mix(in srgb, var(--violet, #7c3aed) 22%, transparent); }
+.mention-av{ width:26px; height:26px; border-radius:50%; overflow:hidden; flex:none; }
+.mention-opt-text{ display:flex; flex-direction:column; min-width:0; line-height:1.2; }
+.mention-opt-name{ font-weight:600; font-size:.85rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.mention-opt-handle{ font-size:.78rem; color:var(--muted); }

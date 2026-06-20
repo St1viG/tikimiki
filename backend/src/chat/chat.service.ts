@@ -10,6 +10,7 @@ import { and, asc, desc, eq, gt, inArray, isNull, ne, or, sql } from "drizzle-or
 import { AuthzService } from "../common/authz.service";
 import { activeTeamMember } from "../common/team.predicates";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
+import { NotificationsService } from "../notifications/notifications.service";
 import { RealtimeGateway } from "../realtime/realtime.gateway";
 import {
   channelGroups,
@@ -189,7 +190,33 @@ export class ChatService {
     @Inject(DRIZZLE) private readonly db: DrizzleDB,
     private readonly realtime: RealtimeGateway,
     private readonly authz: AuthzService,
+    private readonly notifications: NotificationsService,
   ) {}
+
+  /**
+   * User ids that can access a channel's server (role holders + the organizing
+   * account) — used to scope @-mention pings to actual server members.
+   */
+  private async serverMemberIds(channelId: string): Promise<string[]> {
+    const serverId = await this.authz.serverIdForChannel(channelId);
+    const roleRows = await this.db
+      .selectDistinct({ userId: userRoles.userId })
+      .from(userRoles)
+      .innerJoin(
+        serverRoles,
+        eq(serverRoles.serverRoleId, userRoles.serverRoleId),
+      )
+      .where(eq(serverRoles.serverId, serverId));
+    const [org] = await this.db
+      .select({ orgId: hackathons.organizationId })
+      .from(servers)
+      .innerJoin(hackathons, eq(hackathons.hackathonId, servers.hackathonId))
+      .where(eq(servers.serverId, serverId))
+      .limit(1);
+    const ids = roleRows.map((r) => r.userId);
+    if (org?.orgId) ids.push(org.orgId);
+    return ids;
+  }
 
   /* ── Servers ────────────────────────────────────────────── */
 
@@ -916,6 +943,16 @@ export class ChatService {
         filename: null,
       })),
     };
+    // Ping tagged @usernames who are members of this server.
+    await this.notifications.notifyMentions({
+      actorId: userId,
+      actorUsername: sender.username,
+      content,
+      entityType: "message",
+      entityId: message.messageId,
+      restrictToUserIds: await this.serverMemberIds(channelId),
+    });
+
     this.realtime.emitChannelMessage(channelId, dto);
     return dto;
   }
@@ -1481,6 +1518,16 @@ export class ChatService {
         filename: null,
       })),
     };
+    // Ping tagged @usernames who are members of this conversation.
+    await this.notifications.notifyMentions({
+      actorId: userId,
+      actorUsername: sender.username,
+      content,
+      entityType: "message",
+      entityId: message.messageId,
+      restrictToUserIds: others.map((o) => o.userId),
+    });
+
     this.realtime.emitDirectMessage(conversationId, dto);
     return dto;
   }

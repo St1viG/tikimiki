@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from "@nestjs/common";
 import { CurrentUser } from "../auth/current-user.decorator";
@@ -55,6 +56,17 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   getMyPoints(@CurrentUser() userId: string) {
     return this.users.getMyPoints(userId);
+  }
+
+  /** Username/display-name prefix search — powers the @-mention autocomplete. */
+  @Get("search")
+  @UseGuards(JwtAuthGuard)
+  searchUsers(
+    @CurrentUser() userId: string,
+    @Query("q") q?: string,
+    @Query("limit") limit?: string,
+  ) {
+    return this.users.searchUsers(q ?? "", userId, limit ? Number(limit) : 8);
   }
 
   /* ── follow toggle (auth) ────────────────────────────────── */

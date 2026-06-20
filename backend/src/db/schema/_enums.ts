@@ -152,6 +152,7 @@ export const notificationType = pgEnum("notification_type", [
   "team_request_accepted",
   "post_comment",
   "post_reaction",
+  "mention",
 ]);
 
 export const appealStatus = pgEnum("appeal_status", [

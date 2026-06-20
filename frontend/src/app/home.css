@@ -368,6 +368,15 @@ article.post.promo:hover .promo-banner .ghost-ic{ transform:translate(-6px,-6px)
 }
 .comment-reply-btn:hover, .comment-reply-btn[aria-pressed="true"]{ color:var(--violet-light); }
 
+/* "↩ Replying to @x" context line on a reply that targets another reply, so a
+   nested reply is distinguishable from one made directly to the root comment. */
+.comment-replying-to{
+  display:inline-flex; align-items:center; width:fit-content;
+  margin:1px 0 3px; font-size:.78em; font-weight:600; color:var(--muted);
+  cursor:pointer; transition:color var(--dur-1) var(--ease-out);
+}
+.comment-replying-to:hover{ color:var(--violet-light); }
+
 /* Banner shown above the composer when a reply target is selected. */
 .comment-reply-banner{
   display:flex; align-items:center; justify-content:space-between; gap:8px;

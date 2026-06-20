@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { and, asc, eq, isNull, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import {
   commentReactions,
@@ -15,7 +15,7 @@ import {
 } from "../db/schema";
 import { LIKE } from "../common/constants";
 import { NotificationsService } from "../notifications/notifications.service";
-import type { CreateCommentInput } from "./dto";
+import type { CreateCommentInput, UpdateCommentInput } from "./dto";
 
 export interface CommentDto {
   commentId: string;
@@ -34,6 +34,8 @@ export interface CommentDto {
 
 export interface DeleteResult {
   success: true;
+  /** How many comments were soft-deleted (the target plus its reply subtree). */
+  deletedCount: number;
 }
 
 export interface LikeResult {
@@ -206,7 +208,46 @@ export class EngagementService {
       );
     }
 
+    // Ping anyone tagged with @username in the comment (links to the post).
+    await this.notifications.notifyMentions({
+      actorId: userId,
+      actorUsername: dto.authorUsername,
+      content: input.content,
+      entityType: "post",
+      entityId: postId,
+    });
+
     return dto;
+  }
+
+  /** Edit a comment's content. Author-only; stamps `editedAt`. */
+  async updateComment(
+    userId: string,
+    commentId: string,
+    input: UpdateCommentInput,
+  ): Promise<CommentDto> {
+    const [comment] = await this.db
+      .select({ userId: comments.userId })
+      .from(comments)
+      .where(and(eq(comments.commentId, commentId), isNull(comments.deletedAt)))
+      .limit(1);
+    if (!comment) throw new NotFoundException("Comment not found");
+    if (comment.userId !== userId) {
+      throw new ForbiddenException("You can only edit your own comment");
+    }
+
+    await this.db
+      .update(comments)
+      .set({ content: input.content, editedAt: new Date() })
+      .where(eq(comments.commentId, commentId));
+
+    const [row] = await this.db
+      .select(this.commentColumns(userId))
+      .from(comments)
+      .innerJoin(users, eq(comments.userId, users.userId))
+      .where(eq(comments.commentId, commentId))
+      .limit(1);
+    return this.toCommentDto(row);
   }
 
   async deleteComment(
@@ -223,12 +264,26 @@ export class EngagementService {
       throw new ForbiddenException("You can only delete your own comment");
     }
 
-    await this.db
+    // Cascade: soft-delete this comment AND its entire reply subtree, so a
+    // deleted comment never leaves orphaned replies still counted/visible.
+    const subtree = (await this.db.execute(sql`
+      WITH RECURSIVE subtree AS (
+        SELECT comment_id FROM comments WHERE comment_id = ${commentId}
+        UNION ALL
+        SELECT c.comment_id FROM comments c
+        JOIN subtree s ON c.parent_comment_id = s.comment_id
+      )
+      SELECT comment_id FROM subtree
+    `)) as unknown as { comment_id: string }[];
+    const ids = subtree.map((r) => r.comment_id);
+
+    const deleted = await this.db
       .update(comments)
       .set({ deletedAt: new Date() })
-      .where(eq(comments.commentId, commentId));
+      .where(and(inArray(comments.commentId, ids), isNull(comments.deletedAt)))
+      .returning({ commentId: comments.commentId });
 
-    return { success: true };
+    return { success: true, deletedCount: deleted.length };
   }
 
   async togglePostLike(userId: string, postId: string): Promise<LikeResult> {

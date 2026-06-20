@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   UseGuards,
 } from "@nestjs/common";
@@ -13,7 +14,12 @@ import { CurrentUser } from "../auth/current-user.decorator";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { OptionalJwtAuthGuard } from "../auth/optional-jwt-auth.guard";
 import { OptionalUser } from "../auth/optional-user.decorator";
-import { createCommentSchema, type CreateCommentInput } from "./dto";
+import {
+  createCommentSchema,
+  updateCommentSchema,
+  type CreateCommentInput,
+  type UpdateCommentInput,
+} from "./dto";
 import { EngagementService } from "./engagement.service";
 
 @Controller()
@@ -37,6 +43,16 @@ export class EngagementController {
     @Body(new ZodValidationPipe(createCommentSchema)) body: CreateCommentInput,
   ) {
     return this.engagement.createComment(userId, postId, body);
+  }
+
+  @Patch("comments/:commentId")
+  @UseGuards(JwtAuthGuard)
+  updateComment(
+    @CurrentUser() userId: string,
+    @Param("commentId", ParseUUIDPipe) commentId: string,
+    @Body(new ZodValidationPipe(updateCommentSchema)) body: UpdateCommentInput,
+  ) {
+    return this.engagement.updateComment(userId, commentId, body);
   }
 
   @Delete("comments/:commentId")

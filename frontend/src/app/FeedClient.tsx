@@ -2,6 +2,7 @@
 
 import { Fragment, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import type { FeedPost } from "@tikimiki/types";
 import { Icon } from "@/components/Icon";
 import { OrbArt } from "@/components/ui/OrbArt";
@@ -16,7 +17,11 @@ import {
   togglePostLike,
   toggleCommentLike,
   toggleFollow,
+  updateComment,
+  deleteComment,
   uploadMedia,
+  searchUsers,
+  getPost,
 } from "@/lib/api";
 import { relTime } from "@/lib/format";
 import { personName } from "@/lib/displayName";
@@ -32,6 +37,10 @@ import { PostCard } from "@/components/PostCard";
 import { MarkdownContent } from "@/components/MarkdownContent";
 import { ImageCropper } from "@/components/ImageCropper";
 import { ProfilePopup } from "@/components/popups/ProfilePopup";
+import { SharePopup } from "@/components/popups/SharePopup";
+import { MentionText } from "@/components/mentions/MentionText";
+import { MentionClickContext } from "@/components/mentions/MentionLink";
+import { useMentionAutocomplete } from "@/components/mentions/useMentionAutocomplete";
 
 /* FeedClient — the interactive home feed.
  *
@@ -87,6 +96,16 @@ const M = {
   replyingTo:     { en: "Replying to",                   sr: "Odgovaraš na" },
   cancelReply:    { en: "Cancel reply",                  sr: "Otkaži odgovor" },
   noComments:     { en: "No comments yet.",               sr: "Još nema komentara." },
+  cmtOptions:     { en: "Comment options",               sr: "Opcije komentara" },
+  editCmt:        { en: "Edit",                           sr: "Izmeni" },
+  deleteCmt:      { en: "Delete",                         sr: "Obriši" },
+  saveCmt:        { en: "Save",                           sr: "Sačuvaj" },
+  savingCmt:      { en: "Saving…",                        sr: "Čuvanje…" },
+  cancelCmt:      { en: "Cancel",                         sr: "Otkaži" },
+  editedLabel:    { en: "(Edited)",                       sr: "(Izmenjeno)" },
+  deleteCmtTitle: { en: "Delete comment?",               sr: "Obrisati komentar?" },
+  deleteCmtDesc:  { en: "This comment will be permanently removed. This action can't be undone.", sr: "Komentar će biti trajno uklonjen. Ova radnja se ne može poništiti." },
+  deletingCmt:    { en: "Deleting…",                      sr: "Brisanje…" },
 } as const;
 
 type Tab = "explore" | "following";
@@ -156,10 +175,20 @@ export function FeedClient() {
     username: string;
     displayName?: string | null;
   } | null>(null);
-  // Post id whose share-link was just copied (shows brief "Link copied" feedback).
-  const [sharedId, setSharedId] = useState<string | null>(null);
+  // Inline comment editing: which comment is open in the editor + its draft text.
+  const [editingComment, setEditingComment] = useState<string | null>(null);
+  const [commentEditDraft, setCommentEditDraft] = useState("");
+  // Comment id with a save/delete request in flight (disables its controls).
+  const [commentBusy, setCommentBusy] = useState<string | null>(null);
+  // Comment id awaiting delete confirmation (drives the shared confirm modal).
+  const [confirmDeleteComment, setConfirmDeleteComment] = useState<string | null>(null);
+  // Comment id whose "⋯" actions menu is open.
+  const [commentMenuOpen, setCommentMenuOpen] = useState<string | null>(null);
   // Author whose profile popup is open (clicked from a post/comment avatar/name/handle).
   const [popupUser, setPopupUser] = useState<string | null>(null);
+  // Post whose share sheet (copy link / send to friends) is open.
+  const [shareTarget, setShareTarget] = useState<FeedPost | null>(null);
+  const searchParams = useSearchParams();
   const onProfileKey = (e: React.KeyboardEvent, u: string) => {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
@@ -167,10 +196,57 @@ export function FeedClient() {
     }
   };
 
+  // @-mention autocomplete for the post composer (searches all users).
+  const composerMention = useMentionAutocomplete({
+    inputRef: composerTextRef,
+    value: draft,
+    setValue: setDraft,
+    search: (q) => searchUsers(q),
+    placement: "down",
+  });
+  // @-mention autocomplete for the (single) open comment composer.
+  const commentInputRef = useRef<HTMLInputElement>(null);
+  const commentMention = useMentionAutocomplete({
+    inputRef: commentInputRef,
+    value: openPostId ? commentDrafts[openPostId] ?? "" : "",
+    setValue: (v) => {
+      if (openPostId) setCommentDrafts((d) => ({ ...d, [openPostId]: v }));
+    },
+    search: (q) => searchUsers(q),
+    enabled: openPostId !== null,
+  });
+
   // Clear reply context whenever the modal is closed.
   useEffect(() => {
     if (openPostId === null) setReplyToComment(null);
   }, [openPostId]);
+
+  // Escape closes the comment delete-confirm dialog (unless a delete is running).
+  useEffect(() => {
+    if (confirmDeleteComment == null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && commentBusy == null) setConfirmDeleteComment(null);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [confirmDeleteComment, commentBusy]);
+
+  // Close the comment "⋯" menu on any outside click or Escape.
+  useEffect(() => {
+    if (!commentMenuOpen) return;
+    const onDown = (e: MouseEvent) => {
+      if (!(e.target as HTMLElement).closest(".post-menu")) setCommentMenuOpen(null);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setCommentMenuOpen(null);
+    };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [commentMenuOpen]);
 
   // While the post-detail modal is open: lock background scroll and let Escape
   // close it — but only when no profile popup is layered on top (so Escape
@@ -190,35 +266,8 @@ export function FeedClient() {
     };
   }, [openPostId, popupUser]);
 
-  /**
-   * Share a post: use the native share sheet when available, otherwise copy a
-   * link to the author's profile (there is no per-post permalink route yet) and
-   * show a brief confirmation. Replaces the previously inert share button.
-   */
-  async function sharePost(p: FeedPost) {
-    const url =
-      typeof window !== "undefined"
-        ? `${window.location.origin}/u/${p.authorUsername}`
-        : `/u/${p.authorUsername}`;
-    if (typeof navigator !== "undefined" && navigator.share) {
-      try {
-        await navigator.share({ title: `${p.authorUsername} · tikimiki`, text: p.content, url });
-        return;
-      } catch {
-        return; // user dismissed the share sheet
-      }
-    }
-    try {
-      await navigator.clipboard.writeText(url);
-      setSharedId(p.postId);
-      window.setTimeout(
-        () => setSharedId((id) => (id === p.postId ? null : id)),
-        1600,
-      );
-    } catch {
-      /* clipboard unavailable; nothing to do */
-    }
-  }
+  /** Open the share sheet for a post (copy link / send to friends). */
+  const sharePost = (p: FeedPost) => setShareTarget(p);
 
   // Reconcile a post in the list after a PostCard edits or deletes it (the same
   // `posts` array backs both the list and the detail modal).
@@ -251,6 +300,36 @@ export function FeedClient() {
       cancelled = true;
     };
   }, []);
+
+  // Deep-link: /?post=<id> opens that post's detail modal (once per link).
+  useEffect(() => {
+    const pid = searchParams.get("post");
+    if (!pid) return;
+    setOpenPostId(pid);
+    loadComments(pid);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  // …and pull the shared post into the list if it isn't on this feed page, so
+  // the detail modal (which reads from `posts`) can render it.
+  useEffect(() => {
+    const pid = searchParams.get("post");
+    if (!pid || posts === null || posts.some((p) => p.postId === pid)) return;
+    let cancelled = false;
+    getPost(pid)
+      .then((p) => {
+        if (!cancelled)
+          setPosts((cur) =>
+            cur && cur.some((x) => x.postId === p.postId)
+              ? cur
+              : [p, ...(cur ?? [])],
+          );
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [searchParams, posts]);
 
   // Optimistically flip the heart, then reconcile the count from the server's
   // LikeResult (and revert the heart on failure).
@@ -291,6 +370,14 @@ export function FeedClient() {
     getComments(postId)
       .then((list) => {
         setComments((c) => ({ ...c, [postId]: list }));
+        // Reconcile the post's badge with the authoritative thread (server
+        // returns non-deleted comments, replies included) so it can't drift from
+        // the optimistic ±1 math done on create/delete.
+        setPosts((prev) =>
+          prev?.map((p) =>
+            p.postId === postId ? { ...p, commentCount: list.length } : p,
+          ) ?? prev,
+        );
         setLikedComments((prev) => {
           const next = new Set(prev);
           for (const c of list) if (c.likedByMe) next.add(c.commentId);
@@ -308,6 +395,40 @@ export function FeedClient() {
   const openPostModal = (postId: string) => {
     setOpenPostId(postId);
     loadComments(postId);
+  };
+
+  // Matches a leading "@handle " token so switching/cancelling a reply target
+  // doesn't stack mentions in the composer.
+  const LEADING_TAG = /^@[a-zA-Z0-9_.-]+\s+/;
+
+  // Start a reply: tag the author in the composer (so they get pinged + it's
+  // clear who you're answering) and remember the parent for threading.
+  const startReply = (postId: string, c: Comment) => {
+    setReplyToComment({
+      commentId: c.commentId,
+      username: c.authorUsername,
+      displayName: c.authorDisplayName,
+    });
+    setCommentDrafts((d) => ({
+      ...d,
+      [postId]: `@${c.authorUsername} ${(d[postId] ?? "").replace(LEADING_TAG, "")}`,
+    }));
+    requestAnimationFrame(() => {
+      const el = commentInputRef.current;
+      if (el) {
+        el.focus();
+        el.setSelectionRange(el.value.length, el.value.length);
+      }
+    });
+  };
+
+  // Cancel a reply: drop the parent link and strip the leading @tag.
+  const cancelReply = (postId: string) => {
+    setReplyToComment(null);
+    setCommentDrafts((d) => ({
+      ...d,
+      [postId]: (d[postId] ?? "").replace(LEADING_TAG, ""),
+    }));
   };
 
   const handleComment = async (postId: string) => {
@@ -382,6 +503,83 @@ export function FeedClient() {
         wasLiked ? n.add(commentId) : n.delete(commentId);
         return n;
       });
+    }
+  };
+
+  const startCommentEdit = (c: Comment) => {
+    setConfirmDeleteComment(null);
+    setEditingComment(c.commentId);
+    setCommentEditDraft(c.content);
+  };
+  const cancelCommentEdit = () => {
+    setEditingComment(null);
+    setCommentEditDraft("");
+  };
+
+  // Save an inline comment edit. Author-only on the backend; stamps editedAt.
+  const saveCommentEdit = async (postId: string, commentId: string) => {
+    const content = commentEditDraft.trim();
+    if (!content || commentBusy) return;
+    setCommentBusy(commentId);
+    try {
+      const updated = await updateComment(commentId, content);
+      setComments((c) => ({
+        ...c,
+        [postId]: (c[postId] ?? []).map((cm) =>
+          cm.commentId === commentId
+            ? { ...cm, content: updated.content, editedAt: updated.editedAt }
+            : cm,
+        ),
+      }));
+      setEditingComment(null);
+      setCommentEditDraft("");
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setCommentBusy(null);
+    }
+  };
+
+  // Delete the viewer's own comment. The backend cascade soft-deletes this
+  // comment AND its reply subtree, so we drop the whole subtree locally and
+  // decrement the badge by the server's authoritative deletedCount.
+  const deleteCommentFn = async (postId: string, commentId: string) => {
+    if (commentBusy) return;
+    setCommentBusy(commentId);
+    try {
+      const { deletedCount } = await deleteComment(commentId);
+      setComments((c) => {
+        const thread = c[postId] ?? [];
+        // Collect the deleted comment + every descendant reply.
+        const removed = new Set<string>([commentId]);
+        for (let grew = true; grew; ) {
+          grew = false;
+          for (const cm of thread) {
+            if (
+              cm.parentCommentId &&
+              removed.has(cm.parentCommentId) &&
+              !removed.has(cm.commentId)
+            ) {
+              removed.add(cm.commentId);
+              grew = true;
+            }
+          }
+        }
+        return { ...c, [postId]: thread.filter((cm) => !removed.has(cm.commentId)) };
+      });
+      setConfirmDeleteComment(null);
+      if (editingComment === commentId) cancelCommentEdit();
+      setPosts((prev) =>
+        prev?.map((p) =>
+          p.postId === postId
+            ? { ...p, commentCount: Math.max(0, p.commentCount - deletedCount) }
+            : p,
+        ) ?? prev,
+      );
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setCommentBusy(null);
     }
   };
 
@@ -557,10 +755,22 @@ export function FeedClient() {
     const commentMap: Record<string, Comment> = {};
     if (thread) for (const c of thread) commentMap[c.commentId] = c;
 
+    // Resolve the top-level (root) comment a reply belongs to. Robust to a
+    // missing ancestor (e.g. an intermediate reply that was deleted): we stop at
+    // the highest still-existing ancestor instead of returning a dangling id,
+    // so orphaned replies keep rendering instead of vanishing.
     const getRootId = (commentId: string): string => {
-      const c = commentMap[commentId];
-      if (!c?.parentCommentId) return commentId;
-      return getRootId(c.parentCommentId);
+      let cur = commentMap[commentId];
+      let topId = commentId;
+      const seen = new Set<string>();
+      while (cur?.parentCommentId && !seen.has(cur.commentId)) {
+        seen.add(cur.commentId);
+        const parent = commentMap[cur.parentCommentId];
+        if (!parent) break; // ancestor deleted/missing — anchor here
+        topId = parent.commentId;
+        cur = parent;
+      }
+      return topId;
     };
 
     const roots: Comment[] = [];
@@ -580,6 +790,9 @@ export function FeedClient() {
     const renderCommentRow = (c: Comment, isReply = false) => {
       const cLiked = likedComments.has(c.commentId);
       const isTargeted = replyToComment?.commentId === c.commentId;
+      const isOwnComment = !!user && c.authorId === user.userId;
+      const isEditing = editingComment === c.commentId;
+      const isBusy = commentBusy === c.commentId;
       return (
         <div
           className="post-head"
@@ -619,6 +832,7 @@ export function FeedClient() {
                 @{c.authorUsername}
               </span>
               <span className="time">{relTime(c.createdAt, locale)}</span>
+              {c.editedAt && <span className="time">{t("editedLabel")}</span>}
               <button
                 className="act"
                 aria-pressed={cLiked || undefined}
@@ -629,33 +843,106 @@ export function FeedClient() {
                 <Icon name={cLiked ? "like-fill" : "like"} className="heart" />{" "}
                 <span>{c.reactionCount}</span>
               </button>
-              {user && (
+              {user && !isEditing && (
                 <button
                   className="act comment-reply-btn"
                   aria-label={t("replyBtn")}
                   aria-pressed={isTargeted || undefined}
                   onClick={() =>
-                    isTargeted
-                      ? setReplyToComment(null)
-                      : setReplyToComment({
-                          commentId: c.commentId,
-                          username: c.authorUsername,
-                          displayName: c.authorDisplayName,
-                        })
+                    isTargeted ? cancelReply(p.postId) : startReply(p.postId, c)
                   }
                   style={{ padding: 0, color: isTargeted ? "var(--violet-light)" : undefined }}
                 >
                   ↩ {t("replyBtn")}
                 </button>
               )}
+              {isOwnComment && !isEditing && (
+                <span className="post-menu">
+                  <button
+                    type="button"
+                    className="post-menu-btn"
+                    aria-label={t("cmtOptions")}
+                    aria-haspopup="menu"
+                    aria-expanded={commentMenuOpen === c.commentId}
+                    disabled={isBusy}
+                    onClick={() =>
+                      setCommentMenuOpen((o) =>
+                        o === c.commentId ? null : c.commentId,
+                      )
+                    }
+                    style={{ width: 26, height: 26 }}
+                  >
+                    <Icon name="more" />
+                  </button>
+                  {commentMenuOpen === c.commentId && (
+                    <div className="post-menu-pop" role="menu">
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={() => {
+                          setCommentMenuOpen(null);
+                          startCommentEdit(c);
+                        }}
+                      >
+                        <Icon name="edit" /> {t("editCmt")}
+                      </button>
+                      <button
+                        type="button"
+                        role="menuitem"
+                        className="is-danger"
+                        onClick={() => {
+                          setCommentMenuOpen(null);
+                          setConfirmDeleteComment(c.commentId);
+                        }}
+                      >
+                        <Icon name="trash" /> {t("deleteCmt")}
+                      </button>
+                    </div>
+                  )}
+                </span>
+              )}
             </span>
-            <span className="post-body">{c.content}</span>
+            {isEditing ? (
+              <div className="post-edit" style={{ marginTop: 6 }}>
+                <textarea
+                  className="post-edit-text"
+                  style={{ minHeight: 64 }}
+                  value={commentEditDraft}
+                  maxLength={MAX_LEN}
+                  autoFocus
+                  disabled={isBusy}
+                  onChange={(e) => setCommentEditDraft(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && (e.ctrlKey || e.metaKey))
+                      saveCommentEdit(p.postId, c.commentId);
+                    if (e.key === "Escape") cancelCommentEdit();
+                  }}
+                />
+                <div className="post-edit-bar">
+                  <button className="btn btn-ghost" onClick={cancelCommentEdit} disabled={isBusy}>
+                    {t("cancelCmt")}
+                  </button>
+                  <button
+                    className="btn btn-violet"
+                    onClick={() => saveCommentEdit(p.postId, c.commentId)}
+                    disabled={isBusy || commentEditDraft.trim() === ""}
+                  >
+                    {isBusy ? t("savingCmt") : t("saveCmt")}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <span className="post-body">
+                <MentionText>{c.content}</MentionText>
+              </span>
+            )}
           </span>
         </div>
       );
     };
 
     return (
+      <>
       <div className="post-comments">
         {thread == null && (
           <p className="time" style={{ padding: "10px 4px" }}>{t("loading")}</p>
@@ -677,38 +964,27 @@ export function FeedClient() {
 
         {user && (
           <div className="composer" style={{ flexDirection: "column", alignItems: "stretch", gap: 8 }}>
-            {replyToComment && (
-              <div className="comment-reply-banner">
-                <span>
-                  ↩ {t("replyingTo")}{" "}
-                  <strong>
-                    {personName({ displayName: replyToComment.displayName, username: replyToComment.username })}
-                  </strong>
-                </span>
-                <button
-                  aria-label={t("cancelReply")}
-                  onClick={() => setReplyToComment(null)}
-                >
-                  <Icon name="x" />
-                </button>
-              </div>
-            )}
-            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <div style={{ display: "flex", gap: 8, alignItems: "center", position: "relative" }}>
+              {commentMention.menu}
               <span className="avatar brand is-orb" aria-hidden="true">
                 <OrbArt url={user.avatarUrl} seed={user.username ?? "tikimiki"} />
               </span>
               <input
+                ref={commentInputRef}
                 className="field"
-                placeholder={
-                  replyToComment
-                    ? `${t("replyingTo")} @${replyToComment.username}…`
-                    : t("commentPlaceholder")
-                }
+                placeholder={t("commentPlaceholder")}
                 value={commentDrafts[p.postId] ?? ""}
-                onChange={(e) =>
-                  setCommentDrafts((d) => ({ ...d, [p.postId]: e.target.value }))
-                }
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setCommentDrafts((d) => ({ ...d, [p.postId]: v }));
+                  // Deleting the leading @tag cancels the reply (back to a
+                  // top-level comment).
+                  if (replyToComment && !v.startsWith(`@${replyToComment.username}`)) {
+                    setReplyToComment(null);
+                  }
+                }}
                 onKeyDown={(e) => {
+                  if (commentMention.onKeyDown(e)) return;
                   if (e.key === "Enter") handleComment(p.postId);
                 }}
                 disabled={commentingOn === p.postId}
@@ -727,6 +1003,48 @@ export function FeedClient() {
           </div>
         )}
       </div>
+
+      {confirmDeleteComment != null && (
+        <div
+          className="confirm-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="confirm-del-comment"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && commentBusy == null)
+              setConfirmDeleteComment(null);
+          }}
+        >
+          <div className="confirm-box">
+            <div className="confirm-ic" aria-hidden="true">
+              <Icon name="trash" />
+            </div>
+            <h2 className="confirm-title" id="confirm-del-comment">
+              {t("deleteCmtTitle")}
+            </h2>
+            <p className="confirm-desc">{t("deleteCmtDesc")}</p>
+            <div className="confirm-actions">
+              <button
+                type="button"
+                className="btn btn-ghost"
+                onClick={() => setConfirmDeleteComment(null)}
+                disabled={commentBusy != null}
+              >
+                {t("cancelCmt")}
+              </button>
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={() => deleteCommentFn(p.postId, confirmDeleteComment)}
+                disabled={commentBusy != null}
+              >
+                {commentBusy != null ? t("deletingCmt") : t("deleteCmt")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      </>
     );
   };
 
@@ -740,7 +1058,7 @@ export function FeedClient() {
       : posts;
 
   return (
-    <>
+    <MentionClickContext.Provider value={setPopupUser}>
     <main className="feed" id="feed">
       <h1 className="sr-only">Feed</h1>
 
@@ -778,7 +1096,8 @@ export function FeedClient() {
           }
         }}
       >
-        <div className="composer-row">
+        <div className="composer-row" style={{ position: "relative" }}>
+          {composerMention.menu}
           <span className="avatar brand is-orb" aria-hidden="true">
             <OrbArt url={user?.avatarUrl} seed={user?.username ?? "tikimiki"} />
           </span>
@@ -806,6 +1125,7 @@ export function FeedClient() {
                 e.target.style.height = `${Math.min(e.target.scrollHeight, 340)}px`;
               }}
               onKeyDown={(e) => {
+                if (composerMention.onKeyDown(e)) return;
                 if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) handlePost();
               }}
               onFocus={() => setComposerOpen(true)}
@@ -1086,7 +1406,6 @@ export function FeedClient() {
           onOpenDetail={openPostModal}
           onComment={openPostModal}
           onShare={sharePost}
-          shareCopied={sharedId === p.postId}
           className="reveal"
           style={{ "--i": idx + 3 } as React.CSSProperties}
           headExtra={
@@ -1136,7 +1455,6 @@ export function FeedClient() {
               onDeleted={onPostDeleted}
               stackedAuthor
               onShare={sharePost}
-              shareCopied={sharedId === openPost.postId}
               mediaLightbox
               mediaMaxHeight="60vh"
             />
@@ -1150,7 +1468,12 @@ export function FeedClient() {
       username={popupUser}
       onClose={() => setPopupUser(null)}
     />
-    </>
+    <SharePopup
+      post={shareTarget}
+      open={shareTarget !== null}
+      onClose={() => setShareTarget(null)}
+    />
+    </MentionClickContext.Provider>
   );
 }
 

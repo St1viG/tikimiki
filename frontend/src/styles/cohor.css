@@ -626,6 +626,13 @@
   transition:background .1s;
 }
 .msg:hover{ background:color-mix(in srgb, var(--surface-2) 55%, transparent); }
+/* A message that @-mentions the viewer — lemon "voltage" highlight + left bar. */
+.msg-mentioned{ background:color-mix(in srgb, var(--lemon) 9%, transparent); }
+.msg-mentioned:hover{ background:color-mix(in srgb, var(--lemon) 14%, transparent); }
+.msg-mentioned::before{
+  content:""; position:absolute; left:0; top:3px; bottom:3px;
+  width:3px; border-radius:0 3px 3px 0; background:var(--lemon);
+}
 .msg-grouped{ margin-top:-2px; }
 .msg-grouped .msg-av{ visibility:hidden; }
 .msg-grouped .msg-meta-row{ display:none; }
