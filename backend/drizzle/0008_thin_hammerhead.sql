@@ -1,0 +1,1 @@
+ALTER TABLE "conversations" ALTER COLUMN "icon" SET DATA TYPE varchar(512);
