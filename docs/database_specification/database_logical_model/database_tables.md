@@ -1,4 +1,4 @@
-# tikimiki — Database Schema v4.1
+# tikimiki — Database Schema v4.3
 
 ---
 
@@ -173,7 +173,75 @@ CREATE UNIQUE INDEX uq_user_bans_active_per_user ON user_bans (user_id) WHERE li
 
 ---
 
-## 6. skills
+## 6. follows
+
+| Column | Type | PK | FK | Nullable |
+| --- | --- | --- | --- | --- |
+| follower_id | uuid | ✓ | users | |
+| followee_id | uuid | ✓ | users | |
+| created_at | timestamptz | | | |
+
+```sql
+CREATE TABLE follows (
+    follower_id UUID        NOT NULL REFERENCES users (user_id) ON DELETE CASCADE,
+    followee_id UUID        NOT NULL REFERENCES users (user_id) ON DELETE CASCADE,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    PRIMARY KEY (follower_id, followee_id),
+
+    CONSTRAINT chk_follows_no_self CHECK (follower_id <> followee_id)
+);
+
+CREATE INDEX idx_follows_followee_id ON follows (followee_id);
+```
+
+---
+
+## 7. friendships
+
+| Column | Type | PK | FK | Nullable |
+| --- | --- | --- | --- | --- |
+| user_id_a | uuid | ✓ | members | |
+| user_id_b | uuid | ✓ | members | |
+| requester_id | uuid | | members | |
+| status | friendship_status | | | |
+| requested_at | timestamptz | | | |
+| responded_at | timestamptz | | | ✓ |
+
+```sql
+CREATE TYPE friendship_status AS ENUM ('pending', 'accepted');
+
+CREATE TABLE friendships (
+    user_id_a    UUID              NOT NULL REFERENCES members (user_id) ON DELETE CASCADE,
+    user_id_b    UUID              NOT NULL REFERENCES members (user_id) ON DELETE CASCADE,
+    requester_id UUID              NOT NULL REFERENCES members (user_id) ON DELETE CASCADE,
+    status       friendship_status NOT NULL DEFAULT 'pending',
+    requested_at TIMESTAMPTZ       NOT NULL DEFAULT NOW(),
+    responded_at TIMESTAMPTZ,
+
+    PRIMARY KEY (user_id_a, user_id_b),
+
+    CONSTRAINT chk_friendships_canonical_order CHECK (user_id_a < user_id_b),
+    CONSTRAINT chk_friendships_requester CHECK (
+        requester_id = user_id_a OR requester_id = user_id_b
+    ),
+    CONSTRAINT chk_friendships_responded_consistency CHECK (
+        (status = 'accepted') = (responded_at IS NOT NULL)
+    )
+);
+
+CREATE INDEX idx_friendships_user_id_b ON friendships (user_id_b);
+CREATE INDEX idx_friendships_requester ON friendships (requester_id);
+```
+
+> A friendship is stored as a single row per pair, with `user_id_a < user_id_b`
+> enforced so the same pair cannot be inserted twice in opposite directions.
+> `requester_id` records who sent the request; `status` tracks `pending` → `accepted`.
+> A declined / cancelled request is simply deleted.
+
+---
+
+## 8. skills
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -193,7 +261,7 @@ CREATE TABLE skills (
 
 ---
 
-## 7. member_skills
+## 9. member_skills
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -213,7 +281,7 @@ CREATE INDEX idx_member_skills_skill_id ON member_skills (skill_id);
 
 ---
 
-## 8. hackathons
+## 10. hackathons
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -289,7 +357,7 @@ CREATE INDEX idx_hackathons_coordinates     ON hackathons USING GIST (coordinate
 
 ---
 
-## 9. hackathon_required_skills
+## 11. hackathon_required_skills
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -309,7 +377,7 @@ CREATE INDEX idx_hackathon_required_skills_skill_id ON hackathon_required_skills
 
 ---
 
-## 10. bounties
+## 12. bounties
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -339,7 +407,7 @@ CREATE INDEX idx_bounties_hackathon_id ON bounties (hackathon_id);
 
 ---
 
-## 11. hackathon_prizes
+## 13. hackathon_prizes
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -373,7 +441,7 @@ CREATE INDEX        idx_hackathon_prizes_hackathon_id ON hackathon_prizes (hacka
 
 ---
 
-## 12. teams
+## 14. teams
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -391,8 +459,7 @@ CREATE TABLE teams (
     name         VARCHAR(100) NOT NULL,
     created_at   TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
     updated_at   TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
-    deleted_at   TIMESTAMPTZ,
-
+    deleted_at   TIMESTAMPTZ
 );
 
 CREATE UNIQUE INDEX uq_teams_name_per_hackathon ON teams (hackathon_id, name) WHERE deleted_at IS NULL;
@@ -401,7 +468,7 @@ CREATE INDEX        idx_teams_hackathon_id ON teams (hackathon_id);
 
 ---
 
-## 13. team_members
+## 15. team_members
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -436,7 +503,7 @@ CREATE INDEX        idx_team_members_user_id ON team_members (user_id);
 
 ---
 
-## 14. applications
+## 16. applications
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -484,7 +551,7 @@ CREATE INDEX idx_applications_hackathon_status ON applications (hackathon_id, st
 
 ---
 
-## 15. projects
+## 17. projects
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -526,7 +593,7 @@ CREATE INDEX        idx_projects_team_id ON projects (team_id);
 
 ---
 
-## 16. hackathon_results
+## 18. hackathon_results
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -555,7 +622,7 @@ CREATE INDEX        idx_hackathon_results_bounty_id  ON hackathon_results (bount
 
 ---
 
-## 17. bounty_submissions
+## 19. bounty_submissions
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -575,7 +642,45 @@ CREATE INDEX idx_bounty_submissions_project_id ON bounty_submissions (project_id
 
 ---
 
-## 18. kanban_boards
+## 20. votes
+
+| Column | Type | PK | FK | Nullable |
+| --- | --- | --- | --- | --- |
+| vote_id | uuid | ✓ | | |
+| hackathon_id | uuid | | hackathons | |
+| project_id | uuid | | projects | |
+| voter_id | uuid | | users | ✓ |
+| voter_fingerprint | text | | | ✓ |
+| created_at | timestamptz | | | |
+
+```sql
+CREATE TABLE votes (
+    vote_id           UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    hackathon_id      UUID        NOT NULL REFERENCES hackathons (hackathon_id) ON DELETE CASCADE,
+    project_id        UUID        NOT NULL REFERENCES projects   (project_id)   ON DELETE CASCADE,
+    voter_id          UUID        REFERENCES users (user_id) ON DELETE CASCADE,
+    voter_fingerprint TEXT,
+    created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT chk_votes_voter_identity CHECK (
+        (voter_id IS NULL) <> (voter_fingerprint IS NULL)
+    )
+);
+
+CREATE UNIQUE INDEX uq_votes_member_per_hackathon ON votes (hackathon_id, voter_id)          WHERE voter_id          IS NOT NULL;
+CREATE UNIQUE INDEX uq_votes_guest_per_hackathon  ON votes (hackathon_id, voter_fingerprint) WHERE voter_fingerprint IS NOT NULL;
+CREATE INDEX        idx_votes_project_id          ON votes (project_id);
+```
+
+> Audience "People's Choice" vote (F-18), tracked separately from judge decisions
+> in `hackathon_results`. Exactly one of `voter_id` (a logged-in user) or
+> `voter_fingerprint` (a signed guest/device token hash) is set. The two partial
+> unique indexes enforce one vote per hackathon per member and per guest;
+> tallies are aggregated by `project_id`.
+
+---
+
+## 21. kanban_boards
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -597,7 +702,7 @@ CREATE TABLE kanban_boards (
 
 ---
 
-## 19. kanban_columns
+## 22. kanban_columns
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -625,7 +730,7 @@ CREATE INDEX idx_kanban_columns_board_id ON kanban_columns (board_id);
 
 ---
 
-## 20. kanban_cards
+## 23. kanban_cards
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -665,7 +770,7 @@ CREATE INDEX        idx_kanban_cards_assigned_to     ON kanban_cards (assigned_t
 
 ---
 
-## 21. servers
+## 24. servers
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -693,7 +798,7 @@ CREATE TABLE servers (
 
 ---
 
-## 22. server_roles
+## 25. server_roles
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -717,7 +822,7 @@ CREATE INDEX idx_server_roles_server_id ON server_roles (server_id);
 
 ---
 
-## 23. permissions
+## 26. permissions
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -737,7 +842,7 @@ CREATE TABLE permissions (
 
 ---
 
-## 24. server_role_permissions
+## 27. server_role_permissions
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -757,7 +862,7 @@ CREATE INDEX idx_server_role_permissions_permission_id ON server_role_permission
 
 ---
 
-## 25. user_roles
+## 28. user_roles
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -781,7 +886,7 @@ CREATE INDEX idx_user_roles_user_id ON user_roles (user_id);
 
 ---
 
-## 26. channel_groups
+## 29. channel_groups
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -811,7 +916,7 @@ CREATE INDEX        idx_channel_groups_server_id           ON channel_groups (se
 
 ---
 
-## 27. channels
+## 30. channels
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -852,7 +957,7 @@ CREATE INDEX        idx_channels_group_id                  ON channels (group_id
 
 ---
 
-## 28. messages
+## 31. messages
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -887,7 +992,7 @@ CREATE INDEX idx_messages_sent_at   ON messages (sent_at DESC);
 
 ---
 
-## 29. message_attachments
+## 32. message_attachments
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -913,7 +1018,7 @@ CREATE INDEX idx_message_attachments_message_id ON message_attachments (message_
 
 ---
 
-## 30. channel_messages
+## 33. channel_messages
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -933,7 +1038,7 @@ CREATE INDEX idx_channel_messages_channel_id ON channel_messages (channel_id);
 
 ---
 
-## 31. conversations
+## 34. conversations
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -951,7 +1056,7 @@ CREATE TABLE conversations (
 
 ---
 
-## 32. conversation_members
+## 35. conversation_members
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -975,7 +1080,7 @@ CREATE INDEX idx_conversation_members_user_id ON conversation_members (user_id);
 
 ---
 
-## 33. direct_messages
+## 36. direct_messages
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -995,7 +1100,7 @@ CREATE INDEX idx_direct_messages_conversation_id ON direct_messages (conversatio
 
 ---
 
-## 34. message_reactions
+## 37. message_reactions
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -1020,7 +1125,7 @@ CREATE INDEX idx_message_reactions_message_id ON message_reactions (message_id);
 
 ---
 
-## 35. posts
+## 38. posts
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -1047,7 +1152,7 @@ CREATE INDEX idx_posts_created_at ON posts (created_at DESC);
 
 ---
 
-## 36. post_attachments
+## 39. post_attachments
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -1073,7 +1178,7 @@ CREATE INDEX idx_post_attachments_post_id ON post_attachments (post_id);
 
 ---
 
-## 37. post_reactions
+## 40. post_reactions
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -1098,7 +1203,7 @@ CREATE INDEX idx_post_reactions_post_id ON post_reactions (post_id);
 
 ---
 
-## 38. comments
+## 41. comments
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -1130,7 +1235,7 @@ CREATE INDEX idx_comments_parent_comment_id ON comments (parent_comment_id) WHER
 
 ---
 
-## 39. comment_attachments
+## 42. comment_attachments
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -1156,7 +1261,7 @@ CREATE INDEX idx_comment_attachments_comment_id ON comment_attachments (comment_
 
 ---
 
-## 40. comment_reactions
+## 43. comment_reactions
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -1181,7 +1286,7 @@ CREATE INDEX idx_comment_reactions_comment_id ON comment_reactions (comment_id);
 
 ---
 
-## 41. badges
+## 44. badges
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -1211,7 +1316,7 @@ CREATE TABLE badges (
 
 ---
 
-## 42. user_badges
+## 45. user_badges
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -1233,7 +1338,139 @@ CREATE INDEX idx_user_badges_badge_id ON user_badges (badge_id);
 
 ---
 
-## 43. cosmetic_items
+## 46. games
+
+| Column | Type | PK | FK | Nullable |
+| --- | --- | --- | --- | --- |
+| game_id | uuid | ✓ | | |
+| slug | varchar(50) | | | |
+| name | varchar(100) | | | |
+| description | text | | | ✓ |
+| thumbnail_url | text | | | ✓ |
+| is_active | boolean | | | |
+| base_daily_plays | smallint | | | |
+| premium_daily_plays | smallint | | | |
+| max_points_per_play | integer | | | ✓ |
+| created_at | timestamptz | | | |
+| updated_at | timestamptz | | | |
+
+```sql
+CREATE TABLE games (
+    game_id             UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    slug                VARCHAR(50)  NOT NULL,
+    name                VARCHAR(100) NOT NULL,
+    description         TEXT,
+    thumbnail_url       TEXT,
+    is_active           BOOLEAN      NOT NULL DEFAULT TRUE,
+    base_daily_plays    SMALLINT     NOT NULL DEFAULT 1,
+    premium_daily_plays SMALLINT     NOT NULL DEFAULT 3,
+    max_points_per_play INTEGER,
+    created_at          TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+    updated_at          TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT uq_games_slug UNIQUE (slug),
+    CONSTRAINT uq_games_name UNIQUE (name),
+
+    CONSTRAINT chk_games_base_daily_plays    CHECK (base_daily_plays >= 1),
+    CONSTRAINT chk_games_premium_daily_plays CHECK (premium_daily_plays >= base_daily_plays),
+    CONSTRAINT chk_games_max_points          CHECK (max_points_per_play IS NULL OR max_points_per_play > 0)
+);
+
+CREATE INDEX idx_games_active ON games (is_active) WHERE is_active;
+```
+
+> `base_daily_plays` is the free attempt allowance per Member per day; Premium
+> members get `premium_daily_plays` instead (F-20 / F-21). At least one game
+> should have `is_active = TRUE` and be available to all Members.
+
+---
+
+## 47. game_plays
+
+| Column | Type | PK | FK | Nullable |
+| --- | --- | --- | --- | --- |
+| play_id | uuid | ✓ | | |
+| game_id | uuid | | games | |
+| user_id | uuid | | members | |
+| score | integer | | | |
+| points_awarded | integer | | | |
+| played_at | timestamptz | | | |
+
+```sql
+CREATE TABLE game_plays (
+    play_id        UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    game_id        UUID        NOT NULL REFERENCES games   (game_id) ON DELETE CASCADE,
+    user_id        UUID        NOT NULL REFERENCES members (user_id) ON DELETE CASCADE,
+    score          INTEGER     NOT NULL DEFAULT 0,
+    points_awarded INTEGER     NOT NULL DEFAULT 0,
+    played_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT chk_game_plays_score          CHECK (score >= 0),
+    CONSTRAINT chk_game_plays_points_awarded CHECK (points_awarded >= 0)
+);
+
+CREATE INDEX idx_game_plays_user_id       ON game_plays (user_id);
+CREATE INDEX idx_game_plays_game_user_day ON game_plays (game_id, user_id, played_at DESC);
+CREATE INDEX idx_game_plays_leaderboard   ON game_plays (game_id, score DESC);
+```
+
+> Each row is one completed play (a result). `idx_game_plays_game_user_day`
+> supports counting a user's plays for the current day to enforce the daily
+> limit; `idx_game_plays_leaderboard` backs per-game high-score leaderboards.
+
+---
+
+## 48. point_transactions
+
+| Column | Type | PK | FK | Nullable |
+| --- | --- | --- | --- | --- |
+| transaction_id | uuid | ✓ | | |
+| user_id | uuid | | members | |
+| type | point_txn_type | | | |
+| delta | bigint | | | |
+| balance_after | bigint | | | |
+| reference_id | uuid | | | ✓ |
+| note | text | | | ✓ |
+| created_at | timestamptz | | | |
+
+```sql
+CREATE TYPE point_txn_type AS ENUM (
+    'game_reward',
+    'badge_award',
+    'hackathon_placement',
+    'bounty_placement',
+    'merch_purchase',
+    'premium_purchase',
+    'admin_adjustment'
+);
+
+CREATE TABLE point_transactions (
+    transaction_id UUID           PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id        UUID           NOT NULL REFERENCES members (user_id) ON DELETE CASCADE,
+    type           point_txn_type NOT NULL,
+    delta          BIGINT         NOT NULL,
+    balance_after  BIGINT         NOT NULL,
+    reference_id   UUID,
+    note           TEXT,
+    created_at     TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT chk_point_transactions_delta         CHECK (delta <> 0),
+    CONSTRAINT chk_point_transactions_balance_after CHECK (balance_after >= 0)
+);
+
+CREATE INDEX idx_point_transactions_user_id ON point_transactions (user_id, created_at DESC);
+```
+
+> Append-only ledger of every point change (F-19 awards, F-21 spends). `delta` is
+> signed (`+` earn / `-` spend), `balance_after` is the running balance, and
+> `members.points` is the cached copy of the latest `balance_after`. `reference_id`
+> is a soft pointer to the source row (the table is implied by `type`: e.g.
+> `game_reward` → `game_plays`, `merch_purchase` → `merch_orders`); it is
+> intentionally not a hard FK because it spans multiple tables.
+
+---
+
+## 49. cosmetic_items
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -1267,7 +1504,7 @@ CREATE TABLE cosmetic_items (
 
 ---
 
-## 44. user_cosmetics
+## 50. user_cosmetics
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -1291,7 +1528,7 @@ CREATE INDEX idx_user_cosmetics_cosmetic_id ON user_cosmetics (cosmetic_id);
 
 ---
 
-## 45. user_equipped_cosmetics
+## 51. user_equipped_cosmetics
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -1317,7 +1554,7 @@ CREATE INDEX idx_user_equipped_cosmetics_cosmetic_id ON user_equipped_cosmetics 
 
 ---
 
-## 46. merch_items
+## 52. merch_items
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -1348,7 +1585,7 @@ CREATE TABLE merch_items (
 
 ---
 
-## 47. merch_variants
+## 53. merch_variants
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -1373,7 +1610,7 @@ CREATE INDEX idx_merch_variants_merch_id ON merch_variants (merch_id);
 
 ---
 
-## 48. merch_orders
+## 54. merch_orders
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -1416,7 +1653,7 @@ CREATE INDEX idx_merch_orders_status  ON merch_orders (status);
 
 ---
 
-## 49. merch_order_items
+## 55. merch_order_items
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -1445,7 +1682,7 @@ CREATE INDEX idx_merch_order_items_order_id ON merch_order_items (order_id);
 
 ---
 
-## 50. subscriptions
+## 56. subscriptions
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -1482,7 +1719,7 @@ CREATE INDEX idx_subscriptions_active  ON subscriptions (user_id, status) WHERE 
 
 ---
 
-## 51. subscription_payments
+## 57. subscription_payments
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -1513,7 +1750,7 @@ CREATE INDEX idx_subscription_payments_subscription_id ON subscription_payments 
 
 ---
 
-## 52. reports
+## 58. reports
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -1561,7 +1798,7 @@ CREATE INDEX idx_reports_target      ON reports (target_type, target_id);
 
 ---
 
-## 53. notifications
+## 59. notifications
 
 | Column | Type | PK | FK | Nullable |
 | --- | --- | --- | --- | --- |
@@ -1578,7 +1815,7 @@ CREATE INDEX idx_reports_target      ON reports (target_type, target_id);
 ```sql
 CREATE TYPE entity_type AS ENUM (
     'user', 'hackathon', 'application', 'team',
-    'project', 'post', 'comment', 'badge', 'message', 'bounty'
+    'project', 'post', 'comment', 'badge', 'message', 'bounty', 'game'
 );
 
 CREATE TYPE notification_type AS ENUM (
@@ -1593,7 +1830,15 @@ CREATE TYPE notification_type AS ENUM (
     'new_direct_message',
     'position_assigned',
     'bounty_result_posted',
-    'merch_order_shipped'
+    'merch_order_shipped',
+    'new_follower',
+    'friend_request_received',
+    'friend_request_accepted',
+    'team_invitation_received',
+    'team_request_received',
+    'team_request_accepted',
+    'post_comment',
+    'post_reaction'
 );
 
 CREATE TABLE notifications (
@@ -1618,6 +1863,149 @@ CREATE INDEX idx_notifications_unread  ON notifications (user_id, created_at DES
 
 ---
 
+## 60. application_questions
+
+Custom questions an organizer attaches to a hackathon's application form. `type` drives the input widget; `options` holds the choices for `single_choice` / `multi_choice` types.
+
+| Column | Type | PK | FK | Nullable |
+| --- | --- | --- | --- | --- |
+| question_id | uuid | ✓ | | |
+| hackathon_id | uuid | | hackathons | |
+| prompt | text | | | |
+| type | varchar(20) | | | |
+| options | jsonb | | | ✓ |
+| required | boolean | | | |
+| position | integer | | | |
+| created_at | timestamptz | | | |
+
+```sql
+CREATE TABLE application_questions (
+    question_id  UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    hackathon_id UUID        NOT NULL REFERENCES hackathons (hackathon_id) ON DELETE CASCADE,
+    prompt       TEXT        NOT NULL,
+    type         VARCHAR(20) NOT NULL DEFAULT 'short_text',
+    options      JSONB,
+    required     BOOLEAN     NOT NULL DEFAULT FALSE,
+    position     INTEGER     NOT NULL DEFAULT 0,
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT chk_application_questions_type CHECK (
+        type IN ('short_text', 'long_text', 'single_choice', 'multi_choice')
+    ),
+    CONSTRAINT chk_application_questions_options CHECK (
+        type IN ('short_text', 'long_text') OR options IS NOT NULL
+    )
+);
+
+CREATE INDEX idx_application_questions_hackathon_id ON application_questions (hackathon_id);
+```
+
+---
+
+## 61. question_answers
+
+An applicant's answer to a single application question. For choice questions the selected option(s) are stored as text / JSON-encoded text. One answer per (application, question).
+
+| Column | Type | PK | FK | Nullable |
+| --- | --- | --- | --- | --- |
+| answer_id | uuid | ✓ | | |
+| application_id | uuid | | applications | |
+| question_id | uuid | | application_questions | |
+| answer | text | | | |
+| created_at | timestamptz | | | |
+
+```sql
+CREATE TABLE question_answers (
+    answer_id      UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    application_id UUID        NOT NULL REFERENCES applications          (application_id) ON DELETE CASCADE,
+    question_id    UUID        NOT NULL REFERENCES application_questions (question_id)    ON DELETE CASCADE,
+    answer         TEXT        NOT NULL DEFAULT '',
+    created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE UNIQUE INDEX uq_question_answers_application_question ON question_answers (application_id, question_id);
+CREATE INDEX        idx_question_answers_application_id      ON question_answers (application_id);
+CREATE INDEX        idx_question_answers_question_id         ON question_answers (question_id);
+```
+
+---
+
+## 62. team_join_requests
+
+A member's request to join an open team; the team leader accepts or declines. At most one pending request per (team, user).
+
+| Column | Type | PK | FK | Nullable |
+| --- | --- | --- | --- | --- |
+| request_id | uuid | ✓ | | |
+| team_id | uuid | | teams | |
+| user_id | uuid | | members | |
+| message | text | | | ✓ |
+| status | varchar(20) | | | |
+| created_at | timestamptz | | | |
+| responded_at | timestamptz | | | ✓ |
+| responded_by | uuid | | users | ✓ |
+
+```sql
+CREATE TABLE team_join_requests (
+    request_id   UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    team_id      UUID        NOT NULL REFERENCES teams   (team_id) ON DELETE CASCADE,
+    user_id      UUID        NOT NULL REFERENCES members (user_id) ON DELETE CASCADE,
+    message      TEXT,
+    status       VARCHAR(20) NOT NULL DEFAULT 'pending',
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    responded_at TIMESTAMPTZ,
+    responded_by UUID        REFERENCES users (user_id) ON DELETE SET NULL,
+
+    CONSTRAINT chk_team_join_requests_status CHECK (
+        status IN ('pending', 'accepted', 'declined')
+    )
+);
+
+CREATE UNIQUE INDEX uq_team_join_requests_pending ON team_join_requests (team_id, user_id) WHERE status = 'pending';
+CREATE INDEX        idx_team_join_requests_team_id ON team_join_requests (team_id);
+CREATE INDEX        idx_team_join_requests_user_id ON team_join_requests (user_id);
+```
+
+---
+
+## 63. team_invitations
+
+A team leader's invitation to a (solo) member; the invitee accepts or declines. At most one pending invitation per (team, user).
+
+| Column | Type | PK | FK | Nullable |
+| --- | --- | --- | --- | --- |
+| invitation_id | uuid | ✓ | | |
+| team_id | uuid | | teams | |
+| user_id | uuid | | members | |
+| invited_by | uuid | | users | ✓ |
+| message | text | | | ✓ |
+| status | varchar(20) | | | |
+| created_at | timestamptz | | | |
+| responded_at | timestamptz | | | ✓ |
+
+```sql
+CREATE TABLE team_invitations (
+    invitation_id UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    team_id       UUID        NOT NULL REFERENCES teams   (team_id) ON DELETE CASCADE,
+    user_id       UUID        NOT NULL REFERENCES members (user_id) ON DELETE CASCADE,
+    invited_by    UUID        REFERENCES users (user_id) ON DELETE SET NULL,
+    message       TEXT,
+    status        VARCHAR(20) NOT NULL DEFAULT 'pending',
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    responded_at  TIMESTAMPTZ,
+
+    CONSTRAINT chk_team_invitations_status CHECK (
+        status IN ('pending', 'accepted', 'declined')
+    )
+);
+
+CREATE UNIQUE INDEX uq_team_invitations_pending ON team_invitations (team_id, user_id) WHERE status = 'pending';
+CREATE INDEX        idx_team_invitations_team_id ON team_invitations (team_id);
+CREATE INDEX        idx_team_invitations_user_id ON team_invitations (user_id);
+```
+
+---
+
 ## Table Creation Order
 
 ```
@@ -1626,63 +2014,75 @@ CREATE INDEX idx_notifications_unread  ON notifications (user_id, created_at DES
  3.  members
  4.  organizations
  5.  user_bans
+ 6.  follows
+ 7.  friendships
 
- 6.  skills
- 7.  member_skills
+ 8.  skills
+ 9.  member_skills
 
- 8.  hackathons
- 9.  hackathon_required_skills
-10.  bounties
-11.  hackathon_prizes
-12.  teams
-13.  team_members
-14.  applications
-15.  projects
-16.  hackathon_results
-17.  bounty_submissions
+10.  hackathons
+11.  hackathon_required_skills
+12.  bounties
+13.  hackathon_prizes
+14.  teams
+15.  team_members
+16.  applications
+17.  projects
+18.  hackathon_results
+19.  bounty_submissions
+20.  votes
 
-18.  kanban_boards
-19.  kanban_columns
-20.  kanban_cards
+21.  kanban_boards
+22.  kanban_columns
+23.  kanban_cards
 
-21.  servers
-22.  server_roles
-23.  permissions
-24.  server_role_permissions
-25.  user_roles
-26.  channel_groups
-27.  channels
+24.  servers
+25.  server_roles
+26.  permissions
+27.  server_role_permissions
+28.  user_roles
+29.  channel_groups
+30.  channels
 
-28.  messages
-29.  message_attachments
-30.  channel_messages
-31.  conversations
-32.  conversation_members
-33.  direct_messages
-34.  message_reactions
+31.  messages
+32.  message_attachments
+33.  channel_messages
+34.  conversations
+35.  conversation_members
+36.  direct_messages
+37.  message_reactions
 
-35.  posts
-36.  post_attachments
-37.  post_reactions
-38.  comments
-39.  comment_attachments
-40.  comment_reactions
+38.  posts
+39.  post_attachments
+40.  post_reactions
+41.  comments
+42.  comment_attachments
+43.  comment_reactions
 
-41.  badges
-42.  user_badges
+44.  badges
+45.  user_badges
+46.  games
+47.  game_plays
+48.  point_transactions
 
-43.  cosmetic_items
-44.  user_cosmetics
-45.  user_equipped_cosmetics
+49.  cosmetic_items
+50.  user_cosmetics
+51.  user_equipped_cosmetics
 
-46.  merch_items
-47.  merch_variants
-48.  merch_orders
-49.  merch_order_items
+52.  merch_items
+53.  merch_variants
+54.  merch_orders
+55.  merch_order_items
 
-50.  subscriptions
-51.  subscription_payments
+56.  subscriptions
+57.  subscription_payments
 
-52.  reports
-53.  notifications
+58.  reports
+59.  notifications
+
+60.  application_questions
+61.  question_answers
+
+62.  team_join_requests
+63.  team_invitations
 ```

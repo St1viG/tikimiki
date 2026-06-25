@@ -1,4 +1,4 @@
-# tikimiki — Database Schema v4.1 (SQL)
+# tikimiki — Database Schema v4.3 (SQL)
 
 ---
 
@@ -25,6 +25,18 @@ CREATE TYPE cosmetic_rarity AS ENUM ('common', 'rare', 'epic', 'legendary');
 
 CREATE TYPE merch_order_status AS ENUM ('pending', 'processing', 'shipped', 'delivered', 'cancelled');
 
+CREATE TYPE friendship_status AS ENUM ('pending', 'accepted');
+
+CREATE TYPE point_txn_type AS ENUM (
+    'game_reward',
+    'badge_award',
+    'hackathon_placement',
+    'bounty_placement',
+    'merch_purchase',
+    'premium_purchase',
+    'admin_adjustment'
+);
+
 CREATE TYPE subscription_plan   AS ENUM ('premium');
 CREATE TYPE subscription_status AS ENUM ('active', 'cancelled', 'expired');
 
@@ -33,7 +45,7 @@ CREATE TYPE report_status      AS ENUM ('pending', 'reviewed', 'resolved', 'dism
 
 CREATE TYPE entity_type AS ENUM (
     'user', 'hackathon', 'application', 'team',
-    'project', 'post', 'comment', 'badge', 'message', 'bounty'
+    'project', 'post', 'comment', 'badge', 'message', 'bounty', 'game'
 );
 
 CREATE TYPE notification_type AS ENUM (
@@ -48,7 +60,15 @@ CREATE TYPE notification_type AS ENUM (
     'new_direct_message',
     'position_assigned',
     'bounty_result_posted',
-    'merch_order_shipped'
+    'merch_order_shipped',
+    'new_follower',
+    'friend_request_received',
+    'friend_request_accepted',
+    'team_invitation_received',
+    'team_request_received',
+    'team_request_accepted',
+    'post_comment',
+    'post_reaction'
 );
 ```
 
@@ -147,6 +167,42 @@ CREATE TABLE user_bans (
 
 CREATE INDEX        idx_user_bans_user_id        ON user_bans (user_id);
 CREATE UNIQUE INDEX uq_user_bans_active_per_user ON user_bans (user_id) WHERE lifted_at IS NULL;
+
+
+CREATE TABLE follows (
+    follower_id UUID        NOT NULL REFERENCES users (user_id) ON DELETE CASCADE,
+    followee_id UUID        NOT NULL REFERENCES users (user_id) ON DELETE CASCADE,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    PRIMARY KEY (follower_id, followee_id),
+
+    CONSTRAINT chk_follows_no_self CHECK (follower_id <> followee_id)
+);
+
+CREATE INDEX idx_follows_followee_id ON follows (followee_id);
+
+
+CREATE TABLE friendships (
+    user_id_a    UUID              NOT NULL REFERENCES members (user_id) ON DELETE CASCADE,
+    user_id_b    UUID              NOT NULL REFERENCES members (user_id) ON DELETE CASCADE,
+    requester_id UUID              NOT NULL REFERENCES members (user_id) ON DELETE CASCADE,
+    status       friendship_status NOT NULL DEFAULT 'pending',
+    requested_at TIMESTAMPTZ       NOT NULL DEFAULT NOW(),
+    responded_at TIMESTAMPTZ,
+
+    PRIMARY KEY (user_id_a, user_id_b),
+
+    CONSTRAINT chk_friendships_canonical_order CHECK (user_id_a < user_id_b),
+    CONSTRAINT chk_friendships_requester CHECK (
+        requester_id = user_id_a OR requester_id = user_id_b
+    ),
+    CONSTRAINT chk_friendships_responded_consistency CHECK (
+        (status = 'accepted') = (responded_at IS NOT NULL)
+    )
+);
+
+CREATE INDEX idx_friendships_user_id_b ON friendships (user_id_b);
+CREATE INDEX idx_friendships_requester ON friendships (requester_id);
 
 
 CREATE TABLE skills (
@@ -261,8 +317,7 @@ CREATE TABLE teams (
     name         VARCHAR(100) NOT NULL,
     created_at   TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
     updated_at   TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
-    deleted_at   TIMESTAMPTZ,
-
+    deleted_at   TIMESTAMPTZ
 );
 
 CREATE UNIQUE INDEX uq_teams_name_per_hackathon ON teams (hackathon_id, name) WHERE deleted_at IS NULL;
@@ -360,6 +415,24 @@ CREATE TABLE bounty_submissions (
 );
 
 CREATE INDEX idx_bounty_submissions_project_id ON bounty_submissions (project_id);
+
+
+CREATE TABLE votes (
+    vote_id           UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    hackathon_id      UUID        NOT NULL REFERENCES hackathons (hackathon_id) ON DELETE CASCADE,
+    project_id        UUID        NOT NULL REFERENCES projects   (project_id)   ON DELETE CASCADE,
+    voter_id          UUID        REFERENCES users (user_id) ON DELETE CASCADE,
+    voter_fingerprint TEXT,
+    created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT chk_votes_voter_identity CHECK (
+        (voter_id IS NULL) <> (voter_fingerprint IS NULL)
+    )
+);
+
+CREATE UNIQUE INDEX uq_votes_member_per_hackathon ON votes (hackathon_id, voter_id)          WHERE voter_id          IS NOT NULL;
+CREATE UNIQUE INDEX uq_votes_guest_per_hackathon  ON votes (hackathon_id, voter_fingerprint) WHERE voter_fingerprint IS NOT NULL;
+CREATE INDEX        idx_votes_project_id          ON votes (project_id);
 
 
 CREATE TABLE kanban_boards (
@@ -687,6 +760,64 @@ CREATE TABLE user_badges (
 CREATE INDEX idx_user_badges_badge_id ON user_badges (badge_id);
 
 
+CREATE TABLE games (
+    game_id             UUID         PRIMARY KEY DEFAULT gen_random_uuid(),
+    slug                VARCHAR(50)  NOT NULL,
+    name                VARCHAR(100) NOT NULL,
+    description         TEXT,
+    thumbnail_url       TEXT,
+    is_active           BOOLEAN      NOT NULL DEFAULT TRUE,
+    base_daily_plays    SMALLINT     NOT NULL DEFAULT 1,
+    premium_daily_plays SMALLINT     NOT NULL DEFAULT 3,
+    max_points_per_play INTEGER,
+    created_at          TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+    updated_at          TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT uq_games_slug UNIQUE (slug),
+    CONSTRAINT uq_games_name UNIQUE (name),
+
+    CONSTRAINT chk_games_base_daily_plays    CHECK (base_daily_plays >= 1),
+    CONSTRAINT chk_games_premium_daily_plays CHECK (premium_daily_plays >= base_daily_plays),
+    CONSTRAINT chk_games_max_points          CHECK (max_points_per_play IS NULL OR max_points_per_play > 0)
+);
+
+CREATE INDEX idx_games_active ON games (is_active) WHERE is_active;
+
+
+CREATE TABLE game_plays (
+    play_id        UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    game_id        UUID        NOT NULL REFERENCES games   (game_id) ON DELETE CASCADE,
+    user_id        UUID        NOT NULL REFERENCES members (user_id) ON DELETE CASCADE,
+    score          INTEGER     NOT NULL DEFAULT 0,
+    points_awarded INTEGER     NOT NULL DEFAULT 0,
+    played_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT chk_game_plays_score          CHECK (score >= 0),
+    CONSTRAINT chk_game_plays_points_awarded CHECK (points_awarded >= 0)
+);
+
+CREATE INDEX idx_game_plays_user_id       ON game_plays (user_id);
+CREATE INDEX idx_game_plays_game_user_day ON game_plays (game_id, user_id, played_at DESC);
+CREATE INDEX idx_game_plays_leaderboard   ON game_plays (game_id, score DESC);
+
+
+CREATE TABLE point_transactions (
+    transaction_id UUID           PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id        UUID           NOT NULL REFERENCES members (user_id) ON DELETE CASCADE,
+    type           point_txn_type NOT NULL,
+    delta          BIGINT         NOT NULL,
+    balance_after  BIGINT         NOT NULL,
+    reference_id   UUID,
+    note           TEXT,
+    created_at     TIMESTAMPTZ    NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT chk_point_transactions_delta         CHECK (delta <> 0),
+    CONSTRAINT chk_point_transactions_balance_after CHECK (balance_after >= 0)
+);
+
+CREATE INDEX idx_point_transactions_user_id ON point_transactions (user_id, created_at DESC);
+
+
 CREATE TABLE cosmetic_items (
     cosmetic_id     UUID            PRIMARY KEY DEFAULT gen_random_uuid(),
     type            cosmetic_type   NOT NULL,
@@ -873,4 +1004,84 @@ CREATE TABLE notifications (
 
 CREATE INDEX idx_notifications_user_id ON notifications (user_id);
 CREATE INDEX idx_notifications_unread  ON notifications (user_id, created_at DESC) WHERE read_at IS NULL;
+
+
+-- ─────────────────────────────────────────────────────────────
+-- Application form: custom per-hackathon questions + applicant answers (v4.4)
+-- ─────────────────────────────────────────────────────────────
+
+CREATE TABLE application_questions (
+    question_id  UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    hackathon_id UUID        NOT NULL REFERENCES hackathons (hackathon_id) ON DELETE CASCADE,
+    prompt       TEXT        NOT NULL,
+    type         VARCHAR(20) NOT NULL DEFAULT 'short_text',
+    options      JSONB,
+    required     BOOLEAN     NOT NULL DEFAULT FALSE,
+    position     INTEGER     NOT NULL DEFAULT 0,
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    CONSTRAINT chk_application_questions_type CHECK (
+        type IN ('short_text', 'long_text', 'single_choice', 'multi_choice')
+    ),
+    CONSTRAINT chk_application_questions_options CHECK (
+        type IN ('short_text', 'long_text') OR options IS NOT NULL
+    )
+);
+
+CREATE INDEX idx_application_questions_hackathon_id ON application_questions (hackathon_id);
+
+CREATE TABLE question_answers (
+    answer_id      UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    application_id UUID        NOT NULL REFERENCES applications          (application_id) ON DELETE CASCADE,
+    question_id    UUID        NOT NULL REFERENCES application_questions (question_id)    ON DELETE CASCADE,
+    answer         TEXT        NOT NULL DEFAULT '',
+    created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE UNIQUE INDEX uq_question_answers_application_question ON question_answers (application_id, question_id);
+CREATE INDEX        idx_question_answers_application_id      ON question_answers (application_id);
+CREATE INDEX        idx_question_answers_question_id         ON question_answers (question_id);
+
+
+-- ─────────────────────────────────────────────────────────────
+-- Team formation: join requests (member → team) + invitations (leader → member) (v4.4)
+-- ─────────────────────────────────────────────────────────────
+
+CREATE TABLE team_join_requests (
+    request_id   UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    team_id      UUID        NOT NULL REFERENCES teams   (team_id) ON DELETE CASCADE,
+    user_id      UUID        NOT NULL REFERENCES members (user_id) ON DELETE CASCADE,
+    message      TEXT,
+    status       VARCHAR(20) NOT NULL DEFAULT 'pending',
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    responded_at TIMESTAMPTZ,
+    responded_by UUID        REFERENCES users (user_id) ON DELETE SET NULL,
+
+    CONSTRAINT chk_team_join_requests_status CHECK (
+        status IN ('pending', 'accepted', 'declined')
+    )
+);
+
+CREATE UNIQUE INDEX uq_team_join_requests_pending ON team_join_requests (team_id, user_id) WHERE status = 'pending';
+CREATE INDEX        idx_team_join_requests_team_id ON team_join_requests (team_id);
+CREATE INDEX        idx_team_join_requests_user_id ON team_join_requests (user_id);
+
+CREATE TABLE team_invitations (
+    invitation_id UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+    team_id       UUID        NOT NULL REFERENCES teams   (team_id) ON DELETE CASCADE,
+    user_id       UUID        NOT NULL REFERENCES members (user_id) ON DELETE CASCADE,
+    invited_by    UUID        REFERENCES users (user_id) ON DELETE SET NULL,
+    message       TEXT,
+    status        VARCHAR(20) NOT NULL DEFAULT 'pending',
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    responded_at  TIMESTAMPTZ,
+
+    CONSTRAINT chk_team_invitations_status CHECK (
+        status IN ('pending', 'accepted', 'declined')
+    )
+);
+
+CREATE UNIQUE INDEX uq_team_invitations_pending ON team_invitations (team_id, user_id) WHERE status = 'pending';
+CREATE INDEX        idx_team_invitations_team_id ON team_invitations (team_id);
+CREATE INDEX        idx_team_invitations_user_id ON team_invitations (user_id);
 ```
