@@ -1,0 +1,666 @@
+/* ── Kanban page ──────────────────────────────────────────── */
+
+.kb-page {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - var(--header-h));
+  overflow: hidden;
+}
+
+.kb-header {
+  flex-shrink: 0;
+  padding: 20px 24px 0;
+}
+
+.kb-headrow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.kb-title-group {
+  flex: 1;
+  min-width: 0;
+}
+
+.kb-title {
+  font-family: var(--display);
+  font-size: var(--fs-xl);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.kb-title .ic {
+  color: var(--violet-light);
+  width: 22px;
+  height: 22px;
+}
+
+.kb-subtitle {
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+/* ── Board ────────────────────────────────────────────────── */
+
+.kb-board {
+  flex: 1;
+  display: flex;
+  gap: 12px;
+  padding: 16px 24px 24px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  align-items: flex-start;
+}
+
+.kb-board::-webkit-scrollbar {
+  height: 8px;
+}
+
+/* ── Column ───────────────────────────────────────────────── */
+
+.kb-col {
+  flex-shrink: 0;
+  width: 280px;
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
+  border-radius: var(--r-md);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  transition: border-color 0.18s var(--ease-out);
+}
+
+.kb-col--drag-over {
+  border-color: var(--violet);
+  background: color-mix(in srgb, var(--violet) 6%, var(--surface));
+}
+
+.kb-col-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 12px 8px;
+  flex-shrink: 0;
+}
+
+.kb-col-name {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--ink-2);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kb-col-count {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  background: var(--surface-2);
+  border-radius: var(--r-pill);
+  padding: 1px 7px;
+  flex-shrink: 0;
+}
+
+.kb-col-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: var(--r-sm);
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  transition: color 0.15s, background 0.15s;
+}
+
+.kb-col-btn:hover {
+  color: var(--ink);
+  background: var(--surface-2);
+}
+
+.kb-col-btn--danger:hover {
+  color: var(--red);
+  background: color-mix(in srgb, var(--red) 12%, transparent);
+}
+
+.kb-col-btn .ic {
+  width: 14px;
+  height: 14px;
+}
+
+/* Inline column rename */
+.kb-col-rename {
+  flex: 1;
+  background: var(--surface-2);
+  border: 1px solid var(--violet);
+  border-radius: var(--r-sm);
+  color: var(--ink);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  padding: 3px 7px;
+  outline: none;
+  min-width: 0;
+}
+
+/* ── Cards list ───────────────────────────────────────────── */
+
+.kb-cards {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 8px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.kb-cards::-webkit-scrollbar {
+  width: 4px;
+}
+
+/* ── Card ─────────────────────────────────────────────────── */
+
+.kb-card {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+  cursor: grab;
+  user-select: none;
+  transition:
+    border-color 0.16s var(--ease-out),
+    box-shadow 0.16s var(--ease-out),
+    transform 0.12s var(--ease-out),
+    opacity 0.12s;
+}
+
+.kb-card:hover {
+  border-color: var(--line-strong);
+  box-shadow: var(--shadow-sm);
+}
+
+.kb-card:active {
+  cursor: grabbing;
+}
+
+.kb-card--dragging {
+  opacity: 0.45;
+}
+
+.kb-card-title {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.4;
+  margin-bottom: 6px;
+}
+
+.kb-card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.kb-card-assignee {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+
+.kb-card-av {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--violet) 28%, var(--surface));
+  color: var(--violet-light);
+  font-size: 9px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.kb-card-open-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  transition: opacity 0.14s, color 0.14s, background 0.14s;
+}
+
+.kb-card:hover .kb-card-open-btn {
+  opacity: 1;
+}
+
+.kb-card-open-btn:hover {
+  color: var(--ink);
+  background: var(--surface-3);
+}
+
+.kb-card-open-btn .ic {
+  width: 12px;
+  height: 12px;
+}
+
+/* ── Add card form ────────────────────────────────────────── */
+
+.kb-add-card {
+  padding: 0 8px 8px;
+  flex-shrink: 0;
+}
+
+.kb-add-card-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: var(--r-sm);
+  border: 1px dashed var(--line);
+  background: transparent;
+  color: var(--muted);
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.kb-add-card-btn:hover {
+  color: var(--ink-2);
+  border-color: var(--line-strong);
+  background: var(--surface-2);
+}
+
+.kb-add-card-btn .ic {
+  width: 14px;
+  height: 14px;
+}
+
+.kb-add-card-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.kb-add-card-input {
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--violet);
+  border-radius: var(--r-sm);
+  color: var(--ink);
+  font-size: var(--fs-sm);
+  padding: 8px 10px;
+  outline: none;
+  resize: none;
+  font-family: var(--body);
+  line-height: 1.4;
+}
+
+.kb-add-card-input::placeholder {
+  color: var(--muted);
+}
+
+.kb-add-card-actions {
+  display: flex;
+  gap: 6px;
+}
+
+/* ── Add column ───────────────────────────────────────────── */
+
+.kb-add-col {
+  flex-shrink: 0;
+  width: 240px;
+  align-self: flex-start;
+}
+
+.kb-add-col-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  border: 1px dashed var(--line);
+  background: transparent;
+  color: var(--muted);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.kb-add-col-btn:hover {
+  color: var(--ink-2);
+  border-color: var(--line-strong);
+  background: var(--surface);
+}
+
+.kb-add-col-btn .ic {
+  width: 16px;
+  height: 16px;
+}
+
+.kb-add-col-form {
+  background: var(--surface);
+  border: 1px solid var(--violet);
+  border-radius: var(--r-md);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.kb-add-col-input {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  color: var(--ink);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  padding: 8px 10px;
+  outline: none;
+  width: 100%;
+}
+
+.kb-add-col-input:focus {
+  border-color: var(--violet);
+}
+
+.kb-add-col-input::placeholder {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.kb-add-col-actions {
+  display: flex;
+  gap: 6px;
+}
+
+/* ── Card detail modal ────────────────────────────────────── */
+
+.kb-modal-scrim {
+  position: fixed;
+  inset: 0;
+  background: var(--scrim);
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.kb-modal {
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-lg);
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.kb-modal-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.kb-modal-title-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px solid var(--line);
+  color: var(--ink);
+  font-family: var(--display);
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  padding: 2px 0 6px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.kb-modal-title-input:focus {
+  border-bottom-color: var(--violet-light);
+}
+
+.kb-modal-close {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-sm);
+  border: none;
+  background: var(--surface-2);
+  color: var(--muted);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  transition: color 0.15s, background 0.15s;
+}
+
+.kb-modal-close:hover {
+  color: var(--ink);
+  background: var(--surface-3);
+}
+
+.kb-modal-close .ic {
+  width: 16px;
+  height: 16px;
+}
+
+.kb-modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.kb-modal-label {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.kb-modal-desc {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  color: var(--ink);
+  font-size: var(--fs-sm);
+  padding: 10px 12px;
+  outline: none;
+  resize: vertical;
+  min-height: 80px;
+  font-family: var(--body);
+  line-height: 1.5;
+  transition: border-color 0.15s;
+}
+
+.kb-modal-desc:focus {
+  border-color: var(--violet);
+}
+
+.kb-modal-desc::placeholder {
+  color: var(--muted);
+}
+
+.kb-modal-select {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  color: var(--ink);
+  font-size: var(--fs-sm);
+  padding: 9px 12px;
+  outline: none;
+  width: 100%;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239B95BC' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9.5 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+  padding-right: 32px;
+}
+
+.kb-modal-select:focus {
+  border-color: var(--violet);
+}
+
+.kb-modal-select option {
+  background: var(--surface-2);
+  color: var(--ink);
+}
+
+.kb-modal-col-select {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  color: var(--ink);
+  font-size: var(--fs-sm);
+  padding: 9px 12px;
+  outline: none;
+  width: 100%;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239B95BC' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9.5 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+  padding-right: 32px;
+}
+
+.kb-modal-col-select:focus {
+  border-color: var(--violet);
+}
+
+.kb-modal-col-select option {
+  background: var(--surface-2);
+  color: var(--ink);
+}
+
+.kb-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 4px;
+  border-top: 1px solid var(--line-soft);
+}
+
+/* ── Confirm dialog (delete column with cards) ────────────── */
+
+.kb-confirm-scrim {
+  position: fixed;
+  inset: 0;
+  background: var(--scrim);
+  z-index: calc(var(--z-modal) + 10);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.kb-confirm {
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-lg);
+  width: 100%;
+  max-width: 380px;
+  padding: 24px;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.kb-confirm-title {
+  font-family: var(--display);
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.kb-confirm-body {
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+
+.kb-confirm-body strong {
+  color: var(--warning);
+}
+
+.kb-confirm-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+/* ── Loading / error ──────────────────────────────────────── */
+
+.kb-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  color: var(--muted);
+  font-size: var(--fs-sm);
+  gap: 10px;
+}
+
+.kb-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  flex-direction: column;
+  gap: 12px;
+  color: var(--red);
+  font-size: var(--fs-sm);
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  .kb-board {
+    padding: 12px 12px 20px;
+    gap: 10px;
+  }
+
+  .kb-col {
+    width: 256px;
+  }
+
+  .kb-header {
+    padding: 16px 16px 0;
+  }
+}
