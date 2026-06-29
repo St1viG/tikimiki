@@ -1,0 +1,182 @@
+/* Notification popup demo (page-specific) */
+
+/* Demo trigger that lives in the header right slot, like .search */
+.bell-anchor{ justify-self:end; position:relative; }
+.bell-btn{
+  position:relative; width:42px; height:42px; border-radius:12px;
+  display:grid; place-items:center; color:var(--ink-2);
+  background:color-mix(in srgb, var(--surface-2) 70%, transparent); border:1px solid var(--line);
+  transition:color .16s var(--ease-out), background .16s var(--ease-out),
+             border-color .16s var(--ease-out), transform .15s var(--ease-out);
+}
+.bell-btn .ic{ width:20px; height:20px; }
+.bell-btn:hover{ color:var(--ink); border-color:var(--violet-light); transform:translateY(-1px); }
+.bell-btn.bell-active{
+  color:var(--lemon); background:color-mix(in srgb, var(--violet) 22%, transparent); border-color:var(--violet-light);
+}
+.bell-badge{
+  position:absolute; top:-5px; right:-5px; min-width:19px; height:19px; padding:0 5px;
+  border-radius:999px; background:var(--lemon); color:var(--on-accent);
+  font-family:var(--mono); font-size:11px; font-weight:700; display:grid; place-items:center;
+  font-variant-numeric:tabular-nums; letter-spacing:-.02em; border:2px solid var(--bg);
+  box-shadow:0 0 0 0 color-mix(in srgb, var(--lemon) 50%, transparent);
+  transition:transform .2s var(--ease-quint), box-shadow .2s var(--ease-out);
+  animation:badge-throb 2.6s var(--ease-out) infinite;
+}
+.bell-btn:hover .bell-badge{ box-shadow:var(--glow-lemon); }
+/* badge scales out crisply when the panel opens (signature: it "flies" into the panel) */
+.bell-btn.bell-active .bell-badge{ transform:scale(0); animation:none; }
+@keyframes badge-throb{ 0%,92%,100%{ box-shadow:0 0 0 0 color-mix(in srgb, var(--lemon) 50%, transparent); } 96%{ box-shadow:0 0 0 4px color-mix(in srgb, var(--lemon) 0%, transparent); } }
+
+/* The dropdown panel — reskinned to the .card system */
+.notif-dropdown{
+  position:absolute; top:calc(100% + 12px); right:0; width:360px;
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+  box-shadow:0 28px 70px -24px var(--scrim), 0 0 0 1px var(--line-soft);
+  overflow:hidden; z-index:var(--z-pop);
+  /* origin pinned to the bell corner so the panel scales OUT of the bell */
+  transform-origin:top right;
+  animation:dropdown-in .22s var(--ease-quint) both;
+}
+.notif-dropdown.closing{ animation:dropdown-out .14s ease forwards; }
+
+@keyframes dropdown-in{
+  0%{ opacity:0; transform:scale(.86) translateY(-10px); }
+  60%{ opacity:1; }
+  100%{ opacity:1; transform:scale(1) translateY(0); }
+}
+@keyframes dropdown-out{
+  from{ opacity:1; transform:scale(1) translateY(0); }
+  to{ opacity:0; transform:scale(.9) translateY(-8px); }
+}
+
+/* rows cascade in just after the panel, for a sense of depth */
+.notif-dropdown:not(.closing) .notif-item{ animation:notif-row-in .34s var(--ease-out) both; }
+.notif-dropdown:not(.closing) .notif-item:nth-child(1){ animation-delay:.06s; }
+.notif-dropdown:not(.closing) .notif-item:nth-child(2){ animation-delay:.10s; }
+.notif-dropdown:not(.closing) .notif-item:nth-child(3){ animation-delay:.14s; }
+.notif-dropdown:not(.closing) .notif-item:nth-child(4){ animation-delay:.18s; }
+.notif-dropdown:not(.closing) .notif-item:nth-child(5){ animation-delay:.22s; }
+@keyframes notif-row-in{ from{ opacity:0; transform:translateY(6px); } to{ opacity:1; transform:none; } }
+
+/* little pointer toward the bell */
+.notif-dropdown::before{
+  content:''; position:absolute; top:-5px; right:15px; width:10px; height:10px;
+  background:var(--surface); border-top:1px solid var(--line); border-left:1px solid var(--line);
+  transform:rotate(45deg);
+}
+
+.notif-header{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 16px 12px; border-bottom:1px solid var(--line-soft);
+}
+.notif-title{
+  font-family:var(--display); font-weight:700; font-size:16px;
+  letter-spacing:-.01em; color:var(--ink);
+}
+.notif-mark-all{
+  display:inline-flex; align-items:center; gap:5px;
+  font-family:var(--body); font-size:12.5px; font-weight:600;
+  color:var(--violet-light); transition:color .15s var(--ease-out);
+}
+.notif-mark-all .ic{ width:14px; height:14px; }
+.notif-mark-all:hover{ color:var(--lemon); }
+
+.notif-list{ max-height:320px; overflow-y:auto; }
+.notif-list::-webkit-scrollbar{ width:4px; }
+.notif-list::-webkit-scrollbar-track{ background:transparent; }
+.notif-list::-webkit-scrollbar-thumb{ background:var(--line); border-radius:2px; }
+
+.notif-item{
+  display:flex; align-items:flex-start; gap:11px; width:100%; text-align:left;
+  padding:12px 16px; border-bottom:1px solid var(--line-soft);
+  position:relative; transition:background .15s var(--ease-out);
+}
+.notif-item:last-child{ border-bottom:none; }
+.notif-item:hover{ background:var(--surface-2); }
+.notif-item.unread{ background:color-mix(in srgb, var(--violet) 9%, transparent); }
+.notif-item.unread:hover{ background:color-mix(in srgb, var(--violet) 15%, transparent); }
+/* crisp left edge marks an unread row at a glance */
+.notif-item.unread::before{
+  content:''; position:absolute; left:0; top:10px; bottom:10px; width:2px;
+  border-radius:0 2px 2px 0; background:var(--violet-light);
+}
+
+.notif-unread-dot{
+  position:absolute; top:16px; right:14px; width:7px; height:7px;
+  border-radius:50%; background:var(--violet-light);
+  box-shadow:0 0 0 3px color-mix(in srgb, var(--violet-light) 16%, transparent), 0 0 8px color-mix(in srgb, var(--violet-light) 55%, transparent);
+}
+
+.notif-item .avatar{ width:36px; height:36px; font-size:12px; }
+.avatar.org-l{ background:color-mix(in srgb, var(--lemon) 12%, transparent); color:var(--lemon-vivid); border:1px solid color-mix(in srgb, var(--lemon) 30%, transparent); border-radius:11px; font-family:var(--display); font-weight:800; }
+.avatar.org-b{ background:color-mix(in srgb, var(--violet) 18%, transparent); color:var(--violet-light); border:1px solid var(--line); border-radius:11px; font-family:var(--display); font-weight:800; }
+
+.notif-body{ flex:1; min-width:0; }
+.notif-sender{ font-size:14px; font-weight:600; color:var(--ink); }
+.notif-text{
+  font-size:13.5px; color:var(--ink-2); margin-top:2px; line-height:1.4;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.notif-time{
+  font-family:var(--mono); font-variant-numeric:tabular-nums; letter-spacing:-.01em;
+  font-size:11px; color:var(--muted); margin-top:5px; font-weight:500;
+}
+
+.notif-footer{ padding:11px 16px; border-top:1px solid var(--line-soft); text-align:center; }
+.notif-see-all{
+  display:inline-flex; align-items:center; gap:6px;
+  font-size:13.5px; font-weight:600; color:var(--muted);
+  transition:color .15s var(--ease-out);
+}
+.notif-see-all .ic{ width:14px; height:14px; }
+.notif-see-all:hover{ color:var(--violet-light); }
+
+/* Demo stage in main */
+.demo-stage{
+  position:relative; overflow:hidden;
+  min-height:420px; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:18px; text-align:center;
+  border-radius:var(--r); background:var(--surface); border:1px solid var(--line);
+  padding:48px 28px;
+}
+/* grid-breaking moment: oversized display glyph bleeding off-axis behind the demo */
+.demo-stage .stage-ghost{
+  position:absolute; right:-34px; bottom:-58px; width:230px; height:230px;
+  color:var(--violet-light); opacity:.05; pointer-events:none; transform:rotate(-8deg);
+}
+.demo-stage > *{ position:relative; z-index:1; }
+.demo-stage .demo-ic{
+  width:66px; height:66px; border-radius:18px; display:grid; place-items:center;
+  color:var(--lemon); background:linear-gradient(140deg, var(--violet), var(--violet-deep));
+  border:1px solid var(--line);
+  animation:bell-sway 4.5s var(--ease-out) infinite;
+}
+.demo-stage .demo-ic .ic{ width:30px; height:30px; transform-origin:50% 18%; }
+.demo-stage .stage-eyebrow{
+  font-family:var(--mono); font-variant-numeric:tabular-nums; letter-spacing:.14em;
+  text-transform:uppercase; font-size:11px; color:var(--lemon);
+}
+.demo-stage p{ color:var(--muted); font-size:15px; max-width:300px; line-height:1.6; }
+.demo-stage p strong{ color:var(--violet-light); font-weight:700; }
+/* gentle bell sway hints at the live notifications */
+@keyframes bell-sway{ 0%,86%,100%{ transform:rotate(0); } 90%{ transform:rotate(-7deg); } 94%{ transform:rotate(6deg); } 97%{ transform:rotate(-3deg); } }
+@media (prefers-reduced-motion:reduce){ .demo-stage .demo-ic{ animation:none; } }
+
+.demo-note{
+  position:fixed; bottom:22px; left:50%; transform:translateX(-50%);
+  display:inline-flex; align-items:center; gap:8px;
+  background:var(--surface); border:1px solid var(--line); border-radius:999px;
+  padding:9px 18px; font-size:12.5px; color:var(--muted); white-space:nowrap;
+  box-shadow:0 12px 30px -18px var(--scrim); z-index:var(--z-pop);
+}
+.demo-note .ic{ width:15px; height:15px; color:var(--lemon); }
+
+@media (max-width:720px){
+  .notif-dropdown{ width:min(360px, calc(100vw - 28px)); right:-8px; }
+}
+@media (max-width:480px){
+  .notif-dropdown{ width:calc(100vw - 24px); right:-12px; }
+  .demo-stage{ min-height:340px; padding:36px 20px; }
+  .demo-stage .stage-ghost{ width:170px; height:170px; right:-26px; bottom:-44px; }
+}
