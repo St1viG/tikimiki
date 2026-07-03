@@ -1141,10 +1141,23 @@ export const deleteAvatarImage = () =>
 export const deleteBannerImage = () =>
   DELETE<{ success: true }>("/users/me/banner");
 
-// OAuth (GitHub / Google)
+// OAuth (GitHub / Google / LinkedIn)
 /** Full-page navigation target that kicks off the provider OAuth flow. */
-export const oauthUrl = (provider: "github" | "google") =>
+export const oauthUrl = (provider: "github" | "google" | "linkedin") =>
   `${BASE}/auth/oauth/${provider}`;
+
+/** Registration pre-flight: which of the given identifiers are still free. */
+export const checkAvailability = (params: {
+  email?: string;
+  username?: string;
+}) => {
+  const q = new URLSearchParams();
+  if (params.email) q.set("email", params.email);
+  if (params.username) q.set("username", params.username);
+  return GET<{ email?: boolean; username?: boolean }>(
+    `/auth/availability?${q.toString()}`,
+  );
+};
 
 // Admin: audit log + appeals
 export const getAuditLog = (search?: string) =>

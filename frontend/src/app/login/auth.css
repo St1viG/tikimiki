@@ -1,0 +1,336 @@
+/* /login + /signup — the shared auth card (AuthClient).
+   Every class is scoped under the au- prefix so nothing collides with the
+   other auth-adjacent pages that still load login.css (verify-email,
+   reset-password). Colors, spacing, radii, motion all come from the
+   Midnight Voltage tokens in globals.css — no new brand values. */
+
+.au-page{
+  position:relative; z-index:var(--z-base);
+  min-height:100vh; display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  padding:var(--space-7) var(--space-4);
+}
+.au-page .auth-wordmark-link{ margin-bottom:var(--space-5); font-size:34px; }
+
+/* Unstyle the raw buttons once; specific looks below. */
+.au-eye, .au-linkbtn, .au-oauth-btn{
+  background:none; border:0; cursor:pointer; font:inherit; color:inherit;
+}
+
+.au-card{
+  position:relative; width:100%; max-width:440px; overflow:hidden;
+  background:linear-gradient(180deg, var(--surface-2), var(--surface) 52%);
+  border:1px solid var(--line); border-radius:var(--r);
+  box-shadow:0 30px 70px -40px rgba(0,0,0,.9);
+  padding:var(--space-6) var(--space-6) var(--space-5);
+}
+/* the voltage line every auth card carries */
+.au-card::before{
+  content:""; position:absolute; left:0; right:0; top:0; height:2px;
+  background:linear-gradient(90deg, var(--lemon), var(--violet-light) 60%, transparent);
+}
+
+.au-heading{
+  font-family:var(--display); font-weight:800; letter-spacing:-.03em;
+  font-size:clamp(24px, 4vw, 30px); line-height:1.05; color:var(--ink);
+  margin-bottom:var(--space-5); text-align:center; text-wrap:balance;
+}
+
+/* mode switch: the incoming panel fades up */
+.au-panel{ animation:au-panel-in var(--dur-3) var(--ease-out); }
+@keyframes au-panel-in{ from{ opacity:0; transform:translateY(6px); } }
+
+/* ----- fields ----- */
+.au-field{ display:flex; flex-direction:column; gap:var(--space-2); margin-bottom:var(--space-4); }
+.au-label{ font-size:var(--fs-sm); font-weight:600; color:var(--ink-2); }
+
+.au-input-wrap{ position:relative; }
+.au-input{
+  width:100%; font-family:var(--body); font-size:15px; color:var(--ink);
+  background:color-mix(in srgb, var(--surface-2) 70%, transparent);
+  border:1px solid var(--line); border-radius:var(--r-sm);
+  padding:12px 42px 12px 14px; outline:none;
+  transition:border-color var(--dur-2) var(--ease-out),
+             background var(--dur-2) var(--ease-out),
+             box-shadow var(--dur-2) var(--ease-out);
+}
+.au-input:hover{ border-color:var(--line-strong); }
+.au-input:focus{
+  border-color:var(--violet-light);
+  background:color-mix(in srgb, var(--surface-2) 96%, transparent);
+  box-shadow:0 0 0 3px color-mix(in srgb, var(--violet-light) 14%, transparent);
+}
+.au-input.has-eye{ padding-right:78px; }
+.au-input.has-prefix{ padding-left:31px; }
+.au-input-prefix{
+  position:absolute; left:14px; top:50%; transform:translateY(-50%);
+  font-size:15px; font-weight:700; color:var(--violet-light); pointer-events:none;
+}
+.au-input.is-err{ border-color:color-mix(in srgb, var(--red) 65%, var(--line)); }
+.au-input.is-err:focus{
+  border-color:var(--red);
+  box-shadow:0 0 0 3px color-mix(in srgb, var(--red) 14%, transparent);
+}
+.au-input.is-ok{ border-color:color-mix(in srgb, var(--green) 42%, var(--line)); }
+
+/* in-field status: green check / availability spinner */
+.au-status{
+  position:absolute; right:12px; top:50%; transform:translateY(-50%);
+  display:grid; place-items:center; width:20px; height:20px; pointer-events:none;
+}
+.au-status .ic{ width:17px; height:17px; }
+.au-status.ok{ color:var(--green); animation:au-pop var(--dur-3) var(--ease-quint); }
+.au-status.pw{ right:46px; }
+@keyframes au-pop{ from{ transform:translateY(-50%) scale(.4); opacity:0; } }
+
+.au-eye{
+  position:absolute; right:7px; top:50%; transform:translateY(-50%);
+  width:32px; height:32px; display:grid; place-items:center;
+  color:var(--muted); border-radius:8px;
+  transition:color var(--dur-1) var(--ease-out), background var(--dur-1) var(--ease-out);
+}
+.au-eye:hover{ color:var(--ink); background:var(--surface-3); }
+.au-eye .ic{ width:18px; height:18px; }
+
+/* field messages: error / caps-lock warning / async hint */
+.au-msg{
+  display:flex; align-items:flex-start; gap:6px;
+  font-size:13px; font-weight:600; line-height:1.35;
+  animation:au-msg-in var(--dur-2) var(--ease-out);
+}
+.au-msg .ic{ width:14px; height:14px; flex-shrink:0; margin-top:2px; }
+.au-msg.err{ color:var(--red); }
+.au-msg.warn{ color:var(--warning); }
+.au-msg.hint{ color:var(--muted); font-weight:500; }
+@keyframes au-msg-in{ from{ opacity:0; transform:translateY(-2px); } }
+
+.au-linkbtn{
+  font-size:var(--fs-sm); font-weight:600; color:var(--violet-light);
+  transition:color var(--dur-1) var(--ease-out);
+}
+.au-linkbtn:hover{ color:var(--lemon); }
+.au-msg .au-linkbtn{ font-size:inherit; text-decoration:underline; text-underline-offset:2px; }
+
+/* remember me + forgot password */
+.au-remember-row{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:var(--space-3); margin:-4px 0 var(--space-4);
+}
+.au-check-label{
+  display:inline-flex; align-items:center; gap:9px;
+  font-size:var(--fs-sm); color:var(--ink-2); cursor:pointer; user-select:none;
+}
+.au-check-label input{ position:absolute; opacity:0; width:0; height:0; }
+.au-check-mark{
+  width:18px; height:18px; border-radius:5px; flex-shrink:0;
+  border:1.5px solid var(--line); background:color-mix(in srgb, var(--surface-2) 70%, transparent);
+  display:grid; place-items:center; color:transparent;
+  transition:background var(--dur-1) var(--ease-out),
+             border-color var(--dur-1) var(--ease-out),
+             color var(--dur-1) var(--ease-out);
+}
+.au-check-mark .ic{ width:13px; height:13px; }
+.au-check-label input:checked + .au-check-mark{
+  background:var(--violet); border-color:var(--violet); color:var(--lemon);
+}
+.au-check-label input:focus-visible + .au-check-mark{
+  outline:2px solid var(--lemon); outline-offset:2px;
+}
+
+/* "I'm not a robot" placeholder — revealed once the form is filled in.
+   Entry: the row grows open while the box itself pops in with a small
+   overshoot. overflow:clip keeps the grow phase from spilling; nothing
+   inside (focus ring, flash) reaches the field edge, so it clips nothing. */
+.au-captcha-field{
+  overflow:clip;
+  animation:au-captcha-grow .42s var(--ease-quint);
+}
+@keyframes au-captcha-grow{ from{ max-height:0; } to{ max-height:110px; } }
+.au-captcha{
+  display:flex; align-items:center; gap:13px;
+  padding:13px 15px; border-radius:var(--r-sm);
+  background:color-mix(in srgb, var(--surface-2) 55%, transparent);
+  border:1px solid var(--line);
+  transform-origin:50% 0;
+  animation:au-captcha-pop .42s var(--ease-quint);
+}
+@keyframes au-captcha-pop{
+  0%{ opacity:0; transform:scale(.55); }
+  65%{ opacity:1; transform:scale(1.04); }
+  100%{ opacity:1; transform:scale(1); }
+}
+.au-captcha-check{
+  width:26px; height:26px; border-radius:6px; flex-shrink:0;
+  border:2px solid var(--line-strong); background:var(--surface);
+  display:grid; place-items:center; color:transparent; cursor:pointer;
+  transition:border-color var(--dur-2) var(--ease-out),
+             background var(--dur-2) var(--ease-out),
+             color var(--dur-2) var(--ease-out);
+}
+.au-captcha-check .ic{ width:16px; height:16px; transition:transform var(--dur-2) var(--ease-quint); }
+.au-captcha-check.checked{
+  border-color:var(--green);
+  background:color-mix(in srgb, var(--green) 12%, transparent);
+  color:var(--green);
+  animation:au-captcha-flash .5s var(--ease-out);
+}
+.au-captcha-check.checked .ic{ transform:scale(1.15); }
+@keyframes au-captcha-flash{
+  0%{ box-shadow:0 0 0 0 color-mix(in srgb, var(--green) 50%, transparent); transform:scale(1); }
+  45%{ transform:scale(1.12); }
+  100%{ box-shadow:0 0 0 12px color-mix(in srgb, var(--green) 0%, transparent); transform:scale(1); }
+}
+.au-captcha-info{ flex:1; min-width:0; }
+.au-captcha-text{ font-size:14px; font-weight:600; color:var(--ink); }
+.au-captcha-sub{ font-size:var(--fs-xs); color:var(--muted); margin-top:2px; }
+.au-captcha-brand{
+  display:flex; flex-direction:column; align-items:center; gap:3px;
+  flex-shrink:0; color:var(--muted);
+}
+.au-captcha-brand .ic{ width:22px; height:22px; }
+.au-captcha-brand span{ font-size:9px; letter-spacing:.04em; }
+
+/* requirement checklist — dots charge up as rules are met */
+.au-reqs{
+  list-style:none; display:grid; grid-template-columns:1fr 1fr;
+  gap:6px 12px; margin-top:var(--space-2);
+}
+.au-req{
+  display:flex; align-items:center; gap:7px;
+  font-size:12.5px; color:var(--muted);
+  transition:color var(--dur-2) var(--ease-out);
+}
+.au-req-dot{
+  width:15px; height:15px; border-radius:50%; flex-shrink:0;
+  border:1.5px solid var(--line-strong); color:transparent;
+  display:grid; place-items:center;
+  transition:border-color var(--dur-2) var(--ease-out),
+             background var(--dur-2) var(--ease-out),
+             color var(--dur-2) var(--ease-out);
+}
+.au-req-dot .ic{ width:9px; height:9px; }
+.au-req.met{ color:var(--ink-2); }
+.au-req.met .au-req-dot{
+  border-color:var(--green);
+  background:color-mix(in srgb, var(--green) 15%, transparent);
+  color:var(--green);
+}
+
+/* ----- form-level alert / info ----- */
+.au-alert{
+  display:flex; align-items:flex-start; gap:10px;
+  padding:12px 14px; margin-bottom:var(--space-4);
+  border-radius:var(--r-sm);
+  border:1px solid color-mix(in srgb, var(--red) 45%, var(--line));
+  background:color-mix(in srgb, var(--red) 10%, transparent);
+  font-size:13.5px; font-weight:600; color:var(--ink);
+  animation:au-msg-in var(--dur-2) var(--ease-out);
+}
+.au-alert .ic{ width:16px; height:16px; flex-shrink:0; margin-top:1px; color:var(--red); }
+.au-alert.is-info{
+  border-color:color-mix(in srgb, var(--violet-light) 40%, var(--line));
+  background:color-mix(in srgb, var(--violet-light) 8%, transparent);
+  font-weight:500; color:var(--ink-2); overflow-wrap:anywhere;
+}
+.au-alert.is-info .ic{ color:var(--violet-light); }
+
+/* ----- submit ----- */
+.au-submit{ width:100%; justify-content:center; gap:10px; padding:13px; font-size:var(--fs-base); }
+/* aria-disabled instead of disabled so focus doesn't drop to <body> mid-submit */
+.au-submit[aria-disabled="true"]{ opacity:.75; cursor:default; }
+.au-submit[aria-disabled="true"]:hover{ background:var(--lemon); transform:none; box-shadow:none; }
+
+.au-spin{
+  width:15px; height:15px; flex-shrink:0; border-radius:50%;
+  border:2px solid var(--line-strong); border-top-color:var(--violet-light);
+  animation:au-rot .7s linear infinite;
+}
+.au-spin.on-accent{
+  border-color:color-mix(in srgb, var(--on-accent) 35%, transparent);
+  border-top-color:var(--on-accent);
+}
+@keyframes au-rot{ to{ transform:rotate(1turn); } }
+
+/* ----- divider + social ----- */
+.au-divider{ display:flex; align-items:center; gap:14px; margin:var(--space-5) 0; }
+.au-divider::before, .au-divider::after{ content:""; flex:1; height:1px; background:var(--line); }
+.au-divider span{ font-size:var(--fs-xs); color:var(--muted); white-space:nowrap; }
+
+.au-oauth{ display:flex; gap:10px; }
+.au-oauth-btn{
+  flex:1; display:inline-flex; align-items:center; justify-content:center; gap:10px;
+  font-size:14px; font-weight:700; color:var(--ink);
+  background:color-mix(in srgb, var(--surface-2) 70%, transparent);
+  border:1px solid var(--line); border-radius:var(--r-sm); padding:11px 14px;
+  transition:border-color var(--dur-2) var(--ease-out),
+             background var(--dur-2) var(--ease-out),
+             transform var(--dur-1) var(--ease-out);
+}
+.au-oauth-btn:hover:not([aria-disabled="true"]){
+  border-color:var(--violet-light);
+  background:color-mix(in srgb, var(--surface-2) 96%, transparent);
+  transform:translateY(-1px);
+}
+.au-oauth-btn:active:not([aria-disabled="true"]){ transform:scale(.98); }
+.au-oauth-btn[aria-disabled="true"]{ opacity:.6; cursor:default; }
+.au-oauth-btn svg, .au-oauth-btn .ic{ width:18px; height:18px; flex-shrink:0; }
+
+/* mode switch under the social buttons */
+.au-switch{
+  text-align:center; margin-top:var(--space-5);
+  font-size:var(--fs-sm); color:var(--muted);
+}
+.au-switch .au-linkbtn{ font-weight:700; }
+
+/* banned-account panel: appeal textarea + submit inside a red-tinted block */
+.au-banned{
+  padding:13px 14px; margin-bottom:var(--space-4);
+  border-radius:var(--r-sm);
+  border:1px solid color-mix(in srgb, var(--red) 45%, var(--line));
+  background:color-mix(in srgb, var(--red) 8%, transparent);
+  animation:au-msg-in var(--dur-2) var(--ease-out);
+}
+.au-banned-title{ font-size:14px; font-weight:700; color:var(--red); margin-bottom:4px; }
+.au-banned-reason{ font-size:13.5px; color:var(--ink-2); margin-bottom:var(--space-3); }
+.au-banned .au-field{ margin-bottom:0; }
+textarea.au-input{ resize:vertical; min-height:84px; padding-right:14px; }
+.au-banned .btn{ width:100%; justify-content:center; margin-top:var(--space-2); }
+
+/* subtle link to the organization signup under the register card */
+.au-subtle-link{
+  display:block; text-align:center; font-size:13px; color:var(--muted);
+  margin-top:var(--space-3); padding-top:var(--space-4);
+  border-top:1px solid var(--line-soft);
+}
+.au-subtle-link span{ color:var(--violet-light); font-weight:600; }
+.au-subtle-link:hover span{ color:var(--lemon); }
+
+.au-footer{
+  margin-top:var(--space-6); text-align:center;
+  font-family:var(--display); font-weight:700; font-size:var(--fs-xs);
+  color:var(--lemon);
+}
+.au-footer b{ color:var(--violet-light); }
+.au-footer .yr{ font-family:var(--mono); font-variant-numeric:tabular-nums; }
+
+/* screen-reader only */
+.au-sr{
+  position:absolute; width:1px; height:1px; padding:0; margin:-1px;
+  overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0;
+}
+
+@media (max-width:480px){
+  .au-page{ padding:var(--space-6) var(--space-4); }
+  .au-card{ padding:var(--space-5) var(--space-4) var(--space-4); }
+  .au-page .auth-wordmark-link{ font-size:30px; }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .au-panel, .au-msg, .au-alert, .au-banned, .au-status.ok,
+  .au-captcha, .au-captcha-field, .au-captcha-check.checked{ animation:none; }
+  /* spinner stays as a static three-quarter ring; the paired state text
+     ("Signing in…", "Checking availability…") carries the busy signal */
+  .au-spin{ animation:none; }
+  .au-input, .au-oauth-btn{ transition:none; }
+  .au-oauth-btn:hover:not([aria-disabled="true"]){ transform:none; }
+}

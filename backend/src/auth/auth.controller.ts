@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   Post,
+  Query,
   Req,
   Res,
   UseGuards,
@@ -14,8 +15,10 @@ import { ZodValidationPipe } from "../common/zod.pipe";
 import { AuthService } from "./auth.service";
 import { CurrentUser } from "./current-user.decorator";
 import {
+  availabilityQuerySchema,
   loginSchema,
   registerSchema,
+  type AvailabilityQuery,
   type LoginInput,
   type RegisterInput,
 } from "./dto";
@@ -35,6 +38,14 @@ export class AuthController {
       path: "/api/v1/auth",
       maxAge: env.JWT_REFRESH_TTL * 1000,
     });
+  }
+
+  /** Public pre-flight for the registration form's live availability check. */
+  @Get("availability")
+  availability(
+    @Query(new ZodValidationPipe(availabilityQuerySchema)) q: AvailabilityQuery,
+  ) {
+    return this.auth.availability(q.email, q.username);
   }
 
   @Post("register")

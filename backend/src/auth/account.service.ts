@@ -161,10 +161,15 @@ export class AccountService {
     password: string,
     reason: string,
   ): Promise<{ success: true }> {
+    // Same email-or-username identifier the login endpoint accepts.
+    const identifier = email.trim();
+    const idMatch = identifier.includes("@")
+      ? eq(users.email, identifier)
+      : eq(users.username, identifier);
     const [u] = await this.db
       .select({ userId: users.userId, passwordHash: users.passwordHash })
       .from(users)
-      .where(and(eq(users.email, email), isNull(users.deletedAt)))
+      .where(and(idMatch, isNull(users.deletedAt)))
       .limit(1);
     if (!u || !(await verify(u.passwordHash, password))) {
       throw new UnauthorizedException("Invalid credentials");

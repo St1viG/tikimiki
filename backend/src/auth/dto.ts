@@ -21,11 +21,21 @@ export const registerSchema = z
   );
 export type RegisterInput = z.infer<typeof registerSchema>;
 
+// `email` carries the sign-in identifier: an email address OR a username.
+// The field keeps its historical name so existing clients stay compatible.
 export const loginSchema = z.object({
-  email: z.string().email(),
+  email: z.string().trim().min(1).max(254),
   password: z.string().min(1),
 });
 export type LoginInput = z.infer<typeof loginSchema>;
+
+// Pre-flight availability probe for the registration form. Both params are
+// optional; the response only contains keys that were asked about.
+export const availabilityQuerySchema = z.object({
+  email: z.string().trim().max(254).optional(),
+  username: z.string().trim().max(32).optional(),
+});
+export type AvailabilityQuery = z.infer<typeof availabilityQuerySchema>;
 
 export const refreshSchema = z.object({
   refreshToken: z.string().min(1).optional(),

@@ -88,7 +88,7 @@ export function SuspendedClient() {
     }
     // NOTE: deferred. The only user-facing appeal endpoint in api.ts is
     // submitBanAppeal(email, password, reason), which requires the account
-    // credentials to be re-entered (it is used pre-auth from LoginClient). This
+    // credentials to be re-entered (it is used pre-auth from AuthClient). This
     // suspended page has no email/password inputs and no session-based appeal
     // endpoint exists, so we cannot call it here without inventing a new API or
     // adding a credential form. Keeping the local success UX and logging the gap

@@ -9,7 +9,7 @@ const REFRESH_COOKIE = "tikimiki_refresh";
 const STATE_COOKIE = "tikimiki_oauth_state";
 
 function isProvider(p: string): p is OAuthProvider {
-  return p === "github" || p === "google";
+  return p === "github" || p === "google" || p === "linkedin";
 }
 
 /**

@@ -45,6 +45,33 @@ describe("auth (e2e)", () => {
     });
   });
 
+  it("logs in with the username as the identifier", async () => {
+    const u = await registerMember(app);
+    const login = await http()
+      .post("/api/v1/auth/login")
+      .send({ email: u.username, password: u.password })
+      .expect(200);
+    expect(login.body.user.username).toBe(u.username);
+  });
+
+  it("reports email and username availability", async () => {
+    const u = await registerMember(app);
+    const taken = await http()
+      .get(`/api/v1/auth/availability?email=${encodeURIComponent(u.email)}&username=${u.username}`)
+      .expect(200);
+    expect(taken.body).toEqual({ email: false, username: false });
+
+    const free = await http()
+      .get(`/api/v1/auth/availability?email=${uniqueId("free")}@test.dev&username=${uniqueId("free")}`)
+      .expect(200);
+    expect(free.body).toEqual({ email: true, username: true });
+
+    const partial = await http()
+      .get(`/api/v1/auth/availability?username=${u.username}`)
+      .expect(200);
+    expect(partial.body).toEqual({ username: false });
+  });
+
   it("rejects a duplicate email with 409", async () => {
     const u = await registerMember(app);
     await http()

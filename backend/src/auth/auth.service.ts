@@ -113,11 +113,46 @@ export class AuthService {
     return { user: this.toPublicUser(user), ...(await this.issueTokens(user.userId)) };
   }
 
+  /**
+   * Registration pre-flight: is this email / username still free? Mirrors the
+   * clash check in {@link register} (exact match, deleted accounts included,
+   * since register would still 409 on them).
+   */
+  async availability(
+    email?: string,
+    username?: string,
+  ): Promise<{ email?: boolean; username?: boolean }> {
+    const out: { email?: boolean; username?: boolean } = {};
+    if (email) {
+      const [row] = await this.db
+        .select({ id: users.userId })
+        .from(users)
+        .where(eq(users.email, email))
+        .limit(1);
+      out.email = !row;
+    }
+    if (username) {
+      const [row] = await this.db
+        .select({ id: users.userId })
+        .from(users)
+        .where(eq(users.username, username))
+        .limit(1);
+      out.username = !row;
+    }
+    return out;
+  }
+
   async login(input: LoginInput) {
+    // The identifier is an email or a username; emails always contain "@"
+    // and usernames never do, so the two lookups cannot collide.
+    const identifier = input.email.trim();
+    const idMatch = identifier.includes("@")
+      ? eq(users.email, identifier)
+      : eq(users.username, identifier);
     const [u] = await this.db
       .select()
       .from(users)
-      .where(and(eq(users.email, input.email), isNull(users.deletedAt)))
+      .where(and(idMatch, isNull(users.deletedAt)))
       .limit(1);
 
     if (!u || !(await verify(u.passwordHash, input.password))) {

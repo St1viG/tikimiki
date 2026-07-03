@@ -1,4 +1,19 @@
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
+import { config as loadEnvFile } from "dotenv";
 import { z } from "zod";
+
+// Load backend/.env (if present) then the repo-root .env (shared with
+// docker-compose) into process.env. Keys already present in the real
+// environment always win — dotenv never overwrites existing values — which
+// is what keeps the test suite pinned to tikimiki_test (vitest presets
+// DATABASE_URL before any of this runs).
+for (const candidate of [
+  resolve(process.cwd(), ".env"),
+  resolve(process.cwd(), "..", ".env"),
+]) {
+  if (existsSync(candidate)) loadEnvFile({ path: candidate });
+}
 
 const schema = z.object({
   NODE_ENV: z
@@ -27,7 +42,15 @@ const schema = z.object({
   GITHUB_CLIENT_SECRET: z.string().default(""),
   GOOGLE_CLIENT_ID: z.string().default(""),
   GOOGLE_CLIENT_SECRET: z.string().default(""),
+  LINKEDIN_CLIENT_ID: z.string().default(""),
+  LINKEDIN_CLIENT_SECRET: z.string().default(""),
 });
 
-export const env = schema.parse(process.env);
+// Blank values (bare `KEY=` lines in .env) behave like unset keys so the
+// schema defaults apply instead of failing enum/url validation on "".
+const definedEnv = Object.fromEntries(
+  Object.entries(process.env).filter(([, v]) => v !== ""),
+);
+
+export const env = schema.parse(definedEnv);
 export type Env = z.infer<typeof schema>;
