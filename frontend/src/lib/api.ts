@@ -87,7 +87,11 @@ async function request<T>(
   }
 
   if (res.status === 204) return undefined as T;
-  return (await res.json()) as T;
+  // Nest sends an EMPTY 200 body when a handler returns null (e.g.
+  // /me/active-hackathon with no active hackathon); res.json() would throw
+  // on it, so read as text and map empty → null.
+  const text = await res.text();
+  return (text ? JSON.parse(text) : null) as T;
 }
 
 const GET = <T>(path: string) => request<T>(path);

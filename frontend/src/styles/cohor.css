@@ -436,27 +436,36 @@
 .ch-locked-icon{ flex-shrink:0; color:var(--muted); display:grid; place-items:center; }
 .ch-locked-icon .ic{ width:13px; height:13px; }
 
-/* User strip (pinned bottom of sidebar) */
+/* User strip (pinned bottom of sidebar) — one big trigger for the account
+   menu (.pm-menu from globals.css, anchored above via position:relative). */
 .user-strip{
-  flex-shrink:0;
-  display:flex; align-items:center; gap:10px;
-  padding:10px 12px;
+  position:relative; flex-shrink:0;
+  display:flex; align-items:center;
+  padding:6px;
   border-top:1px solid var(--line-soft);
   background:var(--bg);
 }
+.user-strip-trigger{
+  flex:1; min-width:0; display:flex; align-items:center; gap:10px;
+  padding:4px 6px; border-radius:10px; border:0; background:none; cursor:pointer;
+  font:inherit; color:inherit; text-align:left;
+  transition:background var(--dur-1) var(--ease-out);
+}
+.user-strip-trigger:hover{ background:var(--surface-2); }
 .cohor-app .avatar-strip{ width:36px; height:36px; font-size:12px; }
-.user-strip-info{ flex:1; min-width:0; }
-.user-strip-name{ font-size:14px; font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.user-strip-info{ display:block; flex:1; min-width:0; }
+.user-strip-name{ display:block; font-size:14px; font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .user-strip-status{ display:flex; align-items:center; gap:5px; font-size:12px; color:var(--green); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .status-dot{ width:7px; height:7px; border-radius:50%; background:var(--green); flex-shrink:0; }
-.strip-actions{ display:flex; gap:3px; flex-shrink:0; }
-.strip-btn{
-  width:30px; height:30px; border-radius:8px;
-  display:grid; place-items:center; color:var(--muted);
-  transition:background .15s, color .15s;
-}
-.strip-btn .ic{ width:16px; height:16px; }
-.strip-btn:hover{ background:var(--surface-2); color:var(--ink); }
+/* The account menu reuses the app-shell .pm-menu primitives from globals.css.
+   The scoped reset above (margin/padding zero + button font:inherit) has equal
+   or higher specificity and would flatten them, so re-assert the flattened
+   box/type properties here. */
+.cohor-app .pm-menu{ padding:5px; }
+.cohor-app .pm-menu-item{ padding:9px 10px; font-size:14px; font-weight:600; color:var(--ink-2); }
+.cohor-app .pm-menu-item:hover{ color:var(--ink); }
+.cohor-app .pm-menu-item.is-danger,
+.cohor-app .pm-menu-item.is-danger:hover{ color:var(--red); }
 
 /*
    DM CONTACT SIDEBAR

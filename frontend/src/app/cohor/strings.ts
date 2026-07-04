@@ -43,6 +43,11 @@ export const M = {
     en: "You don't have access to any hackathon server yet. Once you're accepted to a hackathon, its server appears here.",
     sr: "Još nemate pristup nijednom hakaton serveru. Čim budete primljeni na hakaton, njegov server će se pojaviti ovde.",
   },
+  dmEmptyTitle: { en: "No conversations yet", sr: "Još nemaš razgovora" },
+  dmEmptySub: {
+    en: "Start a direct message from someone's profile, or join a hackathon to meet your team.",
+    sr: "Pokreni poruku sa nečijeg profila, ili se prijavi na hakaton i upoznaj svoj tim.",
+  },
   dmAria: { en: "Direct messages", sr: "Direktne poruke" },
   dmTooltip: { en: "Direct messages", sr: "Direktne poruke" },
   settings: { en: "Settings", sr: "Podešavanja" },
@@ -351,6 +356,8 @@ export const M = {
   // User strip
   online: { en: "Online", sr: "Online" },
   logout: { en: "Log out", sr: "Odjava" },
+  accountMenu: { en: "Account menu", sr: "Meni naloga" },
+  viewProfile: { en: "View profile", sr: "Pogledaj profil" },
 
   // DM stream / profile
   dmConvStartPre: { en: "This is the start of your conversation with ", sr: "Ovo je početak razgovora sa " },

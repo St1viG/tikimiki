@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Icon } from "@/components/Icon";
 import { GenerativeAvatar } from "@/components/ui/GenerativeAvatar";
 import { useT } from "@/components/i18n/LanguageProvider";
@@ -89,13 +88,6 @@ function conversationSeed(
 export function RailRight() {
   const t = useT(M);
   const { user, status } = useAuth();
-  const router = useRouter();
-
-  // Clicking an empty area of the Cohor card (not one of its links) opens Cohor.
-  const onCohorCardClick = (e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest("a")) return;
-    router.push("/cohor?home=1");
-  };
   const [convos, setConvos] = useState<Conversation[]>([]);
   const [activeHack, setActiveHack] = useState<ActiveHackathon | null>(null);
   const [state, setState] = useState<"loading" | "ready" | "error">("loading");
@@ -111,9 +103,11 @@ export function RailRight() {
     setState("loading");
     (async () => {
       try {
+        // The hackathon lookup must not take the DM previews down with it:
+        // "no active hackathon" (or a failure there) still renders the card.
         const [conversations, hackathon] = await Promise.all([
           getConversations(),
-          getMyActiveHackathon(),
+          getMyActiveHackathon().catch(() => null),
         ]);
         if (cancelled) return;
         setConvos(conversations);
@@ -234,10 +228,9 @@ export function RailRight() {
         />
       </div>
 
-      <div
-        className="cohor-card is-populated cohor-card-click"
-        onClick={onCohorCardClick}
-      >
+      {/* The .cohor-top header link is CSS-stretched over the whole card, so
+          clicks on padding/empty space open Cohor; rows sit above it. */}
+      <div className="cohor-card is-populated">
         {header}
 
         {activeHack && (

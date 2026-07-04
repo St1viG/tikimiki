@@ -239,6 +239,28 @@ header.app-bar{
 /* Profile mini-card — pinned bottom-left */
 .profile-mini{ margin-top:auto; width:100%; display:flex; align-items:center; gap:11px; padding:9px 11px; border-radius:14px; text-align:left; transition:background var(--dur-1) var(--ease-out); }
 .profile-mini:hover{ background:rgba(24,20,47,.7); }
+/* Account menu (View profile / Log out) anchored above the profile trigger.
+   The wrapper takes over the trigger's bottom-stick role in the rail column. */
+.pm-wrap{ margin-top:auto; width:100%; position:relative; }
+.pm-wrap .profile-mini{ margin-top:0; }
+.pm-menu{
+  position:absolute; left:4px; right:4px; bottom:calc(100% + 6px);
+  z-index:var(--z-dropdown); padding:5px;
+  background:var(--surface-2); border:1px solid var(--line-strong);
+  border-radius:var(--r-md); box-shadow:var(--shadow-lg);
+  animation:pm-rise var(--dur-2) var(--ease-out);
+}
+.pm-menu-item{
+  width:100%; display:flex; align-items:center; gap:9px;
+  padding:9px 10px; border-radius:9px; border:0; background:none; cursor:pointer;
+  font-family:var(--body); font-size:14px; font-weight:600; color:var(--ink-2); text-align:left;
+  transition:background var(--dur-1) var(--ease-out), color var(--dur-1) var(--ease-out);
+}
+.pm-menu-item:hover{ background:var(--surface-3); color:var(--ink); }
+.pm-menu-item .ic{ width:16px; height:16px; flex-shrink:0; opacity:.85; }
+.pm-menu-item.is-danger{ color:var(--red); }
+.pm-menu-item.is-danger:hover{ background:color-mix(in srgb, var(--red) 12%, transparent); color:var(--red); }
+@media (prefers-reduced-motion:reduce){ .pm-menu{ animation:none; } }
 .pm-av{ width:40px; height:40px; border-radius:50%; flex-shrink:0; display:grid; place-items:center; background:linear-gradient(135deg, var(--violet), var(--violet-deep)); color:var(--lemon); font-weight:700; font-size:14px; border:1px solid var(--line); }
 .pm-info{ flex:1; min-width:0; display:flex; flex-direction:column; line-height:1.25; }
 .pm-name{ font-weight:700; font-size:15px; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -495,8 +517,12 @@ article.post.promo{ background:var(--surface); border-color:var(--line-strong); 
 
 /* Cohor card — entry point (whole card links to /cohor) */
 .cohor-card{ position:relative; display:block; border-radius:var(--r); background:var(--surface); border:1px solid var(--line); box-shadow:var(--shadow-md); overflow:hidden; padding:6px 6px 12px; transition:border-color var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-out), box-shadow var(--dur-2) var(--ease-out); }
-/* The populated Cohor card is clickable (empty areas open Cohor). */
-.cohor-card-click{ cursor:pointer; }
+/* The header link stretches over the whole card, so every pixel that is not
+   one of the deep-link rows opens Cohor — as a real <a> (keyboard, middle
+   click, prefetch), not a JS click zone. Rows stack above the stretch. */
+.cohor-card .cohor-top::after{ content:""; position:absolute; inset:0; }
+.cohor-card .cohor-server,
+.cohor-card .cohor-dm-row{ position:relative; z-index:1; }
 .cohor-card::before{ content:""; position:absolute; left:0; right:0; top:0; height:2px; background:linear-gradient(90deg, var(--lemon), var(--violet-light) 60%, transparent); }
 .cohor-card:hover{ border-color:var(--violet-light); transform:translateY(-2px); box-shadow:var(--shadow-lg); }
 .cohor-card .ic{ width:18px; height:18px; }

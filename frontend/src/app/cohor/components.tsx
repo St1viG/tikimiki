@@ -1,9 +1,15 @@
 "use client";
 
-import { useState, type CSSProperties, type MouseEvent as ReactMouseEvent } from "react";
-import Link from "next/link";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type MouseEvent as ReactMouseEvent,
+} from "react";
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/Icon";
+import { LogoutConfirm } from "@/components/shell/LogoutConfirm";
 import { useT } from "@/components/i18n/LanguageProvider";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { GenerativeAvatar } from "@/components/ui/GenerativeAvatar";
@@ -94,7 +100,9 @@ export function RoleEditor({
   );
 }
 
-/* Shared user strip (bottom of both sidebars) — the current logged-in user. */
+/* Shared user strip (bottom of both sidebars) — the current logged-in user.
+   Clicking it opens the same account menu the app-shell rail uses (View
+   profile / Log out, with a centered logout confirmation). */
 export function UserStrip({
   onOpenProfile,
   onContextMenu,
@@ -106,36 +114,108 @@ export function UserStrip({
   const { user, logout } = useAuth();
   const router = useRouter();
   const name = user?.username ?? "guest";
-  const clickable = onOpenProfile
-    ? { cursor: "pointer" as const, onClick: onOpenProfile }
-    : {};
+
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [confirmLogout, setConfirmLogout] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const firstItemRef = useRef<HTMLButtonElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  // Menu dismissal: outside click or Escape (Escape returns focus to the
+  // trigger); first item is focused on open.
+  useEffect(() => {
+    if (!menuOpen) return;
+    firstItemRef.current?.focus();
+    const onDown = (e: MouseEvent) => {
+      if (!wrapRef.current?.contains(e.target as Node)) setMenuOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setMenuOpen(false);
+        triggerRef.current?.focus();
+      }
+    };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [menuOpen]);
+
+  const doLogout = async () => {
+    setLoggingOut(true);
+    try {
+      await logout();
+      router.replace("/login");
+    } finally {
+      setLoggingOut(false);
+      setConfirmLogout(false);
+    }
+  };
+
   return (
-    <div className="user-strip" onContextMenu={onContextMenu}>
-      <div className="avatar avatar-strip is-orb" {...clickable}>
-        <OrbArt url={user?.avatarUrl} seed={name} />
-      </div>
-      <div className="user-strip-info" {...clickable}>
-        <div className="user-strip-name">{user ? personName(user) : name}</div>
-        <div className="user-strip-status">
-          <span className="status-dot"></span>@{name} · {t("online")}
+    <div className="user-strip" ref={wrapRef} onContextMenu={onContextMenu}>
+      {menuOpen && (
+        <div className="pm-menu" role="menu" aria-label={t("accountMenu")}>
+          {onOpenProfile && (
+            <button
+              type="button"
+              role="menuitem"
+              className="pm-menu-item"
+              ref={firstItemRef}
+              onClick={() => {
+                setMenuOpen(false);
+                onOpenProfile();
+              }}
+            >
+              <Icon name="eye" />
+              {t("viewProfile")}
+            </button>
+          )}
+          <button
+            type="button"
+            role="menuitem"
+            className="pm-menu-item is-danger"
+            ref={onOpenProfile ? undefined : firstItemRef}
+            onClick={() => {
+              setMenuOpen(false);
+              setConfirmLogout(true);
+            }}
+          >
+            <Icon name="logout" />
+            {t("logout")}
+          </button>
         </div>
-      </div>
-      <div className="strip-actions">
-        <Link className="strip-btn" href="/settings" aria-label={t("settings")}>
-          <Icon name="settings" className="ic-sm" />
-        </Link>
-        <button
-          className="strip-btn"
-          type="button"
-          aria-label={t("logout")}
-          onClick={async () => {
-            await logout();
-            router.replace("/login");
-          }}
-        >
-          <Icon name="logout" className="ic-sm" />
-        </button>
-      </div>
+      )}
+
+      <button
+        type="button"
+        className="user-strip-trigger"
+        ref={triggerRef}
+        aria-label={`@${name}`}
+        aria-haspopup="menu"
+        aria-expanded={menuOpen}
+        onClick={() => setMenuOpen((v) => !v)}
+      >
+        <span className="avatar avatar-strip is-orb">
+          <OrbArt url={user?.avatarUrl} seed={name} />
+        </span>
+        <span className="user-strip-info">
+          <span className="user-strip-name">{user ? personName(user) : name}</span>
+          <span className="user-strip-status">
+            <span className="status-dot"></span>@{name} · {t("online")}
+          </span>
+        </span>
+      </button>
+
+      <LogoutConfirm
+        open={confirmLogout}
+        busy={loggingOut}
+        onCancel={() => setConfirmLogout(false)}
+        onConfirm={doLogout}
+      />
     </div>
   );
 }

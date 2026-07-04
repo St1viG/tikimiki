@@ -274,6 +274,9 @@ export function CohorClient() {
    * fall back to the static fallback stream. */
   // The servers the logged-in user belongs to (role-gated server-side).
   const [servers, setServers] = useState<ServerSummary[]>([]);
+  // Set once the mount fetch settles, so "you're not in a server" empty states
+  // don't flash while the list is still loading.
+  const [serversLoaded, setServersLoaded] = useState(false);
   const [activeServerId, setActiveServerId] = useState<string | null>(null);
   const [chanMap, setChanMap] = useState<Record<string, string>>({});
   const [activeChannelId, setActiveChannelId] = useState<string | null>(null);
@@ -313,8 +316,17 @@ export function CohorClient() {
   // Real direct-message conversations (replaces the mock DM panel).
   const searchParams = useSearchParams();
   const [dmConvos, setDmConvos] = useState<Conversation[]>([]);
+  // Set once conversations have been fetched at least once, so the fresh-account
+  // empty state doesn't flash while the list is still loading.
+  const [dmLoaded, setDmLoaded] = useState(false);
   const [activeConvoId, setActiveConvoId] = useState<string | null>(null);
   const [dmRealMsgs, setDmRealMsgs] = useState<ApiMessage[]>([]);
+
+  // Nothing open on the current surface: server mode with no server, or DM
+  // mode with no conversation (fresh account). Hides the channel topbar and
+  // the composer instead of showing the default "#opšte" placeholder.
+  const nothingOpen =
+    appMode === "server" ? activeServerId === null : activeConvoId === null;
 
   // @-mention candidates are contextual: server members in a channel, the
   // conversation's members in a DM. Filtered client-side (no extra fetch).
@@ -744,13 +756,17 @@ export function CohorClient() {
     getConversations()
       .then((convs) => {
         setDmConvos(convs);
+        setDmLoaded(true);
         const target =
           openId && convs.some((c) => c.conversationId === openId)
             ? openId
             : convs[0]?.conversationId;
         if (target) openConvo(target, convs);
       })
-      .catch(() => setDmConvos([]));
+      .catch(() => {
+        setDmConvos([]);
+        setDmLoaded(true);
+      });
   };
   // Presence (online user ids) + per-channel typing indicator.
   const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
@@ -1103,10 +1119,16 @@ export function CohorClient() {
           getMyActiveHackathon().catch(() => null),
           // Fetch conversations on mount so the DM unread badge is accurate
           // even while the user is in server mode.
-          getConversations().then(setDmConvos).catch(() => {}),
+          getConversations()
+            .then((convs) => {
+              setDmConvos(convs);
+              setDmLoaded(true);
+            })
+            .catch(() => {}),
         ]);
         if (cancelled) return;
         setServers(list);
+        setServersLoaded(true);
         setActiveHackathon(active);
         // A ?dm= deep link owns the initial view (handled in its own effect).
         if (dmParam) return;
@@ -1130,6 +1152,7 @@ export function CohorClient() {
         }
       } catch {
         /* ignore — chat falls back to the static fallback stream */
+        if (!cancelled) setServersLoaded(true);
       }
     })();
     return () => {
@@ -2968,53 +2991,59 @@ export function CohorClient() {
         {/* MAIN COLUMN (chat area) */}
         <main className="chat-area">
           <header className="chat-topbar">
-            <span className="chat-topbar-icon" id="topbar-icon">
-              {isImageIcon(topbarIcon) ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  className="chat-topbar-img"
-                  src={topbarIcon}
-                  alt={topbarName}
-                />
-              ) : (
-                topbarIcon
-              )}
-            </span>
-            {activeIsGroup ? (
-              <button
-                type="button"
-                className="chat-topbar-name chat-topbar-name-link"
-                id="topbar-name"
-                onClick={openGroupSettings}
-              >
-                {topbarName}
-              </button>
-            ) : (
-              <span className="chat-topbar-name" id="topbar-name">{topbarName}</span>
-            )}
-            {topbarDesc && (
+            {/* With no channel/conversation open there is nothing to name —
+                render the bar empty instead of the default "#opšte". */}
+            {!nothingOpen && (
               <>
-                <span className="chat-topbar-dot" aria-hidden="true"></span>
-                <span className="chat-topbar-desc" id="topbar-desc">{topbarDesc}</span>
+                <span className="chat-topbar-icon" id="topbar-icon">
+                  {isImageIcon(topbarIcon) ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      className="chat-topbar-img"
+                      src={topbarIcon}
+                      alt={topbarName}
+                    />
+                  ) : (
+                    topbarIcon
+                  )}
+                </span>
+                {activeIsGroup ? (
+                  <button
+                    type="button"
+                    className="chat-topbar-name chat-topbar-name-link"
+                    id="topbar-name"
+                    onClick={openGroupSettings}
+                  >
+                    {topbarName}
+                  </button>
+                ) : (
+                  <span className="chat-topbar-name" id="topbar-name">{topbarName}</span>
+                )}
+                {topbarDesc && (
+                  <>
+                    <span className="chat-topbar-dot" aria-hidden="true"></span>
+                    <span className="chat-topbar-desc" id="topbar-desc">{topbarDesc}</span>
+                  </>
+                )}
+                <div className="topbar-actions">
+                  <button className="topbar-btn" type="button" aria-label={t("searchInChannel")}>
+                    <Icon name="search" className="ic-sm" />
+                  </button>
+                  <button className="topbar-btn" type="button" aria-label={t("pinnedMessages")}>
+                    <Icon name="flag" className="ic-sm" />
+                  </button>
+                  <button
+                    className="topbar-btn"
+                    type="button"
+                    id="topbar-toggle-right"
+                    onClick={toggleRightPanel}
+                    aria-label={t("toggleParticipants")}
+                  >
+                    <Icon name="teams" className="ic-sm" />
+                  </button>
+                </div>
               </>
             )}
-            <div className="topbar-actions">
-              <button className="topbar-btn" type="button" aria-label={t("searchInChannel")}>
-                <Icon name="search" className="ic-sm" />
-              </button>
-              <button className="topbar-btn" type="button" aria-label={t("pinnedMessages")}>
-                <Icon name="flag" className="ic-sm" />
-              </button>
-              <button
-                className="topbar-btn"
-                type="button"
-                id="topbar-toggle-right"
-                onClick={toggleRightPanel}
-                aria-label={t("toggleParticipants")}
-              >
-                <Icon name="teams" className="ic-sm" />
-              </button>
-            </div>
           </header>
 
           {/* Server messages */}
@@ -3032,11 +3061,14 @@ export function CohorClient() {
             }
           >
             {servers.length === 0 ? (
-              <div className="ch-no-access">
-                <div className="ch-no-access-icon">#</div>
-                <div className="ch-no-access-title">{t("noServerAccessTitle")}</div>
-                <div className="ch-no-access-sub">{t("noServerAccessSub")}</div>
-              </div>
+              /* blank while the list loads; the empty state only once we KNOW */
+              serversLoaded ? (
+                <div className="ch-no-access">
+                  <div className="ch-no-access-icon">#</div>
+                  <div className="ch-no-access-title">{t("noServerAccessTitle")}</div>
+                  <div className="ch-no-access-sub">{t("noServerAccessSub")}</div>
+                </div>
+              ) : null
             ) : (
               <>
             <div style={{ flex: 1 }}></div>
@@ -3201,6 +3233,15 @@ export function CohorClient() {
             ref={dmMsgsRef}
             style={appMode === "dm" ? undefined : { display: "none" }}
           >
+            {/* Fresh account: no conversations at all — explain the empty
+                middle instead of leaving it blank. */}
+            {appMode === "dm" && !activeConvoId && dmLoaded && dmConvos.length === 0 && (
+              <div className="ch-no-access">
+                <div className="ch-no-access-icon">@</div>
+                <div className="ch-no-access-title">{t("dmEmptyTitle")}</div>
+                <div className="ch-no-access-sub">{t("dmEmptySub")}</div>
+              </div>
+            )}
             {appMode === "dm" && activeConvoId && (
               <>
                 <div style={{ flex: 1 }}></div>
@@ -4618,7 +4659,7 @@ export function CohorClient() {
           <div
             className="chat-input-wrap"
             style={
-              panel !== "messages" && appMode === "server"
+              (appMode === "server" && panel !== "messages") || nothingOpen
                 ? { display: "none" }
                 : undefined
             }
