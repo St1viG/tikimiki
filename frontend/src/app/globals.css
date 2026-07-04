@@ -240,9 +240,10 @@ header.app-bar{
 .profile-mini{ margin-top:auto; width:100%; display:flex; align-items:center; gap:11px; padding:9px 11px; border-radius:14px; text-align:left; transition:background var(--dur-1) var(--ease-out); }
 .profile-mini:hover{ background:rgba(24,20,47,.7); }
 /* Account menu (View profile / Log out) anchored above the profile trigger.
-   The wrapper takes over the trigger's bottom-stick role in the rail column. */
-.pm-wrap{ margin-top:auto; width:100%; position:relative; }
-.pm-wrap .profile-mini{ margin-top:0; }
+   The wrapper takes over the trigger's bottom-stick role in the rail column.
+   NOT named .pm-wrap — PostMedia already owns that class on every post. */
+.pm-menu-wrap{ margin-top:auto; width:100%; position:relative; }
+.pm-menu-wrap .profile-mini{ margin-top:0; }
 .pm-menu{
   position:absolute; left:4px; right:4px; bottom:calc(100% + 6px);
   z-index:var(--z-dropdown); padding:5px;

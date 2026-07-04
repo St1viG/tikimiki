@@ -148,6 +148,9 @@ export function FeedClient() {
   // Media attached to the new post (uploaded as picked, max 10).
   const [media, setMedia] = useState<MediaDraft[]>([]);
   const mediaInputRef = useRef<HTMLInputElement>(null);
+  // Opening the OS file dialog blurs the composer; this flag keeps that blur
+  // from collapsing it (the user is mid-attach, not walking away).
+  const pickingMediaRef = useRef(false);
   const composerTextRef = useRef<HTMLTextAreaElement>(null);
   // The post's aspect ratio (all attachments share it); auto-set from the first
   // image, changeable in the cropper. `cropId` is the image being repositioned.
@@ -587,6 +590,9 @@ export function FeedClient() {
   // on Post, so here we just hold the File and measure each image's ratio (for
   // the cropper). The first image picked sets the post's aspect ratio.
   const onPickMedia = (e: React.ChangeEvent<HTMLInputElement>) => {
+    pickingMediaRef.current = false;
+    // Keep the composer expanded so the picked thumbnails are visible at once.
+    setComposerOpen(true);
     const files = Array.from(e.target.files ?? []);
     e.target.value = ""; // allow re-picking the same file
     const room = MAX_MEDIA - media.length;
@@ -1085,6 +1091,9 @@ export function FeedClient() {
         className="composer composer-rich reveal"
         style={{ "--i": 0 } as React.CSSProperties}
         onBlur={(e) => {
+          // The OS file dialog steals focus while media is being attached —
+          // consume that one blur instead of collapsing mid-pick.
+          if (pickingMediaRef.current) return;
           // Collapse if focus leaves the entire composer area with an empty draft.
           if (
             !e.currentTarget.contains(e.relatedTarget as Node | null) &&
@@ -1268,7 +1277,19 @@ export function FeedClient() {
                   <button
                     type="button"
                     className="composer-add"
-                    onClick={() => mediaInputRef.current?.click()}
+                    onClick={() => {
+                      pickingMediaRef.current = true;
+                      // Dialog closed without picking (cancel) → drop the flag
+                      // when the window gets focus back.
+                      window.addEventListener(
+                        "focus",
+                        () => {
+                          pickingMediaRef.current = false;
+                        },
+                        { once: true },
+                      );
+                      mediaInputRef.current?.click();
+                    }}
                     disabled={posting || media.length >= MAX_MEDIA}
                   >
                     <Icon name="image" /> {t("addMedia")}

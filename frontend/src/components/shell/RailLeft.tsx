@@ -191,7 +191,7 @@ export function RailLeft() {
       </Link>
 
       {user ? (
-        <div className="pm-wrap" ref={menuWrapRef}>
+        <div className="pm-menu-wrap" ref={menuWrapRef}>
           {menuOpen && (
             <div className="pm-menu" role="menu" aria-label={t("accountMenu")}>
               <button
