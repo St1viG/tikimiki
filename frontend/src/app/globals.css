@@ -205,7 +205,7 @@ header.app-bar{
 /* Left rail — LOCKED */
 /* Bottom gap (28px) must exceed the shell's 24px bottom padding, or the
    rail gets nudged up in the last pixels of scroll when its grid cell ends. */
-.rail-left{ position:sticky; top:0; height:calc(100vh - 28px); display:flex; flex-direction:column; gap:2px; overflow-y:auto; overscroll-behavior:contain; }
+.rail-left{ position:sticky; top:0; height:calc(100vh - 28px); display:flex; flex-direction:column; gap:2px; overflow-y:auto; overscroll-behavior:contain; scrollbar-width:none; }
 .rail-left::-webkit-scrollbar{ width:0; }
 
 .nav-link{ display:flex; align-items:center; gap:13px; padding:11px 14px; border-radius:13px; font-size:16px; font-weight:500; color:var(--muted); position:relative; transition:color var(--dur-1) var(--ease-out), background var(--dur-1) var(--ease-out), transform var(--dur-1) var(--ease-out); }
