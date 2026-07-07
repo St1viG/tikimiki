@@ -28,6 +28,7 @@ import {
   users,
 } from "../db/schema";
 import { NotificationsService } from "../notifications/notifications.service";
+import { SubscriptionsService } from "../subscriptions/subscriptions.service";
 import type { ChangePasswordInput, UpdateProfileInput } from "./dto";
 
 /** The transaction handle passed to db.transaction callbacks. */
@@ -45,6 +46,7 @@ export interface MyProfileDto {
   bannerUrl: string | null;
   points: number;
   skills: string[];
+  isPremium: boolean;
   createdAt: string;
 }
 
@@ -69,6 +71,8 @@ export interface PublicProfileDto {
   followingCount: number;
   /** Whether the requesting viewer follows this user (false when anonymous/self). */
   isFollowing: boolean;
+  /** Whether this user currently has an active Premium subscription. */
+  isPremium: boolean;
   createdAt: string;
 }
 
@@ -107,6 +111,7 @@ export class UsersService {
   constructor(
     @Inject(DRIZZLE) private readonly db: DrizzleDB,
     private readonly notifications: NotificationsService,
+    private readonly subscriptions: SubscriptionsService,
   ) {}
 
   /** Fetch points balance for a user (0 if no member row). */
@@ -148,9 +153,10 @@ export class UsersService {
       .limit(1);
     if (!user) throw new NotFoundException("User not found");
 
-    const [points, skillNames] = await Promise.all([
+    const [points, skillNames, isPremium] = await Promise.all([
       this.getPoints(userId),
       this.getSkillNames(userId),
+      this.subscriptions.isPremium(userId),
     ]);
 
     return {
@@ -163,6 +169,7 @@ export class UsersService {
       bannerUrl: user.bannerUrl,
       points,
       skills: skillNames,
+      isPremium,
       createdAt: user.createdAt.toISOString(),
     };
   }
@@ -340,7 +347,7 @@ export class UsersService {
       isFollowing = Boolean(f);
     }
 
-    const [points, skillNames, badgeRows, followerRow, followingRow] =
+    const [points, skillNames, badgeRows, followerRow, followingRow, isPremium] =
       await Promise.all([
         this.getPoints(user.userId),
         this.getSkillNames(user.userId),
@@ -363,6 +370,7 @@ export class UsersService {
           .select({ value: sql<number>`count(*)::int` })
           .from(follows)
           .where(eq(follows.followerId, user.userId)),
+        this.subscriptions.isPremium(user.userId),
       ]);
 
     return {
@@ -383,6 +391,7 @@ export class UsersService {
       followerCount: followerRow[0] ? Number(followerRow[0].value) : 0,
       followingCount: followingRow[0] ? Number(followingRow[0].value) : 0,
       isFollowing,
+      isPremium,
       createdAt: user.createdAt.toISOString(),
     };
   }

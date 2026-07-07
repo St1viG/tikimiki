@@ -150,6 +150,29 @@ header.app-bar{
 .wordmark{ justify-self:start; font-family:var(--display); font-weight:800; font-size:27px; letter-spacing:-.04em; color:var(--lemon); line-height:1; user-select:none; }
 .wordmark b{ color:var(--violet-light); font-weight:800; }
 
+/* Premium marker — "crystal" gem shown after a Premium member's name. Reuses
+   the same deliberate cyan hue + glow + hue-rotation as the Premium upsell so
+   the two read as one brand signal. */
+.premium-badge{ display:inline-flex; align-items:center; justify-content:center; vertical-align:middle; flex-shrink:0; color:#7df9ff; }
+.premium-badge .ic{
+  width:var(--pb-size,13px); height:var(--pb-size,13px);
+  /* Stay permanently crystal-cyan. A full hue-rotate (like the upsell link)
+     swings through yellow mid-cycle, which read as an ugly yellow diamond — so
+     here we animate only the glow, never the hue. */
+  filter:drop-shadow(0 0 4px rgba(0,245,255,.55));
+  animation:premium-shine 3.2s ease-in-out infinite;
+  /* Sit slightly below the optical centre — display faces run tall, so a
+     centred badge reads like a superscript. The % scales with the icon size. */
+  transform:translateY(6%);
+}
+@keyframes premium-shine{
+  0%,100%{ filter:drop-shadow(0 0 3px rgba(0,245,255,.4)); }
+  50%{ filter:drop-shadow(0 0 6px rgba(0,245,255,.75)); }
+}
+@media (prefers-reduced-motion:reduce){
+  .premium-badge .ic{ animation:none; }
+}
+
 /* Feed-type switch — X-style sticky bar at the top of the feed column,
    so the divider line is part of the feed and it reads as "choose feed". */
 .feed-switch{ position:sticky; top:0; z-index:var(--z-sticky); display:flex; background:linear-gradient(to bottom, rgba(7,6,15,.96), rgba(7,6,15,.76)); backdrop-filter:blur(12px) saturate(140%); -webkit-backdrop-filter:blur(12px) saturate(140%); border-bottom:1px solid var(--line); }
@@ -445,6 +468,42 @@ article.post:not(.promo) > .post-head{ align-items:flex-start; margin-bottom:2px
    resolve off the home route too). */
 @keyframes pm-fade{ from{ opacity:0; } to{ opacity:1; } }
 @keyframes pm-rise{ from{ opacity:0; transform:translateY(8px); } to{ opacity:1; transform:none; } }
+
+/* Image cropper (shared component: post composer, avatar/banner in settings).
+   Lives here — not home.css — so it resolves on every route the cropper opens. */
+.crop-overlay{ position:fixed; inset:0; z-index:var(--z-toast); display:grid; place-items:center; padding:24px; overflow:auto; background:rgba(4,3,10,.78); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); animation:pm-fade var(--dur-2) var(--ease-out); }
+/* Width is driven by the tallest ratio (4:5) so even a portrait frame fits the
+   viewport height; the frame itself stays EXACTLY the chosen ratio (what you
+   position is what gets baked). */
+.crop-panel{ width:min(540px, 94vw, 64vh); display:flex; flex-direction:column; gap:15px; }
+.crop-stage{ display:grid; place-items:center; }
+.crop-frame{ position:relative; width:100%; overflow:hidden; border-radius:var(--r); background:#000; cursor:grab; touch-action:none; box-shadow:0 24px 60px rgba(0,0,0,.5); }
+.crop-frame:active{ cursor:grabbing; }
+.crop-img{ display:block; max-width:none; user-select:none; -webkit-user-drag:none; }
+.crop-zoom{ display:flex; align-items:center; gap:11px; padding:0 2px; }
+.crop-zoom-ic{ color:var(--muted); width:18px; height:18px; flex-shrink:0; }
+.crop-zoom-sm{ width:13px; height:13px; }
+.crop-range{ flex:1; -webkit-appearance:none; appearance:none; height:4px; border-radius:999px; background:var(--surface-3); cursor:pointer; }
+.crop-range::-webkit-slider-thumb{ -webkit-appearance:none; width:16px; height:16px; border-radius:50%; background:var(--violet-light); border:2px solid #fff; box-shadow:0 1px 4px rgba(0,0,0,.45); cursor:grab; }
+.crop-range::-webkit-slider-thumb:active{ cursor:grabbing; }
+.crop-range::-moz-range-thumb{ width:16px; height:16px; border:2px solid #fff; border-radius:50%; background:var(--violet-light); cursor:grab; }
+.crop-range::-moz-range-track{ height:4px; border-radius:999px; background:var(--surface-3); }
+.crop-range:focus-visible{ outline:2px solid var(--violet-light); outline-offset:4px; }
+.crop-grid{ position:absolute; inset:0; pointer-events:none; opacity:.5;
+  background:
+    linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px) 0 33.33%/100% 33.34%,
+    linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px) 33.33% 0/33.34% 100%;
+  background-repeat:repeat-x, repeat-y; }
+.crop-bar{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.crop-ratios{ display:flex; gap:6px; }
+.crop-ratio{ display:inline-flex; align-items:center; gap:6px; padding:6px 10px 6px 7px; border-radius:9px; border:1px solid var(--line); background:transparent; color:var(--muted); font-family:var(--mono); font-size:12px; font-weight:600; cursor:pointer; transition:border-color var(--dur-1) var(--ease-out), color var(--dur-1) var(--ease-out), background var(--dur-1) var(--ease-out); }
+.crop-ratio:hover{ color:var(--ink); border-color:var(--line-strong); }
+.crop-ratio.is-on{ color:var(--ink); border-color:var(--violet); background:rgba(110,84,181,.16); }
+.crop-ratio-ico{ display:block; width:15px; height:15px; border:1.6px solid currentColor; border-radius:3px; }
+.crop-ratio.is-on .crop-ratio-ico{ border-color:var(--violet-light); }
+.crop-hint{ font-size:12.5px; color:var(--muted); }
+.crop-done{ margin-left:auto; flex-shrink:0; }
+@media (prefers-reduced-motion: reduce){ .crop-overlay{ animation:none; } }
 .post-body{ font-size:16px; color:var(--ink-2); line-height:1.6; overflow-wrap:anywhere; word-break:break-word; }
 /* Indent a top-level post's content so it starts under the author name/time
    (avatar 44px + 12px gap), not under the avatar. Comments (nested deeper, not

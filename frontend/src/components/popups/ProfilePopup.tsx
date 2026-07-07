@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/Icon";
 import { OrbArt } from "@/components/ui/OrbArt";
+import { PremiumBadge } from "@/components/ui/PremiumBadge";
 import { useT } from "@/components/i18n/LanguageProvider";
 import { useAuth } from "@/components/auth/AuthProvider";
 import {
@@ -184,7 +185,18 @@ export function ProfilePopup({ open, onClose, username }: ProfilePopupProps) {
 
         {/* LEFT */}
         <div className="pp-left">
-          <div className="pp-banner">
+          <div
+            className="pp-banner"
+            style={
+              profile?.bannerUrl
+                ? {
+                    backgroundImage: `url(${profile.bannerUrl})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                  }
+                : undefined
+            }
+          >
             <div className="pp-avatar-wrap">
               <div className="pp-avatar is-orb">
                 <OrbArt url={profile?.avatarUrl} seed={handle} />
@@ -194,7 +206,10 @@ export function ProfilePopup({ open, onClose, username }: ProfilePopupProps) {
           </div>
 
           <div className="pp-card-body">
-            <div className="pp-name">{fullName}</div>
+            <div className="pp-name">
+              {fullName}
+              {profile?.isPremium && <PremiumBadge size={15} />}
+            </div>
             <div className="pp-handle">@{handle}</div>
 
             <div

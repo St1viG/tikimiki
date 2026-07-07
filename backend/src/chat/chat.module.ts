@@ -1,4 +1,5 @@
 import { Module } from "@nestjs/common";
+import { SubscriptionsModule } from "../subscriptions/subscriptions.module";
 import { ChatController } from "./chat.controller";
 import { ChatService } from "./chat.service";
 
@@ -9,6 +10,7 @@ import { ChatService } from "./chat.service";
  * module simply injects {@link RealtimeGateway} where it needs to emit.
  */
 @Module({
+  imports: [SubscriptionsModule],
   controllers: [ChatController],
   providers: [ChatService],
 })

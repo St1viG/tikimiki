@@ -4,10 +4,10 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, gt, inArray } from "drizzle-orm";
 import { DAY_MS } from "../common/constants";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
-import { subscriptions } from "../db/schema";
+import { subscriptions, users } from "../db/schema";
 import type { ActivateSubscriptionInput } from "./dto";
 
 /* ── response types ───────────────────────────────────────── */
@@ -67,6 +67,46 @@ export class SubscriptionsService {
   /** Public static plan catalogue. */
   getPlans(): PlansResponse {
     return { plans: PLANS };
+  }
+
+  /**
+   * Whether the user currently has Premium — an active subscription that has
+   * not yet lapsed. This is the single source of truth for premium-gated
+   * features (profile badge, animated GIF avatar).
+   */
+  async isPremium(userId: string): Promise<boolean> {
+    const [row] = await this.db
+      .select({ subscriptionId: subscriptions.subscriptionId })
+      .from(subscriptions)
+      .where(
+        and(
+          eq(subscriptions.userId, userId),
+          eq(subscriptions.status, "active"),
+          gt(subscriptions.endsAt, new Date()),
+        ),
+      )
+      .limit(1);
+    return Boolean(row);
+  }
+
+  /**
+   * Batch variant of {@link isPremium}: given a list of user ids, return the
+   * subset that currently holds Premium. One query for the whole list — use
+   * this when marking members of a server / conversation.
+   */
+  async premiumUserIds(userIds: string[]): Promise<Set<string>> {
+    if (userIds.length === 0) return new Set();
+    const rows = await this.db
+      .select({ userId: subscriptions.userId })
+      .from(subscriptions)
+      .where(
+        and(
+          inArray(subscriptions.userId, userIds),
+          eq(subscriptions.status, "active"),
+          gt(subscriptions.endsAt, new Date()),
+        ),
+      );
+    return new Set(rows.map((r) => r.userId));
   }
 
   private toView(row: {
@@ -173,6 +213,24 @@ export class SubscriptionsService {
     if (updated.length === 0) {
       throw new NotFoundException("No active subscription to cancel");
     }
+
+    // Premium-only personalization reverts when premium ends: the banner
+    // (Premium feature) is always cleared, and an animated GIF avatar (also
+    // Premium) is cleared too — a static avatar is kept.
+    const [u] = await this.db
+      .select({ avatarUrl: users.avatarUrl })
+      .from(users)
+      .where(eq(users.userId, userId))
+      .limit(1);
+    const clearGifAvatar = u?.avatarUrl != null && /\.gif$/i.test(u.avatarUrl);
+    await this.db
+      .update(users)
+      .set({
+        bannerUrl: null,
+        ...(clearGifAvatar ? { avatarUrl: null } : {}),
+        updatedAt: new Date(),
+      })
+      .where(eq(users.userId, userId));
 
     return { success: true };
   }

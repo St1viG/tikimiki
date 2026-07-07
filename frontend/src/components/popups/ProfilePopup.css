@@ -60,7 +60,7 @@
 @keyframes pp-presence{ 0%{ transform:scale(.85); opacity:.55; } 70%,100%{ transform:scale(1.5); opacity:0; } }
 @media (prefers-reduced-motion:reduce){ .pp-status-dot::after{ animation:none; opacity:0; } }
 .pp-card-body{ padding:50px 20px 22px; flex:1; overflow-y:auto; }
-.pp-name{ font-family:var(--display); font-size:24px; font-weight:800; letter-spacing:-.04em; color:var(--ink); line-height:1.1; }
+.pp-name{ font-family:var(--display); font-size:24px; font-weight:800; letter-spacing:-.04em; color:var(--ink); line-height:1.1; display:inline-flex; align-items:center; gap:8px; }
 .pp-handle{ font-size:13px; color:var(--muted); margin-top:3px; }
 .pp-short-bio{ font-size:13.5px; color:var(--ink-2); line-height:1.55; margin-top:12px; }
 .pp-joined-date{ display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--muted); margin-top:12px; }

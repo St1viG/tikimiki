@@ -6,6 +6,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AppShell } from "@/components/shell/AppShell";
 import { Icon } from "@/components/Icon";
 import { OrbArt } from "@/components/ui/OrbArt";
+import { PremiumBadge } from "@/components/ui/PremiumBadge";
+import { ImageCropper } from "@/components/ImageCropper";
+import { cropImageToRatio } from "@/lib/cropImage";
 import { ThemeSwitcher } from "@/components/theme/ThemeSwitcher";
 import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
@@ -45,6 +48,22 @@ type PanelId =
   | "odjava";
 
 type Plan = "mesecno" | "godisnje";
+
+// Fixed crop shapes for the identity images. Banner 3:1 matches the recommended
+// 1500×500 size; avatar is a plain square.
+const AVATAR_RATIO = 1;
+const BANNER_RATIO = 3;
+
+/** A freshly-picked static image being positioned before upload. */
+interface CropTarget {
+  kind: "avatar" | "banner";
+  file: File;
+  previewUrl: string;
+  imgRatio: number;
+  focalX: number;
+  focalY: number;
+  zoom: number;
+}
 
 const MONTHS: Record<"en" | "sr", string[]> = {
   en: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
@@ -131,10 +150,22 @@ const M = {
   },
   banner: { en: "Banner", sr: "Baner" },
   changeBanner: { en: "Change banner", sr: "Promeni baner" },
+  setBanner: { en: "Set banner", sr: "Postavi baner" },
+  cropAvatarLabel: { en: "Avatar 1:1", sr: "Avatar 1:1" },
+  cropBannerLabel: { en: "Banner 3:1", sr: "Baner 3:1" },
+  cropHint: {
+    en: "Drag to reposition · slider to zoom",
+    sr: "Prevuci da pomeriš · klizač za zum",
+  },
+  cropApply: { en: "Apply", sr: "Primeni" },
+  bannerPremiumHint: {
+    en: "The profile banner is a Premium feature.",
+    sr: "Baner na profilu je Premium funkcija.",
+  },
   bannerUpload: { en: "Banner upload", sr: "Upload banera" },
   bannerHint: {
-    en: "Recommended size: 1500×500px · PNG, JPG, GIF (premium)",
-    sr: "Preporučena veličina: 1500×500px · PNG, JPG, GIF (premium)",
+    en: "Recommended size: 1500×500px · PNG, JPG, GIF",
+    sr: "Preporučena veličina: 1500×500px · PNG, JPG, GIF",
   },
   avatarUpload: { en: "Avatar upload", sr: "Upload avatara" },
   changeImage: { en: "Change image", sr: "Promeni sliku" },
@@ -508,6 +539,12 @@ const M = {
     en: "Cancel auto-renew? Premium stays active until the expiry date.",
     sr: "Otkazati automatsku obnovu? Premium ostaje aktivan do datuma isteka.",
   },
+  removePremium: { en: "Remove Premium", sr: "Ukloni premium" },
+  confirmRemovePremium: {
+    en: "Remove Premium now? Benefits end immediately and your banner and animated (GIF) avatar will be removed.",
+    sr: "Ukloniti premium sada? Pogodnosti prestaju odmah, a baner i animirana (GIF) profilna biće uklonjeni.",
+  },
+  premiumRemoved: { en: "Premium removed", sr: "Premium uklonjen" },
   cancelRenewFailed: {
     en: "Could not cancel auto-renew. Please try again.",
     sr: "Otkazivanje automatske obnove nije uspelo. Pokušaj ponovo.",
@@ -566,6 +603,7 @@ export function SettingsClient() {
   // on save and read back from getMyProfile()).
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [bannerUrl, setBannerUrl] = useState<string | null>(null);
+  const [isPremium, setIsPremium] = useState(false);
   const [points, setPoints] = useState<number | null>(null);
   const [email, setEmail] = useState("");
   const [pwCurrent, setPwCurrent] = useState("");
@@ -579,6 +617,9 @@ export function SettingsClient() {
   const [bannerMsg, setBannerMsg] = useState<string | null>(null);
   const avatarFileRef = useRef<HTMLInputElement>(null);
   const bannerFileRef = useRef<HTMLInputElement>(null);
+  const gifAvatarFileRef = useRef<HTMLInputElement>(null);
+  // Static image awaiting crop/position before it is baked and uploaded.
+  const [cropTarget, setCropTarget] = useState<CropTarget | null>(null);
 
   // syncPreview() rewrites the preview handle's textContent to
   // "@username · digitalci" (which removes the trophy/GitHub badge icons). That
@@ -660,6 +701,7 @@ export function SettingsClient() {
         setSkills(profile.skills);
         setAvatarUrl(profile.avatarUrl);
         setBannerUrl(profile.bannerUrl);
+        setIsPremium(profile.isPremium);
         setPoints(profile.points);
         setEmail(profile.email);
       } catch (err) {
@@ -759,12 +801,8 @@ export function SettingsClient() {
   );
 
   // Avatar / banner upload + remove
-  const onPickAvatar = useCallback(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      // Allow re-picking the same file later by clearing the input value.
-      e.target.value = "";
-      if (!file) return;
+  const uploadAvatarFile = useCallback(
+    async (file: File) => {
       setAvatarMsg(null);
       setAvatarBusy(true);
       try {
@@ -780,6 +818,67 @@ export function SettingsClient() {
       }
     },
     [t],
+  );
+
+  const uploadBannerFile = useCallback(
+    async (file: File) => {
+      setBannerMsg(null);
+      setBannerBusy(true);
+      try {
+        const { bannerUrl: url } = await api.uploadBanner(file);
+        setBannerUrl(url);
+      } catch (err) {
+        console.error("Failed to upload banner", err);
+        setBannerMsg(
+          err instanceof api.ApiError ? err.message : t("uploadFailed"),
+        );
+      } finally {
+        setBannerBusy(false);
+      }
+    },
+    [t],
+  );
+
+  // Open the crop overlay for a freshly-picked static image so the user can
+  // choose which part fills the avatar/banner frame. Animated GIFs skip it
+  // (canvas baking would flatten the animation) and upload as-is.
+  const openCropper = useCallback(
+    (kind: "avatar" | "banner", file: File) => {
+      const previewUrl = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () =>
+        setCropTarget({
+          kind,
+          file,
+          previewUrl,
+          imgRatio: img.naturalWidth / Math.max(1, img.naturalHeight),
+          focalX: 0.5,
+          focalY: 0.5,
+          zoom: 1,
+        });
+      img.onerror = () => {
+        // Unreadable image → fall back to a plain direct upload.
+        URL.revokeObjectURL(previewUrl);
+        void (kind === "avatar" ? uploadAvatarFile : uploadBannerFile)(file);
+      };
+      img.src = previewUrl;
+    },
+    [uploadAvatarFile, uploadBannerFile],
+  );
+
+  const onPickAvatar = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      // Allow re-picking the same file later by clearing the input value.
+      e.target.value = "";
+      if (!file) return;
+      if (file.type === "image/gif") {
+        void uploadAvatarFile(file);
+        return;
+      }
+      openCropper("avatar", file);
+    },
+    [openCropper, uploadAvatarFile],
   );
 
   const onRemoveAvatar = useCallback(async () => {
@@ -800,26 +899,53 @@ export function SettingsClient() {
   }, [t]);
 
   const onPickBanner = useCallback(
-    async (e: React.ChangeEvent<HTMLInputElement>) => {
+    (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       e.target.value = "";
       if (!file) return;
-      setBannerMsg(null);
-      setBannerBusy(true);
-      try {
-        const { bannerUrl: url } = await api.uploadBanner(file);
-        setBannerUrl(url);
-      } catch (err) {
-        console.error("Failed to upload banner", err);
-        setBannerMsg(
-          err instanceof api.ApiError ? err.message : t("uploadFailed"),
-        );
-      } finally {
-        setBannerBusy(false);
+      if (file.type === "image/gif") {
+        void uploadBannerFile(file);
+        return;
       }
+      openCropper("banner", file);
     },
-    [t],
+    [openCropper, uploadBannerFile],
   );
+
+  const cancelCrop = useCallback(() => {
+    setCropTarget((c) => {
+      if (c) URL.revokeObjectURL(c.previewUrl);
+      return null;
+    });
+  }, []);
+
+  // Bake the chosen crop (ratio + focal + zoom) to a JPEG and upload it.
+  const confirmCrop = useCallback(async () => {
+    if (!cropTarget) return;
+    const { kind, file, previewUrl, focalX, focalY, zoom } = cropTarget;
+    const ratio = kind === "avatar" ? AVATAR_RATIO : BANNER_RATIO;
+    const maxWidth = kind === "avatar" ? 512 : 1500;
+    setCropTarget(null);
+    try {
+      const blob = await cropImageToRatio(
+        file,
+        ratio,
+        focalX,
+        focalY,
+        zoom,
+        maxWidth,
+      );
+      const base = file.name.replace(/\.[^.]+$/, "") || "image";
+      const baked = new File([blob], `${base}.jpg`, { type: "image/jpeg" });
+      if (kind === "avatar") await uploadAvatarFile(baked);
+      else await uploadBannerFile(baked);
+    } catch (err) {
+      console.error("Failed to crop image", err);
+      (kind === "avatar" ? setAvatarMsg : setBannerMsg)(t("uploadFailed"));
+    } finally {
+      URL.revokeObjectURL(previewUrl);
+    }
+  }, [cropTarget, uploadAvatarFile, uploadBannerFile, t]);
 
   const onRemoveBanner = useCallback(async () => {
     setBannerMsg(null);
@@ -1070,16 +1196,30 @@ export function SettingsClient() {
     }
   };
 
-  const cancelAutoRenew = () => {
+  // Remove Premium immediately. The server also clears the banner (a Premium
+  // feature) and an animated GIF avatar, so we re-read the profile to reflect
+  // whatever it wiped and drop the local premium flags/badges.
+  const removePremium = () => {
     setConfirmDialog({
-      message: t("confirmCancelRenew"),
+      message: t("confirmRemovePremium"),
       danger: true,
       onConfirm: async () => {
         try {
           await api.cancelSubscription();
+          setPremiumActive(false);
           setAutoRenewOn(false);
+          setIsPremium(false);
+          try {
+            const profile = await api.getMyProfile();
+            setAvatarUrl(profile.avatarUrl);
+            setBannerUrl(profile.bannerUrl);
+            setIsPremium(profile.isPremium);
+          } catch (err) {
+            console.error("Failed to refresh profile after removing premium", err);
+          }
+          showToast(t("premiumRemoved"), "ok");
         } catch (err) {
-          console.error("Failed to cancel subscription", err);
+          console.error("Failed to remove premium", err);
           showToast(
             err instanceof api.ApiError ? err.message : t("cancelRenewFailed"),
             "err",
@@ -1123,7 +1263,20 @@ export function SettingsClient() {
               </h2>
             </header>
 
-            <div className="ppc-banner" id="ppc-banner" aria-hidden="true" />
+            <div
+              className="ppc-banner"
+              id="ppc-banner"
+              aria-hidden="true"
+              style={
+                bannerUrl
+                  ? {
+                      backgroundImage: `url(${bannerUrl})`,
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                    }
+                  : undefined
+              }
+            />
 
             <div className="ppc-avatar-row">
               <div className="ppc-avatar is-orb" id="ppc-avatar" aria-hidden="true">
@@ -1133,8 +1286,13 @@ export function SettingsClient() {
             </div>
 
             <div className="ppc-info">
-              <div className="ppc-name" id="ppc-name" style={{ color }}>
+              <div
+                className="ppc-name"
+                id="ppc-name"
+                style={{ color, display: "inline-flex", alignItems: "center", gap: 6 }}
+              >
                 {name}
+                {isPremium && <PremiumBadge size={13} />}
               </div>
               <div className="ppc-handle" id="ppc-handle">
                 {previewSynced ? (
@@ -1279,7 +1437,7 @@ export function SettingsClient() {
                   className="ep-banner-wrap"
                   type="button"
                   aria-label={t("changeBanner")}
-                  disabled={bannerBusy}
+                  disabled={bannerBusy || !isPremium}
                   onClick={() => bannerFileRef.current?.click()}
                 >
                   <div
@@ -1296,28 +1454,69 @@ export function SettingsClient() {
                         : undefined
                     }
                   />
-                  <div className="ep-banner-overlay">
-                    <Icon name="image" />{" "}
-                    {bannerBusy ? t("uploading") : t("changeBanner")}
+                  <div
+                    className="ep-banner-overlay"
+                    style={!bannerUrl || !isPremium ? { opacity: 1 } : undefined}
+                  >
+                    <Icon name={isPremium ? "image" : "premium"} />{" "}
+                    {bannerBusy
+                      ? t("uploading")
+                      : !isPremium
+                        ? t("tabPremium")
+                        : bannerUrl
+                          ? t("changeBanner")
+                          : t("setBanner")}
                   </div>
                 </button>
                 <div className="ep-banner-hint">{t("bannerHint")}</div>
-                <div
-                  className="ep-avatar-btns"
-                  style={{ marginTop: "8px" }}
-                >
-                  {bannerUrl && (
+                {!isPremium && (
+                  <div
+                    className="ep-avatar-btns"
+                    style={{ marginTop: "8px", alignItems: "center" }}
+                  >
+                    <span className="ep-banner-hint">
+                      <Icon name="premium" /> {t("bannerPremiumHint")}
+                    </span>
                     <button
-                      className="ep-btn-danger ep-mini-btn"
+                      className="btn btn-ghost ep-mini-btn"
+                      type="button"
+                      onClick={() => setPanel("premium")}
+                    >
+                      <Icon name="premium" /> {t("tabPremium")}
+                    </button>
+                  </div>
+                )}
+                {isPremium && (
+                  <div
+                    className="ep-avatar-btns"
+                    style={{ marginTop: "8px" }}
+                  >
+                    <button
+                      className="btn btn-ghost ep-mini-btn"
                       type="button"
                       disabled={bannerBusy}
-                      onClick={onRemoveBanner}
+                      onClick={() => bannerFileRef.current?.click()}
                     >
-                      <Icon name="x" />{" "}
-                      {bannerBusy ? t("removing") : t("remove")}
+                      <Icon name="image" />{" "}
+                      {bannerBusy
+                        ? t("uploading")
+                        : bannerUrl
+                          ? t("changeBanner")
+                          : t("setBanner")}
                     </button>
-                  )}
-                </div>
+                    {bannerUrl && (
+                      <button
+                        className="ep-btn-danger ep-mini-btn"
+                        type="button"
+                        disabled={bannerBusy}
+                        onClick={onRemoveBanner}
+                      >
+                        <Icon name="x" />{" "}
+                        {bannerBusy ? t("removing") : t("remove")}
+                      </button>
+                    )}
+                  </div>
+                )}
                 {bannerMsg && (
                   <div
                     className="ep-banner-hint"
@@ -1659,9 +1858,20 @@ export function SettingsClient() {
               <div className="ep-card-sub">{t("premiumPersSub")}</div>
             </div>
             <div className="ep-card-body">
-              <div className="ep-premium-lock">
+              {/* Non-premium members see the controls as a locked preview; the
+                  actual GIF avatar upload (image/gif) is gated to Premium both
+                  here and on the server. Static images stay open to everyone in
+                  the "Avatar & banner" card above. */}
+              <div className={isPremium ? undefined : "ep-premium-lock"}>
                 <div className="ep-field">
                   <span className="ep-label">{t("gifAvatar")}</span>
+                  <input
+                    ref={gifAvatarFileRef}
+                    type="file"
+                    accept="image/gif"
+                    hidden
+                    onChange={onPickAvatar}
+                  />
                   <div
                     style={{
                       display: "flex",
@@ -1673,11 +1883,12 @@ export function SettingsClient() {
                       <OrbArt url={avatarUrl} seed={username} />
                     </div>
                     <div>
-                      {/* GIF avatar/banner upload has no api.ts endpoint — the
-                          control is shown as a locked premium preview but is
-                          disabled so it cannot pretend to work. */}
-                      <button className="btn btn-ghost ep-mini-btn" disabled>
-                        {t("uploadGifAvatar")}
+                      <button
+                        className="btn btn-ghost ep-mini-btn"
+                        disabled={!isPremium || avatarBusy}
+                        onClick={() => gifAvatarFileRef.current?.click()}
+                      >
+                        {avatarBusy ? t("uploading") : t("uploadGifAvatar")}
                       </button>
                       <div
                         className="ep-banner-hint"
@@ -1690,24 +1901,48 @@ export function SettingsClient() {
                 </div>
                 <div className="ep-field">
                   <span className="ep-label">{t("gifBanner")}</span>
-                  <div className="ep-banner-wrap" style={{ cursor: "default" }}>
+                  <button
+                    className="ep-banner-wrap"
+                    type="button"
+                    aria-label={t("changeBanner")}
+                    disabled={!isPremium || bannerBusy}
+                    onClick={() => bannerFileRef.current?.click()}
+                  >
                     <div
                       className="ep-banner"
-                      style={{ height: "72px" }}
+                      style={{
+                        height: "72px",
+                        ...(bannerUrl
+                          ? {
+                              backgroundImage: `url(${bannerUrl})`,
+                              backgroundSize: "cover",
+                              backgroundPosition: "center",
+                            }
+                          : {}),
+                      }}
                       aria-hidden="true"
                     />
-                  </div>
+                  </button>
                   <div className="ep-banner-hint">{t("gifBannerHint")}</div>
                 </div>
               </div>
             </div>
             <div className="ep-card-footer">
-              {/* No GIF-upload / premium-look endpoint exists — disabled to
-                  avoid a fake "Saved" confirmation. */}
-              <span className="ep-not-saved-hint">{t("notSavedYet")}</span>
-              <button className="btn btn-primary" disabled title={t("notSavedYet")}>
-                {t("save")}
-              </button>
+              {isPremium ? (
+                <span className="ep-banner-hint">{t("premiumPersSub")}</span>
+              ) : (
+                <>
+                  <span className="ep-not-saved-hint">
+                    <Icon name="premium" /> {t("premiumStatusSub")}
+                  </span>
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => setPanel("premium")}
+                  >
+                    <Icon name="premium" /> {t("tabPremium")}
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -2519,9 +2754,9 @@ export function SettingsClient() {
                 <button
                   className="ep-btn-danger"
                   style={{ width: "fit-content" }}
-                  onClick={cancelAutoRenew}
+                  onClick={removePremium}
                 >
-                  {t("cancelAutoRenew")}
+                  <Icon name="x" /> {t("removePremium")}
                 </button>
               </div>
             </div>
@@ -2638,6 +2873,31 @@ export function SettingsClient() {
           )}
         </div>
       </main>
+
+      {cropTarget && (
+        <ImageCropper
+          src={cropTarget.previewUrl}
+          imgRatio={cropTarget.imgRatio}
+          focalX={cropTarget.focalX}
+          focalY={cropTarget.focalY}
+          zoom={cropTarget.zoom}
+          lockedRatio={cropTarget.kind === "avatar" ? AVATAR_RATIO : BANNER_RATIO}
+          lockedLabel={
+            cropTarget.kind === "avatar"
+              ? t("cropAvatarLabel")
+              : t("cropBannerLabel")
+          }
+          onChange={(fx, fy, z) =>
+            setCropTarget((c) =>
+              c ? { ...c, focalX: fx, focalY: fy, zoom: z } : c,
+            )
+          }
+          onClose={cancelCrop}
+          onDone={confirmCrop}
+          hint={t("cropHint")}
+          done={t("cropApply")}
+        />
+      )}
     </AppShell>
   );
 }

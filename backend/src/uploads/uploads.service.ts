@@ -9,6 +9,7 @@ import { join, extname } from "path";
 import { eq } from "drizzle-orm";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import { users } from "../db/schema";
+import { SubscriptionsService } from "../subscriptions/subscriptions.service";
 import type { UploadedImage } from "./dto";
 
 /* ── response interfaces ──────────────────────────────────── */
@@ -34,7 +35,10 @@ const UPLOAD_DIR = join(process.cwd(), "uploads");
 
 @Injectable()
 export class UploadsService {
-  constructor(@Inject(DRIZZLE) private readonly db: DrizzleDB) {}
+  constructor(
+    @Inject(DRIZZLE) private readonly db: DrizzleDB,
+    private readonly subscriptions: SubscriptionsService,
+  ) {}
 
   /** Ensure the user exists (404 otherwise). */
   private async assertUserExists(userId: string): Promise<void> {
@@ -64,13 +68,27 @@ export class UploadsService {
     return `/uploads/${filename}`;
   }
 
-  /** Save a new avatar image and update users.avatarUrl. */
+  /**
+   * Save a new avatar image and update users.avatarUrl.
+   *
+   * Animated GIF avatars are a Premium-only feature: a non-premium user who
+   * uploads an `image/gif` is rejected (static images stay open to everyone).
+   */
   async setAvatar(
     userId: string,
     file: UploadedImage | undefined,
   ): Promise<AvatarUploadDto> {
     if (!file) throw new BadRequestException("No file uploaded");
     await this.assertUserExists(userId);
+
+    if (file.mimetype === "image/gif") {
+      const premium = await this.subscriptions.isPremium(userId);
+      if (!premium) {
+        throw new BadRequestException(
+          "Animirani GIF avatar je dostupan samo Premium članovima",
+        );
+      }
+    }
 
     const avatarUrl = this.persist(userId, "avatar", file);
     await this.db
@@ -81,13 +99,23 @@ export class UploadsService {
     return { avatarUrl };
   }
 
-  /** Save a new banner image and update users.bannerUrl. */
+  /**
+   * Save a new banner image and update users.bannerUrl.
+   *
+   * The profile banner is a Premium feature — a non-premium user is rejected.
+   * (When premium ends, the banner is cleared in SubscriptionsService.cancel.)
+   */
   async setBanner(
     userId: string,
     file: UploadedImage | undefined,
   ): Promise<BannerUploadDto> {
     if (!file) throw new BadRequestException("No file uploaded");
     await this.assertUserExists(userId);
+
+    const premium = await this.subscriptions.isPremium(userId);
+    if (!premium) {
+      throw new BadRequestException("Baner je dostupan samo Premium članovima");
+    }
 
     const bannerUrl = this.persist(userId, "banner", file);
     await this.db

@@ -12,6 +12,7 @@ import { activeTeamMember } from "../common/team.predicates";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import { NotificationsService } from "../notifications/notifications.service";
 import { RealtimeGateway } from "../realtime/realtime.gateway";
+import { SubscriptionsService } from "../subscriptions/subscriptions.service";
 import {
   channelGroups,
   channelMembers,
@@ -79,10 +80,13 @@ export interface ServerMemberDto {
   username: string;
   displayName: string | null;
   avatarUrl: string | null;
+  bannerUrl: string | null;
   roles: string[];
   teamName: string | null;
   /** True when the member is the organizer OR holds a role with ≥1 permission. */
   isModerator: boolean;
+  /** True when the member currently holds an active Premium subscription. */
+  isPremium: boolean;
 }
 
 /** Server summary returned after an update. */
@@ -138,6 +142,9 @@ export interface ConversationMemberDto {
   username: string;
   displayName: string | null;
   avatarUrl: string | null;
+  bannerUrl: string | null;
+  /** True when the member currently holds an active Premium subscription. */
+  isPremium: boolean;
 }
 
 export interface ConversationLastMessageDto {
@@ -214,6 +221,7 @@ export class ChatService {
     private readonly realtime: RealtimeGateway,
     private readonly authz: AuthzService,
     private readonly notifications: NotificationsService,
+    private readonly subscriptions: SubscriptionsService,
   ) {}
 
   /**
@@ -414,6 +422,7 @@ export class ChatService {
         username: users.username,
         displayName: users.displayName,
         avatarUrl: users.avatarUrl,
+        bannerUrl: users.bannerUrl,
         roleName: serverRoles.name,
         roleHasPerm: sql<boolean>`exists (
           select 1 from server_role_permissions srp
@@ -435,9 +444,11 @@ export class ChatService {
         username: r.username,
         displayName: r.displayName,
         avatarUrl: r.avatarUrl,
+        bannerUrl: r.bannerUrl,
         roles: [],
         teamName: null,
         isModerator: false,
+        isPremium: false,
       };
       entry.roles.push(r.roleName);
       if (r.roleHasPerm) entry.isModerator = true;
@@ -451,6 +462,7 @@ export class ChatService {
           username: users.username,
           displayName: users.displayName,
           avatarUrl: users.avatarUrl,
+          bannerUrl: users.bannerUrl,
         })
         .from(users)
         .where(eq(users.userId, srv.orgId))
@@ -461,9 +473,11 @@ export class ChatService {
           username: org.username,
           displayName: org.displayName,
           avatarUrl: org.avatarUrl,
+          bannerUrl: org.bannerUrl,
           roles: ["Organizer"],
           teamName: null,
           isModerator: true,
+          isPremium: false,
         });
       }
     }
@@ -487,9 +501,38 @@ export class ChatService {
         const e = byUser.get(t.userId);
         if (e) e.teamName = t.teamName;
       }
+
+      const premium = await this.subscriptions.premiumUserIds(memberIds);
+      for (const id of premium) {
+        const e = byUser.get(id);
+        if (e) e.isPremium = true;
+      }
     }
 
     return [...byUser.values()];
+  }
+
+  /** Attach `isPremium` to conversation-member rows with a single batch query. */
+  private async withPremium(
+    rows: {
+      userId: string;
+      username: string;
+      displayName: string | null;
+      avatarUrl: string | null;
+      bannerUrl: string | null;
+    }[],
+  ): Promise<ConversationMemberDto[]> {
+    const premium = await this.subscriptions.premiumUserIds([
+      ...new Set(rows.map((r) => r.userId)),
+    ]);
+    return rows.map((r) => ({
+      userId: r.userId,
+      username: r.username,
+      displayName: r.displayName,
+      avatarUrl: r.avatarUrl,
+      bannerUrl: r.bannerUrl,
+      isPremium: premium.has(r.userId),
+    }));
   }
 
   async getServerDetail(
@@ -1491,6 +1534,7 @@ export class ChatService {
         username: users.username,
         displayName: users.displayName,
         avatarUrl: users.avatarUrl,
+        bannerUrl: users.bannerUrl,
       })
       .from(conversationMembers)
       .innerJoin(users, eq(conversationMembers.userId, users.userId))
@@ -1501,6 +1545,9 @@ export class ChatService {
         ),
       );
 
+    const premiumMembers = await this.subscriptions.premiumUserIds([
+      ...new Set(memberRows.map((m) => m.userId)),
+    ]);
     const membersByConvo = new Map<string, ConversationMemberDto[]>();
     for (const m of memberRows) {
       const list = membersByConvo.get(m.conversationId) ?? [];
@@ -1509,6 +1556,8 @@ export class ChatService {
         username: m.username,
         displayName: m.displayName,
         avatarUrl: m.avatarUrl,
+        bannerUrl: m.bannerUrl,
+        isPremium: premiumMembers.has(m.userId),
       });
       membersByConvo.set(m.conversationId, list);
     }
@@ -1635,6 +1684,7 @@ export class ChatService {
         username: users.username,
         displayName: users.displayName,
         avatarUrl: users.avatarUrl,
+        bannerUrl: users.bannerUrl,
       })
       .from(conversationMembers)
       .innerJoin(users, eq(conversationMembers.userId, users.userId))
@@ -1699,12 +1749,7 @@ export class ChatService {
       name: convo.name,
       icon: convo.icon,
       createdAt: convo.createdAt.toISOString(),
-      members: memberRows.map((m) => ({
-        userId: m.userId,
-        username: m.username,
-        displayName: m.displayName,
-        avatarUrl: m.avatarUrl,
-      })),
+      members: await this.withPremium(memberRows),
       lastMessage: last
         ? {
             content: last.content,

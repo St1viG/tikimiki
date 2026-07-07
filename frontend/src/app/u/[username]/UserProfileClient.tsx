@@ -7,6 +7,7 @@ import { Icon } from "@/components/Icon";
 import { AppShell } from "@/components/shell/AppShell";
 import { RailRight } from "@/components/shell/RailRight";
 import { OrbArt } from "@/components/ui/OrbArt";
+import { PremiumBadge } from "@/components/ui/PremiumBadge";
 import { PostCard } from "@/components/PostCard";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useT, useLanguage } from "@/components/i18n/LanguageProvider";
@@ -248,13 +249,30 @@ export function UserProfileClient({ username }: { username: string }) {
           <p className="page-sub" style={{ padding: "0 4px" }}>{t("notFound")}</p>
         ) : (
           <>
+            {profile.bannerUrl && (
+              <div
+                className="reveal"
+                aria-hidden="true"
+                style={{
+                  height: 160,
+                  borderRadius: "var(--r)",
+                  border: "1px solid var(--line)",
+                  backgroundImage: `url(${profile.bannerUrl})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }}
+              />
+            )}
             <div className="post reveal" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
                 <span className="avatar v is-orb" aria-hidden="true" style={{ width: 72, height: 72 }}>
                   <OrbArt url={profile?.avatarUrl} seed={name} />
                 </span>
                 <div style={{ flex: 1 }}>
-                  <div className="name" style={{ fontSize: 20, fontWeight: 700 }}>{displayName}</div>
+                  <div className="name" style={{ fontSize: 20, fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 8 }}>
+                    {displayName}
+                    {profile.isPremium && <PremiumBadge size={15} />}
+                  </div>
                   <div className="time"><span className="post-handle">@{name}</span> · {t("memberSince")} {joined(profile.createdAt)}</div>
                   {profile.bio && <p className="post-body" style={{ marginTop: 6 }}>{profile.bio}</p>}
                 </div>

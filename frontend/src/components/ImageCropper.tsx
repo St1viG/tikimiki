@@ -19,6 +19,10 @@ const MAX_ZOOM = 4;
  * and dragging pans it (within the overflow either axis allows) to choose the
  * focal point. The ratio buttons switch the frame (applies to the whole post).
  * The same ratio/focal/zoom values are baked into the upload on post.
+ *
+ * Pass `lockedRatio` to pin the frame to a single ratio and hide the picker —
+ * used for avatar (1:1) and banner (3:1) where the target shape is fixed.
+ * `lockedLabel` is the small caption shown in place of the ratio buttons.
  */
 export function ImageCropper({
   src,
@@ -32,11 +36,14 @@ export function ImageCropper({
   onClose,
   hint,
   done,
+  onDone,
+  lockedRatio,
+  lockedLabel,
 }: {
   src: string;
   imgRatio: number;
-  ratioKey: AspectKey;
-  onRatioKey: (key: AspectKey) => void;
+  ratioKey?: AspectKey;
+  onRatioKey?: (key: AspectKey) => void;
   focalX: number;
   focalY: number;
   zoom: number;
@@ -44,6 +51,16 @@ export function ImageCropper({
   onClose: () => void;
   hint: string;
   done: string;
+  /**
+   * Action for the "done" button. When omitted it falls back to `onClose`
+   * (the post composer stores values and bakes later). Provide it to make the
+   * button a distinct commit while Escape / backdrop still cancel via onClose.
+   */
+  onDone?: () => void;
+  /** When set, pins the frame to this width/height ratio and hides the picker. */
+  lockedRatio?: number;
+  /** Caption shown in place of the ratio buttons when `lockedRatio` is set. */
+  lockedLabel?: string;
 }) {
   const frameRef = useRef<HTMLDivElement>(null);
   const drag = useRef<{ x: number; y: number } | null>(null);
@@ -64,7 +81,7 @@ export function ImageCropper({
     };
   }, [onClose]);
 
-  const ratio = ASPECTS[ratioKey];
+  const ratio = lockedRatio ?? ASPECTS[ratioKey ?? "square"];
 
   const onPointerDown = (e: React.PointerEvent) => {
     drag.current = { x: e.clientX, y: e.clientY };
@@ -146,25 +163,41 @@ export function ImageCropper({
         </div>
 
         <div className="crop-bar">
-          <div className="crop-ratios" role="group" aria-label="Aspect ratio">
-            {ASPECT_ORDER.map((key) => (
-              <button
-                key={key}
-                type="button"
-                className={`crop-ratio${key === ratioKey ? " is-on" : ""}`}
-                onClick={() => onRatioKey(key)}
-              >
+          {lockedRatio != null ? (
+            <div className="crop-ratios">
+              <span className="crop-ratio is-on" aria-hidden="true">
                 <span
                   className="crop-ratio-ico"
-                  style={{ aspectRatio: String(ASPECTS[key]) }}
-                  aria-hidden="true"
+                  style={{ aspectRatio: String(lockedRatio) }}
                 />
-                {RATIO_LABEL[key]}
-              </button>
-            ))}
-          </div>
+                {lockedLabel}
+              </span>
+            </div>
+          ) : (
+            <div className="crop-ratios" role="group" aria-label="Aspect ratio">
+              {ASPECT_ORDER.map((key) => (
+                <button
+                  key={key}
+                  type="button"
+                  className={`crop-ratio${key === ratioKey ? " is-on" : ""}`}
+                  onClick={() => onRatioKey?.(key)}
+                >
+                  <span
+                    className="crop-ratio-ico"
+                    style={{ aspectRatio: String(ASPECTS[key]) }}
+                    aria-hidden="true"
+                  />
+                  {RATIO_LABEL[key]}
+                </button>
+              ))}
+            </div>
+          )}
           <span className="crop-hint">{hint}</span>
-          <button type="button" className="btn btn-violet crop-done" onClick={onClose}>
+          <button
+            type="button"
+            className="btn btn-violet crop-done"
+            onClick={onDone ?? onClose}
+          >
             {done}
           </button>
         </div>

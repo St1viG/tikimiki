@@ -17,6 +17,7 @@ import { useT, useLanguage } from "@/components/i18n/LanguageProvider";
 import { useRequireAuth } from "@/components/auth/AuthProvider";
 import { GenerativeAvatar } from "@/components/ui/GenerativeAvatar";
 import { OrbArt } from "@/components/ui/OrbArt";
+import { MiniProfileCard } from "@/components/cohor/MiniProfileCard";
 import { MarkdownContent } from "@/components/MarkdownContent";
 import {
   useMentionAutocomplete,
@@ -726,6 +727,9 @@ export function CohorClient() {
     const other = c.members.find((m) => m.userId !== user?.userId);
     return other?.username ?? convoTitle(c);
   };
+  // The other member's uploaded avatar for a 1-1 DM row (null → generated).
+  const dmOtherAvatarUrl = (c: Conversation) =>
+    c.members.find((m) => m.userId !== user?.userId)?.avatarUrl ?? null;
 
   const openConvo = (id: string, convs?: Conversation[]) => {
     const list = convs ?? dmConvos;
@@ -2951,7 +2955,7 @@ export function CohorClient() {
                         </span>
                       )
                     ) : (
-                      <GenerativeAvatar seed={convoSeed(c)} className="orb-art" />
+                      <OrbArt url={dmOtherAvatarUrl(c)} seed={convoSeed(c)} />
                     )}
                     {c.members.some(
                       (m) => m.userId !== user?.userId && onlineUsers.has(m.userId),
@@ -4973,68 +4977,11 @@ export function CohorClient() {
                       );
                     }}
                   >
-                    <div className="dm-docked-banner" aria-hidden="true" />
-                    <div className="dm-docked-body">
-                      <div className="dm-docked-head">
-                        <div
-                          className="dm-docked-av is-orb"
-                          role="button"
-                          tabIndex={0}
-                          style={{ cursor: "pointer" }}
-                          title={t("miniViewProfile")}
-                          onClick={() => setProfileUsername(o.username)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" || e.key === " ") {
-                              e.preventDefault();
-                              setProfileUsername(o.username);
-                            }
-                          }}
-                        >
-                          {o.avatarUrl ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              src={o.avatarUrl}
-                              alt={o.username}
-                              className="orb-art"
-                            />
-                          ) : (
-                            <GenerativeAvatar
-                              seed={o.username}
-                              className="orb-art"
-                            />
-                          )}
-                        </div>
-                        <button
-                          type="button"
-                          className="dm-docked-open"
-                          aria-label={t("miniViewProfile")}
-                          title={t("miniViewProfile")}
-                          onClick={() => setProfileUsername(o.username)}
-                        >
-                          <Icon name="external" className="ic-sm" />
-                        </button>
-                      </div>
-                      <div
-                        className="dm-docked-name"
-                        role="button"
-                        tabIndex={0}
-                        style={{ cursor: "pointer" }}
-                        title={t("miniViewProfile")}
-                        onClick={() => setProfileUsername(o.username)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" || e.key === " ") {
-                            e.preventDefault();
-                            setProfileUsername(o.username);
-                          }
-                        }}
-                      >
-                        {personName({
-                          displayName: o.displayName,
-                          username: o.username,
-                        })}
-                      </div>
-                      <div className="dm-docked-handle">@{o.username}</div>
-                    </div>
+                    <MiniProfileCard
+                      member={o}
+                      onOpenProfile={setProfileUsername}
+                      viewProfileLabel={t("miniViewProfile")}
+                    />
                   </div>
                 );
               }
@@ -5093,9 +5040,11 @@ export function CohorClient() {
                               username: m.username,
                               displayName: m.displayName,
                               avatarUrl: m.avatarUrl,
+                              bannerUrl: m.bannerUrl,
                               roles: [],
                               teamName: null,
                               isModerator: false,
+                              isPremium: m.isPremium,
                             },
                             anchorTop: r.top,
                             anchorLeft: r.left,
@@ -5120,9 +5069,11 @@ export function CohorClient() {
                               username: m.username,
                               displayName: m.displayName,
                               avatarUrl: m.avatarUrl,
+                              bannerUrl: m.bannerUrl,
                               roles: [],
                               teamName: null,
                               isModerator: false,
+                              isPremium: m.isPremium,
                             },
                             anchorTop: r.top,
                             anchorLeft: r.left,
@@ -5222,78 +5173,18 @@ export function CohorClient() {
           }}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Cosmetic banner placeholder (future: per-user banner art). */}
-          <div className="mini-profile-banner" aria-hidden="true" />
-          <div className="mini-profile-body">
-            <div className="mini-profile-head">
-              <div
-                className="mini-profile-av is-orb"
-                role="button"
-                tabIndex={0}
-                style={{ cursor: "pointer" }}
-                title={t("miniViewProfile")}
-                onClick={() => {
-                  setProfileUsername(miniProfile.member.username);
-                  setMiniProfile(null);
-                }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    setProfileUsername(miniProfile.member.username);
-                    setMiniProfile(null);
-                  }
-                }}
-              >
-                {miniProfile.member.avatarUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={miniProfile.member.avatarUrl}
-                    alt={miniProfile.member.username}
-                    className="orb-art"
-                  />
-                ) : (
-                  <GenerativeAvatar
-                    seed={miniProfile.member.username}
-                    className="orb-art"
-                  />
-                )}
-              </div>
-              <button
-                type="button"
-                className="mini-profile-open"
-                aria-label={t("miniViewProfile")}
-                title={t("miniViewProfile")}
-                onClick={() => {
-                  setProfileUsername(miniProfile.member.username);
-                  setMiniProfile(null);
-                }}
-              >
-                <Icon name="external" className="ic-sm" />
-              </button>
-            </div>
-            <div className="mini-profile-name">
-              {personName({
-                displayName: miniProfile.member.displayName,
-                username: miniProfile.member.username,
-              })}
-            </div>
-            <div className="mini-profile-handle">@{miniProfile.member.username}</div>
-            <div className="mini-profile-section-label">{t("miniRolesLabel")}</div>
-            <div className="mini-profile-roles">
-              {miniProfile.member.roles.length > 0 ? (
-                miniProfile.member.roles.map((r) => (
-                  <span className="mini-profile-chip" key={r}>
-                    {r}
-                  </span>
-                ))
-              ) : (
-                <span className="mini-profile-muted">—</span>
-              )}
-            </div>
-            <div className="mini-profile-section-label">{t("miniTeamLabel")}</div>
-            <div className="mini-profile-team">
-              {miniProfile.member.teamName ?? t("miniNoTeam")}
-            </div>
-          </div>
+          <MiniProfileCard
+            member={miniProfile.member}
+            showDetails
+            onOpenProfile={(username) => {
+              setProfileUsername(username);
+              setMiniProfile(null);
+            }}
+            viewProfileLabel={t("miniViewProfile")}
+            rolesLabel={t("miniRolesLabel")}
+            teamLabel={t("miniTeamLabel")}
+            noTeamLabel={t("miniNoTeam")}
+          />
         </div>
       )}
       {showGroupModal && (

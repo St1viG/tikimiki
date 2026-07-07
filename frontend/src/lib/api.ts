@@ -307,6 +307,8 @@ export interface ConversationMember {
   username: string;
   displayName?: string | null;
   avatarUrl: string | null;
+  bannerUrl: string | null;
+  isPremium: boolean;
 }
 export interface Conversation {
   conversationId: string;
@@ -332,10 +334,13 @@ export interface ServerMember {
   username: string;
   displayName?: string | null;
   avatarUrl: string | null;
+  bannerUrl: string | null;
   roles: string[];
   teamName: string | null;
   /** True for the organizer or any member whose role carries ≥1 permission. */
   isModerator: boolean;
+  /** True when the member currently holds an active Premium subscription. */
+  isPremium: boolean;
 }
 export const getServerMembers = (serverId: string) =>
   GET<ServerMember[]>(`/servers/${serverId}/members`);
@@ -532,6 +537,7 @@ export interface MyProfile {
   bannerUrl: string | null;
   points: number;
   skills: string[];
+  isPremium: boolean;
   createdAt: string;
 }
 export interface PublicProfile {
@@ -547,6 +553,7 @@ export interface PublicProfile {
   followerCount: number;
   followingCount: number;
   isFollowing: boolean;
+  isPremium: boolean;
   createdAt: string;
 }
 export interface UpdateProfileBody {
