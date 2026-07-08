@@ -47,6 +47,7 @@ export interface ApplicationQuestionDto {
   type: QuestionType;
   options: string[] | null;
   required: boolean;
+  allowOther: boolean;
   position: number;
 }
 
@@ -368,6 +369,7 @@ export class ApplicationsService {
         type: applicationQuestions.type,
         options: applicationQuestions.options,
         required: applicationQuestions.required,
+        allowOther: applicationQuestions.allowOther,
         position: applicationQuestions.position,
       })
       .from(applicationQuestions)
@@ -381,6 +383,7 @@ export class ApplicationsService {
       type: r.type as QuestionType,
       options: (r.options as string[] | null) ?? null,
       required: r.required,
+      allowOther: r.allowOther,
       position: r.position,
     }));
   }
@@ -408,6 +411,7 @@ export class ApplicationsService {
         type: input.type,
         options: isChoice ? (input.options ?? []) : null,
         required: input.required,
+        allowOther: isChoice ? input.allowOther : false,
         position: input.position ?? 0,
       })
       .returning();
@@ -419,6 +423,7 @@ export class ApplicationsService {
       type: row.type as QuestionType,
       options: (row.options as string[] | null) ?? null,
       required: row.required,
+      allowOther: row.allowOther,
       position: row.position,
     };
   }
@@ -484,6 +489,13 @@ export class ApplicationsService {
     ) {
       patch.options = nextOptions;
     }
+    // allowOther only applies to choice types; clear it when text, else honour
+    // the provided value.
+    if (!isChoice) {
+      patch.allowOther = false;
+    } else if (input.allowOther !== undefined) {
+      patch.allowOther = input.allowOther;
+    }
 
     const [row] = await this.db
       .update(applicationQuestions)
@@ -498,6 +510,7 @@ export class ApplicationsService {
       type: row.type as QuestionType,
       options: (row.options as string[] | null) ?? null,
       required: row.required,
+      allowOther: row.allowOther,
       position: row.position,
     };
   }

@@ -146,6 +146,15 @@ export async function getHackathon(id: string): Promise<HackathonSummary> {
  * startsAt, maxParticipants > 0, maxTeamSize >= minTeamSize, and — for non-virtual
  * types — a location plus a paired latitude/longitude.
  */
+/** An application question supplied when publishing a hackathon. */
+export interface PublishQuestion {
+  prompt: string;
+  type: "short_text" | "long_text" | "single_choice" | "multi_choice";
+  options?: string[];
+  required?: boolean;
+  allowOther?: boolean;
+}
+
 export interface CreateHackathonBody {
   title: string;
   description: string;
@@ -162,9 +171,57 @@ export interface CreateHackathonBody {
   longitude?: number;
   logoUrl?: string;
   bannerUrl?: string;
+  /** Application-form questions created atomically with the hackathon. */
+  questions?: PublishQuestion[];
+  /** When publishing from a saved draft, the draft to delete on success. */
+  draftId?: string;
 }
 export const createHackathon = (body: CreateHackathonBody) =>
   POST<HackathonSummary>("/hackathons", body);
+
+/** Body for `PATCH /hackathons/:id` — every field optional; nulls clear. */
+export interface UpdateHackathonBody {
+  title?: string;
+  description?: string;
+  type?: HackathonType;
+  theme?: string | null;
+  startsAt?: string;
+  endsAt?: string;
+  registrationDeadline?: string;
+  maxParticipants?: number | null;
+  minTeamSize?: number;
+  maxTeamSize?: number;
+  location?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  logoUrl?: string | null;
+  bannerUrl?: string | null;
+}
+export const updateHackathon = (id: string, body: UpdateHackathonBody) =>
+  PATCH<HackathonSummary>(`/hackathons/${id}`, body);
+
+export const getMyHackathons = () =>
+  GET<HackathonSummary[]>("/hackathons/mine");
+
+/* ── hackathon drafts (resumable "organize" form) ─────────── */
+export interface HackathonDraft {
+  draftId: string;
+  payload: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+}
+export const getHackathonDrafts = () =>
+  GET<HackathonDraft[]>("/hackathons/drafts");
+export const getHackathonDraft = (draftId: string) =>
+  GET<HackathonDraft>(`/hackathons/drafts/${draftId}`);
+export const createHackathonDraft = (payload: Record<string, unknown>) =>
+  POST<HackathonDraft>("/hackathons/drafts", { payload });
+export const updateHackathonDraft = (
+  draftId: string,
+  payload: Record<string, unknown>,
+) => PATCH<HackathonDraft>(`/hackathons/drafts/${draftId}`, { payload });
+export const deleteHackathonDraft = (draftId: string) =>
+  DELETE<{ success: true }>(`/hackathons/drafts/${draftId}`);
 
 // Feed + engagement (posts, comments, likes)
 export async function getFeed(): Promise<FeedPost[]> {
@@ -735,6 +792,7 @@ export interface ApplicationQuestion {
   type: "short_text" | "long_text" | "single_choice" | "multi_choice";
   options: string[] | null;
   required: boolean;
+  allowOther: boolean;
   position: number;
 }
 export interface ApplicationAnswer {
@@ -762,6 +820,7 @@ export const createApplicationQuestion = (
     type?: ApplicationQuestion["type"];
     options?: string[];
     required?: boolean;
+    allowOther?: boolean;
     position?: number;
   },
 ) =>
@@ -776,6 +835,7 @@ export const updateApplicationQuestion = (
     type?: ApplicationQuestion["type"];
     options?: string[];
     required?: boolean;
+    allowOther?: boolean;
     position?: number;
   },
 ) => PATCH<ApplicationQuestion>(`/applications/questions/${questionId}`, patch);

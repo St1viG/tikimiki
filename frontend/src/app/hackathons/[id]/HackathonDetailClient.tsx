@@ -62,6 +62,7 @@ const M = {
   viewApplication: { en: "View application",            sr: "Pogledaj prijavu" },
   ctaOwn:          { en: "This is your hackathon.",     sr: "Ovo je tvoj hackathon." },
   manageApps:      { en: "Manage applications",         sr: "Upravljaj prijavama" },
+  editHackathon:   { en: "Edit",                        sr: "Izmeni" },
   deadlinePassed:  { en: "Applications are closed.",    sr: "Prijave su zatvorene." },
 
   statusPending:   { en: "Pending review",              sr: "Na čekanju" },
@@ -321,6 +322,12 @@ export function HackathonDetailClient({ hackathonId }: { hackathonId: string }) 
           {isOwner ? (
             <div className="hd-cta-own">
               <span>{t("ctaOwn")}</span>
+              <Link
+                className="btn btn-primary"
+                href={`/hackathons/${hack.hackathonId}/edit`}
+              >
+                <Icon name="settings" /> {t("editHackathon")}
+              </Link>
               <Link className="btn btn-ghost" href="/applications">
                 {t("manageApps")}
               </Link>

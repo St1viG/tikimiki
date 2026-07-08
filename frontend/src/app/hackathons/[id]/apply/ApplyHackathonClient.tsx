@@ -84,6 +84,8 @@ const M = {
   required:      { en: "required",                      sr: "obavezno" },
   optional:      { en: "optional",                      sr: "opciono" },
   noQuestions:   { en: "No extra questions — just confirm to apply.", sr: "Nema dodatnih pitanja — samo potvrdi prijavu." },
+  otherOption:   { en: "Other",                          sr: "Ostalo" },
+  otherPlaceholder:{ en: "Please specify…",              sr: "Navedi…" },
 
   // Submit
   submit:        { en: "Submit application",            sr: "Pošalji prijavu" },
@@ -128,6 +130,9 @@ export function ApplyHackathonClient({ hackathonId }: { hackathonId: string }) {
 
   const [teamChoice, setTeamChoice] = useState<string>("solo");
   const [answers, setAnswers] = useState<AnswerMap>({});
+  // "Other (free text)" state per question, for choice questions that allow it.
+  const [otherOn, setOtherOn] = useState<Record<string, boolean>>({});
+  const [otherText, setOtherText] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
@@ -185,12 +190,40 @@ export function ApplyHackathonClient({ hackathonId }: { hackathonId: string }) {
       };
     });
 
-  const isEmpty = (v: string | string[] | undefined) =>
-    v === undefined || (Array.isArray(v) ? v.length === 0 : v.trim() === "");
+  const setOther = (qid: string, on: boolean) =>
+    setOtherOn((prev) => ({ ...prev, [qid]: on }));
+  const setOtherTextFor = (qid: string, v: string) =>
+    setOtherText((prev) => ({ ...prev, [qid]: v }));
+
+  /**
+   * The value actually submitted for a question, folding in the "Other" free
+   * text: for single_choice it replaces the selection; for multi_choice it is
+   * appended to the picked options. Stored as human-readable text.
+   */
+  const effectiveAnswer = (q: ApplicationQuestion): string => {
+    const other =
+      q.allowOther && otherOn[q.questionId]
+        ? (otherText[q.questionId] ?? "").trim()
+        : "";
+    if (q.type === "multi_choice") {
+      const picked = Array.isArray(answers[q.questionId])
+        ? (answers[q.questionId] as string[])
+        : [];
+      return [...picked, ...(other ? [other] : [])].join(", ");
+    }
+    if (q.type === "single_choice") {
+      if (q.allowOther && otherOn[q.questionId]) return other;
+      return ((answers[q.questionId] as string) ?? "").trim();
+    }
+    const v = answers[q.questionId];
+    return (Array.isArray(v) ? v.join(", ") : (v ?? "")).trim();
+  };
 
   async function submit() {
     if (!user || !questions) return;
-    const missing = questions.some((q) => q.required && isEmpty(answers[q.questionId]));
+    const missing = questions.some(
+      (q) => q.required && effectiveAnswer(q) === "",
+    );
     if (missing) {
       setError(t("fillRequired"));
       return;
@@ -198,11 +231,7 @@ export function ApplyHackathonClient({ hackathonId }: { hackathonId: string }) {
     setSubmitting(true);
     setError(null);
     const payload: AnswerInput[] = questions
-      .map((q) => {
-        const v = answers[q.questionId];
-        const answer = Array.isArray(v) ? v.join(", ") : (v ?? "");
-        return { questionId: q.questionId, answer };
-      })
+      .map((q) => ({ questionId: q.questionId, answer: effectiveAnswer(q) }))
       .filter((a) => a.answer !== "");
     const teamId = teamChoice === "solo" ? undefined : teamChoice;
     try {
@@ -514,12 +543,44 @@ export function ApplyHackathonClient({ hackathonId }: { hackathonId: string }) {
                             <input
                               type="radio"
                               name={q.questionId}
-                              checked={answers[q.questionId] === opt}
-                              onChange={() => setAnswer(q.questionId, opt)}
+                              checked={
+                                !otherOn[q.questionId] &&
+                                answers[q.questionId] === opt
+                              }
+                              onChange={() => {
+                                setAnswer(q.questionId, opt);
+                                setOther(q.questionId, false);
+                              }}
                             />
                             {opt}
                           </label>
                         ))}
+                        {q.allowOther && (
+                          <>
+                            <label className="ap-choice">
+                              <input
+                                type="radio"
+                                name={q.questionId}
+                                checked={!!otherOn[q.questionId]}
+                                onChange={() => {
+                                  setOther(q.questionId, true);
+                                  setAnswer(q.questionId, "");
+                                }}
+                              />
+                              {t("otherOption")}
+                            </label>
+                            {otherOn[q.questionId] && (
+                              <input
+                                className="ap-input"
+                                placeholder={t("otherPlaceholder")}
+                                value={otherText[q.questionId] ?? ""}
+                                onChange={(e) =>
+                                  setOtherTextFor(q.questionId, e.target.value)
+                                }
+                              />
+                            )}
+                          </>
+                        )}
                       </div>
                     )}
 
@@ -538,6 +599,30 @@ export function ApplyHackathonClient({ hackathonId }: { hackathonId: string }) {
                             {opt}
                           </label>
                         ))}
+                        {q.allowOther && (
+                          <>
+                            <label className="ap-choice">
+                              <input
+                                type="checkbox"
+                                checked={!!otherOn[q.questionId]}
+                                onChange={(e) =>
+                                  setOther(q.questionId, e.target.checked)
+                                }
+                              />
+                              {t("otherOption")}
+                            </label>
+                            {otherOn[q.questionId] && (
+                              <input
+                                className="ap-input"
+                                placeholder={t("otherPlaceholder")}
+                                value={otherText[q.questionId] ?? ""}
+                                onChange={(e) =>
+                                  setOtherTextFor(q.questionId, e.target.value)
+                                }
+                              />
+                            )}
+                          </>
+                        )}
                       </div>
                     )}
                   </div>

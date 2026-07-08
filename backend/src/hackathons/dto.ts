@@ -1,6 +1,23 @@
 import { z } from "zod";
 
 export const hackathonType = z.enum(["physical", "virtual", "hybrid"]);
+
+export const questionType = z.enum([
+  "short_text",
+  "long_text",
+  "single_choice",
+  "multi_choice",
+]);
+
+/** One application question supplied at publish time (see createHackathonSchema). */
+export const publishQuestionSchema = z.object({
+  prompt: z.string().trim().min(1).max(500),
+  type: questionType.default("short_text"),
+  options: z.array(z.string().trim().min(1).max(200)).optional(),
+  required: z.boolean().default(false),
+  allowOther: z.boolean().default(false),
+});
+export type PublishQuestionInput = z.infer<typeof publishQuestionSchema>;
 export const hackathonStatus = z.enum([
   "upcoming",
   "ongoing",
@@ -24,8 +41,28 @@ export const createHackathonSchema = z.object({
   longitude: z.number().min(-180).max(180).optional(),
   logoUrl: z.string().trim().max(2048).optional(),
   bannerUrl: z.string().trim().max(2048).optional(),
+  /** Application-form questions to create atomically with the hackathon. */
+  questions: z.array(publishQuestionSchema).max(50).optional(),
+  /** When publishing from a saved draft, the draft to delete on success. */
+  draftId: z.string().uuid().optional(),
 });
 export type CreateHackathonInput = z.infer<typeof createHackathonSchema>;
+
+/**
+ * PUT-style save of a hackathon draft. `payload` is the whole in-progress form
+ * (basics + questions) as free-form JSON — validated strictly only on publish.
+ */
+export const saveDraftSchema = z.object({
+  payload: z.record(z.string(), z.unknown()),
+});
+export type SaveDraftInput = z.infer<typeof saveDraftSchema>;
+
+export interface HackathonDraftDto {
+  draftId: string;
+  payload: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export const updateHackathonSchema = z
   .object({

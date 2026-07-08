@@ -5,12 +5,14 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import type { HackathonSummary } from "@tikimiki/types";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import {
+  applicationQuestions,
   channelGroups,
   channels,
+  hackathonDrafts,
   hackathonPrizes,
   hackathons,
   organizations,
@@ -28,7 +30,9 @@ import type {
   AddModeratorInput,
   CreateHackathonInput,
   CreatePrizeInput,
+  HackathonDraftDto,
   ModeratorDto,
+  SaveDraftInput,
   TeamOverviewDto,
   UpdateHackathonInput,
   UpdatePrizeInput,
@@ -271,10 +275,192 @@ export class HackathonsService {
         },
       ]);
 
+      // Application-form questions supplied at publish time (choice types keep
+      // their options + allowOther; text types are normalised to none).
+      if (input.questions && input.questions.length > 0) {
+        await tx.insert(applicationQuestions).values(
+          input.questions.map((q, i) => {
+            const isChoice =
+              q.type === "single_choice" || q.type === "multi_choice";
+            return {
+              hackathonId: created.hackathonId,
+              prompt: q.prompt,
+              type: q.type,
+              options: isChoice ? (q.options ?? []) : null,
+              required: q.required,
+              allowOther: isChoice ? q.allowOther : false,
+              position: i,
+            };
+          }),
+        );
+      }
+
+      // Publishing from a saved draft consumes it (owner-scoped).
+      if (input.draftId) {
+        await tx
+          .delete(hackathonDrafts)
+          .where(
+            and(
+              eq(hackathonDrafts.draftId, input.draftId),
+              eq(hackathonDrafts.organizationId, userId),
+            ),
+          );
+      }
+
       return created.hackathonId;
     });
 
     return this.getById(hackathonId);
+  }
+
+  /* ── drafts (resumable "organize a hackathon" form) ───────── */
+
+  /** Ensure the caller is an organization account. */
+  private async assertOrganization(userId: string): Promise<void> {
+    const [org] = await this.db
+      .select({ userId: organizations.userId })
+      .from(organizations)
+      .where(eq(organizations.userId, userId))
+      .limit(1);
+    if (!org) {
+      throw new ForbiddenException(
+        "Only organization accounts can organize hackathons",
+      );
+    }
+  }
+
+  private toDraft(row: {
+    draftId: string;
+    payload: unknown;
+    createdAt: Date;
+    updatedAt: Date;
+  }): HackathonDraftDto {
+    return {
+      draftId: row.draftId,
+      payload: (row.payload as Record<string, unknown>) ?? {},
+      createdAt: row.createdAt.toISOString(),
+      updatedAt: row.updatedAt.toISOString(),
+    };
+  }
+
+  /** GET /hackathons/drafts — the caller's drafts, newest edit first. */
+  async listDrafts(userId: string): Promise<HackathonDraftDto[]> {
+    await this.assertOrganization(userId);
+    const rows = await this.db
+      .select({
+        draftId: hackathonDrafts.draftId,
+        payload: hackathonDrafts.payload,
+        createdAt: hackathonDrafts.createdAt,
+        updatedAt: hackathonDrafts.updatedAt,
+      })
+      .from(hackathonDrafts)
+      .where(eq(hackathonDrafts.organizationId, userId))
+      .orderBy(desc(hackathonDrafts.updatedAt));
+    return rows.map((r) => this.toDraft(r));
+  }
+
+  /** Fetch one draft the caller owns (404 otherwise). */
+  async getDraft(userId: string, draftId: string): Promise<HackathonDraftDto> {
+    await this.assertOrganization(userId);
+    const [row] = await this.db
+      .select({
+        draftId: hackathonDrafts.draftId,
+        payload: hackathonDrafts.payload,
+        createdAt: hackathonDrafts.createdAt,
+        updatedAt: hackathonDrafts.updatedAt,
+      })
+      .from(hackathonDrafts)
+      .where(
+        and(
+          eq(hackathonDrafts.draftId, draftId),
+          eq(hackathonDrafts.organizationId, userId),
+        ),
+      )
+      .limit(1);
+    if (!row) throw new NotFoundException("Draft not found");
+    return this.toDraft(row);
+  }
+
+  /** POST /hackathons/drafts — create a new draft. */
+  async createDraft(
+    userId: string,
+    input: SaveDraftInput,
+  ): Promise<HackathonDraftDto> {
+    await this.assertOrganization(userId);
+    const [row] = await this.db
+      .insert(hackathonDrafts)
+      .values({ organizationId: userId, payload: input.payload })
+      .returning({
+        draftId: hackathonDrafts.draftId,
+        payload: hackathonDrafts.payload,
+        createdAt: hackathonDrafts.createdAt,
+        updatedAt: hackathonDrafts.updatedAt,
+      });
+    return this.toDraft(row);
+  }
+
+  /** PATCH /hackathons/drafts/:id — autosave the in-progress form. */
+  async updateDraft(
+    userId: string,
+    draftId: string,
+    input: SaveDraftInput,
+  ): Promise<HackathonDraftDto> {
+    await this.assertOrganization(userId);
+    const [row] = await this.db
+      .update(hackathonDrafts)
+      .set({ payload: input.payload, updatedAt: new Date() })
+      .where(
+        and(
+          eq(hackathonDrafts.draftId, draftId),
+          eq(hackathonDrafts.organizationId, userId),
+        ),
+      )
+      .returning({
+        draftId: hackathonDrafts.draftId,
+        payload: hackathonDrafts.payload,
+        createdAt: hackathonDrafts.createdAt,
+        updatedAt: hackathonDrafts.updatedAt,
+      });
+    if (!row) throw new NotFoundException("Draft not found");
+    return this.toDraft(row);
+  }
+
+  /** DELETE /hackathons/drafts/:id — discard a draft. */
+  async deleteDraft(
+    userId: string,
+    draftId: string,
+  ): Promise<{ success: true }> {
+    await this.assertOrganization(userId);
+    const deleted = await this.db
+      .delete(hackathonDrafts)
+      .where(
+        and(
+          eq(hackathonDrafts.draftId, draftId),
+          eq(hackathonDrafts.organizationId, userId),
+        ),
+      )
+      .returning({ draftId: hackathonDrafts.draftId });
+    if (deleted.length === 0) throw new NotFoundException("Draft not found");
+    return { success: true };
+  }
+
+  /** GET /hackathons/mine — hackathons the caller organizes. */
+  async listMine(userId: string): Promise<HackathonSummary[]> {
+    const rows = await this.db
+      .select(columns)
+      .from(hackathons)
+      .innerJoin(
+        organizations,
+        eq(hackathons.organizationId, organizations.userId),
+      )
+      .where(
+        and(
+          eq(hackathons.organizationId, userId),
+          isNull(hackathons.deletedAt),
+        ),
+      )
+      .orderBy(desc(hackathons.createdAt));
+    return rows.map(toSummary);
   }
 
   /** PATCH /hackathons/:id — izmena polja (samo dok je status 'upcoming'). */

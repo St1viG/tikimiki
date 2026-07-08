@@ -30,6 +30,8 @@ export const applicationQuestions = pgTable(
     type: varchar("type", { length: 20 }).notNull().default("short_text"),
     options: jsonb("options"),
     required: boolean("required").notNull().default(false),
+    /** For *_choice types: expose an "Other" choice with a free-text field. */
+    allowOther: boolean("allow_other").notNull().default(false),
     position: integer("position").notNull().default(0),
     createdAt: timestamp("created_at", tz).notNull().defaultNow(),
   },

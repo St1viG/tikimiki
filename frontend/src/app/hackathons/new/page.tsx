@@ -15,6 +15,10 @@ export const metadata: Metadata = {
   description: "Create and publish a new hackathon.",
 };
 
-export default function NewHackathonPage() {
-  return <NewHackathonClient />;
+export default function NewHackathonPage({
+  searchParams,
+}: {
+  searchParams: { draft?: string };
+}) {
+  return <NewHackathonClient resumeDraftId={searchParams.draft} />;
 }

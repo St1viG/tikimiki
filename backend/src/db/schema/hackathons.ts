@@ -3,6 +3,7 @@ import {
   check,
   index,
   integer,
+  jsonb,
   pgTable,
   primaryKey,
   smallint,
@@ -77,6 +78,26 @@ export const hackathons = pgTable(
     index("idx_hackathons_starts_at").on(t.startsAt),
     index("idx_hackathons_coordinates").using("gist", t.coordinates),
   ],
+);
+
+/* ── hackathon_drafts ─────────────────────────────────────────
+ * A resumable, possibly-incomplete "organize a hackathon" draft owned by an
+ * organization. The whole in-progress form (basics + application questions)
+ * lives in `payload` as JSON so partial data need not satisfy the strict
+ * `hackathons` NOT NULL / check constraints. Publishing validates the payload,
+ * creates the real hackathon, and deletes the draft. */
+export const hackathonDrafts = pgTable(
+  "hackathon_drafts",
+  {
+    draftId: uuid("draft_id").primaryKey().defaultRandom(),
+    organizationId: uuid("organization_id")
+      .notNull()
+      .references(() => organizations.userId, { onDelete: "cascade" }),
+    payload: jsonb("payload").notNull().default({}),
+    createdAt: timestamp("created_at", tz).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", tz).notNull().defaultNow(),
+  },
+  (t) => [index("idx_hackathon_drafts_organization_id").on(t.organizationId)],
 );
 
 /* ── hackathon_required_skills ────────────────────────────── */

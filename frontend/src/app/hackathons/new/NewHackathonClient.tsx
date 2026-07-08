@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { HackathonType } from "@tikimiki/types";
@@ -10,7 +10,30 @@ import { AppShell } from "@/components/shell/AppShell";
 import { RailRight } from "@/components/shell/RailRight";
 import { useT } from "@/components/i18n/LanguageProvider";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { ApiError, createHackathon, uploadGroupIcon } from "@/lib/api";
+import {
+  ApiError,
+  createHackathon,
+  createHackathonDraft,
+  deleteApplicationQuestion,
+  deleteHackathonDraft,
+  getApplicationQuestions,
+  getHackathon,
+  getHackathonDraft,
+  getHackathonDrafts,
+  createApplicationQuestion,
+  updateApplicationQuestion,
+  updateHackathon,
+  updateHackathonDraft,
+  uploadGroupIcon,
+  type ApplicationQuestion,
+  type HackathonDraft,
+  type PublishQuestion,
+} from "@/lib/api";
+import {
+  QuestionBuilder,
+  newQuestion,
+  type QuestionDraft,
+} from "@/components/hackathons/QuestionBuilder";
 
 /**
  * NewHackathonClient — the create-a-hackathon form (route "/hackathons/new").
@@ -95,6 +118,21 @@ const M = {
   submit:          { en: "Publish hackathon",             sr: "Objavi hackathon" },
   submitting:      { en: "Publishing…",                   sr: "Objavljivanje…" },
   cancel:          { en: "Cancel",                        sr: "Otkaži" },
+
+  // Edit mode
+  editTitle:       { en: "Edit hackathon",                sr: "Izmeni hackathon" },
+  editSub:         { en: "Update your hackathon's details and application form.", sr: "Ažuriraj detalje hackathona i formular za prijavu." },
+  saveChanges:     { en: "Save changes",                  sr: "Sačuvaj izmene" },
+  saving:          { en: "Saving…",                       sr: "Čuvanje…" },
+  loading:         { en: "Loading…",                      sr: "Učitavanje…" },
+
+  // Draft (server-side)
+  draftSaving:     { en: "Saving draft…",                 sr: "Čuvanje nacrta…" },
+  draftSaved:      { en: "Draft saved",                   sr: "Nacrt sačuvan" },
+  resumeTitle:     { en: "Continue where you left off?",  sr: "Nastavi gde si stao?" },
+  resumeBody:      { en: "You have an unpublished hackathon draft.", sr: "Imaš nezavršen nacrt hackathona." },
+  resumeContinue:  { en: "Continue draft",                sr: "Nastavi nacrt" },
+  resumeDiscard:   { en: "Discard",                       sr: "Odbaci" },
 } as const;
 
 /** Local form state — kept as strings to mirror the raw inputs. */
@@ -143,16 +181,77 @@ function toIso(local: string): string {
   return Number.isNaN(d.getTime()) ? "" : d.toISOString();
 }
 
-export function NewHackathonClient() {
+/** ISO-8601 → `datetime-local` value (local wall time, minute precision). */
+function toLocalInput(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+/** Map builder questions → the publish payload (choice types keep options). */
+function toPublishQuestions(questions: QuestionDraft[]): PublishQuestion[] {
+  return questions
+    .filter((q) => q.prompt.trim() !== "")
+    .map((q) => {
+      const isChoice =
+        q.type === "single_choice" || q.type === "multi_choice";
+      return {
+        prompt: q.prompt.trim(),
+        type: q.type,
+        options: isChoice
+          ? q.options.map((o) => o.trim()).filter(Boolean)
+          : undefined,
+        required: q.required,
+        allowOther: isChoice ? q.allowOther : false,
+      };
+    });
+}
+
+/** Existing server question → builder draft. */
+function fromApiQuestion(q: ApplicationQuestion): QuestionDraft {
+  return {
+    key: q.questionId,
+    questionId: q.questionId,
+    prompt: q.prompt,
+    type: q.type,
+    options: q.options && q.options.length > 0 ? q.options : ["", ""],
+    required: q.required,
+    allowOther: q.allowOther,
+  };
+}
+
+export function NewHackathonClient({
+  hackathonId,
+  resumeDraftId,
+}: {
+  hackathonId?: string;
+  resumeDraftId?: string;
+} = {}) {
   const t = useT(M);
   const router = useRouter();
   const { user, status } = useAuth();
+  const isEdit = !!hackathonId;
 
   const [form, setForm] = useState<FormState>(INITIAL);
+  const [questions, setQuestions] = useState<QuestionDraft[]>([]);
   const [errors, setErrors] = useState<Errors>({});
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [uploading, setUploading] = useState<null | "logo" | "banner">(null);
+  const [loadingData, setLoadingData] = useState(isEdit);
+
+  // Server-side draft (create mode only): autosave + resume.
+  const [draftId, setDraftId] = useState<string | null>(null);
+  const [draftStatus, setDraftStatus] = useState<"idle" | "saving" | "saved">(
+    "idle",
+  );
+  const [resumeOffer, setResumeOffer] = useState<HackathonDraft | null>(null);
+  // Question ids present at load (edit mode) — to reconcile deletes on save.
+  const initialQuestionIds = useRef<string[]>([]);
+  // Blocks autosave until the initial load / resume has settled.
+  const hydrated = useRef(!isEdit && !resumeDraftId);
 
   const logoInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
@@ -164,6 +263,139 @@ export function NewHackathonClient() {
 
   const isOrg = !!user?.roles.isOrganization;
   const needsLocation = form.type !== "virtual";
+
+  const restore = useCallback((payload: Record<string, unknown>) => {
+    const p = payload as {
+      form?: Partial<FormState>;
+      questions?: QuestionDraft[];
+    };
+    if (p.form) setForm({ ...INITIAL, ...p.form });
+    if (Array.isArray(p.questions)) {
+      setQuestions(
+        p.questions.map((q, i) => ({
+          ...newQuestion(),
+          ...q,
+          key: q.key ?? `q-restore-${i}`,
+        })),
+      );
+    }
+  }, []);
+
+  // Edit mode: load the hackathon + its application questions.
+  useEffect(() => {
+    if (!isEdit || !hackathonId) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const [h, qs] = await Promise.all([
+          getHackathon(hackathonId),
+          getApplicationQuestions(hackathonId),
+        ]);
+        if (cancelled) return;
+        setForm({
+          title: h.title,
+          description: h.description,
+          theme: h.theme ?? "",
+          type: h.type,
+          startsAt: toLocalInput(h.startsAt),
+          endsAt: toLocalInput(h.endsAt),
+          registrationDeadline: toLocalInput(h.registrationDeadline),
+          location: h.location ?? "",
+          latitude: h.latitude != null ? String(h.latitude) : "",
+          longitude: h.longitude != null ? String(h.longitude) : "",
+          maxParticipants:
+            h.maxParticipants != null ? String(h.maxParticipants) : "",
+          minTeamSize: String(h.minTeamSize),
+          maxTeamSize: String(h.maxTeamSize),
+          logoUrl: h.logoUrl ?? "",
+          bannerUrl: h.bannerUrl ?? "",
+        });
+        const drafts = qs.map(fromApiQuestion);
+        setQuestions(drafts);
+        initialQuestionIds.current = drafts
+          .map((q) => q.questionId)
+          .filter((id): id is string => !!id);
+      } catch (err) {
+        if (!cancelled) {
+          setServerError(err instanceof Error ? err.message : "Error");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoadingData(false);
+          hydrated.current = true;
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isEdit, hackathonId]);
+
+  // Create mode: resume a specific draft (?draft=…) or offer the latest one.
+  useEffect(() => {
+    if (isEdit || !isOrg) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        if (resumeDraftId) {
+          const d = await getHackathonDraft(resumeDraftId);
+          if (cancelled) return;
+          restore(d.payload);
+          setDraftId(d.draftId);
+        } else {
+          const drafts = await getHackathonDrafts();
+          if (!cancelled && drafts.length > 0) setResumeOffer(drafts[0]);
+        }
+      } catch {
+        /* no draft / unreachable → start fresh */
+      } finally {
+        if (!cancelled) hydrated.current = true;
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isEdit, isOrg, resumeDraftId, restore]);
+
+  // Autosave (create mode): debounced create/patch of the server draft. Held
+  // back while a resume prompt is pending and until nothing meaningful exists.
+  useEffect(() => {
+    if (isEdit || !isOrg || !hydrated.current || resumeOffer) return;
+    const meaningful =
+      form.title.trim() !== "" ||
+      form.description.trim() !== "" ||
+      questions.length > 0;
+    if (!meaningful && !draftId) return;
+
+    setDraftStatus("saving");
+    const handle = setTimeout(async () => {
+      try {
+        const payload = { form, questions } as Record<string, unknown>;
+        if (draftId) {
+          await updateHackathonDraft(draftId, payload);
+        } else {
+          const d = await createHackathonDraft(payload);
+          setDraftId(d.draftId);
+        }
+        setDraftStatus("saved");
+      } catch {
+        setDraftStatus("idle");
+      }
+    }, 900);
+    return () => clearTimeout(handle);
+  }, [form, questions, isEdit, isOrg, draftId, resumeOffer]);
+
+  const continueDraft = () => {
+    if (!resumeOffer) return;
+    restore(resumeOffer.payload);
+    setDraftId(resumeOffer.draftId);
+    setResumeOffer(null);
+  };
+  const discardDraft = () => {
+    if (!resumeOffer) return;
+    void deleteHackathonDraft(resumeOffer.draftId).catch(() => {});
+    setResumeOffer(null);
+  };
 
   // Non-organization gate
   if (status !== "loading" && !isOrg) {
@@ -272,27 +504,56 @@ export function NewHackathonClient() {
 
     setSubmitting(true);
     try {
-      await createHackathon({
-        title: form.title.trim(),
-        description: form.description.trim(),
-        type: form.type,
-        theme: form.theme.trim() || undefined,
-        startsAt: toIso(form.startsAt),
-        endsAt: toIso(form.endsAt),
-        registrationDeadline: toIso(form.registrationDeadline),
-        maxParticipants:
-          form.maxParticipants.trim() !== ""
-            ? Number(form.maxParticipants)
-            : undefined,
-        minTeamSize: Number(form.minTeamSize),
-        maxTeamSize: Number(form.maxTeamSize),
-        location: needsLocation ? form.location.trim() : form.location.trim() || undefined,
-        latitude: hasLat ? Number(form.latitude) : undefined,
-        longitude: hasLng ? Number(form.longitude) : undefined,
-        logoUrl: form.logoUrl || undefined,
-        bannerUrl: form.bannerUrl || undefined,
-      });
-      router.push("/hackathons");
+      if (isEdit && hackathonId) {
+        await updateHackathon(hackathonId, {
+          title: form.title.trim(),
+          description: form.description.trim(),
+          type: form.type,
+          theme: form.theme.trim() || null,
+          startsAt: toIso(form.startsAt),
+          endsAt: toIso(form.endsAt),
+          registrationDeadline: toIso(form.registrationDeadline),
+          maxParticipants:
+            form.maxParticipants.trim() !== ""
+              ? Number(form.maxParticipants)
+              : null,
+          minTeamSize: Number(form.minTeamSize),
+          maxTeamSize: Number(form.maxTeamSize),
+          location: needsLocation ? form.location.trim() : null,
+          latitude: hasLat ? Number(form.latitude) : null,
+          longitude: hasLng ? Number(form.longitude) : null,
+          logoUrl: form.logoUrl || null,
+          bannerUrl: form.bannerUrl || null,
+        });
+        await reconcileQuestions(hackathonId);
+        router.push(`/hackathons/${hackathonId}`);
+      } else {
+        await createHackathon({
+          title: form.title.trim(),
+          description: form.description.trim(),
+          type: form.type,
+          theme: form.theme.trim() || undefined,
+          startsAt: toIso(form.startsAt),
+          endsAt: toIso(form.endsAt),
+          registrationDeadline: toIso(form.registrationDeadline),
+          maxParticipants:
+            form.maxParticipants.trim() !== ""
+              ? Number(form.maxParticipants)
+              : undefined,
+          minTeamSize: Number(form.minTeamSize),
+          maxTeamSize: Number(form.maxTeamSize),
+          location: needsLocation
+            ? form.location.trim()
+            : form.location.trim() || undefined,
+          latitude: hasLat ? Number(form.latitude) : undefined,
+          longitude: hasLng ? Number(form.longitude) : undefined,
+          logoUrl: form.logoUrl || undefined,
+          bannerUrl: form.bannerUrl || undefined,
+          questions: toPublishQuestions(questions),
+          draftId: draftId ?? undefined,
+        });
+        router.push("/hackathons");
+      }
     } catch (err) {
       setServerError(
         err instanceof ApiError || err instanceof Error
@@ -301,6 +562,46 @@ export function NewHackathonClient() {
       );
       setSubmitting(false);
     }
+  }
+
+  /**
+   * Edit mode: bring the server's question set in line with the builder — create
+   * the new ones, update the touched existing ones, delete the removed ones.
+   * Sequential to keep positions stable and errors attributable.
+   */
+  async function reconcileQuestions(id: string) {
+    const kept = questions.filter((q) => q.prompt.trim() !== "");
+    const keptIds = new Set(
+      kept.map((q) => q.questionId).filter((x): x is string => !!x),
+    );
+    for (const gone of initialQuestionIds.current.filter(
+      (qid) => !keptIds.has(qid),
+    )) {
+      await deleteApplicationQuestion(gone);
+    }
+    for (let i = 0; i < kept.length; i++) {
+      const q = kept[i];
+      const isChoice =
+        q.type === "single_choice" || q.type === "multi_choice";
+      const body = {
+        prompt: q.prompt.trim(),
+        type: q.type,
+        options: isChoice
+          ? q.options.map((o) => o.trim()).filter(Boolean)
+          : undefined,
+        required: q.required,
+        allowOther: isChoice ? q.allowOther : false,
+        position: i,
+      };
+      if (q.questionId) {
+        await updateApplicationQuestion(q.questionId, body);
+      } else {
+        await createApplicationQuestion(id, body);
+      }
+    }
+    initialQuestionIds.current = kept
+      .map((q) => q.questionId)
+      .filter((x): x is string => !!x);
   }
 
   async function onPickImage(
@@ -334,13 +635,32 @@ export function NewHackathonClient() {
           </Link>
           <div className="col-titles">
             <h1 className="page-title">
-              <Icon name="hackathon" /> {t("pageTitle")}
+              <Icon name="hackathon" /> {isEdit ? t("editTitle") : t("pageTitle")}
             </h1>
-            <p className="page-sub">{t("pageSub")}</p>
+            <p className="page-sub">{isEdit ? t("editSub") : t("pageSub")}</p>
           </div>
         </header>
 
+        {isEdit && loadingData ? (
+          <p className="nh-hint" style={{ padding: "8px 4px" }}>{t("loading")}</p>
+        ) : (
         <form className="nh-form" onSubmit={onSubmit} noValidate>
+          {resumeOffer && (
+            <div className="nh-resume" role="alert">
+              <div className="nh-resume-text">
+                <strong>{t("resumeTitle")}</strong>
+                <span>{t("resumeBody")}</span>
+              </div>
+              <div className="nh-resume-actions">
+                <button type="button" className="btn btn-ghost hk-btn-sm" onClick={discardDraft}>
+                  {t("resumeDiscard")}
+                </button>
+                <button type="button" className="btn btn-violet hk-btn-sm" onClick={continueDraft}>
+                  <Icon name="check" /> {t("resumeContinue")}
+                </button>
+              </div>
+            </div>
+          )}
           {/* BASICS */}
           <section className="nh-section">
             <h2 className="nh-section-title">{t("secBasics")}</h2>
@@ -651,17 +971,37 @@ export function NewHackathonClient() {
             </div>
           </section>
 
+          {/* APPLICATION FORM (questions) */}
+          <QuestionBuilder value={questions} onChange={setQuestions} />
+
           {serverError && <p className="nh-server-err">{serverError}</p>}
 
           <div className="nh-foot">
-            <Link className="btn btn-ghost" href="/hackathons">
+            {!isEdit && draftStatus !== "idle" && (
+              <span className="nh-draft-status">
+                <Icon name={draftStatus === "saving" ? "clock" : "check"} />{" "}
+                {draftStatus === "saving" ? t("draftSaving") : t("draftSaved")}
+              </span>
+            )}
+            <Link
+              className="btn btn-ghost"
+              href={isEdit && hackathonId ? `/hackathons/${hackathonId}` : "/hackathons"}
+            >
               {t("cancel")}
             </Link>
             <button className="btn btn-primary nh-submit" type="submit" disabled={submitting}>
-              <Icon name="check" /> {submitting ? t("submitting") : t("submit")}
+              <Icon name="check" />{" "}
+              {submitting
+                ? isEdit
+                  ? t("saving")
+                  : t("submitting")
+                : isEdit
+                  ? t("saveChanges")
+                  : t("submit")}
             </button>
           </div>
         </form>
+        )}
       </main>
     </AppShell>
   );

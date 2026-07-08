@@ -48,6 +48,8 @@ export const createQuestionSchema = z.object({
   type: questionType.default("short_text"),
   options: z.array(z.string().trim().min(1).max(200)).optional(),
   required: z.boolean().default(false),
+  /** Choice questions only: offer an "Other" choice with a free-text field. */
+  allowOther: z.boolean().default(false),
   position: z.number().int().min(0).optional(),
 });
 export type CreateQuestionInput = z.infer<typeof createQuestionSchema>;
@@ -64,6 +66,7 @@ export const updateQuestionSchema = z
     type: questionType.optional(),
     options: z.array(z.string().trim().min(1).max(200)).optional(),
     required: z.boolean().optional(),
+    allowOther: z.boolean().optional(),
     position: z.number().int().min(0).optional(),
   })
   .refine((b) => Object.keys(b).length > 0, {

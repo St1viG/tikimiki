@@ -6,6 +6,12 @@
 .hk-organize-btn{ margin-left:auto; }
 .hk-organize-btn .ic{ width:16px; height:16px; }
 
+/* The action button shares the tab row: pin the tabs to the divider (flex-end,
+   so their underline still lands on the line) and lift any button a few px off
+   it, so its bottom edge floats above the divider instead of sitting on it. */
+.hk-page .tabs-row--divided{ align-items:flex-end; }
+.hk-page .tabs-row--divided > .btn{ margin-bottom:7px; }
+
 /* Tabs */
 /* underline tabs (consistent with teams + notifications) */
 .hk-tabs{ display:flex; gap:4px; flex-wrap:wrap; }

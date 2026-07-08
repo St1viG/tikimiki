@@ -246,11 +246,6 @@ export function HackathonsClient() {
             <h1 className="page-title"><Icon name="hackathon" /> {t("pageTitle")}</h1>
             <p className="page-sub">{t("pageSub")}</p>
           </div>
-          {user?.roles.isOrganization && (
-            <Link className="btn btn-primary hk-btn-lg hk-organize-btn" href="/hackathons/new">
-              <Icon name="plus" /> {t("organize")}
-            </Link>
-          )}
         </header>
 
         {/* TABS */}
@@ -275,6 +270,14 @@ export function HackathonsClient() {
               {t("tabYour")}
             </button>
           </div>
+          {user?.roles.isOrganization && (
+            <Link
+              className="btn btn-primary hk-btn-lg hk-organize-btn"
+              href="/hackathons/new"
+            >
+              <Icon name="plus" /> {t("organize")}
+            </Link>
+          )}
         </div>
 
         {/* FILTER BAR */}

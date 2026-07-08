@@ -18,12 +18,14 @@ import {
   addModeratorSchema,
   createHackathonSchema,
   createPrizeSchema,
+  saveDraftSchema,
   updateHackathonSchema,
   updatePrizeSchema,
   updateStatusSchema,
   type AddModeratorInput,
   type CreateHackathonInput,
   type CreatePrizeInput,
+  type SaveDraftInput,
   type UpdateHackathonInput,
   type UpdatePrizeInput,
   type UpdateStatusInput,
@@ -47,6 +49,57 @@ export class HackathonsController {
     body: CreateHackathonInput,
   ) {
     return this.hackathons.create(userId, body);
+  }
+
+  /* ── literal routes before the `:id` UUID param ──────────── */
+
+  @Get("mine")
+  @UseGuards(JwtAuthGuard)
+  listMine(@CurrentUser() userId: string) {
+    return this.hackathons.listMine(userId);
+  }
+
+  @Get("drafts")
+  @UseGuards(JwtAuthGuard)
+  listDrafts(@CurrentUser() userId: string) {
+    return this.hackathons.listDrafts(userId);
+  }
+
+  @Post("drafts")
+  @UseGuards(JwtAuthGuard)
+  createDraft(
+    @CurrentUser() userId: string,
+    @Body(new ZodValidationPipe(saveDraftSchema)) body: SaveDraftInput,
+  ) {
+    return this.hackathons.createDraft(userId, body);
+  }
+
+  @Get("drafts/:draftId")
+  @UseGuards(JwtAuthGuard)
+  getDraft(
+    @CurrentUser() userId: string,
+    @Param("draftId", ParseUUIDPipe) draftId: string,
+  ) {
+    return this.hackathons.getDraft(userId, draftId);
+  }
+
+  @Patch("drafts/:draftId")
+  @UseGuards(JwtAuthGuard)
+  updateDraft(
+    @CurrentUser() userId: string,
+    @Param("draftId", ParseUUIDPipe) draftId: string,
+    @Body(new ZodValidationPipe(saveDraftSchema)) body: SaveDraftInput,
+  ) {
+    return this.hackathons.updateDraft(userId, draftId, body);
+  }
+
+  @Delete("drafts/:draftId")
+  @UseGuards(JwtAuthGuard)
+  deleteDraft(
+    @CurrentUser() userId: string,
+    @Param("draftId", ParseUUIDPipe) draftId: string,
+  ) {
+    return this.hackathons.deleteDraft(userId, draftId);
   }
 
   @Get(":id")
