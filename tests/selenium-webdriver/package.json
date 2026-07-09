@@ -1,0 +1,19 @@
+{
+  "name": "tikimiki-selenium-webdriver",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Selenium WebDriver UI tests for the tikimiki web app (PSI — funkcionalno testiranje)",
+  "type": "module",
+  "scripts": {
+    "test": "mocha --timeout 60000 tests/**/*.test.mjs",
+    "test:auth": "mocha --timeout 60000 tests/auth.test.mjs",
+    "test:hackathons": "mocha --timeout 60000 tests/hackathons.test.mjs",
+    "test:kanban": "mocha --timeout 60000 tests/kanban.test.mjs",
+    "test:messages": "mocha --timeout 60000 tests/messages.test.mjs",
+    "test:servers": "mocha --timeout 60000 tests/servers.test.mjs"
+  },
+  "devDependencies": {
+    "mocha": "^10.7.3",
+    "selenium-webdriver": "^4.25.0"
+  }
+}

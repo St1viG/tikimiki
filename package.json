@@ -17,6 +17,8 @@
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
     "test": "pnpm -r test",
+    "test:unit": "pnpm --filter ./backend test:unit",
+    "test:ui": "cd tests/selenium-webdriver && npm test",
     "db:up": "docker compose up -d postgres redis",
     "db:down": "docker compose down",
     "db:generate": "pnpm --filter ./backend db:generate",
