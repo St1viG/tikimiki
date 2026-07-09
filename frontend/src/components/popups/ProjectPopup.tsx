@@ -27,6 +27,9 @@ const M = {
   descPh:         { en: "What it does, how it works, the stack…", sr: "Šta radi, kako radi, koji stack…" },
   repoLabel:      { en: "Repository URL",                     sr: "Link repozitorijuma" },
   videoLabel:     { en: "Demo video URL",                     sr: "Link demo videa" },
+  videoUpload:    { en: "Upload video",                       sr: "Otpremi video" },
+  videoUploading: { en: "Uploading…",                         sr: "Otpremam…" },
+  videoEmpty:     { en: "No video yet.",                      sr: "Nema video snimka." },
   statusDraft:    { en: "Draft",                              sr: "Nacrt" },
   statusSubmitted:{ en: "Submitted",                          sr: "Predato" },
   statusReview:   { en: "Under review",                       sr: "U pregledu" },
@@ -66,6 +69,7 @@ export function ProjectPopup({
 }) {
   const t = useT(M);
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
 
   const [loading, setLoading] = useState(true);
   const [project, setProject] = useState<Project | null>(null);
@@ -73,6 +77,7 @@ export function ProjectPopup({
   const [description, setDescription] = useState("");
   const [repositoryUrl, setRepositoryUrl] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
+  const [uploadingVideo, setUploadingVideo] = useState(false);
   const [busy, setBusy] = useState<Busy>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -160,6 +165,26 @@ export function ProjectPopup({
       setError(errorMessage(e, t("genericError")));
     } finally {
       setBusy(null);
+    }
+  }
+
+  /**
+   * Upload a picked video file to `/uploads/video` and, on success, point the
+   * form's `videoUrl` at the returned path so the next save persists it.
+   */
+  async function handleVideoFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // allow re-picking the same file
+    if (!file) return;
+    setUploadingVideo(true);
+    setError(null);
+    try {
+      const { url } = await api.uploadProjectVideo(file);
+      setVideoUrl(url);
+    } catch (err) {
+      setError(errorMessage(err, t("genericError")));
+    } finally {
+      setUploadingVideo(false);
     }
   }
 
@@ -302,16 +327,58 @@ export function ProjectPopup({
                 <label className="am-q-label" htmlFor="pp-video">
                   {t("videoLabel")}
                 </label>
-                <input
-                  id="pp-video"
-                  className="am-input"
-                  type="url"
-                  value={videoUrl}
-                  onChange={(e) => setVideoUrl(e.target.value)}
-                  placeholder="https://…"
-                  disabled={!canEdit}
-                  autoComplete="off"
-                />
+                <div style={{ display: "flex", gap: 8 }}>
+                  <input
+                    id="pp-video"
+                    className="am-input"
+                    type="text"
+                    value={videoUrl}
+                    onChange={(e) => setVideoUrl(e.target.value)}
+                    placeholder="https://…"
+                    disabled={!canEdit}
+                    autoComplete="off"
+                    style={{ flex: 1 }}
+                  />
+                  {canEdit && (
+                    <>
+                      <input
+                        ref={videoInputRef}
+                        type="file"
+                        accept="video/mp4,video/webm"
+                        hidden
+                        onChange={handleVideoFile}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-ghost"
+                        onClick={() => videoInputRef.current?.click()}
+                        disabled={uploadingVideo || busy !== null}
+                      >
+                        <Icon name="upload" />{" "}
+                        {uploadingVideo ? t("videoUploading") : t("videoUpload")}
+                      </button>
+                    </>
+                  )}
+                </div>
+                {videoUrl ? (
+                  <video
+                    className="pp-video-player"
+                    src={videoUrl}
+                    controls
+                    preload="metadata"
+                    style={{
+                      width: "100%",
+                      marginTop: 10,
+                      borderRadius: 12,
+                      background: "#000",
+                      maxHeight: 320,
+                    }}
+                  />
+                ) : (
+                  <p className="am-note" style={{ marginTop: 8 }}>
+                    {t("videoEmpty")}
+                  </p>
+                )}
               </div>
 
               {isSubmitted && project?.submittedAt && (
