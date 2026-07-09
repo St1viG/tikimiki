@@ -1,0 +1,117 @@
+{
+  "id": "a1b2c3d4-0000-4000-8000-000000000001",
+  "version": "2.0",
+  "name": "tikimiki UI testovi",
+  "url": "http://localhost:3000",
+  "tests": [
+    {
+      "id": "t0000000-0000-4000-8000-000000000001",
+      "name": "Prijava - clan (uspesna)",
+      "commands": [
+        { "id": "c101", "comment": "IDE-AUTH-01: prijava clana", "command": "open", "target": "/login", "targets": [], "value": "" },
+        { "id": "c102", "comment": "Sacekaj login formu (prvi put Next.js kompajlira rutu)", "command": "waitForElementVisible", "target": "css=input[name='identifier']", "targets": [], "value": "20000" },
+        { "id": "c103", "comment": "Email/korisnicko ime", "command": "type", "target": "css=input[name='identifier']", "targets": [], "value": "andrej@tikimiki.dev" },
+        { "id": "c104", "comment": "Lozinka", "command": "type", "target": "css=input[name='password']", "targets": [], "value": "password123" },
+        { "id": "c105", "comment": "Klik na Prijavi se (prvi put -> pojavi se captcha)", "command": "click", "target": "css=button.au-submit", "targets": [], "value": "" },
+        { "id": "c106", "comment": "Cekiraj 'nisam robot'", "command": "waitForElementVisible", "target": "css=.au-captcha-check", "targets": [], "value": "10000" },
+        { "id": "c107", "comment": "", "command": "click", "target": "css=.au-captcha-check", "targets": [], "value": "" },
+        { "id": "c108", "comment": "Ponovni submit -> stvarna prijava", "command": "click", "target": "css=button.au-submit", "targets": [], "value": "" },
+        { "id": "c109", "comment": "Uspeh = redirekcija sa /login (nema login polja)", "command": "waitForElementNotPresent", "target": "css=input[name='identifier']", "targets": [], "value": "15000" }
+      ]
+    },
+    {
+      "id": "t0000000-0000-4000-8000-000000000002",
+      "name": "Prijava - organizator",
+      "commands": [
+        { "id": "c201", "comment": "Prijava organizatorskog naloga", "command": "open", "target": "/login", "targets": [], "value": "" },
+        { "id": "c202", "comment": "", "command": "waitForElementVisible", "target": "css=input[name='identifier']", "targets": [], "value": "20000" },
+        { "id": "c203", "comment": "", "command": "type", "target": "css=input[name='identifier']", "targets": [], "value": "org@tikimiki.dev" },
+        { "id": "c204", "comment": "", "command": "type", "target": "css=input[name='password']", "targets": [], "value": "password123" },
+        { "id": "c205", "comment": "", "command": "click", "target": "css=button.au-submit", "targets": [], "value": "" },
+        { "id": "c206", "comment": "Cekiraj captcha", "command": "waitForElementVisible", "target": "css=.au-captcha-check", "targets": [], "value": "10000" },
+        { "id": "c207", "comment": "", "command": "click", "target": "css=.au-captcha-check", "targets": [], "value": "" },
+        { "id": "c208", "comment": "", "command": "click", "target": "css=button.au-submit", "targets": [], "value": "" },
+        { "id": "c209", "comment": "", "command": "waitForElementNotPresent", "target": "css=input[name='identifier']", "targets": [], "value": "15000" }
+      ]
+    },
+    {
+      "id": "t0000000-0000-4000-8000-000000000003",
+      "name": "Serveri za komunikaciju - otvaranje cohor",
+      "commands": [
+        { "id": "c301", "comment": "IDE-SRV-01: preduslov prijava", "command": "run", "target": "Prijava - clan (uspesna)", "targets": [], "value": "" },
+        { "id": "c302", "comment": "Otvori radni prostor servera", "command": "open", "target": "/cohor", "targets": [], "value": "" },
+        { "id": "c303", "comment": "Root kontejner mora da se ucita", "command": "waitForElementVisible", "target": "css=.cohor-app", "targets": [], "value": "10000" },
+        { "id": "c304", "comment": "Traka sa serverima (tabovi)", "command": "assertElementPresent", "target": "css=.cohor-tabs", "targets": [], "value": "" }
+      ]
+    },
+    {
+      "id": "t0000000-0000-4000-8000-000000000004",
+      "name": "Dopisivanje i grupna caskanja - slanje poruke",
+      "commands": [
+        { "id": "c401", "comment": "IDE-MSG-01: preduslov prijava", "command": "run", "target": "Prijava - clan (uspesna)", "targets": [], "value": "" },
+        { "id": "c402", "comment": "Otvori poruke", "command": "open", "target": "/messages", "targets": [], "value": "" },
+        { "id": "c403", "comment": "Sacekaj listu konverzacija", "command": "waitForElementPresent", "target": "css=button.post", "targets": [], "value": "10000" },
+        { "id": "c404", "comment": "Otvori prvu konverzaciju", "command": "click", "target": "css=button.post", "targets": [], "value": "" },
+        { "id": "c405", "comment": "Composer za unos poruke mora biti vidljiv", "command": "waitForElementVisible", "target": "css=.composer input.field", "targets": [], "value": "10000" },
+        { "id": "c406", "comment": "Unesi tekst poruke", "command": "type", "target": "css=.composer input.field", "targets": [], "value": "Zdravo iz Selenium IDE" },
+        { "id": "c407", "comment": "Posalji", "command": "click", "target": "css=.composer button.btn-violet", "targets": [], "value": "" },
+        { "id": "c408", "comment": "Composer je i dalje prisutan (poruka poslata)", "command": "assertElementPresent", "target": "css=.composer input.field", "targets": [], "value": "" }
+      ]
+    },
+    {
+      "id": "t0000000-0000-4000-8000-000000000005",
+      "name": "Hakaton - otvaranje forme za kreiranje",
+      "commands": [
+        { "id": "c501", "comment": "IDE-HACK-01: kreiranje sme samo organizator", "command": "run", "target": "Prijava - organizator", "targets": [], "value": "" },
+        { "id": "c502", "comment": "Otvori formu za novi hakaton", "command": "open", "target": "/hackathons/new", "targets": [], "value": "" },
+        { "id": "c503", "comment": "Polje za naziv mora biti vidljivo", "command": "waitForElementVisible", "target": "id=nh-title", "targets": [], "value": "15000" },
+        { "id": "c504", "comment": "Unesi naziv", "command": "type", "target": "id=nh-title", "targets": [], "value": "Hakaton iz Selenium IDE" },
+        { "id": "c505", "comment": "Polje za opis prisutno", "command": "assertElementPresent", "target": "id=nh-desc", "targets": [], "value": "" }
+      ]
+    },
+    {
+      "id": "t0000000-0000-4000-8000-000000000006",
+      "name": "Kanban - otvaranje table",
+      "commands": [
+        { "id": "c601", "comment": "IDE-KAN-01: preduslov prijava (clan u timu)", "command": "run", "target": "Prijava - clan (uspesna)", "targets": [], "value": "" },
+        { "id": "c602", "comment": "Otvori timove", "command": "open", "target": "/teams", "targets": [], "value": "" },
+        { "id": "c603", "comment": "Link ka kanban tabli tima", "command": "waitForElementPresent", "target": "css=a[href*='/kanban']", "targets": [], "value": "10000" },
+        { "id": "c604", "comment": "Otvori kanban tablu", "command": "click", "target": "css=a[href*='/kanban']", "targets": [], "value": "" },
+        { "id": "c605", "comment": "Dugme za dodavanje kartice postoji => tabla je ucitana", "command": "waitForElementVisible", "target": "css=.kb-add-card-btn", "targets": [], "value": "10000" },
+        { "id": "c606", "comment": "Provera", "command": "assertElementPresent", "target": "css=.kb-add-card-btn", "targets": [], "value": "" }
+      ]
+    },
+    {
+      "id": "t0000000-0000-4000-8000-000000000007",
+      "name": "Prijava na hakaton - otvaranje forme",
+      "commands": [
+        { "id": "c701", "comment": "IDE-APP-01: preduslov prijava", "command": "run", "target": "Prijava - clan (uspesna)", "targets": [], "value": "" },
+        { "id": "c702", "comment": "Otvori listu hakatona", "command": "open", "target": "/hackathons", "targets": [], "value": "" },
+        { "id": "c703", "comment": "Postoji dugme/link Prijava na neki hakaton", "command": "waitForElementPresent", "target": "css=a[href*='/apply']", "targets": [], "value": "10000" },
+        { "id": "c704", "comment": "Otvori formu za prijavu", "command": "click", "target": "css=a[href*='/apply']", "targets": [], "value": "" },
+        { "id": "c705", "comment": "Strana za prijavu je ucitana", "command": "waitForElementVisible", "target": "id=ap-main", "targets": [], "value": "10000" },
+        { "id": "c706", "comment": "Dugme za slanje prijave postoji", "command": "assertElementPresent", "target": "css=.ap-foot .btn-primary", "targets": [], "value": "" }
+      ]
+    }
+  ],
+  "suites": [
+    {
+      "id": "s0000000-0000-4000-8000-000000000001",
+      "name": "Kompletan UI paket",
+      "persistSession": false,
+      "parallel": false,
+      "timeout": 300,
+      "tests": [
+        "t0000000-0000-4000-8000-000000000001",
+        "t0000000-0000-4000-8000-000000000002",
+        "t0000000-0000-4000-8000-000000000003",
+        "t0000000-0000-4000-8000-000000000004",
+        "t0000000-0000-4000-8000-000000000005",
+        "t0000000-0000-4000-8000-000000000006",
+        "t0000000-0000-4000-8000-000000000007"
+      ]
+    }
+  ],
+  "urls": ["http://localhost:3000/"],
+  "plugins": []
+}
