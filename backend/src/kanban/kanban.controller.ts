@@ -33,10 +33,7 @@ export class KanbanController {
 
   @Get("teams/:teamId/kanban")
   @UseGuards(JwtAuthGuard)
-  getBoard(
-    @CurrentUser() userId: string,
-    @Param("teamId", ParseUUIDPipe) teamId: string,
-  ) {
+  getBoard(@CurrentUser() userId: string, @Param("teamId", ParseUUIDPipe) teamId: string) {
     return this.kanban.getBoard(teamId, userId);
   }
 
@@ -64,10 +61,7 @@ export class KanbanController {
 
   @Delete("kanban/cards/:cardId")
   @UseGuards(JwtAuthGuard)
-  deleteCard(
-    @CurrentUser() userId: string,
-    @Param("cardId", ParseUUIDPipe) cardId: string,
-  ) {
+  deleteCard(@CurrentUser() userId: string, @Param("cardId", ParseUUIDPipe) cardId: string) {
     return this.kanban.deleteCard(cardId, userId);
   }
 
@@ -95,10 +89,7 @@ export class KanbanController {
 
   @Delete("kanban/columns/:columnId")
   @UseGuards(JwtAuthGuard)
-  deleteColumn(
-    @CurrentUser() userId: string,
-    @Param("columnId", ParseUUIDPipe) columnId: string,
-  ) {
+  deleteColumn(@CurrentUser() userId: string, @Param("columnId", ParseUUIDPipe) columnId: string) {
     return this.kanban.deleteColumn(columnId, userId);
   }
 

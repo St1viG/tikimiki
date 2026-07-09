@@ -16,16 +16,16 @@ import { XP_REWARDS } from "@/lib/rewards";
  */
 
 const M = {
-  railAria:     { en: "How to earn XP",            sr: "Kako zaraditi XP" },
-  earnTitle:    { en: "How to earn XP?",           sr: "Kako zaraditi XP?" },
-  upTo:         { en: "Up to",                     sr: "Do" },
-  daily:        { en: "daily",                     sr: "dnevno" },
-  rowWin:       { en: "Win a hackathon",           sr: "Pobedi na hackathonu" },
-  rowMinigame:  { en: "Daily Minigame",            sr: "Daily Minigame" },
-  rowSpin:      { en: "Daily Spin",                sr: "Daily Spin" },
-  rowJoin:      { en: "Hackathon participation",   sr: "Učešće na hackathonu" },
-  rowRefer:     { en: "Refer a friend",            sr: "Preporuči prijatelja" },
-  copyright:    { en: "© 2026",                    sr: "© 2026" },
+  railAria: { en: "How to earn XP", sr: "Kako zaraditi XP" },
+  earnTitle: { en: "How to earn XP?", sr: "Kako zaraditi XP?" },
+  upTo: { en: "Up to", sr: "Do" },
+  daily: { en: "daily", sr: "dnevno" },
+  rowWin: { en: "Win a hackathon", sr: "Pobedi na hackathonu" },
+  rowMinigame: { en: "Daily Minigame", sr: "Daily Minigame" },
+  rowSpin: { en: "Daily Spin", sr: "Daily Spin" },
+  rowJoin: { en: "Hackathon participation", sr: "Učešće na hackathonu" },
+  rowRefer: { en: "Refer a friend", sr: "Preporuči prijatelja" },
+  copyright: { en: "© 2026", sr: "© 2026" },
 } as const;
 
 export function StoreRailRight() {

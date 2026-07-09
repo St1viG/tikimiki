@@ -1,11 +1,7 @@
 import { z } from "zod";
 
 /** Up to 10 attachment URLs (relative upload paths or absolute), image/video. */
-const attachmentUrls = z
-  .array(z.string().trim().min(1).max(500))
-  .max(10)
-  .optional()
-  .default([]);
+const attachmentUrls = z.array(z.string().trim().min(1).max(500)).max(10).optional().default([]);
 
 /** Body for posting a channel message or a direct message. Content may be empty
  *  when the message carries at least one attachment. */
@@ -75,13 +71,9 @@ export const updateServerSchema = z
     logoUrl: z.string().trim().min(1).max(2000).nullable().optional(),
     bannerUrl: z.string().trim().min(1).max(2000).nullable().optional(),
   })
-  .refine(
-    (b) =>
-      b.name !== undefined ||
-      b.logoUrl !== undefined ||
-      b.bannerUrl !== undefined,
-    { message: "Provide at least one field to update" },
-  );
+  .refine((b) => b.name !== undefined || b.logoUrl !== undefined || b.bannerUrl !== undefined, {
+    message: "Provide at least one field to update",
+  });
 export type UpdateServerInput = z.infer<typeof updateServerSchema>;
 
 /** Body for creating a channel group. */

@@ -34,11 +34,7 @@ const DEFAULT_SETTINGS: SettingsDto = {
   pushNotifications: true,
 };
 
-const PROVIDERS: readonly IntegrationProvider[] = [
-  "github",
-  "google",
-  "linkedin",
-];
+const PROVIDERS: readonly IntegrationProvider[] = ["github", "google", "linkedin"];
 
 @Injectable()
 export class SettingsService {
@@ -63,10 +59,7 @@ export class SettingsService {
   }
 
   /** Upsert the caller's settings with the provided partial, then return all. */
-  async update(
-    userId: string,
-    input: UpdateSettingsInput,
-  ): Promise<SettingsDto> {
+  async update(userId: string, input: UpdateSettingsInput): Promise<SettingsDto> {
     const now = new Date();
 
     await this.db
@@ -104,10 +97,7 @@ export class SettingsService {
   }
 
   /** Disconnect an OAuth provider by nulling its id column(s). */
-  async disconnect(
-    userId: string,
-    provider: string,
-  ): Promise<IntegrationsDto> {
+  async disconnect(userId: string, provider: string): Promise<IntegrationsDto> {
     if (!PROVIDERS.includes(provider as IntegrationProvider)) {
       throw new BadRequestException(`Unknown provider: ${provider}`);
     }

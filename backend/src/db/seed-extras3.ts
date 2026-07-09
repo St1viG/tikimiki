@@ -70,16 +70,14 @@ async function main() {
       sponsorName: "Anthropic",
       title: "Most responsible use of AI",
       theme: "AI",
-      description:
-        "For the most mature, transparent and safe integration of AI into a solution.",
+      description: "For the most mature, transparent and safe integration of AI into a solution.",
       award: "$1000 · Claude API credits (1 yr.)",
     },
     {
       sponsorName: "JetBrains",
       title: "Cleanest and most maintainable code",
       theme: "Engineering",
-      description:
-        "Values readable, well-tested, well-documented code and sound architecture.",
+      description: "Values readable, well-tested, well-documented code and sound architecture.",
       award: "$2000 · JetBrains All Products Pack (1 yr.)",
     },
   ];

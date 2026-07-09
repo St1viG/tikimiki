@@ -27,14 +27,10 @@ describe("SSU 8 — Pins, Mutes, Private channels (e2e)", () => {
     const org = await registerOrganization(app);
     const hk = await createHackathon(app, org);
     const serverId = await getHackathonServerId(app, hk.hackathonId);
-    const detail = await http()
-      .get(`/api/v1/servers/${serverId}`)
-      .set(auth(org))
-      .expect(200);
+    const detail = await http().get(`/api/v1/servers/${serverId}`).set(auth(org)).expect(200);
     const channels: { channelId: string; type: string; name: string }[] =
       detail.body.groups.flatMap(
-        (g: { channels: { channelId: string; type: string; name: string }[] }) =>
-          g.channels,
+        (g: { channels: { channelId: string; type: string; name: string }[] }) => g.channels,
       );
     const general = channels.find((c) => c.type === "general")!;
     const firstGroupId: string = detail.body.groups[0].groupId;
@@ -116,9 +112,7 @@ describe("SSU 8 — Pins, Mutes, Private channels (e2e)", () => {
     it("unpin non-existent returns 404", async () => {
       const { org, generalChannelId } = await freshServer();
       await http()
-        .delete(
-          `/api/v1/channels/${generalChannelId}/pins/00000000-0000-4000-8000-000000000000`,
-        )
+        .delete(`/api/v1/channels/${generalChannelId}/pins/00000000-0000-4000-8000-000000000000`)
         .set(auth(org))
         .expect(404);
     });
@@ -137,8 +131,7 @@ describe("SSU 8 — Pins, Mutes, Private channels (e2e)", () => {
     });
 
     it("pinning a message from a different channel returns 404", async () => {
-      const { org, generalChannelId, firstGroupId, serverId } =
-        await freshServer();
+      const { org, generalChannelId, firstGroupId, serverId } = await freshServer();
       // Create a second general channel.
       const ch2 = await http()
         .post(`/api/v1/servers/${serverId}/channels`)
@@ -172,11 +165,10 @@ describe("SSU 8 — Pins, Mutes, Private channels (e2e)", () => {
       expect(res.body.mutedUserId).toBe(member.userId);
       expect(res.body.reason).toBe("testing");
 
-      const list = await http()
-        .get(`/api/v1/servers/${serverId}/mutes`)
-        .set(auth(org))
-        .expect(200);
-      expect(list.body.some((m: { mutedUserId: string }) => m.mutedUserId === member.userId)).toBe(true);
+      const list = await http().get(`/api/v1/servers/${serverId}/mutes`).set(auth(org)).expect(200);
+      expect(list.body.some((m: { mutedUserId: string }) => m.mutedUserId === member.userId)).toBe(
+        true,
+      );
     });
 
     it("muted member cannot send messages (403)", async () => {
@@ -345,10 +337,7 @@ describe("SSU 8 — Pins, Mutes, Private channels (e2e)", () => {
       const channelId: string = ch.body.channelId;
 
       // Denied before.
-      await http()
-        .get(`/api/v1/channels/${channelId}/messages`)
-        .set(auth(member))
-        .expect(403);
+      await http().get(`/api/v1/channels/${channelId}/messages`).set(auth(member)).expect(403);
 
       await http()
         .post(`/api/v1/channels/${channelId}/members`)
@@ -357,10 +346,7 @@ describe("SSU 8 — Pins, Mutes, Private channels (e2e)", () => {
         .expect(201);
 
       // Allowed after.
-      await http()
-        .get(`/api/v1/channels/${channelId}/messages`)
-        .set(auth(member))
-        .expect(200);
+      await http().get(`/api/v1/channels/${channelId}/messages`).set(auth(member)).expect(200);
       await http()
         .post(`/api/v1/channels/${channelId}/messages`)
         .set(auth(member))
@@ -391,10 +377,7 @@ describe("SSU 8 — Pins, Mutes, Private channels (e2e)", () => {
         .set(auth(org))
         .expect(200);
 
-      await http()
-        .get(`/api/v1/channels/${channelId}/messages`)
-        .set(auth(member))
-        .expect(403);
+      await http().get(`/api/v1/channels/${channelId}/messages`).set(auth(member)).expect(403);
     });
 
     it("manager (manage_channels) can always access a private channel", async () => {
@@ -407,10 +390,7 @@ describe("SSU 8 — Pins, Mutes, Private channels (e2e)", () => {
         .expect(201);
 
       // Org is never in channel_members but holds manage_channels implicitly.
-      await http()
-        .get(`/api/v1/channels/${ch.body.channelId}/messages`)
-        .set(auth(org))
-        .expect(200);
+      await http().get(`/api/v1/channels/${ch.body.channelId}/messages`).set(auth(org)).expect(200);
     });
 
     it("listChannelMembers requires manage_channels (403 for plain member)", async () => {

@@ -58,8 +58,8 @@ import { Icon } from "@/components/Icon";
 import { AppShell } from "@/components/shell/AppShell";
 //  AppShell({ children: ReactNode; right?: ReactNode;
 //             variant?: "default" | "no-right" | "wide" })   // default "default"
-import { RailLeft } from "@/components/shell/RailLeft";    // RailLeft()  (no props)
-import { RailRight } from "@/components/shell/RailRight";  // RailRight() (no props)
+import { RailLeft } from "@/components/shell/RailLeft"; // RailLeft()  (no props)
+import { RailRight } from "@/components/shell/RailRight"; // RailRight() (no props)
 
 // UI primitives (optional — raw className markup is equally valid)
 import { Button } from "@/components/ui/Button";
@@ -91,7 +91,9 @@ via `right`, or omit it to get `<RailRight/>`.
 ```tsx
 // Typical app-shell page:
 <AppShell right={<RailRight />}>
-  <main className="feed" id="feed">…page content…</main>
+  <main className="feed" id="feed">
+    …page content…
+  </main>
 </AppShell>
 // No-right page:  <AppShell variant="no-right"><main className="page">…</main></AppShell>
 ```
@@ -103,6 +105,7 @@ sprite, grain div, or skip-link (the root layout provides them globally).
 ## (d) Exports of lib/mock-data.ts and lib/types.ts
 
 `lib/mock-data.ts` (read-only; do not mutate):
+
 - `currentUser: User` — Andrej Čolić, @andrej, initials "AČ", avatarKind "brand".
 - `currentMember: Member` — `{ userId, points: 1240 }`.
 - `navBadges` — `{ notifications: 5, store: 2 } as const`.
@@ -116,6 +119,7 @@ sprite, grain div, or skip-link (the root layout provides them globally).
 
 `lib/types.ts` exports (camelCase fields; ids `string` UUID; timestamps ISO
 `string`; nullable cols `?: T | null`):
+
 - Enums (string-literal unions): `OrgVerificationStatus`, `HackathonType`,
   `HackathonStatus`, `TeamRole`, `ApplicationStatus`, `ProjectStatus`,
   `ChannelType`, `BadgeCategory`, `CosmeticType`, `CosmeticRarity`,
@@ -158,7 +162,7 @@ single server `page.tsx` with a `metadata` export.
   `style="a:b"`→`style={{ a: "b" }}`, self-close void tags, keep aria-*/role.
   CSS custom props in style need `as React.CSSProperties` (see FeedClient `--i`).
 - Icons: `<svg class="ic …"><use href="#i-NAME"/></svg>` → `<Icon name="NAME"
-  className="…extra ic classes…" />`.
+className="…extra ic classes…" />`.
 - Internal links: `<Link href="/route">` from "next/link". Route map:
   home_page→/ · login→/login · signup→/signup · signup_organization→
   /signup/organization · suspended→/suspended · hackathons→/hackathons ·
@@ -170,4 +174,7 @@ single server `page.tsx` with a `metadata` export.
   stay plain `<a>`.
 - Images: `images/x.jpg` → `/images/x.jpg` (served from public/). Keep
   loading="lazy" and alt.
+
+```
+
 ```

@@ -1,11 +1,4 @@
-import {
-  Controller,
-  Get,
-  Param,
-  ParseUUIDPipe,
-  Post,
-  UseGuards,
-} from "@nestjs/common";
+import { Controller, Get, Param, ParseUUIDPipe, Post, UseGuards } from "@nestjs/common";
 import { CurrentUser } from "../auth/current-user.decorator";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { OptionalJwtAuthGuard } from "../auth/optional-jwt-auth.guard";
@@ -42,10 +35,7 @@ export class VotingController {
 
   @Get("hackathons/:hackathonId/my-vote")
   @UseGuards(JwtAuthGuard)
-  myVote(
-    @Param("hackathonId", ParseUUIDPipe) hackathonId: string,
-    @CurrentUser() userId: string,
-  ) {
+  myVote(@Param("hackathonId", ParseUUIDPipe) hackathonId: string, @CurrentUser() userId: string) {
     return this.voting.myVote(hackathonId, userId);
   }
 }

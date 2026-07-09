@@ -84,8 +84,7 @@ async function main() {
     .values({
       teamId: nullptr.teamId,
       title: "Segfault — AI study buddy",
-      description:
-        "Explains your compiler errors in plain language and quizzes you on the fix.",
+      description: "Explains your compiler errors in plain language and quizzes you on the fix.",
       status: "submitted",
       repositoryUrl: "https://github.com/nullptr/segfault",
       submittedAt: ago(95),
@@ -115,9 +114,27 @@ async function main() {
   const colId = (name: string) => cols.find((c) => c.name === name)!.columnId;
   await db.insert(schema.kanbanCards).values([
     { columnId: colId("To do"), createdBy: andrej, title: "Design the event-map UI", position: 0 },
-    { columnId: colId("To do"), createdBy: andrej, assignedTo: mohammed, title: "Set up push notifications", position: 1 },
-    { columnId: colId("In progress"), createdBy: mohammed, assignedTo: mohammed, title: "Check-in API endpoint", position: 0 },
-    { columnId: colId("Done"), createdBy: andrej, assignedTo: andrej, title: "Repo + CI scaffolding", position: 0 },
+    {
+      columnId: colId("To do"),
+      createdBy: andrej,
+      assignedTo: mohammed,
+      title: "Set up push notifications",
+      position: 1,
+    },
+    {
+      columnId: colId("In progress"),
+      createdBy: mohammed,
+      assignedTo: mohammed,
+      title: "Check-in API endpoint",
+      position: 0,
+    },
+    {
+      columnId: colId("Done"),
+      createdBy: andrej,
+      assignedTo: andrej,
+      title: "Repo + CI scaffolding",
+      position: 0,
+    },
   ]);
 
   console.log("✓  Added 2 projects, 3 votes, and a kanban board for digitalci.");

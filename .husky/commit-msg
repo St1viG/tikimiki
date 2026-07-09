@@ -1,0 +1,5 @@
+# Preserve the repo's native Gerrit commit-msg hook (it appends Change-Id).
+# husky now owns core.hooksPath, so .git/hooks/commit-msg no longer runs by
+# itself — chain it explicitly here so the Gerrit workflow keeps working.
+gerrit_hook="$(git rev-parse --git-common-dir)/hooks/commit-msg"
+[ -x "$gerrit_hook" ] && "$gerrit_hook" "$1"

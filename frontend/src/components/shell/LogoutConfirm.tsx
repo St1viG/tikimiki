@@ -17,13 +17,13 @@ import { useT } from "@/components/i18n/LanguageProvider";
  */
 
 const M = {
-  logoutTitle: { en: "Log out?",  sr: "Odjava?" },
+  logoutTitle: { en: "Log out?", sr: "Odjava?" },
   logoutDesc: {
     en: "You'll be signed out on this device.",
     sr: "Bićeš odjavljen sa ovog uređaja.",
   },
-  cancel:     { en: "Cancel",      sr: "Otkaži" },
-  logOut:     { en: "Log out",     sr: "Odjavi se" },
+  cancel: { en: "Cancel", sr: "Otkaži" },
+  logOut: { en: "Log out", sr: "Odjavi se" },
   loggingOut: { en: "Logging out…", sr: "Odjavljivanje…" },
 } as const;
 

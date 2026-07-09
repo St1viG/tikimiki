@@ -89,9 +89,7 @@ export function HexAvatar({ seed, size = 64, className }: AvatarArtProps) {
     CX + (x - CX) * innerScale,
     CY + (y - CY) * innerScale,
   ]) as [number, number][];
-  const innerPath = innerVerts
-    .map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`)
-    .join(" ");
+  const innerPath = innerVerts.map(([x, y]) => `${x.toFixed(2)},${y.toFixed(2)}`).join(" ");
 
   /* Mirror-symmetric facet lightness.
      Six wedges (0=top going clockwise). The hex is mirrored across the vertical
@@ -126,9 +124,7 @@ export function HexAvatar({ seed, size = 64, className }: AvatarArtProps) {
 
     // Inner facet (center triangle of the wedge): center -> innerA -> innerB
     facets.push({
-      points: `${CX},${CY} ${iax.toFixed(2)},${iay.toFixed(2)} ${ibx.toFixed(
-        2,
-      )},${iby.toFixed(2)}`,
+      points: `${CX},${CY} ${iax.toFixed(2)},${iay.toFixed(2)} ${ibx.toFixed(2)},${iby.toFixed(2)}`,
       fill: facetFill(accent, lWedge),
       op: 1,
     });
@@ -247,7 +243,13 @@ export function HexAvatar({ seed, size = 64, className }: AvatarArtProps) {
       <g filter={`url(#${uid}-spark)`}>
         <circle cx={spx.toFixed(2)} cy={(spy + 4).toFixed(2)} r="2.4" fill={sparkColor} />
       </g>
-      <circle cx={spx.toFixed(2)} cy={(spy + 4).toFixed(2)} r="1.1" fill="#FFFFFF" fillOpacity="0.9" />
+      <circle
+        cx={spx.toFixed(2)}
+        cy={(spy + 4).toFixed(2)}
+        r="1.1"
+        fill="#FFFFFF"
+        fillOpacity="0.9"
+      />
     </svg>
   );
 }

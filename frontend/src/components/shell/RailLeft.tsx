@@ -140,130 +140,130 @@ export function RailLeft() {
 
   return (
     <>
-    <nav className="rail-left" aria-label={t("mainNav")}>
-      <Link className="rail-logo" href="/" aria-label={t("logoAria")}>
-        <b>tiki</b>miki
-      </Link>
+      <nav className="rail-left" aria-label={t("mainNav")}>
+        <Link className="rail-logo" href="/" aria-label={t("logoAria")}>
+          <b>tiki</b>miki
+        </Link>
 
-      {NAV_ITEMS.map((item) => {
-        const active = isActive(pathname, item.href);
-        // Notifications badge comes from the live unread count (hidden at 0);
-        // other badges (e.g. store) stay on their hardcoded values.
-        const badge =
-          item.href === "/notifications"
-            ? unreadCount > 0
-              ? unreadCount
-              : undefined
-            : item.badge;
-        return (
-          <Link
-            key={item.href}
-            className="nav-link"
-            href={item.href}
-            aria-current={active ? "page" : undefined}
-          >
-            <Icon name={item.icon} />
-            {t(item.labelKey)}
-            {badge !== undefined && (
-              <span
-                className="nav-badge"
-                aria-label={
-                  item.href === "/notifications"
-                    ? `${badge} ${t("unread")}`
-                    : `${badge} ${t("newItems")}`
-                }
-              >
-                {badge}
-              </span>
+        {NAV_ITEMS.map((item) => {
+          const active = isActive(pathname, item.href);
+          // Notifications badge comes from the live unread count (hidden at 0);
+          // other badges (e.g. store) stay on their hardcoded values.
+          const badge =
+            item.href === "/notifications"
+              ? unreadCount > 0
+                ? unreadCount
+                : undefined
+              : item.badge;
+          return (
+            <Link
+              key={item.href}
+              className="nav-link"
+              href={item.href}
+              aria-current={active ? "page" : undefined}
+            >
+              <Icon name={item.icon} />
+              {t(item.labelKey)}
+              {badge !== undefined && (
+                <span
+                  className="nav-badge"
+                  aria-label={
+                    item.href === "/notifications"
+                      ? `${badge} ${t("unread")}`
+                      : `${badge} ${t("newItems")}`
+                  }
+                >
+                  {badge}
+                </span>
+              )}
+            </Link>
+          );
+        })}
+
+        <div className="rail-sep" />
+
+        <Link
+          className="premium-link"
+          href="/premium"
+          aria-current={isActive(pathname, "/premium") ? "page" : undefined}
+        >
+          <Icon name="premium" /> {t("premium")}
+        </Link>
+
+        {user ? (
+          <div className="pm-menu-wrap" ref={menuWrapRef}>
+            {menuOpen && (
+              <div className="pm-menu" role="menu" aria-label={t("accountMenu")}>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="pm-menu-item"
+                  ref={menuFirstRef}
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setProfileOpen(true);
+                  }}
+                >
+                  <Icon name="eye" />
+                  {t("viewProfile")}
+                </button>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="pm-menu-item is-danger"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setConfirmLogout(true);
+                  }}
+                >
+                  <Icon name="logout" />
+                  {t("logOut")}
+                </button>
+              </div>
             )}
-          </Link>
-        );
-      })}
-
-      <div className="rail-sep" />
-
-      <Link
-        className="premium-link"
-        href="/premium"
-        aria-current={isActive(pathname, "/premium") ? "page" : undefined}
-      >
-        <Icon name="premium" /> {t("premium")}
-      </Link>
-
-      {user ? (
-        <div className="pm-menu-wrap" ref={menuWrapRef}>
-          {menuOpen && (
-            <div className="pm-menu" role="menu" aria-label={t("accountMenu")}>
-              <button
-                type="button"
-                role="menuitem"
-                className="pm-menu-item"
-                ref={menuFirstRef}
-                onClick={() => {
-                  setMenuOpen(false);
-                  setProfileOpen(true);
-                }}
-              >
-                <Icon name="eye" />
-                {t("viewProfile")}
-              </button>
-              <button
-                type="button"
-                role="menuitem"
-                className="pm-menu-item is-danger"
-                onClick={() => {
-                  setMenuOpen(false);
-                  setConfirmLogout(true);
-                }}
-              >
-                <Icon name="logout" />
-                {t("logOut")}
-              </button>
-            </div>
-          )}
-          <button
-            type="button"
-            className="profile-mini"
-            ref={triggerRef}
-            aria-label={`@${user.username}`}
-            aria-haspopup="menu"
-            aria-expanded={menuOpen}
-            onClick={() => setMenuOpen((v) => !v)}
-          >
+            <button
+              type="button"
+              className="profile-mini"
+              ref={triggerRef}
+              aria-label={`@${user.username}`}
+              aria-haspopup="menu"
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen((v) => !v)}
+            >
+              <span className="pm-av is-orb" aria-hidden="true">
+                <OrbArt url={user.avatarUrl} seed={user.username} />
+              </span>
+              <span className="pm-info">
+                <span className="pm-name">{personName(user)}</span>
+                <span className="pm-user">@{user.username}</span>
+              </span>
+            </button>
+          </div>
+        ) : (
+          <Link className="profile-mini" href="/login" aria-label={t("signInAria")}>
             <span className="pm-av is-orb" aria-hidden="true">
-              <OrbArt url={user.avatarUrl} seed={user.username} />
+              <Icon name="logout" />
             </span>
             <span className="pm-info">
-              <span className="pm-name">{personName(user)}</span>
-              <span className="pm-user">@{user.username}</span>
+              <span className="pm-name">{t("signIn")}</span>
+              <span className="pm-user">{t("guest")}</span>
             </span>
-          </button>
-        </div>
-      ) : (
-        <Link className="profile-mini" href="/login" aria-label={t("signInAria")}>
-          <span className="pm-av is-orb" aria-hidden="true">
-            <Icon name="logout" />
-          </span>
-          <span className="pm-info">
-            <span className="pm-name">{t("signIn")}</span>
-            <span className="pm-user">{t("guest")}</span>
-          </span>
-        </Link>
-      )}
-    </nav>
+          </Link>
+        )}
+      </nav>
 
-    <ProfilePopup
+      <ProfilePopup
         open={profileOpen}
         onClose={() => setProfileOpen(false)}
         username={user?.username ?? null}
       />
 
-    <LogoutConfirm
-      open={confirmLogout}
-      busy={loggingOut}
-      onCancel={() => setConfirmLogout(false)}
-      onConfirm={doLogout}
-    />
+      <LogoutConfirm
+        open={confirmLogout}
+        busy={loggingOut}
+        onCancel={() => setConfirmLogout(false)}
+        onConfirm={doLogout}
+      />
     </>
   );
 }

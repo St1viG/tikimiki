@@ -25,9 +25,7 @@ import { env } from "../config/env";
 @WebSocketGateway({
   cors: { origin: env.WEB_ORIGIN, credentials: true },
 })
-export class RealtimeGateway
-  implements OnGatewayConnection, OnGatewayDisconnect
-{
+export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server!: Server;
 
   /** userId → number of live connections (one user may have several tabs). */
@@ -38,17 +36,16 @@ export class RealtimeGateway
   async handleConnection(client: Socket): Promise<void> {
     const token =
       (client.handshake.auth?.token as string | undefined) ??
-      (client.handshake.headers.authorization?.replace("Bearer ", "") ??
-        undefined);
+      client.handshake.headers.authorization?.replace("Bearer ", "") ??
+      undefined;
     if (!token) {
       client.disconnect();
       return;
     }
     try {
-      const payload = await this.jwt.verifyAsync<{ sub: string; typ: string }>(
-        token,
-        { secret: env.JWT_ACCESS_SECRET },
-      );
+      const payload = await this.jwt.verifyAsync<{ sub: string; typ: string }>(token, {
+        secret: env.JWT_ACCESS_SECRET,
+      });
       if (payload.typ !== "access") throw new Error("wrong token type");
       const userId = payload.sub;
       client.data.userId = userId;
@@ -82,44 +79,28 @@ export class RealtimeGateway
   }
 
   @SubscribeMessage("joinChannel")
-  joinChannel(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() channelId: string,
-  ): void {
+  joinChannel(@ConnectedSocket() client: Socket, @MessageBody() channelId: string): void {
     if (typeof channelId === "string") void client.join(`channel:${channelId}`);
   }
 
   @SubscribeMessage("leaveChannel")
-  leaveChannel(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() channelId: string,
-  ): void {
+  leaveChannel(@ConnectedSocket() client: Socket, @MessageBody() channelId: string): void {
     if (typeof channelId === "string") void client.leave(`channel:${channelId}`);
   }
 
   @SubscribeMessage("joinServer")
-  joinServer(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() serverId: string,
-  ): void {
+  joinServer(@ConnectedSocket() client: Socket, @MessageBody() serverId: string): void {
     if (typeof serverId === "string") void client.join(`server:${serverId}`);
   }
 
   @SubscribeMessage("leaveServer")
-  leaveServer(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() serverId: string,
-  ): void {
+  leaveServer(@ConnectedSocket() client: Socket, @MessageBody() serverId: string): void {
     if (typeof serverId === "string") void client.leave(`server:${serverId}`);
   }
 
   @SubscribeMessage("joinConversation")
-  joinConversation(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() conversationId: string,
-  ): void {
-    if (typeof conversationId === "string")
-      void client.join(`conversation:${conversationId}`);
+  joinConversation(@ConnectedSocket() client: Socket, @MessageBody() conversationId: string): void {
+    if (typeof conversationId === "string") void client.join(`conversation:${conversationId}`);
   }
 
   @SubscribeMessage("leaveConversation")
@@ -127,8 +108,7 @@ export class RealtimeGateway
     @ConnectedSocket() client: Socket,
     @MessageBody() conversationId: string,
   ): void {
-    if (typeof conversationId === "string")
-      void client.leave(`conversation:${conversationId}`);
+    if (typeof conversationId === "string") void client.leave(`conversation:${conversationId}`);
   }
 
   /** A user is typing in a channel — relay to others in that channel. */
@@ -151,9 +131,7 @@ export class RealtimeGateway
   }
 
   emitDirectMessage(conversationId: string, message: unknown): void {
-    this.server
-      ?.to(`conversation:${conversationId}`)
-      .emit("directMessage", message);
+    this.server?.to(`conversation:${conversationId}`).emit("directMessage", message);
   }
 
   emitNotification(userId: string, notification: unknown): void {
@@ -165,9 +143,7 @@ export class RealtimeGateway
   }
 
   emitConversationReaction(conversationId: string, payload: unknown): void {
-    this.server
-      ?.to(`conversation:${conversationId}`)
-      .emit("messageReaction", payload);
+    this.server?.to(`conversation:${conversationId}`).emit("messageReaction", payload);
   }
 
   emitChannelMessageEdited(channelId: string, payload: unknown): void {
@@ -175,9 +151,7 @@ export class RealtimeGateway
   }
 
   emitConversationMessageEdited(conversationId: string, payload: unknown): void {
-    this.server
-      ?.to(`conversation:${conversationId}`)
-      .emit("messageEdited", payload);
+    this.server?.to(`conversation:${conversationId}`).emit("messageEdited", payload);
   }
 
   /**
@@ -204,28 +178,17 @@ export class RealtimeGateway
   }
 
   /** A direct message was soft-deleted — tell the conversation room. */
-  emitConversationMessageDeleted(
-    conversationId: string,
-    payload: unknown,
-  ): void {
-    this.server
-      ?.to(`conversation:${conversationId}`)
-      .emit("messageDeleted", payload);
+  emitConversationMessageDeleted(conversationId: string, payload: unknown): void {
+    this.server?.to(`conversation:${conversationId}`).emit("messageDeleted", payload);
   }
 
   @SubscribeMessage("joinKanban")
-  joinKanban(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() boardId: string,
-  ): void {
+  joinKanban(@ConnectedSocket() client: Socket, @MessageBody() boardId: string): void {
     if (typeof boardId === "string") void client.join(`board:${boardId}`);
   }
 
   @SubscribeMessage("leaveKanban")
-  leaveKanban(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() boardId: string,
-  ): void {
+  leaveKanban(@ConnectedSocket() client: Socket, @MessageBody() boardId: string): void {
     if (typeof boardId === "string") void client.leave(`board:${boardId}`);
   }
 

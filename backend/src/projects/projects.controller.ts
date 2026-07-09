@@ -88,9 +88,7 @@ export class ProjectsController {
 
   /** Every submitted project in a hackathon (showcase / judging). Public. */
   @Get("hackathons/:hackathonId/submissions")
-  listSubmissions(
-    @Param("hackathonId", ParseUUIDPipe) hackathonId: string,
-  ) {
+  listSubmissions(@Param("hackathonId", ParseUUIDPipe) hackathonId: string) {
     return this.projects.listSubmissions(hackathonId);
   }
 }

@@ -1,11 +1,7 @@
 "use client";
 
 import { Icon } from "@/components/Icon";
-import {
-  OVERALL_STREAK,
-  PLAYED_TODAY,
-  TOTAL_GAMES,
-} from "@/lib/gamehub/mock";
+import { OVERALL_STREAK, PLAYED_TODAY, TOTAL_GAMES } from "@/lib/gamehub/mock";
 import { useT } from "@/components/i18n/LanguageProvider";
 
 const M = {
@@ -50,8 +46,7 @@ const WEEK: { key: keyof typeof M; played: boolean; today?: boolean }[] = [
 
 export function StreakBand() {
   const t = useT(M);
-  const pct =
-    TOTAL_GAMES > 0 ? Math.round((PLAYED_TODAY / TOTAL_GAMES) * 100) : 0;
+  const pct = TOTAL_GAMES > 0 ? Math.round((PLAYED_TODAY / TOTAL_GAMES) * 100) : 0;
 
   return (
     <section className="streak-band" aria-label={t("yourStreak")}>
@@ -78,7 +73,13 @@ export function StreakBand() {
               {PLAYED_TODAY}/{TOTAL_GAMES} {t("playedCount")}
             </span>
           </div>
-          <div className="sb-bar" role="progressbar" aria-valuenow={PLAYED_TODAY} aria-valuemin={0} aria-valuemax={TOTAL_GAMES}>
+          <div
+            className="sb-bar"
+            role="progressbar"
+            aria-valuenow={PLAYED_TODAY}
+            aria-valuemin={0}
+            aria-valuemax={TOTAL_GAMES}
+          >
             <div className="sb-bar-fill" style={{ width: `${pct}%` }} />
           </div>
         </div>

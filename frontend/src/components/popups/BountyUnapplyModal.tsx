@@ -14,12 +14,18 @@ import { useT } from "@/components/i18n/LanguageProvider";
  */
 
 const M = {
-  title:   { en: "Unapply from bounty",                              sr: "Odjava sa bounty-a" },
-  descPre: { en: "Are you sure you want to unapply team",            sr: "Da li sigurno želiš da odjaviš tim" },
-  descMid: { en: "from the bounty",                                  sr: "sa bounty-a" },
-  descPost:{ en: "? Your solution will no longer be considered for this reward.", sr: "? Vaše rešenje više neće biti razmatrano za ovu nagradu." },
-  cancel:  { en: "Cancel",                                           sr: "Odustani" },
-  confirm: { en: "Yes, unapply me",                                  sr: "Da, odjavi me" },
+  title: { en: "Unapply from bounty", sr: "Odjava sa bounty-a" },
+  descPre: {
+    en: "Are you sure you want to unapply team",
+    sr: "Da li sigurno želiš da odjaviš tim",
+  },
+  descMid: { en: "from the bounty", sr: "sa bounty-a" },
+  descPost: {
+    en: "? Your solution will no longer be considered for this reward.",
+    sr: "? Vaše rešenje više neće biti razmatrano za ovu nagradu.",
+  },
+  cancel: { en: "Cancel", sr: "Odustani" },
+  confirm: { en: "Yes, unapply me", sr: "Da, odjavi me" },
 } as const;
 
 export function BountyUnapplyModal({
@@ -58,8 +64,7 @@ export function BountyUnapplyModal({
           {t("title")}
         </div>
         <div className="bounty-modal-desc" id="modal-desc">
-          {t("descPre")}{" "}
-          <strong style={{ color: "var(--violet-light)" }}>digitalci</strong>{" "}
+          {t("descPre")} <strong style={{ color: "var(--violet-light)" }}>digitalci</strong>{" "}
           {t("descMid")}{" "}
           <strong id="modal-bounty-name" style={{ color: "var(--ink)" }}>
             {bountyName}

@@ -59,8 +59,12 @@ import { registerMember } from "../helpers/factories";
 
 describe("my feature (e2e)", () => {
   let app: INestApplication;
-  beforeAll(async () => { app = await createTestApp(); });
-  afterAll(async () => { await closeTestApp(app); });
+  beforeAll(async () => {
+    app = await createTestApp();
+  });
+  afterAll(async () => {
+    await closeTestApp(app);
+  });
 
   it("does the thing", async () => {
     const user = await registerMember(app);

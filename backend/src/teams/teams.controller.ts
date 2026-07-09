@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  ParseUUIDPipe,
-  Post,
-  UseGuards,
-} from "@nestjs/common";
+import { Body, Controller, Get, Param, ParseUUIDPipe, Post, UseGuards } from "@nestjs/common";
 import { CurrentUser } from "../auth/current-user.decorator";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { ZodValidationPipe } from "../common/zod.pipe";
@@ -45,38 +37,26 @@ export class TeamsController {
 
   @Post("invitations/:id/accept")
   @UseGuards(JwtAuthGuard)
-  acceptInvitation(
-    @CurrentUser() userId: string,
-    @Param("id", ParseUUIDPipe) id: string,
-  ) {
+  acceptInvitation(@CurrentUser() userId: string, @Param("id", ParseUUIDPipe) id: string) {
     return this.teams.respondInvitation(id, userId, true);
   }
 
   @Post("invitations/:id/decline")
   @UseGuards(JwtAuthGuard)
-  declineInvitation(
-    @CurrentUser() userId: string,
-    @Param("id", ParseUUIDPipe) id: string,
-  ) {
+  declineInvitation(@CurrentUser() userId: string, @Param("id", ParseUUIDPipe) id: string) {
     return this.teams.respondInvitation(id, userId, false);
   }
 
   /* ── Join requests ────────────────────────────────────────── */
   @Post("join-requests/:id/accept")
   @UseGuards(JwtAuthGuard)
-  acceptJoinRequest(
-    @CurrentUser() userId: string,
-    @Param("id", ParseUUIDPipe) id: string,
-  ) {
+  acceptJoinRequest(@CurrentUser() userId: string, @Param("id", ParseUUIDPipe) id: string) {
     return this.teams.respondJoinRequest(id, userId, true);
   }
 
   @Post("join-requests/:id/decline")
   @UseGuards(JwtAuthGuard)
-  declineJoinRequest(
-    @CurrentUser() userId: string,
-    @Param("id", ParseUUIDPipe) id: string,
-  ) {
+  declineJoinRequest(@CurrentUser() userId: string, @Param("id", ParseUUIDPipe) id: string) {
     return this.teams.respondJoinRequest(id, userId, false);
   }
 
@@ -108,10 +88,7 @@ export class TeamsController {
 
   @Post(":teamId/join")
   @UseGuards(JwtAuthGuard)
-  join(
-    @CurrentUser() userId: string,
-    @Param("teamId", ParseUUIDPipe) teamId: string,
-  ) {
+  join(@CurrentUser() userId: string, @Param("teamId", ParseUUIDPipe) teamId: string) {
     return this.teams.join(userId, teamId);
   }
 
@@ -127,10 +104,7 @@ export class TeamsController {
 
   @Get(":teamId/join-requests")
   @UseGuards(JwtAuthGuard)
-  listJoinRequests(
-    @CurrentUser() userId: string,
-    @Param("teamId", ParseUUIDPipe) teamId: string,
-  ) {
+  listJoinRequests(@CurrentUser() userId: string, @Param("teamId", ParseUUIDPipe) teamId: string) {
     return this.teams.listJoinRequests(teamId, userId);
   }
 

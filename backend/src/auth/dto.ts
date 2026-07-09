@@ -15,10 +15,10 @@ export const registerSchema = z
     accountType: accountTypeSchema.default("member"),
     organizationName: z.string().min(2).max(100).optional(),
   })
-  .refine(
-    (d) => d.accountType !== "organization" || !!d.organizationName,
-    { message: "organizationName is required for organization accounts", path: ["organizationName"] },
-  );
+  .refine((d) => d.accountType !== "organization" || !!d.organizationName, {
+    message: "organizationName is required for organization accounts",
+    path: ["organizationName"],
+  });
 export type RegisterInput = z.infer<typeof registerSchema>;
 
 // `email` carries the sign-in identifier: an email address OR a username.

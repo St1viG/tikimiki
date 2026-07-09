@@ -29,28 +29,28 @@ import "./ProfilePopup.css";
  */
 
 const M = {
-  close:            { en: "Close",                  sr: "Zatvori" },
-  loading:          { en: "Loading…",               sr: "Učitavanje…" },
-  notFound:         { en: "Profile unavailable.",   sr: "Profil nije dostupan." },
-  editProfile:      { en: "Edit profile",           sr: "Izmena profila" },
-  openProfile:      { en: "Open profile",           sr: "Otvori profil" },
-  follow:           { en: "Follow",                  sr: "Zaprati" },
-  unfollow:         { en: "Following",               sr: "Pratiš ✓" },
-  message:          { en: "Message",                 sr: "Poruka" },
-  back:             { en: "Back",                    sr: "Nazad" },
-  noFollowers:      { en: "No followers yet.",       sr: "Još nema pratilaca." },
-  noFollowing:      { en: "Not following anyone.",   sr: "Ne prati nikoga." },
-  skills:           { en: "Skills",                 sr: "Veštine" },
-  tabOverview:      { en: "Overview",               sr: "Pregled" },
-  tabBadges:        { en: "Badges",                 sr: "Bedževi" },
-  statXp:           { en: "XP",                      sr: "XP" },
-  statBadges:       { en: "Badges",                 sr: "Bedževi" },
-  statFollowers:    { en: "Followers",              sr: "Pratioci" },
-  following:        { en: "Following",              sr: "Prati" },
-  memberSince:      { en: "Member since",           sr: "Član od" },
-  earnedBadges:     { en: "Earned badges",          sr: "Zarađeni bedževi" },
-  noBadges:         { en: "No badges earned yet.",  sr: "Još nema zarađenih bedževa." },
-  noSkills:         { en: "No skills listed.",      sr: "Nema navedenih veština." },
+  close: { en: "Close", sr: "Zatvori" },
+  loading: { en: "Loading…", sr: "Učitavanje…" },
+  notFound: { en: "Profile unavailable.", sr: "Profil nije dostupan." },
+  editProfile: { en: "Edit profile", sr: "Izmena profila" },
+  openProfile: { en: "Open profile", sr: "Otvori profil" },
+  follow: { en: "Follow", sr: "Zaprati" },
+  unfollow: { en: "Following", sr: "Pratiš ✓" },
+  message: { en: "Message", sr: "Poruka" },
+  back: { en: "Back", sr: "Nazad" },
+  noFollowers: { en: "No followers yet.", sr: "Još nema pratilaca." },
+  noFollowing: { en: "Not following anyone.", sr: "Ne prati nikoga." },
+  skills: { en: "Skills", sr: "Veštine" },
+  tabOverview: { en: "Overview", sr: "Pregled" },
+  tabBadges: { en: "Badges", sr: "Bedževi" },
+  statXp: { en: "XP", sr: "XP" },
+  statBadges: { en: "Badges", sr: "Bedževi" },
+  statFollowers: { en: "Followers", sr: "Pratioci" },
+  following: { en: "Following", sr: "Prati" },
+  memberSince: { en: "Member since", sr: "Član od" },
+  earnedBadges: { en: "Earned badges", sr: "Zarađeni bedževi" },
+  noBadges: { en: "No badges earned yet.", sr: "Još nema zarađenih bedževa." },
+  noSkills: { en: "No skills listed.", sr: "Nema navedenih veština." },
 } as const;
 
 type PpTab = "overview" | "badges";
@@ -63,8 +63,18 @@ interface ProfilePopupProps {
 }
 
 const MONTHS_SR = [
-  "januara", "februara", "marta", "aprila", "maja", "juna",
-  "jula", "avgusta", "septembra", "oktobra", "novembra", "decembra",
+  "januara",
+  "februara",
+  "marta",
+  "aprila",
+  "maja",
+  "juna",
+  "jula",
+  "avgusta",
+  "septembra",
+  "oktobra",
+  "novembra",
+  "decembra",
 ];
 
 function joinedLabel(iso: string): string {
@@ -249,11 +259,7 @@ export function ProfilePopup({ open, onClose, username }: ProfilePopupProps) {
                   <Icon name="comment" /> {t("message")}
                 </button>
               )}
-              <Link
-                className="btn btn-ghost"
-                href={`/u/${handle}`}
-                onClick={onClose}
-              >
+              <Link className="btn btn-ghost" href={`/u/${handle}`} onClick={onClose}>
                 <Icon name="link" /> {t("openProfile")}
               </Link>
             </div>
@@ -262,8 +268,7 @@ export function ProfilePopup({ open, onClose, username }: ProfilePopupProps) {
 
             {profile && (
               <div className="pp-joined-date">
-                <Icon name="calendar" /> {t("memberSince")}{" "}
-                {joinedLabel(profile.createdAt)}
+                <Icon name="calendar" /> {t("memberSince")} {joinedLabel(profile.createdAt)}
               </div>
             )}
 
@@ -323,10 +328,7 @@ export function ProfilePopup({ open, onClose, username }: ProfilePopupProps) {
                       onClick={onClose}
                       style={{ textDecoration: "none", cursor: "pointer" }}
                     >
-                      <span
-                        className="pp-avatar is-orb"
-                        style={{ width: 34, height: 34 }}
-                      >
+                      <span className="pp-avatar is-orb" style={{ width: 34, height: 34 }}>
                         <OrbArt url={u.avatarUrl} seed={u.username} />
                       </span>
                       <div className="pp-hack-info">

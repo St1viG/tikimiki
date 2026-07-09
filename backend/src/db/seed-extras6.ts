@@ -59,10 +59,7 @@ async function main() {
   }
 
   // ── Create the group conversation ─────────────────────────────────
-  const [conv] = await db
-    .insert(schema.conversations)
-    .values({ createdBy: andrej })
-    .returning();
+  const [conv] = await db.insert(schema.conversations).values({ createdBy: andrej }).returning();
   await db.insert(schema.conversationMembers).values([
     { conversationId: conv.conversationId, userId: andrej },
     { conversationId: conv.conversationId, userId: mohammed },
@@ -84,9 +81,7 @@ async function main() {
       .values({ messageId: msg.messageId, conversationId: conv.conversationId });
   }
 
-  console.log(
-    "✓  Created a group DM (andrej, mohammed, nenad) with 3 messages.",
-  );
+  console.log("✓  Created a group DM (andrej, mohammed, nenad) with 3 messages.");
   await client.end();
 }
 

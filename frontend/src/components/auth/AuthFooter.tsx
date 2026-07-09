@@ -15,12 +15,12 @@ import "./auth-shell.css";
  */
 
 const M = {
-  aboutUs:        { en: "About us",         sr: "O nama" },
-  help:           { en: "Help",             sr: "Pomoć" },
-  privacyAndTerms:{ en: "Privacy & terms",  sr: "Privatnost i uslovi" },
-  helpCenter:     { en: "Help center",      sr: "Centar za pomoć" },
-  platformRules:  { en: "Platform rules",   sr: "Pravila platforme" },
-  privacy:        { en: "Privacy",          sr: "Privatnost" },
+  aboutUs: { en: "About us", sr: "O nama" },
+  help: { en: "Help", sr: "Pomoć" },
+  privacyAndTerms: { en: "Privacy & terms", sr: "Privatnost i uslovi" },
+  helpCenter: { en: "Help center", sr: "Centar za pomoć" },
+  platformRules: { en: "Platform rules", sr: "Pravila platforme" },
+  privacy: { en: "Privacy", sr: "Privatnost" },
 } as const;
 
 export function AuthFooter({ variant = "links" }: { variant?: "links" | "inline" }) {
@@ -32,7 +32,10 @@ export function AuthFooter({ variant = "links" }: { variant?: "links" | "inline"
         <a href="#">{t("helpCenter")}</a> · <a href="#">{t("platformRules")}</a> ·{" "}
         <a href="#">{t("privacy")}</a>
         <br />
-        <span className="cw"><b>tiki</b>miki</span> © 2026
+        <span className="cw">
+          <b>tiki</b>miki
+        </span>{" "}
+        © 2026
       </footer>
     );
   }
@@ -44,7 +47,9 @@ export function AuthFooter({ variant = "links" }: { variant?: "links" | "inline"
         <a href="#">{t("help")}</a> <span>·</span>
         <a href="#">{t("privacyAndTerms")}</a>
       </div>
-      <div className="auth-footer-copy"><b>tiki</b>miki &copy; <span className="yr">2026</span></div>
+      <div className="auth-footer-copy">
+        <b>tiki</b>miki &copy; <span className="yr">2026</span>
+      </div>
     </footer>
   );
 }

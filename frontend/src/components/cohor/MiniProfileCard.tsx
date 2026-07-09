@@ -128,9 +128,7 @@ export function MiniProfileCard({
               )}
             </div>
             <div className="mini-profile-section-label">{teamLabel}</div>
-            <div className="mini-profile-team">
-              {member.teamName ?? noTeamLabel}
-            </div>
+            <div className="mini-profile-team">{member.teamName ?? noTeamLabel}</div>
           </>
         )}
       </div>

@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from "@nestjs/common";
+import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { and, desc, eq, gte, sql } from "drizzle-orm";
 import { PointsService } from "../common/points.service";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
@@ -63,9 +58,7 @@ export class GamesService {
   /** UTC start-of-today, used for daily-limit comparisons. */
   private startOfTodayUtc(): Date {
     const now = new Date();
-    return new Date(
-      Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
-    );
+    return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
   }
 
   /** PUBLIC: list all active games. */
@@ -124,8 +117,7 @@ export class GamesService {
 
     return rows.map((r) => {
       const playsUsedToday = Number(r.playsUsedToday);
-      const bestScoreToday =
-        r.bestScoreToday === null ? null : Number(r.bestScoreToday);
+      const bestScoreToday = r.bestScoreToday === null ? null : Number(r.bestScoreToday);
       return {
         gameId: r.gameId,
         slug: r.slug,
@@ -144,11 +136,7 @@ export class GamesService {
    * Points are computed **server-side** from the submitted `score` and the
    * game's `maxPointsPerPlay` cap — the client cannot dictate the reward.
    */
-  async recordPlay(
-    userId: string,
-    gameId: string,
-    score: number,
-  ): Promise<PlayResultDto> {
+  async recordPlay(userId: string, gameId: string, score: number): Promise<PlayResultDto> {
     const [game] = await this.db
       .select({
         gameId: games.gameId,
@@ -180,17 +168,13 @@ export class GamesService {
 
     const playsUsedToday = Number(used?.count ?? 0);
     if (playsUsedToday >= game.baseDailyPlays) {
-      throw new BadRequestException(
-        "Daily play limit reached for this game",
-      );
+      throw new BadRequestException("Daily play limit reached for this game");
     }
 
     // Server-authoritative reward: derived from the submitted score and capped
     // by the game's maxPointsPerPlay. The client cannot influence the amount.
     const pointsAwarded =
-      game.maxPointsPerPlay === null
-        ? score
-        : Math.min(score, game.maxPointsPerPlay);
+      game.maxPointsPerPlay === null ? score : Math.min(score, game.maxPointsPerPlay);
 
     return this.db.transaction(async (tx) => {
       const [play] = await tx
@@ -208,12 +192,11 @@ export class GamesService {
       let newBalance = member ? member.points : 0;
 
       if (member && pointsAwarded > 0) {
-        const credited = await this.points.credit(
-          tx,
-          userId,
-          pointsAwarded,
-          { type: "game_reward", referenceId: play.playId, note: game.name },
-        );
+        const credited = await this.points.credit(tx, userId, pointsAwarded, {
+          type: "game_reward",
+          referenceId: play.playId,
+          note: game.name,
+        });
         newBalance = credited.newBalance;
       }
 
@@ -239,12 +222,7 @@ export class GamesService {
       })
       .from(gamePlays)
       .innerJoin(users, eq(gamePlays.userId, users.userId))
-      .where(
-        and(
-          eq(gamePlays.gameId, gameId),
-          gte(gamePlays.playedAt, startOfToday),
-        ),
-      )
+      .where(and(eq(gamePlays.gameId, gameId), gte(gamePlays.playedAt, startOfToday)))
       .orderBy(desc(gamePlays.score), desc(gamePlays.playedAt))
       .limit(10);
 

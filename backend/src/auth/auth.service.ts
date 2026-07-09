@@ -11,12 +11,7 @@ import { and, eq, isNull, or } from "drizzle-orm";
 import { AuthzService } from "../common/authz.service";
 import { env } from "../config/env";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
-import {
-  administrators,
-  members,
-  organizations,
-  users,
-} from "../db/schema";
+import { administrators, members, organizations, users } from "../db/schema";
 import type { LoginInput, RegisterInput } from "./dto";
 
 export interface PublicUser {
@@ -101,9 +96,7 @@ export class AuthService {
         .returning();
 
       if (input.accountType === "organization") {
-        await tx
-          .insert(organizations)
-          .values({ userId: u.userId, name: input.organizationName! });
+        await tx.insert(organizations).values({ userId: u.userId, name: input.organizationName! });
       } else {
         await tx.insert(members).values({ userId: u.userId });
       }
@@ -170,10 +163,7 @@ export class AuthService {
       });
     }
 
-    await this.db
-      .update(users)
-      .set({ lastLoginAt: new Date() })
-      .where(eq(users.userId, u.userId));
+    await this.db.update(users).set({ lastLoginAt: new Date() }).where(eq(users.userId, u.userId));
 
     return { user: this.toPublicUser(u), ...(await this.issueTokens(u.userId)) };
   }
@@ -182,10 +172,9 @@ export class AuthService {
     if (!refreshToken) throw new UnauthorizedException("Missing refresh token");
     let sub: string;
     try {
-      const payload = await this.jwt.verifyAsync<{ sub: string; typ: string }>(
-        refreshToken,
-        { secret: env.JWT_REFRESH_SECRET },
-      );
+      const payload = await this.jwt.verifyAsync<{ sub: string; typ: string }>(refreshToken, {
+        secret: env.JWT_REFRESH_SECRET,
+      });
       if (payload.typ !== "refresh") throw new Error("wrong token type");
       sub = payload.sub;
     } catch {

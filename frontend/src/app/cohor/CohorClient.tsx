@@ -142,7 +142,6 @@ import {
   CTX_MENU_DANGER_STYLE,
 } from "./shared";
 
-
 /*
    Cohor — full Discord-style chat app. Features:
      · live 48h hackathon timer (drives progress bar + elapsed label)
@@ -191,17 +190,11 @@ export function CohorClient() {
   // Real audience-voting window (set from getVotingStatus below) wins; otherwise
   // fall back to the last 2h of the real timer. Both are real-data driven.
   const isVotingOpen =
-    votingStatus !== null
-      ? votingStatus.isOpen
-      : isHackathonActive && rem <= VOTING_WINDOW_S;
+    votingStatus !== null ? votingStatus.isOpen : isHackathonActive && rem <= VOTING_WINDOW_S;
 
   const elapsedS = totalS > 0 ? Math.min(totalS, totalS - rem) : 0;
   const timerVal =
-    pad(Math.floor(rem / 3600)) +
-    ":" +
-    pad(Math.floor((rem % 3600) / 60)) +
-    ":" +
-    pad(rem % 60);
+    pad(Math.floor(rem / 3600)) + ":" + pad(Math.floor((rem % 3600) / 60)) + ":" + pad(rem % 60);
   const progressPct = totalS > 0 ? ((elapsedS / totalS) * 100).toFixed(3) : "0";
   const elapsedLabel =
     t("startedAgoPre") +
@@ -220,9 +213,7 @@ export function CohorClient() {
   const [topbarIcon, setTopbarIcon] = useState("#");
   const [topbarName, setTopbarName] = useState("opšte");
   const [topbarDesc, setTopbarDesc] = useState<string>(M.chOpsteDesc[locale]);
-  const [inputPlaceholder, setInputPlaceholder] = useState<string>(
-    M.msgPrefix[locale] + "opšte"
-  );
+  const [inputPlaceholder, setInputPlaceholder] = useState<string>(M.msgPrefix[locale] + "opšte");
 
   /* Message composer (controlled: multiline, preview, attachments) */
   const [draft, setDraft] = useState("");
@@ -235,7 +226,6 @@ export function CohorClient() {
 
   /* Members panel visibility */
   const [membersVisible, setMembersVisible] = useState(true);
-
 
   /* Rail state */
   // dmStripNotif removed — badge is derived from real dmConvos unreadCount below
@@ -326,8 +316,7 @@ export function CohorClient() {
   // Nothing open on the current surface: server mode with no server, or DM
   // mode with no conversation (fresh account). Hides the channel topbar and
   // the composer instead of showing the default "#opšte" placeholder.
-  const nothingOpen =
-    appMode === "server" ? activeServerId === null : activeConvoId === null;
+  const nothingOpen = appMode === "server" ? activeServerId === null : activeConvoId === null;
 
   // @-mention candidates are contextual: server members in a channel, the
   // conversation's members in a DM. Filtered client-side (no extra fetch).
@@ -371,14 +360,10 @@ export function CohorClient() {
   });
 
   // Home landing view data: the user's ongoing hackathon (or null) + friends.
-  const [activeHackathon, setActiveHackathon] = useState<ActiveHackathon | null>(
-    null,
-  );
+  const [activeHackathon, setActiveHackathon] = useState<ActiveHackathon | null>(null);
 
   /* Message context menu (right-click) */
-  const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number; m: ApiMessage } | null>(
-    null,
-  );
+  const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number; m: ApiMessage } | null>(null);
   // Add-reaction sub-row expanded inside the menu.
   const [ctxReactOpen, setCtxReactOpen] = useState(false);
   // Two-step in-menu confirm for the destructive Delete action.
@@ -393,9 +378,7 @@ export function CohorClient() {
     messageId: string;
     username: string;
     displayName?: string | null;
-  } | null>(
-    null,
-  );
+  } | null>(null);
 
   const closeCtxMenu = useCallback(() => {
     setCtxMenu(null);
@@ -447,9 +430,7 @@ export function CohorClient() {
       if (isSelf) return;
       getRelationship(target.userId)
         .then((rel) =>
-          setProfileMenu((pm) =>
-            pm && pm.userId === target.userId ? { ...pm, rel } : pm,
-          ),
+          setProfileMenu((pm) => (pm && pm.userId === target.userId ? { ...pm, rel } : pm)),
         )
         .catch(() => {
           /* leave rel null → menu falls back to "add friend" / "block" */
@@ -508,9 +489,7 @@ export function CohorClient() {
         ? `↩ ${personName({
             displayName: ref.senderDisplayName,
             username: ref.senderUsername,
-          })}: ${
-            ref.content.length > 60 ? ref.content.slice(0, 60) + "…" : ref.content
-          }`
+          })}: ${ref.content.length > 60 ? ref.content.slice(0, 60) + "…" : ref.content}`
         : t("msgReplyFallback");
       return (
         <div className="msg-reply-preview" style={MSG_REPLY_PREVIEW_STYLE} title={text}>
@@ -537,45 +516,36 @@ export function CohorClient() {
   );
 
   // Image/video attachments shown beneath a message's text.
-  const renderAttachments = useCallback(
-    (m: ApiMessage) => {
-      if (!m.attachments || m.attachments.length === 0) return null;
-      return (
-        <div className="msg-attachments">
-          {m.attachments.map((a, i) =>
-            a.type === "video" ? (
-              <video
-                key={i}
-                className="msg-att"
-                src={a.url}
-                controls
-                preload="metadata"
-              />
-            ) : (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                key={i}
-                className="msg-att"
-                src={a.url}
-                alt={a.filename ?? ""}
-                loading="lazy"
-                role="button"
-                tabIndex={0}
-                onClick={() => setChatLb(a.url)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    setChatLb(a.url);
-                  }
-                }}
-              />
-            ),
-          )}
-        </div>
-      );
-    },
-    [],
-  );
+  const renderAttachments = useCallback((m: ApiMessage) => {
+    if (!m.attachments || m.attachments.length === 0) return null;
+    return (
+      <div className="msg-attachments">
+        {m.attachments.map((a, i) =>
+          a.type === "video" ? (
+            <video key={i} className="msg-att" src={a.url} controls preload="metadata" />
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={i}
+              className="msg-att"
+              src={a.url}
+              alt={a.filename ?? ""}
+              loading="lazy"
+              role="button"
+              tabIndex={0}
+              onClick={() => setChatLb(a.url)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setChatLb(a.url);
+                }
+              }}
+            />
+          ),
+        )}
+      </div>
+    );
+  }, []);
 
   // Close the context menu on any outside click or Escape while it is open.
   useEffect(() => {
@@ -596,7 +566,9 @@ export function CohorClient() {
   useEffect(() => {
     if (!showPastHacks) return;
     const onClick = () => setShowPastHacks(false);
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setShowPastHacks(false); };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setShowPastHacks(false);
+    };
     window.addEventListener("click", onClick);
     window.addEventListener("keydown", onKey);
     return () => {
@@ -637,8 +609,9 @@ export function CohorClient() {
   // Create-channel modal (group prefilled). null = closed.
   const [chCreate, setChCreate] = useState<{ groupId: string } | null>(null);
   const [chCreateName, setChCreateName] = useState("");
-  const [chCreateType, setChCreateType] =
-    useState<"general" | "announcements" | "private">("general");
+  const [chCreateType, setChCreateType] = useState<"general" | "announcements" | "private">(
+    "general",
+  );
   const [chCreateErr, setChCreateErr] = useState<string | null>(null);
   const [chBusy, setChBusy] = useState(false);
   // Create-group modal. null = closed.
@@ -682,8 +655,7 @@ export function CohorClient() {
 
   /* Server settings modal (manage_server / manage_roles / kick_members) */
   const [serverSettingsOpen, setServerSettingsOpen] = useState(false);
-  const [settingsTab, setSettingsTab] =
-    useState<"overview" | "roles" | "members">("overview");
+  const [settingsTab, setSettingsTab] = useState<"overview" | "roles" | "members">("overview");
   // Overview tab draft fields.
   const [ovName, setOvName] = useState("");
   const [ovLogo, setOvLogo] = useState<string | null>(null);
@@ -720,7 +692,7 @@ export function CohorClient() {
   // Display title for a conversation row / header: group name (or member names
   // as a fallback) for groups, the other person's name for 1-1 DMs.
   const convoTitle = (c: Conversation) =>
-    isGroupConvo(c) ? (c.name?.trim() || dmOtherName(c)) : dmOtherName(c);
+    isGroupConvo(c) ? c.name?.trim() || dmOtherName(c) : dmOtherName(c);
   // Stable avatar seed for a 1-1 DM row: always the other member's USERNAME so
   // the avatar never shifts when a display name is set. Falls back to the title.
   const convoSeed = (c: Conversation) => {
@@ -738,7 +710,7 @@ export function CohorClient() {
     const group = c ? isGroupConvo(c) : false;
     setActiveConvoId(id);
     setActiveDm(null);
-    setTopbarIcon(group ? (c?.icon || GROUP_ICON_FALLBACK) : "@");
+    setTopbarIcon(group ? c?.icon || GROUP_ICON_FALLBACK : "@");
     setTopbarName(nm);
     setTopbarDesc("");
     setInputPlaceholder(t("msgPrefixDm") + nm);
@@ -750,9 +722,7 @@ export function CohorClient() {
     // clear its unread badge locally so it disappears immediately.
     markConversationRead(id).catch(() => {});
     setDmConvos((prev) =>
-      prev.map((c) =>
-        c.conversationId === id ? { ...c, unreadCount: 0 } : c,
-      ),
+      prev.map((c) => (c.conversationId === id ? { ...c, unreadCount: 0 } : c)),
     );
   };
 
@@ -795,9 +765,7 @@ export function CohorClient() {
     if (!s) return;
     const onMessage = (msg: ApiMessage) => {
       if (msg.channelId !== activeChannelId) return;
-      setMsgs((prev) =>
-        prev.some((m) => m.messageId === msg.messageId) ? prev : [...prev, msg],
-      );
+      setMsgs((prev) => (prev.some((m) => m.messageId === msg.messageId) ? prev : [...prev, msg]));
       requestAnimationFrame(() => {
         if (serverMsgsRef.current)
           serverMsgsRef.current.scrollTop = serverMsgsRef.current.scrollHeight;
@@ -929,8 +897,7 @@ export function CohorClient() {
   useEffect(() => {
     const s = getSocket();
     if (!s) return;
-    const onPresence = (p: { online: string[] }) =>
-      setOnlineUsers(new Set(p.online));
+    const onPresence = (p: { online: string[] }) => setOnlineUsers(new Set(p.online));
     s.on("presence", onPresence);
     s.emit("getPresence");
     return () => {
@@ -968,8 +935,7 @@ export function CohorClient() {
       try {
         const detail = await getServer(serverId);
         const map: Record<string, string> = {};
-        for (const g of detail.groups)
-          for (const c of g.channels) map[c.name] = c.channelId;
+        for (const g of detail.groups) for (const c of g.channels) map[c.name] = c.channelId;
         setChanMap(map);
         setServerGroups(detail.groups);
         const def = map["opšte"] ?? Object.values(map)[0];
@@ -1007,14 +973,11 @@ export function CohorClient() {
       try {
         const detail = await getServer(serverId);
         const map: Record<string, string> = {};
-        for (const g of detail.groups)
-          for (const c of g.channels) map[c.name] = c.channelId;
+        for (const g of detail.groups) for (const c of g.channels) map[c.name] = c.channelId;
         setChanMap(map);
         setServerGroups(detail.groups);
         // Active channel gone (deleted remotely) → switch to the first one.
-        const stillThere = Object.values(map).includes(
-          activeChannelIdRef.current ?? "",
-        );
+        const stillThere = Object.values(map).includes(activeChannelIdRef.current ?? "");
         if (!stillThere) {
           const firstName = Object.keys(map)[0];
           if (firstName) {
@@ -1069,7 +1032,9 @@ export function CohorClient() {
       if (p.serverId !== sid) return;
       refreshServerDetail(sid);
       // Reflect a renamed server in the rail / sidebar list too.
-      getServers().then(setServers).catch(() => {});
+      getServers()
+        .then(setServers)
+        .catch(() => {});
     };
     const onRolesChanged = (p: { serverId: string }) => {
       if (p.serverId !== sid) return;
@@ -1146,8 +1111,7 @@ export function CohorClient() {
           }
         }
         // Active hackathon → its server; else → Direct messages.
-        const activeServer =
-          active && list.find((s) => s.serverId === active.serverId);
+        const activeServer = active && list.find((s) => s.serverId === active.serverId);
         if (activeServer) {
           enterServerMode();
           await loadServer(activeServer.serverId, activeServer);
@@ -1206,9 +1170,7 @@ export function CohorClient() {
           // Prefill the organizer form's sponsor selects with current winners.
           if (res.bountyWinners.length > 0) {
             setBountyWinners(
-              Object.fromEntries(
-                res.bountyWinners.map((w) => [w.bountyId, w.teamName])
-              )
+              Object.fromEntries(res.bountyWinners.map((w) => [w.bountyId, w.teamName])),
             );
           }
         }
@@ -1311,15 +1273,11 @@ export function CohorClient() {
   const onDropCard = useCallback(
     (cardId: string | null, targetColumnId: string) => {
       if (!board || !cardId) return;
-      const sourceCol = board.columns.find((c) =>
-        c.cards.some((card) => card.cardId === cardId),
-      );
+      const sourceCol = board.columns.find((c) => c.cards.some((card) => card.cardId === cardId));
       const card = sourceCol?.cards.find((c) => c.cardId === cardId);
       // No source / already in the target column → nothing to do.
       if (!card || card.columnId === targetColumnId) return;
-      const targetCol = board.columns.find(
-        (c) => c.columnId === targetColumnId,
-      );
+      const targetCol = board.columns.find((c) => c.columnId === targetColumnId);
       if (!targetCol) return;
       const nextPosition = targetCol.cards.length;
       // Optimistically move the card so the board updates instantly.
@@ -1369,11 +1327,7 @@ export function CohorClient() {
   // Create a group conversation from the picked member ids, then open it.
   const createGroupConvo = useCallback(() => {
     if (groupPick.length === 0) return;
-    createConversation(
-      groupPick,
-      groupName.trim() || undefined,
-      groupIcon || undefined,
-    )
+    createConversation(groupPick, groupName.trim() || undefined, groupIcon || undefined)
       .then((convo) => {
         setShowGroupModal(false);
         setGroupPick([]);
@@ -1442,7 +1396,7 @@ export function CohorClient() {
         setToast((t) => (t ? { ...t, show: false } : t));
       }, ms);
     },
-    []
+    [],
   );
 
   /* Channel management actions (manage_channels) */
@@ -1472,8 +1426,7 @@ export function CohorClient() {
       // Refetch our own tree (socket event would also fire; refresh is idempotent).
       await refreshServerDetail(activeServerId);
     } catch (err) {
-      if (err instanceof ApiError && err.status === 409)
-        setChCreateErr(t("chNameTaken"));
+      if (err instanceof ApiError && err.status === 409) setChCreateErr(t("chNameTaken"));
       else setChCreateErr(t("chActionFailed"));
     } finally {
       setChBusy(false);
@@ -1552,17 +1505,13 @@ export function CohorClient() {
     setOvBanner(null); // server summary carries no banner; settable, not shown
     setOvErr(null);
     // First permitted tab.
-    setSettingsTab(
-      can("manage_server")
-        ? "overview"
-        : can("manage_roles")
-          ? "roles"
-          : "members",
-    );
+    setSettingsTab(can("manage_server") ? "overview" : can("manage_roles") ? "roles" : "members");
     setServerSettingsOpen(true);
     // Load roles + permission catalog if allowed.
     if (activeServerId && can("manage_roles")) {
-      getPermissionCatalog().then(setPermCatalog).catch(() => {});
+      getPermissionCatalog()
+        .then(setPermCatalog)
+        .catch(() => {});
       getServerRoles(activeServerId)
         .then(setRoles)
         .catch(() => setRolesErr(t("chActionFailed")));
@@ -1571,7 +1520,9 @@ export function CohorClient() {
 
   const refreshRoles = useCallback(() => {
     if (!activeServerId) return;
-    getServerRoles(activeServerId).then(setRoles).catch(() => {});
+    getServerRoles(activeServerId)
+      .then(setRoles)
+      .catch(() => {});
   }, [activeServerId]);
 
   // Save overview (name + logo + banner).
@@ -1585,7 +1536,9 @@ export function CohorClient() {
         logoUrl: ovLogo,
         bannerUrl: ovBanner,
       });
-      await getServers().then(setServers).catch(() => {});
+      await getServers()
+        .then(setServers)
+        .catch(() => {});
       showToast("violet", "check", <>{t("srvOvSaved")}</>, 2500);
     } catch (err) {
       setOvErr(err instanceof ApiError ? err.message : t("chActionFailed"));
@@ -1645,8 +1598,7 @@ export function CohorClient() {
         /* ignore */
       }
     } catch (err) {
-      if (err instanceof ApiError && err.status === 409)
-        setRolesErr(t("srvRoleNameTaken"));
+      if (err instanceof ApiError && err.status === 409) setRolesErr(t("srvRoleNameTaken"));
       else setRolesErr(err instanceof ApiError ? err.message : t("chActionFailed"));
     }
   }, [activeServerId, roleEditing, roleDraftName, roleDraftPerms, refreshRoles, t]);
@@ -1788,12 +1740,8 @@ export function CohorClient() {
       if (relBusy) return;
       setRelBusy(true);
       try {
-        const rel = isFriend
-          ? await removeFriend(userId)
-          : await addFriend(userId);
-        setProfileMenu((pm) =>
-          pm && pm.userId === userId ? { ...pm, rel } : pm,
-        );
+        const rel = isFriend ? await removeFriend(userId) : await addFriend(userId);
+        setProfileMenu((pm) => (pm && pm.userId === userId ? { ...pm, rel } : pm));
         if (!isFriend) showToast("violet", "check", <>{t("pmFriendAdded")}</>, 2500);
       } catch (err) {
         if (err instanceof ApiError) showToast("red", "x", <>{err.message}</>, 4000);
@@ -1810,12 +1758,8 @@ export function CohorClient() {
       if (relBusy) return;
       setRelBusy(true);
       try {
-        const rel = isBlocked
-          ? await unblockUser(userId)
-          : await blockUser(userId);
-        setProfileMenu((pm) =>
-          pm && pm.userId === userId ? { ...pm, rel } : pm,
-        );
+        const rel = isBlocked ? await unblockUser(userId) : await blockUser(userId);
+        setProfileMenu((pm) => (pm && pm.userId === userId ? { ...pm, rel } : pm));
         showToast(
           isBlocked ? "violet" : "red",
           isBlocked ? "check" : "x",
@@ -1864,16 +1808,12 @@ export function CohorClient() {
         const r = await editMessage(messageId, next);
         setMsgs((prev) =>
           prev.map((m) =>
-            m.messageId === messageId
-              ? { ...m, content: r.content, editedAt: r.editedAt }
-              : m,
+            m.messageId === messageId ? { ...m, content: r.content, editedAt: r.editedAt } : m,
           ),
         );
         setDmRealMsgs((prev) =>
           prev.map((m) =>
-            m.messageId === messageId
-              ? { ...m, content: r.content, editedAt: r.editedAt }
-              : m,
+            m.messageId === messageId ? { ...m, content: r.content, editedAt: r.editedAt } : m,
           ),
         );
         setEditingId(null);
@@ -1973,14 +1913,11 @@ export function CohorClient() {
       try {
         const r = await apiCastVote(hackathonId, projectId);
         setMyVotedProjectId(projectId);
-        const votedName =
-          realProjects.find((p) => p.projectId === projectId)?.title ?? "";
+        const votedName = realProjects.find((p) => p.projectId === projectId)?.title ?? "";
         setRealProjects((prev) =>
           prev.map((p) =>
-            p.projectId === projectId
-              ? { ...p, voteCount: r.voteCount, hasUserVoted: true }
-              : p
-          )
+            p.projectId === projectId ? { ...p, voteCount: r.voteCount, hasUserVoted: true } : p,
+          ),
         );
         showToast(
           "violet",
@@ -1990,28 +1927,29 @@ export function CohorClient() {
             <strong style={{ color: "var(--violet-light)" }}>{votedName}</strong>
             {t("voteToastPost")}
           </>,
-          3000
+          3000,
         );
       } catch {
         /* ignore — backend governs vote eligibility */
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [hackathonId, myVotedProjectId, realProjects]
+    [hackathonId, myVotedProjectId, realProjects],
   );
 
   /* Rezultati form */
   const [rezForm, setRezForm] = useState({
-    rank1: "", rank2: "", rank3: "", publike: "",
+    rank1: "",
+    rank2: "",
+    rank3: "",
+    publike: "",
   });
   // Per-bounty winning team selections — key = bountyId, value = chosen teamName.
   const [bountyWinners, setBountyWinners] = useState<Record<string, string>>({});
   const [rezError, setRezError] = useState<string | null>(null);
   const [rezPublished, setRezPublished] = useState<typeof rezForm | null>(null);
   const [rezSaved, setRezSaved] = useState<typeof rezForm | null>(null);
-  const [rezTimestamp, setRezTimestamp] = useState<string>(
-    M.rezTimestampDefault[locale]
-  );
+  const [rezTimestamp, setRezTimestamp] = useState<string>(M.rezTimestampDefault[locale]);
   // Real official results loaded from the backend for the active hackathon.
   const [results, setResults] = useState<HackathonResults | null>(null);
 
@@ -2046,14 +1984,12 @@ export function CohorClient() {
   /* Scroll to bottom when real messages finish loading (async, fires after the
      channel-switch effect above so it wins for channels backed by the API). */
   useEffect(() => {
-    if (serverMsgsRef.current)
-      serverMsgsRef.current.scrollTop = serverMsgsRef.current.scrollHeight;
+    if (serverMsgsRef.current) serverMsgsRef.current.scrollTop = serverMsgsRef.current.scrollHeight;
   }, [msgs]);
 
   /* Scroll to bottom whenever real DM messages load or new ones arrive. */
   useEffect(() => {
-    if (dmMsgsRef.current)
-      dmMsgsRef.current.scrollTop = dmMsgsRef.current.scrollHeight;
+    if (dmMsgsRef.current) dmMsgsRef.current.scrollTop = dmMsgsRef.current.scrollHeight;
   }, [dmRealMsgs]);
 
   /* Mode switching */
@@ -2089,10 +2025,7 @@ export function CohorClient() {
       if (next.has(channelId)) next.delete(channelId);
       else next.add(channelId);
       try {
-        window.localStorage.setItem(
-          "cohor_muted_channels",
-          JSON.stringify([...next]),
-        );
+        window.localStorage.setItem("cohor_muted_channels", JSON.stringify([...next]));
       } catch {
         /* ignore */
       }
@@ -2133,7 +2066,6 @@ export function CohorClient() {
     else setPanel("messages");
   }
 
-
   /* Composer: attachments + autogrow */
   function autoGrowChat() {
     const ta = composerRef.current;
@@ -2147,27 +2079,18 @@ export function CohorClient() {
     const room = 10 - chatMedia.length;
     for (const file of files.slice(0, Math.max(0, room))) {
       const id = `${Date.now()}-${Math.round(performance.now())}-${file.name}`;
-      const type: "image" | "video" = file.type.startsWith("video/")
-        ? "video"
-        : "image";
+      const type: "image" | "video" = file.type.startsWith("video/") ? "video" : "image";
       const previewUrl = URL.createObjectURL(file);
-      setChatMedia((prev) => [
-        ...prev,
-        { id, type, previewUrl, url: null, uploading: true },
-      ]);
+      setChatMedia((prev) => [...prev, { id, type, previewUrl, url: null, uploading: true }]);
       uploadMedia(file)
         .then((res) =>
           setChatMedia((prev) =>
-            prev.map((m) =>
-              m.id === id ? { ...m, url: res.url, uploading: false } : m,
-            ),
+            prev.map((m) => (m.id === id ? { ...m, url: res.url, uploading: false } : m)),
           ),
         )
         .catch(() =>
           setChatMedia((prev) =>
-            prev.map((m) =>
-              m.id === id ? { ...m, uploading: false, error: true } : m,
-            ),
+            prev.map((m) => (m.id === id ? { ...m, uploading: false, error: true } : m)),
           ),
         );
     }
@@ -2200,11 +2123,7 @@ export function CohorClient() {
         .then((created) => {
           // Dedupe: the socket echo of our own message may arrive before
           // this resolves, so skip if it's already in the list.
-          setMsgs((m) =>
-            m.some((x) => x.messageId === created.messageId)
-              ? m
-              : [...m, created],
-          );
+          setMsgs((m) => (m.some((x) => x.messageId === created.messageId) ? m : [...m, created]));
           requestAnimationFrame(() => {
             if (serverMsgsRef.current)
               serverMsgsRef.current.scrollTop = serverMsgsRef.current.scrollHeight;
@@ -2219,8 +2138,7 @@ export function CohorClient() {
             m.some((x) => x.messageId === created.messageId) ? m : [...m, created],
           );
           requestAnimationFrame(() => {
-            if (dmMsgsRef.current)
-              dmMsgsRef.current.scrollTop = dmMsgsRef.current.scrollHeight;
+            if (dmMsgsRef.current) dmMsgsRef.current.scrollTop = dmMsgsRef.current.scrollHeight;
           });
         })
         .catch((err) => console.error(err));
@@ -2271,9 +2189,21 @@ export function CohorClient() {
   const MD_TOOLS = [
     { key: "mdBold" as const, label: <b>B</b>, wrap: ["**", "**"] as const },
     { key: "mdItalic" as const, label: <i>I</i>, wrap: ["_", "_"] as const },
-    { key: "mdStrike" as const, label: <span className="strike">S</span>, wrap: ["~~", "~~"] as const },
-    { key: "mdCode" as const, label: <span className="code">{"</>"}</span>, wrap: ["`", "`"] as const },
-    { key: "mdLink" as const, label: <Icon name="link" className="ic-sm" />, wrap: ["[", "](url)"] as const },
+    {
+      key: "mdStrike" as const,
+      label: <span className="strike">S</span>,
+      wrap: ["~~", "~~"] as const,
+    },
+    {
+      key: "mdCode" as const,
+      label: <span className="code">{"</>"}</span>,
+      wrap: ["`", "`"] as const,
+    },
+    {
+      key: "mdLink" as const,
+      label: <Icon name="link" className="ic-sm" />,
+      wrap: ["[", "](url)"] as const,
+    },
   ];
 
   /* Toggle right panel */
@@ -2319,12 +2249,10 @@ export function CohorClient() {
       "leaderboard",
       <>
         {t("voteToastPre")}
-        <strong style={{ color: "var(--violet-light)" }}>
-          {TEAM_LABEL[btnTeam]}
-        </strong>
+        <strong style={{ color: "var(--violet-light)" }}>{TEAM_LABEL[btnTeam]}</strong>
         {t("voteToastPost")}
       </>,
-      3000
+      3000,
     );
   }
 
@@ -2340,7 +2268,7 @@ export function CohorClient() {
         {t("channelUnlocksPre")}
         <strong style={{ color: "var(--violet-light)" }}>{label}</strong>
       </>,
-      3000
+      3000,
     );
   }
 
@@ -2357,9 +2285,7 @@ export function CohorClient() {
   // Sync one bounty card from an apply/unapply API response.
   function patchBounty(bountyId: string, hasApplied: boolean, applicantCount: number) {
     setBounties((prev) =>
-      prev.map((x) =>
-        x.bountyId === bountyId ? { ...x, hasApplied, applicantCount } : x
-      )
+      prev.map((x) => (x.bountyId === bountyId ? { ...x, hasApplied, applicantCount } : x)),
     );
   }
   // Apply the user's team to a bounty (direct), or open the withdraw
@@ -2383,7 +2309,7 @@ export function CohorClient() {
           <strong style={{ color: "var(--lemon-vivid)" }}>{b.title}</strong>
           {t("bountyAppliedToastPost")}
         </>,
-        3500
+        3500,
       );
     } catch {
       /* ignore — backend governs bounty eligibility */
@@ -2405,7 +2331,7 @@ export function CohorClient() {
           <strong style={{ color: "var(--red)" }}>{b.title}</strong>
           {t("bountyUnappliedToastPost")}
         </>,
-        3500
+        3500,
       );
     } catch {
       /* ignore — backend governs bounty eligibility */
@@ -2441,9 +2367,7 @@ export function CohorClient() {
         { projectId: projectIdFor(rank1), rank: 1 },
         { projectId: projectIdFor(rank2), rank: 2 },
         { projectId: projectIdFor(rank3), rank: 3 },
-      ].filter(
-        (r): r is { projectId: string; rank: number } => r.projectId !== null
-      );
+      ].filter((r): r is { projectId: string; rank: number } => r.projectId !== null);
       if (rankings.length > 0) {
         try {
           const res = await publishHackathonResults(hackathonId, rankings);
@@ -2479,8 +2403,8 @@ export function CohorClient() {
     const now = new Date();
     setRezTimestamp(
       `${t("rezPublishedAt")}${now.getDate()}. ${MONTHS[now.getMonth()]} ${now.getFullYear()}.${t(
-        "rezPublishedAtMid"
-      )}${pad(now.getHours())}:${pad(now.getMinutes())}${t("rezPublishedAtPost")}`
+        "rezPublishedAtMid",
+      )}${pad(now.getHours())}:${pad(now.getMinutes())}${t("rezPublishedAtPost")}`,
     );
     setRezultatiBadge(t("rezNewBadge"));
   }
@@ -2494,7 +2418,12 @@ export function CohorClient() {
   /* Video upload */
   function processVideoFile(f: File) {
     const allowed = [
-      "video/mp4", "video/quicktime", "video/avi", "video/x-msvideo", "video/webm", "video/ogg",
+      "video/mp4",
+      "video/quicktime",
+      "video/avi",
+      "video/x-msvideo",
+      "video/webm",
+      "video/ogg",
     ];
     const maxBytes = 500 * 1024 * 1024;
     if (!f.type.startsWith("video/") && !allowed.includes(f.type)) {
@@ -2585,11 +2514,7 @@ export function CohorClient() {
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();
-        openProfileMenu(
-          { userId: m.userId, username: m.username },
-          e.clientX,
-          e.clientY,
-        );
+        openProfileMenu({ userId: m.userId, username: m.username }, e.clientX, e.clientY);
       }}
       onKeyDown={(e) => {
         if (e.key !== "Enter") return;
@@ -2605,9 +2530,7 @@ export function CohorClient() {
       <div className="member-info">
         <div className="member-name">
           {personName({ displayName: m.displayName, username: m.username })}
-          {m.isModerator && (
-            <span className="member-mod-badge">{t("srvModeratorBadge")}</span>
-          )}
+          {m.isModerator && <span className="member-mod-badge">{t("srvModeratorBadge")}</span>}
         </div>
         <div className="member-handle">@{m.username}</div>
       </div>
@@ -2617,12 +2540,8 @@ export function CohorClient() {
   /* Participants split into Moderators (online or not) → Online (non-mods) →
    * Offline (non-mods). All counts are real. */
   const moderatorMembers = members.filter((m) => m.isModerator);
-  const onlineNonMods = members.filter(
-    (m) => !m.isModerator && onlineUsers.has(m.userId),
-  );
-  const offlineNonMods = members.filter(
-    (m) => !m.isModerator && !onlineUsers.has(m.userId),
-  );
+  const onlineNonMods = members.filter((m) => !m.isModerator && onlineUsers.has(m.userId));
+  const offlineNonMods = members.filter((m) => !m.isModerator && !onlineUsers.has(m.userId));
 
   return (
     <MentionClickContext.Provider value={setProfileUsername}>
@@ -2654,7 +2573,9 @@ export function CohorClient() {
               title={t("backToFeed")}
             >
               <Icon name="arrow-left" className="cohor-brand-back ic-sm" />
-              <span className="cohor-brand-name"><b>tiki</b>miki</span>
+              <span className="cohor-brand-name">
+                <b>tiki</b>miki
+              </span>
             </Link>
           </div>
 
@@ -2665,8 +2586,7 @@ export function CohorClient() {
               <span className="cohor-tabs-empty">{t("navNoServers")}</span>
             )}
             {activeServers.map((s) => {
-              const isCurrent =
-                appMode === "server" && activeServerId === s.serverId;
+              const isCurrent = appMode === "server" && activeServerId === s.serverId;
               return (
                 <button
                   key={s.serverId}
@@ -2678,11 +2598,7 @@ export function CohorClient() {
                 >
                   <span className="cohor-tab-ic">{serverInitials(s.name)}</span>
                   <span className="cohor-tab-name">{s.name}</span>
-                  <span
-                    className="cohor-tab-live"
-                    aria-hidden="true"
-                    title={t("navActiveHacks")}
-                  />
+                  <span className="cohor-tab-live" aria-hidden="true" title={t("navActiveHacks")} />
                 </button>
               );
             })}
@@ -2691,24 +2607,23 @@ export function CohorClient() {
           <div className="cohor-topact">
             <button
               type="button"
-              className={
-                "cohor-topbtn" + (appMode === "dm" ? " is-on" : "")
-              }
+              className={"cohor-topbtn" + (appMode === "dm" ? " is-on" : "")}
               onClick={enterDmMode}
               aria-label={t("dmAria")}
             >
               <Icon name="messages" className="ic-sm" />
               <span className="cohor-topbtn-label">{t("dmTooltip")}</span>
-              {dmUnreadTotal > 0 && (
-                <span className="cohor-topbtn-badge">{dmUnreadTotal}</span>
-              )}
+              {dmUnreadTotal > 0 && <span className="cohor-topbtn-badge">{dmUnreadTotal}</span>}
             </button>
             {pastServers.length > 0 && (
               <div className="cohor-pasthacks" ref={pastHacksRef}>
                 <button
                   type="button"
                   className={"cohor-topbtn cohor-topbtn-icon" + (showPastHacks ? " is-on" : "")}
-                  onClick={(e) => { e.stopPropagation(); setShowPastHacks((v) => !v); }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowPastHacks((v) => !v);
+                  }}
                   aria-label={t("navPastHacks")}
                   title={t("navPastHacks")}
                   aria-expanded={showPastHacks}
@@ -2726,7 +2641,10 @@ export function CohorClient() {
                           type="button"
                           role="menuitem"
                           className={"cohor-pasthacks-item" + (isCurrent ? " is-current" : "")}
-                          onClick={() => { switchServer(s); setShowPastHacks(false); }}
+                          onClick={() => {
+                            switchServer(s);
+                            setShowPastHacks(false);
+                          }}
                         >
                           <span className="cohor-tab-ic">{serverInitials(s.name)}</span>
                           <span>{s.name}</span>
@@ -2741,1245 +2659,623 @@ export function CohorClient() {
         </header>
 
         <div className="cohor-body">
-        {/* SERVER: CHANNEL SIDEBAR */}
-        <div
-          className={"ch-sidebar" + (appMode !== "server" ? " dm-hidden" : "")}
-          id="panel-ch-sidebar"
-        >
-          <div className="ch-sidebar-header">
-            <div className="ch-sidebar-title">
-              <span className="ch-sidebar-title-name">
-                {servers.find((s) => s.serverId === activeServerId)?.name ??
-                  hackathon?.title ??
-                  ""}
-              </span>
-              {(can("manage_server") ||
-                can("manage_roles") ||
-                can("kick_members")) && (
-                <button
-                  type="button"
-                  className="ch-settings-btn"
-                  aria-label={t("srvSettings")}
-                  title={t("srvSettings")}
-                  onClick={openServerSettings}
-                >
-                  <Icon name="settings" className="ic-sm" />
-                </button>
-              )}
-            </div>
-            <div className="ch-admin-btns">
-              {/* "Edit hackathon" and "Moderators" placeholder buttons removed:
+          {/* SERVER: CHANNEL SIDEBAR */}
+          <div
+            className={"ch-sidebar" + (appMode !== "server" ? " dm-hidden" : "")}
+            id="panel-ch-sidebar"
+          >
+            <div className="ch-sidebar-header">
+              <div className="ch-sidebar-title">
+                <span className="ch-sidebar-title-name">
+                  {servers.find((s) => s.serverId === activeServerId)?.name ??
+                    hackathon?.title ??
+                    ""}
+                </span>
+                {(can("manage_server") || can("manage_roles") || can("kick_members")) && (
+                  <button
+                    type="button"
+                    className="ch-settings-btn"
+                    aria-label={t("srvSettings")}
+                    title={t("srvSettings")}
+                    onClick={openServerSettings}
+                  >
+                    <Icon name="settings" className="ic-sm" />
+                  </button>
+                )}
+              </div>
+              <div className="ch-admin-btns">
+                {/* "Edit hackathon" and "Moderators" placeholder buttons removed:
                   they only fired alert() with no backing API. Server settings
                   (gear, above) now covers roles/members; content reports stays. */}
-              <Link
-                className="ch-admin-btn ch-admin-btn-mod"
-                style={{ flexBasis: "100%" }}
-                href="/moderator"
-              >
-                <Icon name="flag" className="ic-sm" /> {t("contentReports")}
-              </Link>
+                <Link
+                  className="ch-admin-btn ch-admin-btn-mod"
+                  style={{ flexBasis: "100%" }}
+                  href="/moderator"
+                >
+                  <Icon name="flag" className="ic-sm" /> {t("contentReports")}
+                </Link>
+              </div>
             </div>
+
+            <div className="ch-list">
+              {serverGroups.map((group) => (
+                <React.Fragment key={group.groupId}>
+                  <div className="ch-section ch-section-row">
+                    <span className="ch-section-name">{group.name}</span>
+                    {can("manage_channels") && (
+                      <button
+                        type="button"
+                        className="ch-section-add"
+                        aria-label={t("chAddChannelAria")}
+                        title={t("chCreateChannel")}
+                        onClick={() => openCreateChannel(group.groupId)}
+                      >
+                        <Icon name="plus" className="ic-sm" />
+                      </button>
+                    )}
+                  </div>
+                  {group.channels.map((ch) => {
+                    const cid = ch.channelId;
+                    const unread = channelUnread[cid] ?? 0;
+                    const isActive = activeChannel === ch.name;
+                    const isRezultati = ch.name === "rezultati";
+                    const isLocked = isRezultati && isHackathonActive;
+                    const muted = mutedChannels.has(cid);
+                    const iconKind = channelIconKind(ch.type);
+                    return (
+                      <button
+                        key={cid}
+                        className={
+                          "ch-item" +
+                          (isActive ? " ch-active" : "") +
+                          (isLocked ? " ch-locked" : "") +
+                          ((!readChannels[ch.name] || unread > 0) && !isActive && !muted
+                            ? " ch-unread"
+                            : "")
+                        }
+                        type="button"
+                        style={muted ? { opacity: 0.5 } : undefined}
+                        onClick={() => switchChannel(ch.name, "", ch.type)}
+                        onContextMenu={(e) => {
+                          e.preventDefault();
+                          setChCtxConfirmDelete(false);
+                          setChCtx({
+                            x: e.clientX,
+                            y: e.clientY,
+                            channelId: cid,
+                            name: ch.name,
+                            type: ch.type,
+                          });
+                        }}
+                      >
+                        {"hash" in iconKind ? (
+                          <span className="ch-icon ch-hash">#</span>
+                        ) : (
+                          <span className="ch-icon ch-type-ic">
+                            <Icon name={iconKind.icon} className="ic-sm" />
+                          </span>
+                        )}
+                        <span className="ch-name">{ch.name}</span>
+                        {isRezultati && isHackathonActive ? (
+                          <span
+                            className="ch-locked-icon"
+                            id="ch-rezultati-lock"
+                            title={t("rezLockedTitleHint")}
+                          >
+                            <Icon name="lock" className="ic-sm" />
+                          </span>
+                        ) : isRezultati && rezultatiBadge ? (
+                          <span className="ch-badge">{rezultatiBadge}</span>
+                        ) : unread > 0 ? (
+                          <span className="ch-badge">{unread > 99 ? "99+" : unread}</span>
+                        ) : null}
+                      </button>
+                    );
+                  })}
+                </React.Fragment>
+              ))}
+              {can("manage_channels") && (
+                <button
+                  type="button"
+                  className="ch-create-group"
+                  onClick={() => {
+                    setGrpCreateName("");
+                    setGrpCreateOpen(true);
+                  }}
+                >
+                  <Icon name="plus" className="ic-sm" /> {t("chCreateGroup")}
+                </button>
+              )}
+            </div>
+
+            <UserStrip
+              onOpenProfile={() => user && setProfileUsername(user.username)}
+              onContextMenu={(e) => {
+                if (!user) return;
+                e.preventDefault();
+                e.stopPropagation();
+                openProfileMenu(
+                  { userId: user.userId, username: user.username },
+                  e.clientX,
+                  e.clientY,
+                );
+              }}
+            />
           </div>
 
-          <div className="ch-list">
-            {serverGroups.map((group) => (
-              <React.Fragment key={group.groupId}>
-                <div className="ch-section ch-section-row">
-                  <span className="ch-section-name">{group.name}</span>
-                  {can("manage_channels") && (
-                    <button
-                      type="button"
-                      className="ch-section-add"
-                      aria-label={t("chAddChannelAria")}
-                      title={t("chCreateChannel")}
-                      onClick={() => openCreateChannel(group.groupId)}
-                    >
-                      <Icon name="plus" className="ic-sm" />
-                    </button>
-                  )}
-                </div>
-                {group.channels.map((ch) => {
-                  const cid = ch.channelId;
-                  const unread = channelUnread[cid] ?? 0;
-                  const isActive = activeChannel === ch.name;
-                  const isRezultati = ch.name === "rezultati";
-                  const isLocked = isRezultati && isHackathonActive;
-                  const muted = mutedChannels.has(cid);
-                  const iconKind = channelIconKind(ch.type);
-                  return (
-                    <button
-                      key={cid}
-                      className={
-                        "ch-item" +
-                        (isActive ? " ch-active" : "") +
-                        (isLocked ? " ch-locked" : "") +
-                        ((!readChannels[ch.name] || unread > 0) && !isActive && !muted ? " ch-unread" : "")
-                      }
-                      type="button"
-                      style={muted ? { opacity: 0.5 } : undefined}
-                      onClick={() => switchChannel(ch.name, "", ch.type)}
-                      onContextMenu={(e) => {
-                        e.preventDefault();
-                        setChCtxConfirmDelete(false);
-                        setChCtx({
-                          x: e.clientX,
-                          y: e.clientY,
-                          channelId: cid,
-                          name: ch.name,
-                          type: ch.type,
-                        });
-                      }}
-                    >
-                      {"hash" in iconKind ? (
-                        <span className="ch-icon ch-hash">#</span>
-                      ) : (
-                        <span className="ch-icon ch-type-ic">
-                          <Icon name={iconKind.icon} className="ic-sm" />
-                        </span>
-                      )}
-                      <span className="ch-name">{ch.name}</span>
-                      {isRezultati && isHackathonActive ? (
-                        <span className="ch-locked-icon" id="ch-rezultati-lock" title={t("rezLockedTitleHint")}>
-                          <Icon name="lock" className="ic-sm" />
-                        </span>
-                      ) : isRezultati && rezultatiBadge ? (
-                        <span className="ch-badge">{rezultatiBadge}</span>
-                      ) : unread > 0 ? (
-                        <span className="ch-badge">{unread > 99 ? "99+" : unread}</span>
-                      ) : null}
-                    </button>
-                  );
-                })}
-              </React.Fragment>
-            ))}
-            {can("manage_channels") && (
-              <button
-                type="button"
-                className="ch-create-group"
-                onClick={() => {
-                  setGrpCreateName("");
-                  setGrpCreateOpen(true);
-                }}
-              >
-                <Icon name="plus" className="ic-sm" /> {t("chCreateGroup")}
-              </button>
-            )}
-          </div>
-
-          <UserStrip
-            onOpenProfile={() => user && setProfileUsername(user.username)}
-            onContextMenu={(e) => {
-              if (!user) return;
-              e.preventDefault();
-              e.stopPropagation();
-              openProfileMenu(
-                { userId: user.userId, username: user.username },
-                e.clientX,
-                e.clientY,
-              );
-            }}
-          />
-        </div>
-
-        {/* DM: CONTACT SIDEBAR */}
-        <div
-          className={"dm-sidebar" + (appMode === "dm" ? " dm-visible" : "")}
-          id="panel-dm-sidebar"
-        >
-          <div className="dm-sidebar-header">
-            <div className="dm-sidebar-title">{t("dmSidebarTitle")}</div>
-            <div className="dm-action-btns">
-              {/* "New message" placeholder removed: no 1:1 DM-start picker exists
+          {/* DM: CONTACT SIDEBAR */}
+          <div
+            className={"dm-sidebar" + (appMode === "dm" ? " dm-visible" : "")}
+            id="panel-dm-sidebar"
+          >
+            <div className="dm-sidebar-header">
+              <div className="dm-sidebar-title">{t("dmSidebarTitle")}</div>
+              <div className="dm-action-btns">
+                {/* "New message" placeholder removed: no 1:1 DM-start picker exists
                   yet. The working "Group" action (opens the group-create modal)
                   is kept. Flagged for backend/UX follow-up. */}
-              <button
-                className="dm-action-btn dm-action-btn-group"
-                type="button"
-                onClick={() => {
-                  setGroupPick([]);
-                  setShowGroupModal(true);
-                }}
-              >
-                <Icon name="teams" className="ic-sm" /> {t("group")}
-              </button>
-            </div>
-            <div className="dm-search-wrap">
-              <Icon name="search" className="ic-sm dm-search-ic" />
-              <input
-                className="dm-search"
-                type="text"
-                aria-label={t("findOrStart")}
-                placeholder={t("findOrStart")}
-              />
-            </div>
-          </div>
-
-          <div className="dm-list">
-            <div className="dm-section">{t("dmSecConversations")}</div>
-
-            {dmConvos.length === 0 && (
-              <div className="dm-row" style={{ opacity: 0.6 }}>
-                <div className="dm-row-info">
-                  <div className="dm-row-preview">
-                    {locale === "sr"
-                      ? "Još nema konverzacija."
-                      : "No conversations yet."}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {dmConvos.map((c) => {
-              const group = isGroupConvo(c);
-              const nm = convoTitle(c);
-              return (
                 <button
-                  key={c.conversationId}
-                  className={
-                    "dm-row" +
-                    (activeConvoId === c.conversationId ? " dm-row-active" : "")
-                  }
+                  className="dm-action-btn dm-action-btn-group"
                   type="button"
-                  onClick={() => openConvo(c.conversationId)}
+                  onClick={() => {
+                    setGroupPick([]);
+                    setShowGroupModal(true);
+                  }}
                 >
-                  <div
-                    className={"dm-row-av is-orb" + (group ? " dm-row-av-group" : "")}
-                  >
-                    {group ? (
-                      isImageIcon(c.icon) ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img className="orb-art" src={c.icon} alt={nm} />
-                      ) : (
-                        <span className="dm-row-grp-ic" aria-hidden="true">
-                          {c.icon || GROUP_ICON_FALLBACK}
-                        </span>
-                      )
-                    ) : (
-                      <OrbArt url={dmOtherAvatarUrl(c)} seed={convoSeed(c)} />
-                    )}
-                    {c.members.some(
-                      (m) => m.userId !== user?.userId && onlineUsers.has(m.userId),
-                    ) && <span className="dm-row-si"></span>}
-                  </div>
+                  <Icon name="teams" className="ic-sm" /> {t("group")}
+                </button>
+              </div>
+              <div className="dm-search-wrap">
+                <Icon name="search" className="ic-sm dm-search-ic" />
+                <input
+                  className="dm-search"
+                  type="text"
+                  aria-label={t("findOrStart")}
+                  placeholder={t("findOrStart")}
+                />
+              </div>
+            </div>
+
+            <div className="dm-list">
+              <div className="dm-section">{t("dmSecConversations")}</div>
+
+              {dmConvos.length === 0 && (
+                <div className="dm-row" style={{ opacity: 0.6 }}>
                   <div className="dm-row-info">
-                    <div className="dm-row-name">{nm}</div>
-                    {c.lastMessage && (
-                      <div className="dm-row-preview">{c.lastMessage.content}</div>
+                    <div className="dm-row-preview">
+                      {locale === "sr" ? "Još nema konverzacija." : "No conversations yet."}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {dmConvos.map((c) => {
+                const group = isGroupConvo(c);
+                const nm = convoTitle(c);
+                return (
+                  <button
+                    key={c.conversationId}
+                    className={
+                      "dm-row" + (activeConvoId === c.conversationId ? " dm-row-active" : "")
+                    }
+                    type="button"
+                    onClick={() => openConvo(c.conversationId)}
+                  >
+                    <div className={"dm-row-av is-orb" + (group ? " dm-row-av-group" : "")}>
+                      {group ? (
+                        isImageIcon(c.icon) ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img className="orb-art" src={c.icon} alt={nm} />
+                        ) : (
+                          <span className="dm-row-grp-ic" aria-hidden="true">
+                            {c.icon || GROUP_ICON_FALLBACK}
+                          </span>
+                        )
+                      ) : (
+                        <OrbArt url={dmOtherAvatarUrl(c)} seed={convoSeed(c)} />
+                      )}
+                      {c.members.some(
+                        (m) => m.userId !== user?.userId && onlineUsers.has(m.userId),
+                      ) && <span className="dm-row-si"></span>}
+                    </div>
+                    <div className="dm-row-info">
+                      <div className="dm-row-name">{nm}</div>
+                      {c.lastMessage && (
+                        <div className="dm-row-preview">{c.lastMessage.content}</div>
+                      )}
+                    </div>
+                    {c.unreadCount > 0 && (
+                      <span className="dm-row-unread" aria-label={t("homeUnreadAria")}>
+                        {c.unreadCount > 99 ? "99+" : c.unreadCount}
+                      </span>
                     )}
-                  </div>
-                  {c.unreadCount > 0 && (
-                    <span className="dm-row-unread" aria-label={t("homeUnreadAria")}>
-                      {c.unreadCount > 99 ? "99+" : c.unreadCount}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+                  </button>
+                );
+              })}
+            </div>
+
+            <UserStrip
+              onOpenProfile={() => user && setProfileUsername(user.username)}
+              onContextMenu={(e) => {
+                if (!user) return;
+                e.preventDefault();
+                e.stopPropagation();
+                openProfileMenu(
+                  { userId: user.userId, username: user.username },
+                  e.clientX,
+                  e.clientY,
+                );
+              }}
+            />
           </div>
 
-          <UserStrip
-            onOpenProfile={() => user && setProfileUsername(user.username)}
-            onContextMenu={(e) => {
-              if (!user) return;
-              e.preventDefault();
-              e.stopPropagation();
-              openProfileMenu(
-                { userId: user.userId, username: user.username },
-                e.clientX,
-                e.clientY,
-              );
-            }}
-          />
-        </div>
-
-        {/* MAIN COLUMN (chat area) */}
-        <main className="chat-area">
-          <header className="chat-topbar">
-            {/* With no channel/conversation open there is nothing to name —
+          {/* MAIN COLUMN (chat area) */}
+          <main className="chat-area">
+            <header className="chat-topbar">
+              {/* With no channel/conversation open there is nothing to name —
                 render the bar empty instead of the default "#opšte". */}
-            {!nothingOpen && (
-              <>
-                <span className="chat-topbar-icon" id="topbar-icon">
-                  {isImageIcon(topbarIcon) ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      className="chat-topbar-img"
-                      src={topbarIcon}
-                      alt={topbarName}
-                    />
+              {!nothingOpen && (
+                <>
+                  <span className="chat-topbar-icon" id="topbar-icon">
+                    {isImageIcon(topbarIcon) ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img className="chat-topbar-img" src={topbarIcon} alt={topbarName} />
+                    ) : (
+                      topbarIcon
+                    )}
+                  </span>
+                  {activeIsGroup ? (
+                    <button
+                      type="button"
+                      className="chat-topbar-name chat-topbar-name-link"
+                      id="topbar-name"
+                      onClick={openGroupSettings}
+                    >
+                      {topbarName}
+                    </button>
                   ) : (
-                    topbarIcon
+                    <span className="chat-topbar-name" id="topbar-name">
+                      {topbarName}
+                    </span>
                   )}
-                </span>
-                {activeIsGroup ? (
-                  <button
-                    type="button"
-                    className="chat-topbar-name chat-topbar-name-link"
-                    id="topbar-name"
-                    onClick={openGroupSettings}
-                  >
-                    {topbarName}
-                  </button>
-                ) : (
-                  <span className="chat-topbar-name" id="topbar-name">{topbarName}</span>
-                )}
-                {topbarDesc && (
-                  <>
-                    <span className="chat-topbar-dot" aria-hidden="true"></span>
-                    <span className="chat-topbar-desc" id="topbar-desc">{topbarDesc}</span>
-                  </>
-                )}
-                <div className="topbar-actions">
-                  <button className="topbar-btn" type="button" aria-label={t("searchInChannel")}>
-                    <Icon name="search" className="ic-sm" />
-                  </button>
-                  <button className="topbar-btn" type="button" aria-label={t("pinnedMessages")}>
-                    <Icon name="flag" className="ic-sm" />
-                  </button>
-                  <button
-                    className="topbar-btn"
-                    type="button"
-                    id="topbar-toggle-right"
-                    onClick={toggleRightPanel}
-                    aria-label={t("toggleParticipants")}
-                  >
-                    <Icon name="teams" className="ic-sm" />
-                  </button>
-                </div>
-              </>
-            )}
-          </header>
+                  {topbarDesc && (
+                    <>
+                      <span className="chat-topbar-dot" aria-hidden="true"></span>
+                      <span className="chat-topbar-desc" id="topbar-desc">
+                        {topbarDesc}
+                      </span>
+                    </>
+                  )}
+                  <div className="topbar-actions">
+                    <button className="topbar-btn" type="button" aria-label={t("searchInChannel")}>
+                      <Icon name="search" className="ic-sm" />
+                    </button>
+                    <button className="topbar-btn" type="button" aria-label={t("pinnedMessages")}>
+                      <Icon name="flag" className="ic-sm" />
+                    </button>
+                    <button
+                      className="topbar-btn"
+                      type="button"
+                      id="topbar-toggle-right"
+                      onClick={toggleRightPanel}
+                      aria-label={t("toggleParticipants")}
+                    >
+                      <Icon name="teams" className="ic-sm" />
+                    </button>
+                  </div>
+                </>
+              )}
+            </header>
 
-          {/* Server messages */}
-          <div
-            className={
-              "messages" +
-              (appMode !== "server" || panel !== "messages" ? " dm-hidden" : "")
-            }
-            id="messages-server"
-            ref={serverMsgsRef}
-            style={
-              appMode !== "server" || panel !== "messages"
-                ? { display: "none" }
-                : undefined
-            }
-          >
-            {servers.length === 0 ? (
-              /* blank while the list loads; the empty state only once we KNOW */
-              serversLoaded ? (
-                <div className="ch-no-access">
-                  <div className="ch-no-access-icon">#</div>
-                  <div className="ch-no-access-title">{t("noServerAccessTitle")}</div>
-                  <div className="ch-no-access-sub">{t("noServerAccessSub")}</div>
-                </div>
-              ) : null
-            ) : (
-              <>
-            <div style={{ flex: 1 }}></div>
-            <div className="ch-intro">
-              <div className="ch-intro-hash">#</div>
-              <div className="ch-intro-title">{t("chIntroTitlePre")}{activeChannel}</div>
-              <div className="ch-intro-sub">
-                {t("chIntroSubPre")}
-                <strong style={{ color: "var(--violet-light)" }}>#{activeChannel}</strong>
-                {t("chIntroSubPost")}
-              </div>
-            </div>
-            {activeChannelId && (
-              <>
-                {chatLoading && (
-                  <div className="msg-date-sep">
-                    {locale === "sr" ? "Učitavanje…" : "Loading…"}
+            {/* Server messages */}
+            <div
+              className={
+                "messages" + (appMode !== "server" || panel !== "messages" ? " dm-hidden" : "")
+              }
+              id="messages-server"
+              ref={serverMsgsRef}
+              style={appMode !== "server" || panel !== "messages" ? { display: "none" } : undefined}
+            >
+              {servers.length === 0 ? (
+                /* blank while the list loads; the empty state only once we KNOW */
+                serversLoaded ? (
+                  <div className="ch-no-access">
+                    <div className="ch-no-access-icon">#</div>
+                    <div className="ch-no-access-title">{t("noServerAccessTitle")}</div>
+                    <div className="ch-no-access-sub">{t("noServerAccessSub")}</div>
                   </div>
-                )}
-                {!chatLoading && msgs.length === 0 && (
-                  <div className="msg-date-sep">
-                    {locale === "sr" ? "Još nema poruka" : "No messages yet"}
-                  </div>
-                )}
-                {msgs.map((m) => (
-                  <div
-                    className={
-                      m.senderId !== user?.userId &&
-                      isUserMentioned(m.content, user?.username)
-                        ? "msg msg-mentioned"
-                        : "msg"
-                    }
-                    key={m.messageId}
-                    style={{ marginTop: 10 }}
-                    onContextMenu={(e) => {
-                      e.preventDefault();
-                      setCtxConfirmDelete(false);
-                      setCtxReactOpen(false);
-                      setCtxMenu({ x: e.clientX, y: e.clientY, m });
-                    }}
-                  >
-                    <div className="msg-av is-orb">
-                      <OrbArt url={m.senderAvatarUrl} seed={m.senderUsername} />
+                ) : null
+              ) : (
+                <>
+                  <div style={{ flex: 1 }}></div>
+                  <div className="ch-intro">
+                    <div className="ch-intro-hash">#</div>
+                    <div className="ch-intro-title">
+                      {t("chIntroTitlePre")}
+                      {activeChannel}
                     </div>
-                    <div className="msg-body">
-                      <div className="msg-meta-row">
-                        <span
-                          className="msg-author msg-author-v"
-                          style={{ cursor: "pointer" }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            const author =
-                              members.find((mm) => mm.userId === m.senderId) ??
-                              members.find(
-                                (mm) => mm.username === m.senderUsername,
-                              );
-                            if (author) {
-                              const r = e.currentTarget.getBoundingClientRect();
-                              setMiniProfile({
-                                member: author,
-                                anchorTop: r.top,
-                                anchorLeft: r.left,
-                              });
-                            } else {
-                              setProfileUsername(m.senderUsername);
-                            }
-                          }}
+                    <div className="ch-intro-sub">
+                      {t("chIntroSubPre")}
+                      <strong style={{ color: "var(--violet-light)" }}>#{activeChannel}</strong>
+                      {t("chIntroSubPost")}
+                    </div>
+                  </div>
+                  {activeChannelId && (
+                    <>
+                      {chatLoading && (
+                        <div className="msg-date-sep">
+                          {locale === "sr" ? "Učitavanje…" : "Loading…"}
+                        </div>
+                      )}
+                      {!chatLoading && msgs.length === 0 && (
+                        <div className="msg-date-sep">
+                          {locale === "sr" ? "Još nema poruka" : "No messages yet"}
+                        </div>
+                      )}
+                      {msgs.map((m) => (
+                        <div
+                          className={
+                            m.senderId !== user?.userId &&
+                            isUserMentioned(m.content, user?.username)
+                              ? "msg msg-mentioned"
+                              : "msg"
+                          }
+                          key={m.messageId}
+                          style={{ marginTop: 10 }}
                           onContextMenu={(e) => {
                             e.preventDefault();
-                            e.stopPropagation();
-                            openProfileMenu(
-                              {
-                                userId: m.senderId,
-                                username: m.senderUsername,
-                              },
-                              e.clientX,
-                              e.clientY,
-                            );
+                            setCtxConfirmDelete(false);
+                            setCtxReactOpen(false);
+                            setCtxMenu({ x: e.clientX, y: e.clientY, m });
                           }}
-                          title={m.senderUsername}
                         >
-                          {personName({
-                            displayName: m.senderDisplayName,
-                            username: m.senderUsername,
-                          })}
-                        </span>
-                        {onlineUsers.has(m.senderId) && (
-                          <span
-                            title="online"
-                            style={{
-                              width: 7,
-                              height: 7,
-                              borderRadius: "50%",
-                              background: "var(--green, #4fd8a6)",
-                              display: "inline-block",
-                            }}
-                          />
-                        )}
-                        <span className="msg-time">
-                          {new Date(m.sentAt).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </span>
-                      </div>
-                      {renderReplyPreview(m, msgs)}
-                      {renderForwardPreview(m)}
-                      {editingId === m.messageId ? (
-                        <input
-                          type="text"
-                          className="msg-edit-input"
-                          value={editDraft}
-                          autoFocus
-                          onChange={(e) => setEditDraft(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") commitEdit(m.messageId);
-                            else if (e.key === "Escape") setEditingId(null);
-                          }}
-                          style={CTX_EDIT_INPUT_STYLE}
-                        />
-                      ) : (
-                        <div className="msg-text">
-                          <MarkdownContent>
-                            {parseForwarded(m.content).body}
-                          </MarkdownContent>
-                          {m.editedAt && (
-                            <span className="msg-edited" style={CTX_EDITED_STYLE}>
-                              {t("ctxEdited")}
-                            </span>
-                          )}
-                        </div>
-                      )}
-                      {renderAttachments(m)}
-                      {m.reactions && m.reactions.length > 0 && (
-                        <div className="msg-reactions" style={{ marginTop: 4 }}>
-                          {m.reactions.map((rx) => (
-                            <button
-                              key={rx.symbol}
-                              type="button"
-                              className={"reaction" + (rx.mine ? " mine" : "")}
-                              onClick={() => toggleReactionOn(m.messageId, rx.symbol)}
-                              style={{ cursor: "pointer" }}
-                            >
-                              {rx.symbol} {rx.count}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </>
-            )}
-              </>
-            )}
-          </div>
-
-          {/* DM messages */}
-          <div
-            className={"messages" + (appMode === "dm" ? "" : " dm-hidden")}
-            id="messages-dm"
-            ref={dmMsgsRef}
-            style={appMode === "dm" ? undefined : { display: "none" }}
-          >
-            {/* Fresh account: no conversations at all — explain the empty
-                middle instead of leaving it blank. */}
-            {appMode === "dm" && !activeConvoId && dmLoaded && dmConvos.length === 0 && (
-              <div className="ch-no-access">
-                <div className="ch-no-access-icon">@</div>
-                <div className="ch-no-access-title">{t("dmEmptyTitle")}</div>
-                <div className="ch-no-access-sub">{t("dmEmptySub")}</div>
-              </div>
-            )}
-            {appMode === "dm" && activeConvoId && (
-              <>
-                <div style={{ flex: 1 }}></div>
-                {dmRealMsgs.length === 0 && (
-                  <div className="msg-date-sep">
-                    {locale === "sr" ? "Još nema poruka" : "No messages yet"}
-                  </div>
-                )}
-                {dmRealMsgs.map((m) => (
-                  <div
-                    className={
-                      m.senderId !== user?.userId &&
-                      isUserMentioned(m.content, user?.username)
-                        ? "msg msg-mentioned"
-                        : "msg"
-                    }
-                    key={m.messageId}
-                    style={{ marginTop: 10 }}
-                    onContextMenu={(e) => {
-                      e.preventDefault();
-                      setCtxConfirmDelete(false);
-                      setCtxReactOpen(false);
-                      setCtxMenu({ x: e.clientX, y: e.clientY, m });
-                    }}
-                  >
-                    <div
-                      className="msg-av is-orb"
-                      style={{ cursor: "pointer" }}
-                      onClick={() => setProfileUsername(m.senderUsername)}
-                    >
-                      <OrbArt url={m.senderAvatarUrl} seed={m.senderUsername} />
-                    </div>
-                    <div className="msg-body">
-                      <div className="msg-meta-row">
-                        <span
-                          className="msg-author msg-author-v"
-                          style={{ cursor: "pointer" }}
-                          onClick={() => setProfileUsername(m.senderUsername)}
-                          onContextMenu={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            openProfileMenu(
-                              {
-                                userId: m.senderId,
-                                username: m.senderUsername,
-                              },
-                              e.clientX,
-                              e.clientY,
-                            );
-                          }}
-                          title={m.senderUsername}
-                        >
-                          {personName({
-                            displayName: m.senderDisplayName,
-                            username: m.senderUsername,
-                          })}
-                        </span>
-                        <span className="msg-time">
-                          {new Date(m.sentAt).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </span>
-                      </div>
-                      {renderReplyPreview(m, dmRealMsgs)}
-                      {renderForwardPreview(m)}
-                      {editingId === m.messageId ? (
-                        <input
-                          type="text"
-                          className="msg-edit-input"
-                          value={editDraft}
-                          autoFocus
-                          onChange={(e) => setEditDraft(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") commitEdit(m.messageId);
-                            else if (e.key === "Escape") setEditingId(null);
-                          }}
-                          style={CTX_EDIT_INPUT_STYLE}
-                        />
-                      ) : (
-                        <div className="msg-text">
-                          <MarkdownContent>
-                            {parseForwarded(m.content).body}
-                          </MarkdownContent>
-                          {m.editedAt && (
-                            <span className="msg-edited" style={CTX_EDITED_STYLE}>
-                              {t("ctxEdited")}
-                            </span>
-                          )}
-                        </div>
-                      )}
-                      {renderAttachments(m)}
-                      {m.reactions && m.reactions.length > 0 && (
-                        <div className="msg-reactions" style={{ marginTop: 4 }}>
-                          {m.reactions.map((rx) => (
-                            <button
-                              key={rx.symbol}
-                              type="button"
-                              className={"reaction" + (rx.mine ? " mine" : "")}
-                              onClick={() => toggleReactionOn(m.messageId, rx.symbol)}
-                              style={{ cursor: "pointer" }}
-                            >
-                              {rx.symbol} {rx.count}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </>
-            )}
-            {appMode === "dm" && !activeConvoId && activeDm && (
-              <DmStream entry={DM[activeDm]} extra={dmExtra[activeDm] || []} />
-            )}
-          </div>
-
-          {/* PREDAJA PROJEKTA PANEL */}
-          <div
-            id="predaja-panel"
-            className="swap-panel"
-            style={{ display: panel === "predaja" ? "flex" : "none" }}
-          >
-            <div className="panel-pad-top">
-              <div className="panel-org-row">
-                <div className="panel-org-av panel-org-av-green is-orb">
-                  <GenerativeAvatar seed="mohammedavdol" className="orb-art" />
-                </div>
-                <div>
-                  <span className="panel-org-name panel-org-name-green">
-                    Mohammed Avdol
-                  </span>
-                  <span className="role-badge role-badge-org">{t("roleBadgeOrg")}</span>
-                  <div className="panel-org-time">11. april 2026. u 09:00</div>
-                </div>
-              </div>
-              <div className="panel-brief">
-                <div className="panel-brief-head">
-                  <Icon name="share" className="ic-sm" />
-                  <span className="panel-brief-title">
-                    {t("predajaBriefTitle")}
-                  </span>
-                </div>
-                <div className="panel-brief-text">
-                  {t("predajaBriefText")}
-                </div>
-                <div className="panel-spec-grid">
-                  <div className="panel-spec">
-                    <div className="panel-spec-label">{t("specDuration")}</div>
-                    <div className="panel-spec-val">{t("specDurationVal")}</div>
-                  </div>
-                  <div className="panel-spec">
-                    <div className="panel-spec-label">{t("specMaxSize")}</div>
-                    <div className="panel-spec-val">500 MB</div>
-                  </div>
-                  <div className="panel-spec">
-                    <div className="panel-spec-label">{t("specFormats")}</div>
-                    <div className="panel-spec-val">MP4, MOV, AVI</div>
-                  </div>
-                  <div className="panel-spec">
-                    <div className="panel-spec-label">{t("specDeadline")}</div>
-                    <div className="panel-spec-val panel-spec-val-lemon">
-                      {t("specDeadlineVal")}
-                    </div>
-                  </div>
-                </div>
-                <div className="panel-brief-note">
-                  {t("predajaNotePre")}<strong>{t("predajaNoteStrong")}</strong>
-                  {t("predajaNotePost")}
-                </div>
-              </div>
-            </div>
-
-            {/* Video section */}
-            <div className="panel-section">
-              {!videoDone ? (
-                <div id="video-empty-state">
-                  <div className="panel-label">{t("videoLabel")}</div>
-                  <div
-                    id="video-drop-zone"
-                    className={
-                      "video-drop-zone" +
-                      (dragOver ? " drag-over" : "") +
-                      (videoError ? " error" : "")
-                    }
-                    onClick={() => videoFileInputRef.current?.click()}
-                    onDragOver={(e) => {
-                      e.preventDefault();
-                      setDragOver(true);
-                    }}
-                    onDragLeave={() => setDragOver(false)}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      setDragOver(false);
-                      const f = e.dataTransfer.files[0];
-                      if (f) processVideoFile(f);
-                    }}
-                  >
-                    <div className="video-drop-ic">
-                      <Icon name="image" className="ic-lg" />
-                    </div>
-                    <div className="video-drop-title">{t("videoDropTitle")}</div>
-                    <div className="video-drop-sub">
-                      {t("videoDropSub")}
-                    </div>
-                    <div className="video-drop-btn">
-                      <Icon name="share" className="ic-sm" /> {t("videoUpload")}
-                    </div>
-                    <input
-                      type="file"
-                      id="video-file-input"
-                      ref={videoFileInputRef}
-                      accept="video/mp4,video/quicktime,video/avi,video/*"
-                      style={{ display: "none" }}
-                      onChange={(e) => {
-                        const f = e.target.files?.[0];
-                        if (f) processVideoFile(f);
-                      }}
-                    />
-                  </div>
-                  {videoError && (
-                    <div id="video-upload-err" className="video-upload-err">
-                      ⚠ {videoError}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div id="video-uploaded-state">
-                  <div className="panel-label-row">
-                    <div className="panel-label">{t("videoLabel")}</div>
-                    <div className="panel-label-actions">
-                      <button
-                        type="button"
-                        className="mini-btn"
-                        onClick={() => videoReplaceInputRef.current?.click()}
-                      >
-                        <Icon name="share" className="ic-sm" /> {t("videoReplace")}
-                      </button>
-                      <input
-                        type="file"
-                        id="video-replace-input"
-                        ref={videoReplaceInputRef}
-                        accept="video/*"
-                        style={{ display: "none" }}
-                        onChange={(e) => {
-                          const f = e.target.files?.[0];
-                          if (f) processVideoFile(f);
-                        }}
-                      />
-                      <button
-                        type="button"
-                        className="mini-btn mini-btn-danger"
-                        onClick={removeVideo}
-                      >
-                        <Icon name="x" className="ic-sm" /> {t("videoRemove")}
-                      </button>
-                    </div>
-                  </div>
-                  <div className="video-frame">
-                    <video
-                      id="video-player"
-                      ref={videoPlayerRef}
-                      controls
-                      style={{
-                        width: "100%",
-                        display: "block",
-                        maxHeight: 340,
-                        background: "#000",
-                      }}
-                    >
-                      {t("videoNoHtml5")}
-                    </video>
-                  </div>
-                  <div className="video-file-row">
-                    <span className="video-file-ic">
-                      <Icon name="image" className="ic-sm" />
-                    </span>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div id="video-filename" className="video-filename">
-                        {video.name}
-                      </div>
-                      <div id="video-meta" className="video-meta">
-                        {video.meta}
-                      </div>
-                    </div>
-                    <span className="ok-pill">
-                      <Icon name="check" className="ic-sm" /> OK
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* GitHub repo section */}
-            <div className="panel-section">
-              <div className="panel-label">{t("githubLabel")}</div>
-              <div
-                id="github-display"
-                className="github-display"
-                style={{ display: githubDone ? "flex" : "none" }}
-              >
-                <span className="github-display-ic">
-                  <Icon name="link" className="ic-sm" />
-                </span>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div
-                    id="github-link-display"
-                    className="github-link-display"
-                    onClick={openGithub}
-                  >
-                    {githubSaved.replace("https://", "")}
-                  </div>
-                  <div className="github-display-sub">digitalci · public repo</div>
-                </div>
-                <button type="button" className="mini-btn" onClick={editGithub}>
-                  {t("edit")}
-                </button>
-              </div>
-              <div
-                id="github-input-wrap"
-                className="github-input-wrap"
-                style={{ display: githubDone ? "none" : "flex" }}
-              >
-                <div
-                  className={"github-input-box" + (githubFocused ? " focused" : "")}
-                  id="github-input-box"
-                >
-                  <span className="github-input-ic">
-                    <Icon name="link" className="ic-sm" />
-                  </span>
-                  <input
-                    type="text"
-                    id="github-url-input"
-                    aria-label="GitHub URL"
-                    placeholder="https://github.com/tim/repo"
-                    value={githubInput}
-                    onChange={(e) => setGithubInput(e.target.value)}
-                    onFocus={() => setGithubFocused(true)}
-                    onBlur={() => setGithubFocused(false)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") saveGithub();
-                    }}
-                  />
-                </div>
-                <button
-                  type="button"
-                  className="btn-violet-sm"
-                  onClick={saveGithub}
-                >
-                  {t("save")}
-                </button>
-              </div>
-              <div
-                id="github-error"
-                className="github-error"
-                style={{ display: githubError ? "flex" : "none" }}
-              >
-                <Icon name="x" className="ic-sm" /> {t("githubError")}
-              </div>
-            </div>
-
-            {/* Status summary */}
-            <div className="panel-section panel-section-end">
-              <div className="panel-label">{t("statusTitle")}</div>
-              <div className="status-card">
-                <div className="status-row">
-                  <span
-                    id="status-video-icon"
-                    className={"status-ic" + (videoDone ? " status-ic-done" : "")}
-                  >
-                    <Icon name={videoDone ? "check" : "x"} className="ic-sm" />
-                  </span>
-                  <div style={{ flex: 1 }}>
-                    <div className="status-name">{t("statusVideoName")}</div>
-                    <div id="status-video-txt" className="status-sub">
-                      {videoDone ? t("statusUploaded") : t("statusNotUploaded")}
-                    </div>
-                  </div>
-                </div>
-                <div className="status-row">
-                  <span
-                    id="status-github-icon"
-                    className={"status-ic" + (githubDone ? " status-ic-done" : "")}
-                  >
-                    <Icon name={githubDone ? "check" : "x"} className="ic-sm" />
-                  </span>
-                  <div style={{ flex: 1 }}>
-                    <div className="status-name">{t("statusGithubName")}</div>
-                    <div id="status-github-txt" className="status-sub">
-                      {githubDone ? t("statusLinkAdded") : t("statusLinkNotAdded")}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* BOUNTIES PANEL */}
-          <div
-            id="bounties-panel"
-            className="swap-panel"
-            style={{ display: panel === "bounties" ? "flex" : "none" }}
-          >
-            <div className="panel-pad-top">
-              <div className="panel-org-row">
-                <div className="panel-org-av panel-org-av-lemon">
-                  <Icon name="coin" className="ic-sm" />
-                </div>
-                <div>
-                  <div className="panel-org-name panel-org-name-lemon">
-                    {t("bountyOrgName")}{" "}
-                    <span className="panel-org-meta">· ETF HackWeek 2026</span>
-                  </div>
-                  <div className="panel-org-time">
-                    {t("bountyOrgDesc")}
-                  </div>
-                </div>
-              </div>
-
-              <div className="info-banner info-banner-lemon">
-                <Icon name="coin" className="ic-sm" />
-                <span>
-                  {t("bountyBannerPre")}
-                  <strong>{t("bountyBannerStrong")}</strong>
-                  {t("bountyBannerPost")}
-                </span>
-              </div>
-
-              {/* Real sponsor bounties for the active hackathon */}
-              {bounties.length > 0 ? (
-                bounties.map((b, i) => {
-                  const style = BOUNTY_BADGE_STYLES[i % BOUNTY_BADGE_STYLES.length];
-                  return (
-                    <BountyCard
-                      key={b.bountyId}
-                      id={b.bountyId}
-                      cardStyle={i === bounties.length - 1 ? { marginBottom: 32 } : undefined}
-                      badgeStyle={style.badgeStyle}
-                      badgeIcon={style.badgeIcon}
-                      sponsor={b.sponsorName}
-                      prize={b.prizeAward ?? ""}
-                      title={b.title}
-                      desc={b.description ?? ""}
-                      tags={b.theme ? [b.theme] : []}
-                      count={b.applicantCount}
-                      applied={b.hasApplied}
-                      onApply={() => applyBounty(b)}
-                    />
-                  );
-                })
-              ) : (
-                <div className="rezultati-locked" style={{ marginBottom: 32 }}>
-                  <div className="rezultati-locked-ic">
-                    <Icon name="coin" className="ic-lg" />
-                  </div>
-                  <div className="rezultati-locked-title">{t("bountyEmptyTitle")}</div>
-                  <div className="rezultati-locked-sub">{t("bountyEmptySub")}</div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* GLASANJE PUBLIKE PANEL */}
-          <div
-            id="glasanje-panel"
-            className="swap-panel"
-            style={{ display: panel === "glasanje" ? "flex" : "none" }}
-          >
-            <div className="panel-pad-top">
-              <div className="panel-org-row">
-                <div className="panel-org-av panel-org-av-green is-orb">
-                  <GenerativeAvatar seed="mohammedavdol" className="orb-art" />
-                </div>
-                <div>
-                  <div className="panel-org-name panel-org-name-green">
-                    Mohammed Avdol{" "}
-                    <span className="panel-org-meta">{t("glasanjeOrgMeta")}</span>
-                  </div>
-                  <div className="panel-org-say">
-                    <span className="msg-inline-ic">
-                      <Icon name="leaderboard" className="ic-sm" />
-                    </span>{" "}
-                    {t("glasanjeSayPre")}
-                    <strong>{t("glasanjeSayStrong")}</strong>
-                    {t("glasanjeSayPost")}
-                  </div>
-                </div>
-              </div>
-
-              {/* Status baner: glasanje nije aktivno */}
-              <div
-                id="voting-locked-banner"
-                className="voting-locked-banner"
-                style={{
-                  display: (
-                    votingStatus ? votingStatus.isOpen : isVotingOpen
-                  )
-                    ? "none"
-                    : "flex",
-                }}
-              >
-                <div className="voting-locked-ic">
-                  <Icon name="lock" />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div className="voting-locked-title">{t("votingLockedTitle")}</div>
-                  <div className="voting-locked-sub">
-                    {t("votingLockedSub")}
-                    {votingStatus?.opensAt ? (
-                      <>
-                        {" "}
-                        {t("votingOpensAtLabel")}
-                        {new Date(votingStatus.opensAt).toLocaleString()}
-                      </>
-                    ) : null}
-                  </div>
-                </div>
-                <div id="voting-countdown-pill" className="voting-countdown-pill">
-                  <Icon name="clock" className="ic-sm" />
-                  <span id="voting-opens-in">{votingCountdownLabel}</span>
-                </div>
-              </div>
-
-              <div className="panel-label">{t("projectsLabelPre")}{realProjects.length > 0 ? realProjects.length : 28}{t("projectsLabelPost")}</div>
-
-              <div id="projects-list" className="projects-list">
-                {realProjects.length > 0 ? (
-                  realProjects.map((p) => {
-                    const initials = p.teamName.slice(0, 2).toUpperCase();
-                    const isVoted = myVotedProjectId === p.projectId;
-                    return (
-                      <div
-                        className="project-card"
-                        data-project={p.projectId}
-                        key={p.projectId}
-                      >
-                        <div className="project-card-left">
-                          <div className="project-av">{initials}</div>
-                          <div className="project-info">
-                            <div className="project-name">
-                              {p.title}{" "}
-                              <span className="project-team-badge">
-                                {p.teamName}
+                          <div className="msg-av is-orb">
+                            <OrbArt url={m.senderAvatarUrl} seed={m.senderUsername} />
+                          </div>
+                          <div className="msg-body">
+                            <div className="msg-meta-row">
+                              <span
+                                className="msg-author msg-author-v"
+                                style={{ cursor: "pointer" }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const author =
+                                    members.find((mm) => mm.userId === m.senderId) ??
+                                    members.find((mm) => mm.username === m.senderUsername);
+                                  if (author) {
+                                    const r = e.currentTarget.getBoundingClientRect();
+                                    setMiniProfile({
+                                      member: author,
+                                      anchorTop: r.top,
+                                      anchorLeft: r.left,
+                                    });
+                                  } else {
+                                    setProfileUsername(m.senderUsername);
+                                  }
+                                }}
+                                onContextMenu={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  openProfileMenu(
+                                    {
+                                      userId: m.senderId,
+                                      username: m.senderUsername,
+                                    },
+                                    e.clientX,
+                                    e.clientY,
+                                  );
+                                }}
+                                title={m.senderUsername}
+                              >
+                                {personName({
+                                  displayName: m.senderDisplayName,
+                                  username: m.senderUsername,
+                                })}
+                              </span>
+                              {onlineUsers.has(m.senderId) && (
+                                <span
+                                  title="online"
+                                  style={{
+                                    width: 7,
+                                    height: 7,
+                                    borderRadius: "50%",
+                                    background: "var(--green, #4fd8a6)",
+                                    display: "inline-block",
+                                  }}
+                                />
+                              )}
+                              <span className="msg-time">
+                                {new Date(m.sentAt).toLocaleTimeString([], {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })}
                               </span>
                             </div>
-                            <div className="project-desc">{p.description}</div>
+                            {renderReplyPreview(m, msgs)}
+                            {renderForwardPreview(m)}
+                            {editingId === m.messageId ? (
+                              <input
+                                type="text"
+                                className="msg-edit-input"
+                                value={editDraft}
+                                autoFocus
+                                onChange={(e) => setEditDraft(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") commitEdit(m.messageId);
+                                  else if (e.key === "Escape") setEditingId(null);
+                                }}
+                                style={CTX_EDIT_INPUT_STYLE}
+                              />
+                            ) : (
+                              <div className="msg-text">
+                                <MarkdownContent>{parseForwarded(m.content).body}</MarkdownContent>
+                                {m.editedAt && (
+                                  <span className="msg-edited" style={CTX_EDITED_STYLE}>
+                                    {t("ctxEdited")}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                            {renderAttachments(m)}
+                            {m.reactions && m.reactions.length > 0 && (
+                              <div className="msg-reactions" style={{ marginTop: 4 }}>
+                                {m.reactions.map((rx) => (
+                                  <button
+                                    key={rx.symbol}
+                                    type="button"
+                                    className={"reaction" + (rx.mine ? " mine" : "")}
+                                    onClick={() => toggleReactionOn(m.messageId, rx.symbol)}
+                                    style={{ cursor: "pointer" }}
+                                  >
+                                    {rx.symbol} {rx.count}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         </div>
-                        <div className="project-card-right">
-                          <div className="project-votes">
-                            <span className="project-votes-num">
-                              {p.voteCount}
-                            </span>
-                            <span className="project-votes-label">
-                              {t("votesLabel")}
-                            </span>
-                          </div>
-                          <button
-                            className={isVoted ? "vote-btn voted" : "vote-btn"}
-                            type="button"
-                            disabled={
-                              myVotedProjectId !== null ||
-                              votingStatus?.isOpen === false
-                            }
-                            onClick={() => voteForProject(p.projectId)}
-                          >
-                            {isVoted ? t("votedBtn") : t("voteBtn")}
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })
-                ) : (
-                  <>
-                <ProjectCard
-                  team="digitalci"
-                  btnId="vote-btn-digitalci"
-                  av="DC"
-                  avStyle={{
-                    background: "#241750",
-                    color: "var(--violet-light)",
-                    borderColor: "#3D2E6B",
-                  }}
-                  name="EduBot"
-                  badge="★ digitalci"
-                  badgeStyle={{
-                    background: "#241750",
-                    color: "var(--violet-light)",
-                    borderColor: "#3D2E6B",
-                  }}
-                  desc={t("projEduBotDesc")}
-                  tags={["Python", "LLM", "FastAPI"]}
-                  votesId="votes-digitalci"
-                  votes={votes.digitalci}
-                  isVotingOpen={isVotingOpen}
-                  myVote={myVote}
-                  onVote={castVote}
-                />
-                <ProjectCard
-                  team="ukohorisani"
-                  btnId="vote-btn-bytecraft"
-                  av="UK"
-                  avStyle={{
-                    background: "#0D1A0D",
-                    color: "var(--green)",
-                    borderColor: "#0F3D30",
-                  }}
-                  name="ClassroomOS"
-                  badge="ukohorisani"
-                  badgeStyle={{
-                    background: "#0D1A0D",
-                    color: "var(--green)",
-                    borderColor: "#0F3D30",
-                  }}
-                  desc={t("projClassroomOSDesc")}
-                  tags={["React", "OpenCV", "WebSocket"]}
-                  votesId="votes-bytecraft"
-                  votes={votes.ukohorisani}
-                  isVotingOpen={isVotingOpen}
-                  myVote={myVote}
-                  onVote={castVote}
-                />
-                <ProjectCard
-                  team="nullptr"
-                  btnId="vote-btn-nullptr"
-                  av="NP"
-                  avStyle={{
-                    background: "#1A0D0D",
-                    color: "var(--red)",
-                    borderColor: "#3D1A1A",
-                  }}
-                  name="QuizForge"
-                  badge="nullptr"
-                  badgeStyle={{
-                    background: "#1A0D0D",
-                    color: "var(--red)",
-                    borderColor: "#3D1A1A",
-                  }}
-                  desc={t("projQuizForgeDesc")}
-                  tags={["Next.js", "GPT-4", "PostgreSQL"]}
-                  votesId="votes-nullptr"
-                  votes={votes.nullptr}
-                  isVotingOpen={isVotingOpen}
-                  myVote={myVote}
-                  onVote={castVote}
-                />
-                <ProjectCard
-                  team="lale"
-                  btnId="vote-btn-stackframe"
-                  av="LA"
-                  avStyle={{
-                    background: "#1A1500",
-                    color: "var(--lemon-vivid)",
-                    borderColor: "#3A3600",
-                  }}
-                  name="MathPath"
-                  badge="lale"
-                  badgeStyle={{
-                    background: "#1A1500",
-                    color: "var(--lemon-vivid)",
-                    borderColor: "#3A3600",
-                  }}
-                  desc={t("projMathPathDesc")}
-                  tags={["Three.js", "WebGL", "SpeechAPI"]}
-                  votesId="votes-stackframe"
-                  votes={votes.lale}
-                  isVotingOpen={isVotingOpen}
-                  myVote={myVote}
-                  onVote={castVote}
-                />
-                <ProjectCard
-                  team="menjači"
-                  btnId="vote-btn-menjači"
-                  av="ME"
-                  avStyle={{
-                    background: "#0D0D1A",
-                    color: "var(--violet-light)",
-                    borderColor: "#2D1A55",
-                  }}
-                  name="PeerLearn"
-                  badge="menjači"
-                  badgeStyle={{
-                    background: "#0D0D1A",
-                    color: "var(--violet-light)",
-                    borderColor: "#2D1A55",
-                  }}
-                  desc={t("projPeerLearnDesc")}
-                  tags={["Vue.js", "Node", "ML"]}
-                  votesId="votes-menjači"
-                  votes={votes.menjači}
-                  isVotingOpen={isVotingOpen}
-                  myVote={myVote}
-                  onVote={castVote}
-                />
-
-                <MoreProjectsStub />
-                  </>
-                )}
-              </div>
+                      ))}
+                    </>
+                  )}
+                </>
+              )}
             </div>
-          </div>
 
-          {/* REZULTATI PANEL */}
-          <div
-            id="rezultati-panel"
-            className="swap-panel"
-            style={{ display: panel === "rezultati" ? "flex" : "none" }}
-          >
-            {/* Locked state (while hackathon is active and nothing published) */}
+            {/* DM messages */}
             <div
-              id="rezultati-locked"
-              className="rezultati-locked"
-              style={{ display: isHackathonActive && !results?.published ? "" : "none" }}
+              className={"messages" + (appMode === "dm" ? "" : " dm-hidden")}
+              id="messages-dm"
+              ref={dmMsgsRef}
+              style={appMode === "dm" ? undefined : { display: "none" }}
             >
-              <div className="rezultati-locked-ic">
-                <Icon name="lock" className="ic-lg" />
-              </div>
-              <div className="rezultati-locked-title">
-                {t("rezLockedTitle")}
-              </div>
-              <div className="rezultati-locked-sub">
-                {t("rezLockedSub")}
-              </div>
-              <div id="rezultati-locked-pill" className="rezultati-locked-pill">
-                <span className="rezultati-locked-dot"></span>
-                <span id="rezultati-locked-countdown">{rezultatiLockedCountdown}</span>
-              </div>
+              {/* Fresh account: no conversations at all — explain the empty
+                middle instead of leaving it blank. */}
+              {appMode === "dm" && !activeConvoId && dmLoaded && dmConvos.length === 0 && (
+                <div className="ch-no-access">
+                  <div className="ch-no-access-icon">@</div>
+                  <div className="ch-no-access-title">{t("dmEmptyTitle")}</div>
+                  <div className="ch-no-access-sub">{t("dmEmptySub")}</div>
+                </div>
+              )}
+              {appMode === "dm" && activeConvoId && (
+                <>
+                  <div style={{ flex: 1 }}></div>
+                  {dmRealMsgs.length === 0 && (
+                    <div className="msg-date-sep">
+                      {locale === "sr" ? "Još nema poruka" : "No messages yet"}
+                    </div>
+                  )}
+                  {dmRealMsgs.map((m) => (
+                    <div
+                      className={
+                        m.senderId !== user?.userId && isUserMentioned(m.content, user?.username)
+                          ? "msg msg-mentioned"
+                          : "msg"
+                      }
+                      key={m.messageId}
+                      style={{ marginTop: 10 }}
+                      onContextMenu={(e) => {
+                        e.preventDefault();
+                        setCtxConfirmDelete(false);
+                        setCtxReactOpen(false);
+                        setCtxMenu({ x: e.clientX, y: e.clientY, m });
+                      }}
+                    >
+                      <div
+                        className="msg-av is-orb"
+                        style={{ cursor: "pointer" }}
+                        onClick={() => setProfileUsername(m.senderUsername)}
+                      >
+                        <OrbArt url={m.senderAvatarUrl} seed={m.senderUsername} />
+                      </div>
+                      <div className="msg-body">
+                        <div className="msg-meta-row">
+                          <span
+                            className="msg-author msg-author-v"
+                            style={{ cursor: "pointer" }}
+                            onClick={() => setProfileUsername(m.senderUsername)}
+                            onContextMenu={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              openProfileMenu(
+                                {
+                                  userId: m.senderId,
+                                  username: m.senderUsername,
+                                },
+                                e.clientX,
+                                e.clientY,
+                              );
+                            }}
+                            title={m.senderUsername}
+                          >
+                            {personName({
+                              displayName: m.senderDisplayName,
+                              username: m.senderUsername,
+                            })}
+                          </span>
+                          <span className="msg-time">
+                            {new Date(m.sentAt).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </span>
+                        </div>
+                        {renderReplyPreview(m, dmRealMsgs)}
+                        {renderForwardPreview(m)}
+                        {editingId === m.messageId ? (
+                          <input
+                            type="text"
+                            className="msg-edit-input"
+                            value={editDraft}
+                            autoFocus
+                            onChange={(e) => setEditDraft(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") commitEdit(m.messageId);
+                              else if (e.key === "Escape") setEditingId(null);
+                            }}
+                            style={CTX_EDIT_INPUT_STYLE}
+                          />
+                        ) : (
+                          <div className="msg-text">
+                            <MarkdownContent>{parseForwarded(m.content).body}</MarkdownContent>
+                            {m.editedAt && (
+                              <span className="msg-edited" style={CTX_EDITED_STYLE}>
+                                {t("ctxEdited")}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        {renderAttachments(m)}
+                        {m.reactions && m.reactions.length > 0 && (
+                          <div className="msg-reactions" style={{ marginTop: 4 }}>
+                            {m.reactions.map((rx) => (
+                              <button
+                                key={rx.symbol}
+                                type="button"
+                                className={"reaction" + (rx.mine ? " mine" : "")}
+                                onClick={() => toggleReactionOn(m.messageId, rx.symbol)}
+                                style={{ cursor: "pointer" }}
+                              >
+                                {rx.symbol} {rx.count}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
+              {appMode === "dm" && !activeConvoId && activeDm && (
+                <DmStream entry={DM[activeDm]} extra={dmExtra[activeDm] || []} />
+              )}
             </div>
 
-            {/* Unlocked: org form + published view */}
+            {/* PREDAJA PROJEKTA PANEL */}
             <div
-              id="rezultati-unlocked"
-              className="rezultati-unlocked"
-              style={{ display: !isHackathonActive || results?.published ? "flex" : "none" }}
+              id="predaja-panel"
+              className="swap-panel"
+              style={{ display: panel === "predaja" ? "flex" : "none" }}
             >
               <div className="panel-pad-top">
                 <div className="panel-org-row">
@@ -3987,1136 +3283,1647 @@ export function CohorClient() {
                     <GenerativeAvatar seed="mohammedavdol" className="orb-art" />
                   </div>
                   <div>
-                    <span className="panel-org-name panel-org-name-green">
-                      Mohammed Avdol
-                    </span>
+                    <span className="panel-org-name panel-org-name-green">Mohammed Avdol</span>
                     <span className="role-badge role-badge-org">{t("roleBadgeOrg")}</span>
-                    <div className="panel-org-time" id="rezultati-header-time">
-                      {t("rezHeaderTime")}
-                    </div>
+                    <div className="panel-org-time">11. april 2026. u 09:00</div>
                   </div>
                 </div>
-                <div className="panel-brief panel-brief-flat">
-                  <span className="msg-inline-ic">
-                    <Icon name="trophy" className="ic-sm" />
-                  </span>{" "}
-                  {t("rezBriefPre")}
-                  <strong>
-                    {t("rezBriefStrong")}
-                  </strong>
-                  {t("rezBriefPost")}
+                <div className="panel-brief">
+                  <div className="panel-brief-head">
+                    <Icon name="share" className="ic-sm" />
+                    <span className="panel-brief-title">{t("predajaBriefTitle")}</span>
+                  </div>
+                  <div className="panel-brief-text">{t("predajaBriefText")}</div>
+                  <div className="panel-spec-grid">
+                    <div className="panel-spec">
+                      <div className="panel-spec-label">{t("specDuration")}</div>
+                      <div className="panel-spec-val">{t("specDurationVal")}</div>
+                    </div>
+                    <div className="panel-spec">
+                      <div className="panel-spec-label">{t("specMaxSize")}</div>
+                      <div className="panel-spec-val">500 MB</div>
+                    </div>
+                    <div className="panel-spec">
+                      <div className="panel-spec-label">{t("specFormats")}</div>
+                      <div className="panel-spec-val">MP4, MOV, AVI</div>
+                    </div>
+                    <div className="panel-spec">
+                      <div className="panel-spec-label">{t("specDeadline")}</div>
+                      <div className="panel-spec-val panel-spec-val-lemon">
+                        {t("specDeadlineVal")}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="panel-brief-note">
+                    {t("predajaNotePre")}
+                    <strong>{t("predajaNoteStrong")}</strong>
+                    {t("predajaNotePost")}
+                  </div>
                 </div>
               </div>
 
-              {/* FORM: enter results (org only) */}
-              <div
-                id="rezultati-form-wrap"
-                className="rezultati-form-wrap"
-                style={{ display: rezPublished || results?.published ? "none" : "block" }}
-              >
-                <div className="panel-label">{t("rezFormLabel")}</div>
-
-                {/* Plasman */}
-                <div className="rez-group">
-                  <div className="rez-group-head">{t("rezGroupRanking")}</div>
-
-                  <div className="rez-row">
-                    <div className="rez-medal rez-medal-1">
-                      <Icon name="trophy" className="ic-sm" />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div className="rez-row-label">{t("rezPlace1")}</div>
-                      <RezSelect
-                        id="rank1-select"
-                        ariaLabel={t("rezPlace1")}
-                        value={rezForm.rank1}
-                        onChange={(v) => onRankChange("rank1", v)}
-                      />
-                    </div>
-                    <div id="rank1-badge" className="rez-badge rez-badge-1">
-                      {t("rezBadge1")}
-                    </div>
-                  </div>
-
-                  <div className="rez-row">
-                    <div className="rez-medal rez-medal-2">
-                      <Icon name="trophy" className="ic-sm" />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div className="rez-row-label">{t("rezPlace2")}</div>
-                      <RezSelect
-                        id="rank2-select"
-                        ariaLabel={t("rezPlace2")}
-                        value={rezForm.rank2}
-                        onChange={(v) => onRankChange("rank2", v)}
-                      />
-                    </div>
-                    <div id="rank2-badge" className="rez-badge rez-badge-2">
-                      {t("rezBadge2")}
-                    </div>
-                  </div>
-
-                  <div className="rez-row rez-row-last">
-                    <div className="rez-medal rez-medal-3">
-                      <Icon name="trophy" className="ic-sm" />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div className="rez-row-label">{t("rezPlace3")}</div>
-                      <RezSelect
-                        id="rank3-select"
-                        ariaLabel={t("rezPlace3")}
-                        value={rezForm.rank3}
-                        onChange={(v) => onRankChange("rank3", v)}
-                      />
-                    </div>
-                    <div id="rank3-badge" className="rez-badge rez-badge-3">
-                      {t("rezBadge3")}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Nagrada publike */}
-                <div className="rez-group">
-                  <div className="rez-group-head">{t("rezGroupAudience")}</div>
-                  <div className="rez-row rez-row-last">
-                    <div className="rez-medal rez-medal-pub">
-                      <Icon name="leaderboard" className="ic-sm" />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div className="rez-row-label">
-                        {t("rezAudienceRowLabel")}
+              {/* Video section */}
+              <div className="panel-section">
+                {!videoDone ? (
+                  <div id="video-empty-state">
+                    <div className="panel-label">{t("videoLabel")}</div>
+                    <div
+                      id="video-drop-zone"
+                      className={
+                        "video-drop-zone" +
+                        (dragOver ? " drag-over" : "") +
+                        (videoError ? " error" : "")
+                      }
+                      onClick={() => videoFileInputRef.current?.click()}
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        setDragOver(true);
+                      }}
+                      onDragLeave={() => setDragOver(false)}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        setDragOver(false);
+                        const f = e.dataTransfer.files[0];
+                        if (f) processVideoFile(f);
+                      }}
+                    >
+                      <div className="video-drop-ic">
+                        <Icon name="image" className="ic-lg" />
                       </div>
-                      <RezSelect
-                        id="publike-select"
-                        ariaLabel={t("rezAudienceLabel")}
-                        value={rezForm.publike}
-                        onChange={(v) => onRankChange("publike", v)}
+                      <div className="video-drop-title">{t("videoDropTitle")}</div>
+                      <div className="video-drop-sub">{t("videoDropSub")}</div>
+                      <div className="video-drop-btn">
+                        <Icon name="share" className="ic-sm" /> {t("videoUpload")}
+                      </div>
+                      <input
+                        type="file"
+                        id="video-file-input"
+                        ref={videoFileInputRef}
+                        accept="video/mp4,video/quicktime,video/avi,video/*"
+                        style={{ display: "none" }}
+                        onChange={(e) => {
+                          const f = e.target.files?.[0];
+                          if (f) processVideoFile(f);
+                        }}
                       />
+                    </div>
+                    {videoError && (
+                      <div id="video-upload-err" className="video-upload-err">
+                        ⚠ {videoError}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div id="video-uploaded-state">
+                    <div className="panel-label-row">
+                      <div className="panel-label">{t("videoLabel")}</div>
+                      <div className="panel-label-actions">
+                        <button
+                          type="button"
+                          className="mini-btn"
+                          onClick={() => videoReplaceInputRef.current?.click()}
+                        >
+                          <Icon name="share" className="ic-sm" /> {t("videoReplace")}
+                        </button>
+                        <input
+                          type="file"
+                          id="video-replace-input"
+                          ref={videoReplaceInputRef}
+                          accept="video/*"
+                          style={{ display: "none" }}
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (f) processVideoFile(f);
+                          }}
+                        />
+                        <button
+                          type="button"
+                          className="mini-btn mini-btn-danger"
+                          onClick={removeVideo}
+                        >
+                          <Icon name="x" className="ic-sm" /> {t("videoRemove")}
+                        </button>
+                      </div>
+                    </div>
+                    <div className="video-frame">
+                      <video
+                        id="video-player"
+                        ref={videoPlayerRef}
+                        controls
+                        style={{
+                          width: "100%",
+                          display: "block",
+                          maxHeight: 340,
+                          background: "#000",
+                        }}
+                      >
+                        {t("videoNoHtml5")}
+                      </video>
+                    </div>
+                    <div className="video-file-row">
+                      <span className="video-file-ic">
+                        <Icon name="image" className="ic-sm" />
+                      </span>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div id="video-filename" className="video-filename">
+                          {video.name}
+                        </div>
+                        <div id="video-meta" className="video-meta">
+                          {video.meta}
+                        </div>
+                      </div>
+                      <span className="ok-pill">
+                        <Icon name="check" className="ic-sm" /> OK
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* GitHub repo section */}
+              <div className="panel-section">
+                <div className="panel-label">{t("githubLabel")}</div>
+                <div
+                  id="github-display"
+                  className="github-display"
+                  style={{ display: githubDone ? "flex" : "none" }}
+                >
+                  <span className="github-display-ic">
+                    <Icon name="link" className="ic-sm" />
+                  </span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div
+                      id="github-link-display"
+                      className="github-link-display"
+                      onClick={openGithub}
+                    >
+                      {githubSaved.replace("https://", "")}
+                    </div>
+                    <div className="github-display-sub">digitalci · public repo</div>
+                  </div>
+                  <button type="button" className="mini-btn" onClick={editGithub}>
+                    {t("edit")}
+                  </button>
+                </div>
+                <div
+                  id="github-input-wrap"
+                  className="github-input-wrap"
+                  style={{ display: githubDone ? "none" : "flex" }}
+                >
+                  <div
+                    className={"github-input-box" + (githubFocused ? " focused" : "")}
+                    id="github-input-box"
+                  >
+                    <span className="github-input-ic">
+                      <Icon name="link" className="ic-sm" />
+                    </span>
+                    <input
+                      type="text"
+                      id="github-url-input"
+                      aria-label="GitHub URL"
+                      placeholder="https://github.com/tim/repo"
+                      value={githubInput}
+                      onChange={(e) => setGithubInput(e.target.value)}
+                      onFocus={() => setGithubFocused(true)}
+                      onBlur={() => setGithubFocused(false)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") saveGithub();
+                      }}
+                    />
+                  </div>
+                  <button type="button" className="btn-violet-sm" onClick={saveGithub}>
+                    {t("save")}
+                  </button>
+                </div>
+                <div
+                  id="github-error"
+                  className="github-error"
+                  style={{ display: githubError ? "flex" : "none" }}
+                >
+                  <Icon name="x" className="ic-sm" /> {t("githubError")}
+                </div>
+              </div>
+
+              {/* Status summary */}
+              <div className="panel-section panel-section-end">
+                <div className="panel-label">{t("statusTitle")}</div>
+                <div className="status-card">
+                  <div className="status-row">
+                    <span
+                      id="status-video-icon"
+                      className={"status-ic" + (videoDone ? " status-ic-done" : "")}
+                    >
+                      <Icon name={videoDone ? "check" : "x"} className="ic-sm" />
+                    </span>
+                    <div style={{ flex: 1 }}>
+                      <div className="status-name">{t("statusVideoName")}</div>
+                      <div id="status-video-txt" className="status-sub">
+                        {videoDone ? t("statusUploaded") : t("statusNotUploaded")}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="status-row">
+                    <span
+                      id="status-github-icon"
+                      className={"status-ic" + (githubDone ? " status-ic-done" : "")}
+                    >
+                      <Icon name={githubDone ? "check" : "x"} className="ic-sm" />
+                    </span>
+                    <div style={{ flex: 1 }}>
+                      <div className="status-name">{t("statusGithubName")}</div>
+                      <div id="status-github-txt" className="status-sub">
+                        {githubDone ? t("statusLinkAdded") : t("statusLinkNotAdded")}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* BOUNTIES PANEL */}
+            <div
+              id="bounties-panel"
+              className="swap-panel"
+              style={{ display: panel === "bounties" ? "flex" : "none" }}
+            >
+              <div className="panel-pad-top">
+                <div className="panel-org-row">
+                  <div className="panel-org-av panel-org-av-lemon">
+                    <Icon name="coin" className="ic-sm" />
+                  </div>
+                  <div>
+                    <div className="panel-org-name panel-org-name-lemon">
+                      {t("bountyOrgName")}{" "}
+                      <span className="panel-org-meta">· ETF HackWeek 2026</span>
+                    </div>
+                    <div className="panel-org-time">{t("bountyOrgDesc")}</div>
+                  </div>
+                </div>
+
+                <div className="info-banner info-banner-lemon">
+                  <Icon name="coin" className="ic-sm" />
+                  <span>
+                    {t("bountyBannerPre")}
+                    <strong>{t("bountyBannerStrong")}</strong>
+                    {t("bountyBannerPost")}
+                  </span>
+                </div>
+
+                {/* Real sponsor bounties for the active hackathon */}
+                {bounties.length > 0 ? (
+                  bounties.map((b, i) => {
+                    const style = BOUNTY_BADGE_STYLES[i % BOUNTY_BADGE_STYLES.length];
+                    return (
+                      <BountyCard
+                        key={b.bountyId}
+                        id={b.bountyId}
+                        cardStyle={i === bounties.length - 1 ? { marginBottom: 32 } : undefined}
+                        badgeStyle={style.badgeStyle}
+                        badgeIcon={style.badgeIcon}
+                        sponsor={b.sponsorName}
+                        prize={b.prizeAward ?? ""}
+                        title={b.title}
+                        desc={b.description ?? ""}
+                        tags={b.theme ? [b.theme] : []}
+                        count={b.applicantCount}
+                        applied={b.hasApplied}
+                        onApply={() => applyBounty(b)}
+                      />
+                    );
+                  })
+                ) : (
+                  <div className="rezultati-locked" style={{ marginBottom: 32 }}>
+                    <div className="rezultati-locked-ic">
+                      <Icon name="coin" className="ic-lg" />
+                    </div>
+                    <div className="rezultati-locked-title">{t("bountyEmptyTitle")}</div>
+                    <div className="rezultati-locked-sub">{t("bountyEmptySub")}</div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* GLASANJE PUBLIKE PANEL */}
+            <div
+              id="glasanje-panel"
+              className="swap-panel"
+              style={{ display: panel === "glasanje" ? "flex" : "none" }}
+            >
+              <div className="panel-pad-top">
+                <div className="panel-org-row">
+                  <div className="panel-org-av panel-org-av-green is-orb">
+                    <GenerativeAvatar seed="mohammedavdol" className="orb-art" />
+                  </div>
+                  <div>
+                    <div className="panel-org-name panel-org-name-green">
+                      Mohammed Avdol <span className="panel-org-meta">{t("glasanjeOrgMeta")}</span>
+                    </div>
+                    <div className="panel-org-say">
+                      <span className="msg-inline-ic">
+                        <Icon name="leaderboard" className="ic-sm" />
+                      </span>{" "}
+                      {t("glasanjeSayPre")}
+                      <strong>{t("glasanjeSayStrong")}</strong>
+                      {t("glasanjeSayPost")}
                     </div>
                   </div>
                 </div>
 
-                {/* Sponzorske nagrade — driven by the real bounties list */}
-                {bounties.length > 0 && (
-                  <div className="rez-group">
-                    <div className="rez-group-head">{t("rezGroupSponsor")}</div>
+                {/* Status baner: glasanje nije aktivno */}
+                <div
+                  id="voting-locked-banner"
+                  className="voting-locked-banner"
+                  style={{
+                    display: (votingStatus ? votingStatus.isOpen : isVotingOpen) ? "none" : "flex",
+                  }}
+                >
+                  <div className="voting-locked-ic">
+                    <Icon name="lock" />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div className="voting-locked-title">{t("votingLockedTitle")}</div>
+                    <div className="voting-locked-sub">
+                      {t("votingLockedSub")}
+                      {votingStatus?.opensAt ? (
+                        <>
+                          {" "}
+                          {t("votingOpensAtLabel")}
+                          {new Date(votingStatus.opensAt).toLocaleString()}
+                        </>
+                      ) : null}
+                    </div>
+                  </div>
+                  <div id="voting-countdown-pill" className="voting-countdown-pill">
+                    <Icon name="clock" className="ic-sm" />
+                    <span id="voting-opens-in">{votingCountdownLabel}</span>
+                  </div>
+                </div>
 
-                    {bounties.map((b, i) => {
-                      const style =
-                        BOUNTY_BADGE_STYLES[i % BOUNTY_BADGE_STYLES.length];
-                      const last = i === bounties.length - 1;
+                <div className="panel-label">
+                  {t("projectsLabelPre")}
+                  {realProjects.length > 0 ? realProjects.length : 28}
+                  {t("projectsLabelPost")}
+                </div>
+
+                <div id="projects-list" className="projects-list">
+                  {realProjects.length > 0 ? (
+                    realProjects.map((p) => {
+                      const initials = p.teamName.slice(0, 2).toUpperCase();
+                      const isVoted = myVotedProjectId === p.projectId;
                       return (
-                        <div
-                          className={"rez-row" + (last ? " rez-row-last" : "")}
-                          key={b.bountyId}
-                        >
-                          <div className="rez-medal" style={style.badgeStyle}>
-                            <Icon name={style.badgeIcon} className="ic-sm" />
-                          </div>
-                          <div style={{ flex: 1 }}>
-                            <div
-                              className="rez-spon-name"
-                              style={{ color: style.badgeStyle.color }}
-                            >
-                              {b.sponsorName} — {b.title}
+                        <div className="project-card" data-project={p.projectId} key={p.projectId}>
+                          <div className="project-card-left">
+                            <div className="project-av">{initials}</div>
+                            <div className="project-info">
+                              <div className="project-name">
+                                {p.title} <span className="project-team-badge">{p.teamName}</span>
+                              </div>
+                              <div className="project-desc">{p.description}</div>
                             </div>
-                            {b.theme && (
-                              <div className="rez-spon-sub">{b.theme}</div>
-                            )}
-                            <RezSelect
-                              id={`bounty-${b.bountyId}-select`}
-                              ariaLabel={`${b.sponsorName} — ${b.title}`}
-                              placeholder={t("selectWinner")}
-                              value={bountyWinners[b.bountyId] ?? ""}
-                              onChange={(v) =>
-                                setBountyWinners((prev) => ({
-                                  ...prev,
-                                  [b.bountyId]: v,
-                                }))
-                              }
-                            />
+                          </div>
+                          <div className="project-card-right">
+                            <div className="project-votes">
+                              <span className="project-votes-num">{p.voteCount}</span>
+                              <span className="project-votes-label">{t("votesLabel")}</span>
+                            </div>
+                            <button
+                              className={isVoted ? "vote-btn voted" : "vote-btn"}
+                              type="button"
+                              disabled={myVotedProjectId !== null || votingStatus?.isOpen === false}
+                              onClick={() => voteForProject(p.projectId)}
+                            >
+                              {isVoted ? t("votedBtn") : t("voteBtn")}
+                            </button>
                           </div>
                         </div>
                       );
-                    })}
-                  </div>
-                )}
-
-                {/* Error */}
-                <div
-                  id="rezultati-form-error"
-                  className="rez-form-error"
-                  style={{ display: rezError ? "flex" : "none" }}
-                >
-                  <Icon name="x" className="ic-sm" />{" "}
-                  <span id="rezultati-form-error-msg">
-                    {rezError ?? t("rezErrFallback")}
-                  </span>
-                </div>
-
-                {/* Submit button */}
-                <button
-                  id="rezultati-submit-btn"
-                  type="button"
-                  className="rez-submit-btn"
-                  onClick={submitRezultati}
-                >
-                  {rezSaved ? t("rezUpdate") : t("rezSubmit")}
-                </button>
-              </div>
-
-              {/* PUBLISHED VIEW */}
-              <div
-                id="rezultati-published"
-                className="rezultati-published"
-                style={{ display: rezPublished || results?.published ? "block" : "none" }}
-              >
-                <div className="panel-label-row">
-                  <div className="panel-label">{t("rezOfficial")}</div>
-                  {!results?.published && (
-                    <button
-                      id="rezultati-edit-btn"
-                      type="button"
-                      className="mini-btn"
-                      onClick={editRezultati}
-                    >
-                      <Icon name="settings" className="ic-sm" /> {t("rezEditResults")}
-                    </button>
-                  )}
-                </div>
-
-                {/* Real published podium (backend) */}
-                {results?.published && (
-                  <>
-                    <div className="rez-podium">
-                      {[...results.podium]
-                        .sort((a, b) => (a.rank ?? 99) - (b.rank ?? 99))
-                        .map((p) => {
-                          const cls =
-                            p.rank === 1
-                              ? "rez-podium-1"
-                              : p.rank === 2
-                              ? "rez-podium-2"
-                              : p.rank === 3
-                              ? "rez-podium-3"
-                              : "rez-podium-pub";
-                          const subKey =
-                            p.rank === 1
-                              ? "rezPodium1Sub"
-                              : p.rank === 2
-                              ? "rezPodium2Sub"
-                              : p.rank === 3
-                              ? "rezPodium3Sub"
-                              : "rezPodiumPubSub";
-                          return (
-                            <div className={"rez-podium-row " + cls} key={p.projectId}>
-                              <div className="rez-podium-medal">
-                                <Icon name={p.rank ? "trophy" : "leaderboard"} />
-                              </div>
-                              <div style={{ flex: 1 }}>
-                                <div className="rez-podium-name">{p.teamName}</div>
-                                <div className="rez-podium-sub">
-                                  {t(subKey as keyof typeof M)}
-                                  {p.title ? ` · ${p.title}` : ""}
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
-                    </div>
-                    {results.bountyWinners.length > 0 && (
-                      <div className="rez-spon-published">
-                        <div className="rez-spon-published-head">
-                          {t("rezSponPublishedHead")}
-                        </div>
-                        {results.bountyWinners.map((w, i) => {
-                          const style =
-                            BOUNTY_BADGE_STYLES[i % BOUNTY_BADGE_STYLES.length];
-                          const last = i === results.bountyWinners.length - 1;
-                          return (
-                            <div
-                              className={"rez-spon-row" + (last ? " rez-spon-row-last" : "")}
-                              key={w.bountyId}
-                              style={{ "--accent": style.badgeStyle.color } as CSSProperties}
-                            >
-                              <div className="rez-spon-row-ic" style={style.badgeStyle}>
-                                <Icon name={style.badgeIcon} className="ic-sm" />
-                              </div>
-                              <div style={{ flex: 1 }}>
-                                <div
-                                  className="rez-spon-row-name"
-                                  style={{ color: style.badgeStyle.color }}
-                                >
-                                  {w.teamName}
-                                </div>
-                                <div className="rez-spon-row-sub">
-                                  {w.sponsorName} · {w.bountyTitle}
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                    <div className="rez-published-info">
-                      <span className="rez-published-info-ic">
-                        <Icon name="check" className="ic-sm" />
-                      </span>
-                      <div>
-                        <div className="rez-published-info-title">
-                          {t("rezPublishedTitle")}
-                        </div>
-                        <div className="rez-published-info-sub">
-                          {t("rezTimestampDefault")}
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                {/* Podium (fallback) */}
-                {!results?.published && (
-                <>
-                <div id="rezultati-podium" className="rez-podium">
-                  <div className="rez-podium-row rez-podium-1">
-                    <div className="rez-podium-medal">
-                      <Icon name="trophy" />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div className="rez-podium-name" id="pub-rank1-name">
-                        {rezPublished?.rank1 || "—"}
-                      </div>
-                      <div className="rez-podium-sub">{t("rezPodium1Sub")}</div>
-                    </div>
-                    <div className="rez-podium-pts rez-pts-1">+500 pts</div>
-                  </div>
-                  <div className="rez-podium-row rez-podium-2">
-                    <div className="rez-podium-medal">
-                      <Icon name="trophy" />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div className="rez-podium-name" id="pub-rank2-name">
-                        {rezPublished?.rank2 || "—"}
-                      </div>
-                      <div className="rez-podium-sub">{t("rezPodium2Sub")}</div>
-                    </div>
-                    <div className="rez-podium-pts rez-pts-2">+300 pts</div>
-                  </div>
-                  <div className="rez-podium-row rez-podium-3">
-                    <div className="rez-podium-medal">
-                      <Icon name="trophy" />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div className="rez-podium-name" id="pub-rank3-name">
-                        {rezPublished?.rank3 || "—"}
-                      </div>
-                      <div className="rez-podium-sub">{t("rezPodium3Sub")}</div>
-                    </div>
-                    <div className="rez-podium-pts rez-pts-3">+150 pts</div>
-                  </div>
-                  <div className="rez-podium-row rez-podium-pub">
-                    <div className="rez-podium-medal">
-                      <Icon name="leaderboard" />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div className="rez-podium-name" id="pub-publike-name">
-                        {rezPublished?.publike || "—"}
-                      </div>
-                      <div className="rez-podium-sub">{t("rezPodiumPubSub")}</div>
-                    </div>
-                    <div className="rez-podium-pts rez-pts-pub">+100 pts</div>
-                  </div>
-                </div>
-
-                {/* Sponzorske nagrade - objavljene */}
-                <div className="rez-spon-published">
-                  <div className="rez-spon-published-head">
-                    {t("rezSponPublishedHead")}
-                  </div>
-
-                  <div
-                    className="rez-spon-row"
-                    style={{ "--accent": "var(--green)" } as CSSProperties}
-                  >
-                    <div
-                      className="rez-spon-row-ic"
-                      style={{
-                        background: "#0D1A0D",
-                        borderColor: "#0F3D30",
-                        color: "var(--green)",
-                      }}
-                    >
-                      <Icon name="gamehub" className="ic-sm" />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div
-                        className="rez-spon-row-name"
-                        id="pub-bounty-logitech-name"
-                        style={{ color: "var(--green)" }}
-                      >
-                        {"—"}
-                      </div>
-                      <div className="rez-spon-row-sub">{t("rezSponRowLogitech")}</div>
-                    </div>
-                    <div
-                      className="rez-spon-row-prize"
-                      style={{
-                        color: "var(--green)",
-                        background: "#0D1A0D",
-                        borderColor: "#0F3D30",
-                      }}
-                    >
-                      $500 + Gear
-                    </div>
-                  </div>
-
-                  <div
-                    className="rez-spon-row"
-                    style={{ "--accent": "var(--violet-light)" } as CSSProperties}
-                  >
-                    <div
-                      className="rez-spon-row-ic"
-                      style={{
-                        background: "#0D0D1A",
-                        borderColor: "#2D1A55",
-                        color: "var(--violet-light)",
-                      }}
-                    >
-                      <Icon name="flame" className="ic-sm" />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div
-                        className="rez-spon-row-name"
-                        id="pub-bounty-anthropic-name"
-                        style={{ color: "var(--violet-light)" }}
-                      >
-                        {"—"}
-                      </div>
-                      <div className="rez-spon-row-sub">
-                        {t("rezSponRowAnthropic")}
-                      </div>
-                    </div>
-                    <div
-                      className="rez-spon-row-prize"
-                      style={{
-                        color: "var(--violet-light)",
-                        background: "#0D0D1A",
-                        borderColor: "#2D1A55",
-                      }}
-                    >
-                      $1000 + API
-                    </div>
-                  </div>
-
-                  <div
-                    className="rez-spon-row rez-spon-row-last"
-                    style={{ "--accent": "var(--red)" } as CSSProperties}
-                  >
-                    <div
-                      className="rez-spon-row-ic"
-                      style={{
-                        background: "#1A0D0D",
-                        borderColor: "#3D1A1A",
-                        color: "var(--red)",
-                      }}
-                    >
-                      <Icon name="shield" className="ic-sm" />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div
-                        className="rez-spon-row-name"
-                        id="pub-bounty-jetbrains-name"
-                        style={{ color: "var(--red)" }}
-                      >
-                        {"—"}
-                      </div>
-                      <div className="rez-spon-row-sub">
-                        {t("rezSponRowJetbrains")}
-                      </div>
-                    </div>
-                    <div
-                      className="rez-spon-row-prize"
-                      style={{
-                        color: "var(--red)",
-                        background: "#1A0D0D",
-                        borderColor: "#3D1A1A",
-                      }}
-                    >
-                      $2000 + IDE
-                    </div>
-                  </div>
-                </div>
-
-                {/* Published info */}
-                <div className="rez-published-info">
-                  <span className="rez-published-info-ic">
-                    <Icon name="check" className="ic-sm" />
-                  </span>
-                  <div>
-                    <div className="rez-published-info-title">
-                      {t("rezPublishedTitle")}
-                    </div>
-                    <div className="rez-published-info-sub" id="pub-timestamp">
-                      {rezTimestamp}
-                    </div>
-                  </div>
-                </div>
-                </>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* KANBAN PANEL */}
-          <div
-            id="kanban-panel"
-            className="swap-panel"
-            style={{ display: panel === "kanban" ? "flex" : "none" }}
-          >
-            <div className="kanban-head-wrap">
-              <div className="kanban-head">
-                <span className="kanban-head-ic">
-                  <Icon name="server" />
-                </span>
-                <div>
-                  <div className="kanban-head-title">
-                    {myTeamName
-                      ? t("kanbanTitlePrefix") + myTeamName
-                      : t("kanbanTitle")}
-                  </div>
-                  <div className="kanban-head-sub">{t("kanbanSub")}</div>
-                </div>
-              </div>
-              {/* "Board settings" placeholder removed: kanban columns are fixed
-                  server-side; no column-CRUD API exists. Flagged for backend. */}
-            </div>
-
-            <div className="kanban-board">
-              {board ? (
-                [...board.columns]
-                  .sort((a, b) => a.position - b.position)
-                  .map((col) => {
-                    const cards: KanbanCard[] = [...col.cards].sort(
-                      (a, b) => a.position - b.position,
-                    );
-                    return (
-                      <div
-                        className="kanban-col"
-                        key={col.columnId}
-                        onDragOver={(e) => {
-                          e.preventDefault();
-                          if (dragOverCol !== col.columnId)
-                            setDragOverCol(col.columnId);
-                        }}
-                        onDragLeave={() => {
-                          if (dragOverCol === col.columnId)
-                            setDragOverCol(null);
-                        }}
-                        onDrop={(e) => {
-                          e.preventDefault();
-                          const id =
-                            e.dataTransfer.getData("text/plain") || dragCardId;
-                          onDropCard(id, col.columnId);
-                          setDragCardId(null);
-                          setDragOverCol(null);
-                        }}
-                        style={
-                          dragOverCol === col.columnId
-                            ? { outline: "2px dashed var(--violet-light)" }
-                            : undefined
-                        }
-                      >
-                        <div className="kanban-col-header">
-                          <span className="kanban-col-title">{col.name}</span>
-                          <span className="kanban-col-count">{cards.length}</span>
-                        </div>
-                        <div className="kanban-cards">
-                          {cards.map((card) => (
-                            <div
-                              className="kanban-card"
-                              key={card.cardId}
-                              draggable
-                              onDragStart={(e) => {
-                                e.dataTransfer.setData(
-                                  "text/plain",
-                                  card.cardId,
-                                );
-                                e.dataTransfer.effectAllowed = "move";
-                                setDragCardId(card.cardId);
-                              }}
-                              onDragEnd={() => {
-                                setDragCardId(null);
-                                setDragOverCol(null);
-                              }}
-                              style={{ cursor: "grab" }}
-                            >
-                              <div className="kanban-card-title">
-                                {card.title}
-                                <button
-                                  className="kanban-card-del"
-                                  type="button"
-                                  aria-label={t("kanbanRemoveCard")}
-                                  title={t("kanbanRemoveCard")}
-                                  onClick={() => removeCard(card.cardId)}
-                                >
-                                  <Icon name="x" className="ic-sm" />
-                                </button>
-                              </div>
-                              {card.description && (
-                                <div className="kanban-card-desc">
-                                  {card.description}
-                                </div>
-                              )}
-                              {card.assignedToUsername && (
-                                <div className="kanban-card-footer">
-                                  <span className="kanban-tag kanban-tag-dev">
-                                    {card.assignedToUsername}
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                          {addingCol === col.columnId ? (
-                            <div className="kanban-add-form">
-                              <input
-                                className="kanban-add-input"
-                                type="text"
-                                autoFocus
-                                maxLength={200}
-                                placeholder={t("kanbanCardTitlePh")}
-                                value={newCardTitle}
-                                onChange={(e) => setNewCardTitle(e.target.value)}
-                                onKeyDown={(e) => {
-                                  if (e.key === "Enter" && !e.shiftKey) {
-                                    e.preventDefault();
-                                    submitNewCard();
-                                  } else if (e.key === "Escape") {
-                                    setAddingCol(null);
-                                  }
-                                }}
-                              />
-                              <textarea
-                                className="kanban-add-textarea"
-                                rows={2}
-                                maxLength={10000}
-                                placeholder={t("kanbanCardDescPh")}
-                                value={newCardDesc}
-                                onChange={(e) => setNewCardDesc(e.target.value)}
-                              />
-                              <div className="kanban-add-actions">
-                                <button
-                                  type="button"
-                                  className="kanban-add-submit"
-                                  disabled={newCardBusy || !newCardTitle.trim()}
-                                  onClick={submitNewCard}
-                                >
-                                  {t("kanbanCreate")}
-                                </button>
-                                <button
-                                  type="button"
-                                  className="kanban-add-cancel"
-                                  onClick={() => setAddingCol(null)}
-                                >
-                                  {t("kanbanCancel")}
-                                </button>
-                              </div>
-                            </div>
-                          ) : (
-                            <button
-                              className="kanban-add-task"
-                              type="button"
-                              onClick={() => openAddCard(col.columnId)}
-                            >
-                              <Icon name="plus" className="ic-sm" />{" "}
-                              {t("kanbanAddTask")}
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })
-              ) : (
-                <div className="kanban-empty">{t("kanbanEmpty")}</div>
-              )}
-            </div>
-          </div>
-
-          <div
-            className="typing-bar"
-            id="typing-bar"
-            style={
-              appMode === "dm" || panel !== "messages" || !typingUser
-                ? { display: "none" }
-                : undefined
-            }
-          >
-            <div className="typing-dots">
-              <div className="typing-dot"></div>
-              <div className="typing-dot"></div>
-              <div className="typing-dot"></div>
-            </div>
-            <span>
-              <strong>{typingUser}</strong>{t("typingSuffix")}
-            </span>
-          </div>
-
-          <div
-            className="chat-input-wrap"
-            style={
-              (appMode === "server" && panel !== "messages") || nothingOpen
-                ? { display: "none" }
-                : undefined
-            }
-          >
-            {replyTo && (
-              <div
-                className="reply-banner"
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  padding: "6px 12px",
-                  marginBottom: 6,
-                  borderRadius: 8,
-                  background: "var(--surface-2)",
-                  border: "1px solid var(--line)",
-                  fontSize: 13,
-                }}
-              >
-                <span style={{ opacity: 0.85 }}>
-                  {t("ctxReplyingTo")}
-                  <strong style={{ color: "var(--violet-light, #b39ddf)" }}>
-                    {personName({
-                      displayName: replyTo.displayName,
-                      username: replyTo.username,
-                    })}
-                  </strong>
-                </span>
-                <button
-                  type="button"
-                  aria-label="Cancel reply"
-                  onClick={() => setReplyTo(null)}
-                  style={{
-                    marginLeft: "auto",
-                    background: "none",
-                    border: "none",
-                    color: "inherit",
-                    cursor: "pointer",
-                    fontSize: 16,
-                    lineHeight: 1,
-                  }}
-                >
-                  ×
-                </button>
-              </div>
-            )}
-            <div className="chat-mdbar">
-              {MD_TOOLS.map((tool) => (
-                <button
-                  key={tool.key}
-                  type="button"
-                  className="chat-mdbtn"
-                  title={t(tool.key)}
-                  aria-label={t(tool.key)}
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() => insertMd(tool.wrap[0], tool.wrap[1])}
-                >
-                  {tool.label}
-                </button>
-              ))}
-            </div>
-            {chatMedia.length > 0 && (
-              <div className="chat-media">
-                {chatMedia.map((m) => (
-                  <div
-                    className={`chat-thumb${m.error ? " is-error" : ""}`}
-                    key={m.id}
-                  >
-                    {m.type === "video" ? (
-                      <video className="chat-thumb-el" src={m.previewUrl} muted />
-                    ) : (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img className="chat-thumb-el" src={m.previewUrl} alt="" />
-                    )}
-                    {m.uploading && (
-                      <span className="chat-thumb-spin" aria-hidden="true" />
-                    )}
-                    {m.type === "video" && (
-                      <span className="chat-thumb-badge" aria-hidden="true">
-                        ▶
-                      </span>
-                    )}
-                    <button
-                      type="button"
-                      className="chat-thumb-x"
-                      aria-label={t("removeMedia")}
-                      onClick={() => removeChatMedia(m.id)}
-                    >
-                      <Icon name="x" className="ic-sm" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-            <div className="chat-input-box" style={{ position: "relative" }}>
-              {chatMention.menu}
-              <input
-                ref={chatFileRef}
-                type="file"
-                accept="image/*,video/*"
-                multiple
-                hidden
-                onChange={onPickChatMedia}
-              />
-              <button
-                className="inp-btn"
-                type="button"
-                aria-label={t("addAttachment")}
-                onClick={() => chatFileRef.current?.click()}
-              >
-                <Icon name="plus" className="ic-sm" />
-              </button>
-              {chatPreview ? (
-                <div className="chat-preview" aria-live="polite">
-                  {draft.trim() ? (
-                    <MarkdownContent>{draft}</MarkdownContent>
+                    })
                   ) : (
-                    <span className="chat-preview-empty">
-                      {t("nothingToPreview")}
-                    </span>
-                  )}
-                </div>
-              ) : (
-                <textarea
-                  id="msg-input"
-                  ref={composerRef}
-                  className="chat-textarea"
-                  rows={1}
-                  aria-label={t("writeMessage")}
-                  placeholder={
-                    activeChannelType === "announcements" &&
-                    !can("manage_messages")
-                      ? t("announcementReadOnly")
-                      : inputPlaceholder
-                  }
-                  disabled={
-                    activeChannelType === "announcements" &&
-                    !can("manage_messages")
-                  }
-                  value={draft}
-                  onChange={(e) => {
-                    setDraft(e.target.value);
-                    autoGrowChat();
-                    emitTyping();
-                  }}
-                  onKeyDown={sendMsg}
-                />
-              )}
-              <div className="inp-actions">
-                <button
-                  className="inp-btn"
-                  type="button"
-                  aria-label={t("addImage")}
-                  onClick={() => chatFileRef.current?.click()}
-                >
-                  <Icon name="image" className="ic-sm" />
-                </button>
-                <button
-                  className={`inp-btn${chatPreview ? " is-on" : ""}`}
-                  type="button"
-                  aria-label={chatPreview ? t("editMessage") : t("previewMessage")}
-                  title={chatPreview ? t("editMessage") : t("previewMessage")}
-                  onClick={() => setChatPreview((v) => !v)}
-                >
-                  <Icon name={chatPreview ? "edit" : "eye"} className="ic-sm" />
-                </button>
-                <button
-                  className="send-btn"
-                  type="button"
-                  onClick={sendMsgClick}
-                  aria-label={t("sendMessage")}
-                  disabled={
-                    activeChannelType === "announcements" &&
-                    !can("manage_messages")
-                  }
-                >
-                  <Icon name="share" className="ic-sm" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </main>
-
-        {/* SERVER: MEMBERS PANEL (right) */}
-        <aside
-          className={
-            "members-panel" + (appMode !== "server" ? " dm-hidden" : "")
-          }
-          id="panel-members"
-          aria-label={t("participants")}
-          style={
-            appMode === "server" && !membersVisible
-              ? { display: "none" }
-              : undefined
-          }
-        >
-          <div className="members-header">
-            {t("participants")} <span className="members-count">{members.length}</span>
-          </div>
-          <div className="members-list">
-            {/* Real hackathon info card. Hidden entirely until the hackathon is
-                loaded (no fake numbers). prizePool stat is rendered only when
-                the backend provides one. */}
-            {hackathon && (
-              <div className="hack-info-card">
-                <div className="hack-info-top">
-                  <div className="hack-info-name" title={hackathon.title}>{hackathon.title}</div>
-                  {isHackathonActive ? (
-                    <div className="hack-info-sub" id="hack-elapsed">
-                      {elapsedLabel}
-                    </div>
-                  ) : nowMs > hackEndMs ? (
-                    <div className="hack-info-sub hack-info-ended">{t("hackEnded")}</div>
-                  ) : (
-                    <div className="hack-info-sub">{t("hackNotStarted")}</div>
-                  )}
-                </div>
-                <div className="hack-info-stats">
-                  {isHackathonActive && (
                     <>
-                      <div className="hack-stat">
-                        <span className="hack-stat-label">{t("remaining")}</span>
-                        <span className="hack-stat-val" id="timer-val">
-                          {timerVal}
-                        </span>
+                      <ProjectCard
+                        team="digitalci"
+                        btnId="vote-btn-digitalci"
+                        av="DC"
+                        avStyle={{
+                          background: "#241750",
+                          color: "var(--violet-light)",
+                          borderColor: "#3D2E6B",
+                        }}
+                        name="EduBot"
+                        badge="★ digitalci"
+                        badgeStyle={{
+                          background: "#241750",
+                          color: "var(--violet-light)",
+                          borderColor: "#3D2E6B",
+                        }}
+                        desc={t("projEduBotDesc")}
+                        tags={["Python", "LLM", "FastAPI"]}
+                        votesId="votes-digitalci"
+                        votes={votes.digitalci}
+                        isVotingOpen={isVotingOpen}
+                        myVote={myVote}
+                        onVote={castVote}
+                      />
+                      <ProjectCard
+                        team="ukohorisani"
+                        btnId="vote-btn-bytecraft"
+                        av="UK"
+                        avStyle={{
+                          background: "#0D1A0D",
+                          color: "var(--green)",
+                          borderColor: "#0F3D30",
+                        }}
+                        name="ClassroomOS"
+                        badge="ukohorisani"
+                        badgeStyle={{
+                          background: "#0D1A0D",
+                          color: "var(--green)",
+                          borderColor: "#0F3D30",
+                        }}
+                        desc={t("projClassroomOSDesc")}
+                        tags={["React", "OpenCV", "WebSocket"]}
+                        votesId="votes-bytecraft"
+                        votes={votes.ukohorisani}
+                        isVotingOpen={isVotingOpen}
+                        myVote={myVote}
+                        onVote={castVote}
+                      />
+                      <ProjectCard
+                        team="nullptr"
+                        btnId="vote-btn-nullptr"
+                        av="NP"
+                        avStyle={{
+                          background: "#1A0D0D",
+                          color: "var(--red)",
+                          borderColor: "#3D1A1A",
+                        }}
+                        name="QuizForge"
+                        badge="nullptr"
+                        badgeStyle={{
+                          background: "#1A0D0D",
+                          color: "var(--red)",
+                          borderColor: "#3D1A1A",
+                        }}
+                        desc={t("projQuizForgeDesc")}
+                        tags={["Next.js", "GPT-4", "PostgreSQL"]}
+                        votesId="votes-nullptr"
+                        votes={votes.nullptr}
+                        isVotingOpen={isVotingOpen}
+                        myVote={myVote}
+                        onVote={castVote}
+                      />
+                      <ProjectCard
+                        team="lale"
+                        btnId="vote-btn-stackframe"
+                        av="LA"
+                        avStyle={{
+                          background: "#1A1500",
+                          color: "var(--lemon-vivid)",
+                          borderColor: "#3A3600",
+                        }}
+                        name="MathPath"
+                        badge="lale"
+                        badgeStyle={{
+                          background: "#1A1500",
+                          color: "var(--lemon-vivid)",
+                          borderColor: "#3A3600",
+                        }}
+                        desc={t("projMathPathDesc")}
+                        tags={["Three.js", "WebGL", "SpeechAPI"]}
+                        votesId="votes-stackframe"
+                        votes={votes.lale}
+                        isVotingOpen={isVotingOpen}
+                        myVote={myVote}
+                        onVote={castVote}
+                      />
+                      <ProjectCard
+                        team="menjači"
+                        btnId="vote-btn-menjači"
+                        av="ME"
+                        avStyle={{
+                          background: "#0D0D1A",
+                          color: "var(--violet-light)",
+                          borderColor: "#2D1A55",
+                        }}
+                        name="PeerLearn"
+                        badge="menjači"
+                        badgeStyle={{
+                          background: "#0D0D1A",
+                          color: "var(--violet-light)",
+                          borderColor: "#2D1A55",
+                        }}
+                        desc={t("projPeerLearnDesc")}
+                        tags={["Vue.js", "Node", "ML"]}
+                        votesId="votes-menjači"
+                        votes={votes.menjači}
+                        isVotingOpen={isVotingOpen}
+                        myVote={myVote}
+                        onVote={castVote}
+                      />
+
+                      <MoreProjectsStub />
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* REZULTATI PANEL */}
+            <div
+              id="rezultati-panel"
+              className="swap-panel"
+              style={{ display: panel === "rezultati" ? "flex" : "none" }}
+            >
+              {/* Locked state (while hackathon is active and nothing published) */}
+              <div
+                id="rezultati-locked"
+                className="rezultati-locked"
+                style={{ display: isHackathonActive && !results?.published ? "" : "none" }}
+              >
+                <div className="rezultati-locked-ic">
+                  <Icon name="lock" className="ic-lg" />
+                </div>
+                <div className="rezultati-locked-title">{t("rezLockedTitle")}</div>
+                <div className="rezultati-locked-sub">{t("rezLockedSub")}</div>
+                <div id="rezultati-locked-pill" className="rezultati-locked-pill">
+                  <span className="rezultati-locked-dot"></span>
+                  <span id="rezultati-locked-countdown">{rezultatiLockedCountdown}</span>
+                </div>
+              </div>
+
+              {/* Unlocked: org form + published view */}
+              <div
+                id="rezultati-unlocked"
+                className="rezultati-unlocked"
+                style={{ display: !isHackathonActive || results?.published ? "flex" : "none" }}
+              >
+                <div className="panel-pad-top">
+                  <div className="panel-org-row">
+                    <div className="panel-org-av panel-org-av-green is-orb">
+                      <GenerativeAvatar seed="mohammedavdol" className="orb-art" />
+                    </div>
+                    <div>
+                      <span className="panel-org-name panel-org-name-green">Mohammed Avdol</span>
+                      <span className="role-badge role-badge-org">{t("roleBadgeOrg")}</span>
+                      <div className="panel-org-time" id="rezultati-header-time">
+                        {t("rezHeaderTime")}
                       </div>
-                      <div className="progress-bar">
-                        <div
-                          className="progress-fill"
-                          id="progress-fill"
-                          style={{ width: progressPct + "%" }}
-                        ></div>
+                    </div>
+                  </div>
+                  <div className="panel-brief panel-brief-flat">
+                    <span className="msg-inline-ic">
+                      <Icon name="trophy" className="ic-sm" />
+                    </span>{" "}
+                    {t("rezBriefPre")}
+                    <strong>{t("rezBriefStrong")}</strong>
+                    {t("rezBriefPost")}
+                  </div>
+                </div>
+
+                {/* FORM: enter results (org only) */}
+                <div
+                  id="rezultati-form-wrap"
+                  className="rezultati-form-wrap"
+                  style={{ display: rezPublished || results?.published ? "none" : "block" }}
+                >
+                  <div className="panel-label">{t("rezFormLabel")}</div>
+
+                  {/* Plasman */}
+                  <div className="rez-group">
+                    <div className="rez-group-head">{t("rezGroupRanking")}</div>
+
+                    <div className="rez-row">
+                      <div className="rez-medal rez-medal-1">
+                        <Icon name="trophy" className="ic-sm" />
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div className="rez-row-label">{t("rezPlace1")}</div>
+                        <RezSelect
+                          id="rank1-select"
+                          ariaLabel={t("rezPlace1")}
+                          value={rezForm.rank1}
+                          onChange={(v) => onRankChange("rank1", v)}
+                        />
+                      </div>
+                      <div id="rank1-badge" className="rez-badge rez-badge-1">
+                        {t("rezBadge1")}
+                      </div>
+                    </div>
+
+                    <div className="rez-row">
+                      <div className="rez-medal rez-medal-2">
+                        <Icon name="trophy" className="ic-sm" />
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div className="rez-row-label">{t("rezPlace2")}</div>
+                        <RezSelect
+                          id="rank2-select"
+                          ariaLabel={t("rezPlace2")}
+                          value={rezForm.rank2}
+                          onChange={(v) => onRankChange("rank2", v)}
+                        />
+                      </div>
+                      <div id="rank2-badge" className="rez-badge rez-badge-2">
+                        {t("rezBadge2")}
+                      </div>
+                    </div>
+
+                    <div className="rez-row rez-row-last">
+                      <div className="rez-medal rez-medal-3">
+                        <Icon name="trophy" className="ic-sm" />
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div className="rez-row-label">{t("rezPlace3")}</div>
+                        <RezSelect
+                          id="rank3-select"
+                          ariaLabel={t("rezPlace3")}
+                          value={rezForm.rank3}
+                          onChange={(v) => onRankChange("rank3", v)}
+                        />
+                      </div>
+                      <div id="rank3-badge" className="rez-badge rez-badge-3">
+                        {t("rezBadge3")}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Nagrada publike */}
+                  <div className="rez-group">
+                    <div className="rez-group-head">{t("rezGroupAudience")}</div>
+                    <div className="rez-row rez-row-last">
+                      <div className="rez-medal rez-medal-pub">
+                        <Icon name="leaderboard" className="ic-sm" />
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div className="rez-row-label">{t("rezAudienceRowLabel")}</div>
+                        <RezSelect
+                          id="publike-select"
+                          ariaLabel={t("rezAudienceLabel")}
+                          value={rezForm.publike}
+                          onChange={(v) => onRankChange("publike", v)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Sponzorske nagrade — driven by the real bounties list */}
+                  {bounties.length > 0 && (
+                    <div className="rez-group">
+                      <div className="rez-group-head">{t("rezGroupSponsor")}</div>
+
+                      {bounties.map((b, i) => {
+                        const style = BOUNTY_BADGE_STYLES[i % BOUNTY_BADGE_STYLES.length];
+                        const last = i === bounties.length - 1;
+                        return (
+                          <div
+                            className={"rez-row" + (last ? " rez-row-last" : "")}
+                            key={b.bountyId}
+                          >
+                            <div className="rez-medal" style={style.badgeStyle}>
+                              <Icon name={style.badgeIcon} className="ic-sm" />
+                            </div>
+                            <div style={{ flex: 1 }}>
+                              <div
+                                className="rez-spon-name"
+                                style={{ color: style.badgeStyle.color }}
+                              >
+                                {b.sponsorName} — {b.title}
+                              </div>
+                              {b.theme && <div className="rez-spon-sub">{b.theme}</div>}
+                              <RezSelect
+                                id={`bounty-${b.bountyId}-select`}
+                                ariaLabel={`${b.sponsorName} — ${b.title}`}
+                                placeholder={t("selectWinner")}
+                                value={bountyWinners[b.bountyId] ?? ""}
+                                onChange={(v) =>
+                                  setBountyWinners((prev) => ({
+                                    ...prev,
+                                    [b.bountyId]: v,
+                                  }))
+                                }
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Error */}
+                  <div
+                    id="rezultati-form-error"
+                    className="rez-form-error"
+                    style={{ display: rezError ? "flex" : "none" }}
+                  >
+                    <Icon name="x" className="ic-sm" />{" "}
+                    <span id="rezultati-form-error-msg">{rezError ?? t("rezErrFallback")}</span>
+                  </div>
+
+                  {/* Submit button */}
+                  <button
+                    id="rezultati-submit-btn"
+                    type="button"
+                    className="rez-submit-btn"
+                    onClick={submitRezultati}
+                  >
+                    {rezSaved ? t("rezUpdate") : t("rezSubmit")}
+                  </button>
+                </div>
+
+                {/* PUBLISHED VIEW */}
+                <div
+                  id="rezultati-published"
+                  className="rezultati-published"
+                  style={{ display: rezPublished || results?.published ? "block" : "none" }}
+                >
+                  <div className="panel-label-row">
+                    <div className="panel-label">{t("rezOfficial")}</div>
+                    {!results?.published && (
+                      <button
+                        id="rezultati-edit-btn"
+                        type="button"
+                        className="mini-btn"
+                        onClick={editRezultati}
+                      >
+                        <Icon name="settings" className="ic-sm" /> {t("rezEditResults")}
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Real published podium (backend) */}
+                  {results?.published && (
+                    <>
+                      <div className="rez-podium">
+                        {[...results.podium]
+                          .sort((a, b) => (a.rank ?? 99) - (b.rank ?? 99))
+                          .map((p) => {
+                            const cls =
+                              p.rank === 1
+                                ? "rez-podium-1"
+                                : p.rank === 2
+                                  ? "rez-podium-2"
+                                  : p.rank === 3
+                                    ? "rez-podium-3"
+                                    : "rez-podium-pub";
+                            const subKey =
+                              p.rank === 1
+                                ? "rezPodium1Sub"
+                                : p.rank === 2
+                                  ? "rezPodium2Sub"
+                                  : p.rank === 3
+                                    ? "rezPodium3Sub"
+                                    : "rezPodiumPubSub";
+                            return (
+                              <div className={"rez-podium-row " + cls} key={p.projectId}>
+                                <div className="rez-podium-medal">
+                                  <Icon name={p.rank ? "trophy" : "leaderboard"} />
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                  <div className="rez-podium-name">{p.teamName}</div>
+                                  <div className="rez-podium-sub">
+                                    {t(subKey as keyof typeof M)}
+                                    {p.title ? ` · ${p.title}` : ""}
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                      </div>
+                      {results.bountyWinners.length > 0 && (
+                        <div className="rez-spon-published">
+                          <div className="rez-spon-published-head">{t("rezSponPublishedHead")}</div>
+                          {results.bountyWinners.map((w, i) => {
+                            const style = BOUNTY_BADGE_STYLES[i % BOUNTY_BADGE_STYLES.length];
+                            const last = i === results.bountyWinners.length - 1;
+                            return (
+                              <div
+                                className={"rez-spon-row" + (last ? " rez-spon-row-last" : "")}
+                                key={w.bountyId}
+                                style={{ "--accent": style.badgeStyle.color } as CSSProperties}
+                              >
+                                <div className="rez-spon-row-ic" style={style.badgeStyle}>
+                                  <Icon name={style.badgeIcon} className="ic-sm" />
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                  <div
+                                    className="rez-spon-row-name"
+                                    style={{ color: style.badgeStyle.color }}
+                                  >
+                                    {w.teamName}
+                                  </div>
+                                  <div className="rez-spon-row-sub">
+                                    {w.sponsorName} · {w.bountyTitle}
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                      <div className="rez-published-info">
+                        <span className="rez-published-info-ic">
+                          <Icon name="check" className="ic-sm" />
+                        </span>
+                        <div>
+                          <div className="rez-published-info-title">{t("rezPublishedTitle")}</div>
+                          <div className="rez-published-info-sub">{t("rezTimestampDefault")}</div>
+                        </div>
                       </div>
                     </>
                   )}
-                  <div className="hack-stat">
-                    <span className="hack-stat-label">{t("teamsStat")}</span>
-                    <span className="hack-stat-val">{hackathon.teamCount}</span>
-                  </div>
-                  {hackathon.prizePool && (
-                    <div className="hack-stat hack-stat-prize">
-                      <span className="hack-stat-label">{t("prizeStat")}</span>
-                      <span className="hack-stat-val hack-stat-lemon" title={hackathon.prizePool}>
-                        {hackathon.prizePool}
-                      </span>
-                    </div>
+
+                  {/* Podium (fallback) */}
+                  {!results?.published && (
+                    <>
+                      <div id="rezultati-podium" className="rez-podium">
+                        <div className="rez-podium-row rez-podium-1">
+                          <div className="rez-podium-medal">
+                            <Icon name="trophy" />
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <div className="rez-podium-name" id="pub-rank1-name">
+                              {rezPublished?.rank1 || "—"}
+                            </div>
+                            <div className="rez-podium-sub">{t("rezPodium1Sub")}</div>
+                          </div>
+                          <div className="rez-podium-pts rez-pts-1">+500 pts</div>
+                        </div>
+                        <div className="rez-podium-row rez-podium-2">
+                          <div className="rez-podium-medal">
+                            <Icon name="trophy" />
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <div className="rez-podium-name" id="pub-rank2-name">
+                              {rezPublished?.rank2 || "—"}
+                            </div>
+                            <div className="rez-podium-sub">{t("rezPodium2Sub")}</div>
+                          </div>
+                          <div className="rez-podium-pts rez-pts-2">+300 pts</div>
+                        </div>
+                        <div className="rez-podium-row rez-podium-3">
+                          <div className="rez-podium-medal">
+                            <Icon name="trophy" />
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <div className="rez-podium-name" id="pub-rank3-name">
+                              {rezPublished?.rank3 || "—"}
+                            </div>
+                            <div className="rez-podium-sub">{t("rezPodium3Sub")}</div>
+                          </div>
+                          <div className="rez-podium-pts rez-pts-3">+150 pts</div>
+                        </div>
+                        <div className="rez-podium-row rez-podium-pub">
+                          <div className="rez-podium-medal">
+                            <Icon name="leaderboard" />
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <div className="rez-podium-name" id="pub-publike-name">
+                              {rezPublished?.publike || "—"}
+                            </div>
+                            <div className="rez-podium-sub">{t("rezPodiumPubSub")}</div>
+                          </div>
+                          <div className="rez-podium-pts rez-pts-pub">+100 pts</div>
+                        </div>
+                      </div>
+
+                      {/* Sponzorske nagrade - objavljene */}
+                      <div className="rez-spon-published">
+                        <div className="rez-spon-published-head">{t("rezSponPublishedHead")}</div>
+
+                        <div
+                          className="rez-spon-row"
+                          style={{ "--accent": "var(--green)" } as CSSProperties}
+                        >
+                          <div
+                            className="rez-spon-row-ic"
+                            style={{
+                              background: "#0D1A0D",
+                              borderColor: "#0F3D30",
+                              color: "var(--green)",
+                            }}
+                          >
+                            <Icon name="gamehub" className="ic-sm" />
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <div
+                              className="rez-spon-row-name"
+                              id="pub-bounty-logitech-name"
+                              style={{ color: "var(--green)" }}
+                            >
+                              {"—"}
+                            </div>
+                            <div className="rez-spon-row-sub">{t("rezSponRowLogitech")}</div>
+                          </div>
+                          <div
+                            className="rez-spon-row-prize"
+                            style={{
+                              color: "var(--green)",
+                              background: "#0D1A0D",
+                              borderColor: "#0F3D30",
+                            }}
+                          >
+                            $500 + Gear
+                          </div>
+                        </div>
+
+                        <div
+                          className="rez-spon-row"
+                          style={{ "--accent": "var(--violet-light)" } as CSSProperties}
+                        >
+                          <div
+                            className="rez-spon-row-ic"
+                            style={{
+                              background: "#0D0D1A",
+                              borderColor: "#2D1A55",
+                              color: "var(--violet-light)",
+                            }}
+                          >
+                            <Icon name="flame" className="ic-sm" />
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <div
+                              className="rez-spon-row-name"
+                              id="pub-bounty-anthropic-name"
+                              style={{ color: "var(--violet-light)" }}
+                            >
+                              {"—"}
+                            </div>
+                            <div className="rez-spon-row-sub">{t("rezSponRowAnthropic")}</div>
+                          </div>
+                          <div
+                            className="rez-spon-row-prize"
+                            style={{
+                              color: "var(--violet-light)",
+                              background: "#0D0D1A",
+                              borderColor: "#2D1A55",
+                            }}
+                          >
+                            $1000 + API
+                          </div>
+                        </div>
+
+                        <div
+                          className="rez-spon-row rez-spon-row-last"
+                          style={{ "--accent": "var(--red)" } as CSSProperties}
+                        >
+                          <div
+                            className="rez-spon-row-ic"
+                            style={{
+                              background: "#1A0D0D",
+                              borderColor: "#3D1A1A",
+                              color: "var(--red)",
+                            }}
+                          >
+                            <Icon name="shield" className="ic-sm" />
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <div
+                              className="rez-spon-row-name"
+                              id="pub-bounty-jetbrains-name"
+                              style={{ color: "var(--red)" }}
+                            >
+                              {"—"}
+                            </div>
+                            <div className="rez-spon-row-sub">{t("rezSponRowJetbrains")}</div>
+                          </div>
+                          <div
+                            className="rez-spon-row-prize"
+                            style={{
+                              color: "var(--red)",
+                              background: "#1A0D0D",
+                              borderColor: "#3D1A1A",
+                            }}
+                          >
+                            $2000 + IDE
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Published info */}
+                      <div className="rez-published-info">
+                        <span className="rez-published-info-ic">
+                          <Icon name="check" className="ic-sm" />
+                        </span>
+                        <div>
+                          <div className="rez-published-info-title">{t("rezPublishedTitle")}</div>
+                          <div className="rez-published-info-sub" id="pub-timestamp">
+                            {rezTimestamp}
+                          </div>
+                        </div>
+                      </div>
+                    </>
                   )}
                 </div>
               </div>
-            )}
-            {members.length > 0 && (
-              <>
-                {moderatorMembers.length > 0 && (
-                  <>
-                    <div className="members-section">
-                      {t("moderators")} ({moderatorMembers.length})
+            </div>
+
+            {/* KANBAN PANEL */}
+            <div
+              id="kanban-panel"
+              className="swap-panel"
+              style={{ display: panel === "kanban" ? "flex" : "none" }}
+            >
+              <div className="kanban-head-wrap">
+                <div className="kanban-head">
+                  <span className="kanban-head-ic">
+                    <Icon name="server" />
+                  </span>
+                  <div>
+                    <div className="kanban-head-title">
+                      {myTeamName ? t("kanbanTitlePrefix") + myTeamName : t("kanbanTitle")}
                     </div>
-                    {moderatorMembers.map((m) =>
-                      renderMemberRow(m, onlineUsers.has(m.userId)),
-                    )}
-                  </>
-                )}
-                <div className="members-section">
-                  {t("membersOnline")} ({onlineNonMods.length})
+                    <div className="kanban-head-sub">{t("kanbanSub")}</div>
+                  </div>
                 </div>
-                {onlineNonMods.map((m) => renderMemberRow(m, true))}
-                <div className="members-section">
-                  {t("membersOffline")} ({offlineNonMods.length})
-                </div>
-                {offlineNonMods.map((m) => renderMemberRow(m, false))}
-              </>
-            )}
-            {members.length === 0 && (
-              <div className="members-offline-note">{t("membersOffline")} (0)</div>
-            )}
-          </div>
-        </aside>
+                {/* "Board settings" placeholder removed: kanban columns are fixed
+                  server-side; no column-CRUD API exists. Flagged for backend. */}
+              </div>
 
-        {/* DM: PROFILE PANEL */}
-        <aside
-          className={
-            "dm-profile-panel" + (appMode === "dm" ? " dm-visible" : "")
-          }
-          id="panel-dm-profile"
-          aria-label={t("dmProfilePanelAria")}
-        >
-          {appMode === "dm" &&
-            (() => {
-              // Real conversation drives the panel; the static DmProfile is
-              // only a fallback when there is no real active conversation.
-              const conv = dmConvos.find(
-                (c) => c.conversationId === activeConvoId,
-              );
-              const others = conv
-                ? conv.members.filter((m) => m.userId !== user?.userId)
-                : [];
-
-              // 1-1 DM → permanent docked profile card for the other person.
-              if (conv && others.length === 1) {
-                const o = others[0];
-                return (
-                  <div
-                    className="dm-docked-card"
-                    onContextMenu={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      openProfileMenu(
-                        { userId: o.userId, username: o.username },
-                        e.clientX,
-                        e.clientY,
+              <div className="kanban-board">
+                {board ? (
+                  [...board.columns]
+                    .sort((a, b) => a.position - b.position)
+                    .map((col) => {
+                      const cards: KanbanCard[] = [...col.cards].sort(
+                        (a, b) => a.position - b.position,
                       );
+                      return (
+                        <div
+                          className="kanban-col"
+                          key={col.columnId}
+                          onDragOver={(e) => {
+                            e.preventDefault();
+                            if (dragOverCol !== col.columnId) setDragOverCol(col.columnId);
+                          }}
+                          onDragLeave={() => {
+                            if (dragOverCol === col.columnId) setDragOverCol(null);
+                          }}
+                          onDrop={(e) => {
+                            e.preventDefault();
+                            const id = e.dataTransfer.getData("text/plain") || dragCardId;
+                            onDropCard(id, col.columnId);
+                            setDragCardId(null);
+                            setDragOverCol(null);
+                          }}
+                          style={
+                            dragOverCol === col.columnId
+                              ? { outline: "2px dashed var(--violet-light)" }
+                              : undefined
+                          }
+                        >
+                          <div className="kanban-col-header">
+                            <span className="kanban-col-title">{col.name}</span>
+                            <span className="kanban-col-count">{cards.length}</span>
+                          </div>
+                          <div className="kanban-cards">
+                            {cards.map((card) => (
+                              <div
+                                className="kanban-card"
+                                key={card.cardId}
+                                draggable
+                                onDragStart={(e) => {
+                                  e.dataTransfer.setData("text/plain", card.cardId);
+                                  e.dataTransfer.effectAllowed = "move";
+                                  setDragCardId(card.cardId);
+                                }}
+                                onDragEnd={() => {
+                                  setDragCardId(null);
+                                  setDragOverCol(null);
+                                }}
+                                style={{ cursor: "grab" }}
+                              >
+                                <div className="kanban-card-title">
+                                  {card.title}
+                                  <button
+                                    className="kanban-card-del"
+                                    type="button"
+                                    aria-label={t("kanbanRemoveCard")}
+                                    title={t("kanbanRemoveCard")}
+                                    onClick={() => removeCard(card.cardId)}
+                                  >
+                                    <Icon name="x" className="ic-sm" />
+                                  </button>
+                                </div>
+                                {card.description && (
+                                  <div className="kanban-card-desc">{card.description}</div>
+                                )}
+                                {card.assignedToUsername && (
+                                  <div className="kanban-card-footer">
+                                    <span className="kanban-tag kanban-tag-dev">
+                                      {card.assignedToUsername}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                            {addingCol === col.columnId ? (
+                              <div className="kanban-add-form">
+                                <input
+                                  className="kanban-add-input"
+                                  type="text"
+                                  autoFocus
+                                  maxLength={200}
+                                  placeholder={t("kanbanCardTitlePh")}
+                                  value={newCardTitle}
+                                  onChange={(e) => setNewCardTitle(e.target.value)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter" && !e.shiftKey) {
+                                      e.preventDefault();
+                                      submitNewCard();
+                                    } else if (e.key === "Escape") {
+                                      setAddingCol(null);
+                                    }
+                                  }}
+                                />
+                                <textarea
+                                  className="kanban-add-textarea"
+                                  rows={2}
+                                  maxLength={10000}
+                                  placeholder={t("kanbanCardDescPh")}
+                                  value={newCardDesc}
+                                  onChange={(e) => setNewCardDesc(e.target.value)}
+                                />
+                                <div className="kanban-add-actions">
+                                  <button
+                                    type="button"
+                                    className="kanban-add-submit"
+                                    disabled={newCardBusy || !newCardTitle.trim()}
+                                    onClick={submitNewCard}
+                                  >
+                                    {t("kanbanCreate")}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="kanban-add-cancel"
+                                    onClick={() => setAddingCol(null)}
+                                  >
+                                    {t("kanbanCancel")}
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <button
+                                className="kanban-add-task"
+                                type="button"
+                                onClick={() => openAddCard(col.columnId)}
+                              >
+                                <Icon name="plus" className="ic-sm" /> {t("kanbanAddTask")}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })
+                ) : (
+                  <div className="kanban-empty">{t("kanbanEmpty")}</div>
+                )}
+              </div>
+            </div>
+
+            <div
+              className="typing-bar"
+              id="typing-bar"
+              style={
+                appMode === "dm" || panel !== "messages" || !typingUser
+                  ? { display: "none" }
+                  : undefined
+              }
+            >
+              <div className="typing-dots">
+                <div className="typing-dot"></div>
+                <div className="typing-dot"></div>
+                <div className="typing-dot"></div>
+              </div>
+              <span>
+                <strong>{typingUser}</strong>
+                {t("typingSuffix")}
+              </span>
+            </div>
+
+            <div
+              className="chat-input-wrap"
+              style={
+                (appMode === "server" && panel !== "messages") || nothingOpen
+                  ? { display: "none" }
+                  : undefined
+              }
+            >
+              {replyTo && (
+                <div
+                  className="reply-banner"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "6px 12px",
+                    marginBottom: 6,
+                    borderRadius: 8,
+                    background: "var(--surface-2)",
+                    border: "1px solid var(--line)",
+                    fontSize: 13,
+                  }}
+                >
+                  <span style={{ opacity: 0.85 }}>
+                    {t("ctxReplyingTo")}
+                    <strong style={{ color: "var(--violet-light, #b39ddf)" }}>
+                      {personName({
+                        displayName: replyTo.displayName,
+                        username: replyTo.username,
+                      })}
+                    </strong>
+                  </span>
+                  <button
+                    type="button"
+                    aria-label="Cancel reply"
+                    onClick={() => setReplyTo(null)}
+                    style={{
+                      marginLeft: "auto",
+                      background: "none",
+                      border: "none",
+                      color: "inherit",
+                      cursor: "pointer",
+                      fontSize: 16,
+                      lineHeight: 1,
                     }}
                   >
-                    <MiniProfileCard
-                      member={o}
-                      onOpenProfile={setProfileUsername}
-                      viewProfileLabel={t("miniViewProfile")}
-                    />
+                    ×
+                  </button>
+                </div>
+              )}
+              <div className="chat-mdbar">
+                {MD_TOOLS.map((tool) => (
+                  <button
+                    key={tool.key}
+                    type="button"
+                    className="chat-mdbtn"
+                    title={t(tool.key)}
+                    aria-label={t(tool.key)}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => insertMd(tool.wrap[0], tool.wrap[1])}
+                  >
+                    {tool.label}
+                  </button>
+                ))}
+              </div>
+              {chatMedia.length > 0 && (
+                <div className="chat-media">
+                  {chatMedia.map((m) => (
+                    <div className={`chat-thumb${m.error ? " is-error" : ""}`} key={m.id}>
+                      {m.type === "video" ? (
+                        <video className="chat-thumb-el" src={m.previewUrl} muted />
+                      ) : (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img className="chat-thumb-el" src={m.previewUrl} alt="" />
+                      )}
+                      {m.uploading && <span className="chat-thumb-spin" aria-hidden="true" />}
+                      {m.type === "video" && (
+                        <span className="chat-thumb-badge" aria-hidden="true">
+                          ▶
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        className="chat-thumb-x"
+                        aria-label={t("removeMedia")}
+                        onClick={() => removeChatMedia(m.id)}
+                      >
+                        <Icon name="x" className="ic-sm" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="chat-input-box" style={{ position: "relative" }}>
+                {chatMention.menu}
+                <input
+                  ref={chatFileRef}
+                  type="file"
+                  accept="image/*,video/*"
+                  multiple
+                  hidden
+                  onChange={onPickChatMedia}
+                />
+                <button
+                  className="inp-btn"
+                  type="button"
+                  aria-label={t("addAttachment")}
+                  onClick={() => chatFileRef.current?.click()}
+                >
+                  <Icon name="plus" className="ic-sm" />
+                </button>
+                {chatPreview ? (
+                  <div className="chat-preview" aria-live="polite">
+                    {draft.trim() ? (
+                      <MarkdownContent>{draft}</MarkdownContent>
+                    ) : (
+                      <span className="chat-preview-empty">{t("nothingToPreview")}</span>
+                    )}
                   </div>
-                );
-              }
+                ) : (
+                  <textarea
+                    id="msg-input"
+                    ref={composerRef}
+                    className="chat-textarea"
+                    rows={1}
+                    aria-label={t("writeMessage")}
+                    placeholder={
+                      activeChannelType === "announcements" && !can("manage_messages")
+                        ? t("announcementReadOnly")
+                        : inputPlaceholder
+                    }
+                    disabled={activeChannelType === "announcements" && !can("manage_messages")}
+                    value={draft}
+                    onChange={(e) => {
+                      setDraft(e.target.value);
+                      autoGrowChat();
+                      emitTyping();
+                    }}
+                    onKeyDown={sendMsg}
+                  />
+                )}
+                <div className="inp-actions">
+                  <button
+                    className="inp-btn"
+                    type="button"
+                    aria-label={t("addImage")}
+                    onClick={() => chatFileRef.current?.click()}
+                  >
+                    <Icon name="image" className="ic-sm" />
+                  </button>
+                  <button
+                    className={`inp-btn${chatPreview ? " is-on" : ""}`}
+                    type="button"
+                    aria-label={chatPreview ? t("editMessage") : t("previewMessage")}
+                    title={chatPreview ? t("editMessage") : t("previewMessage")}
+                    onClick={() => setChatPreview((v) => !v)}
+                  >
+                    <Icon name={chatPreview ? "edit" : "eye"} className="ic-sm" />
+                  </button>
+                  <button
+                    className="send-btn"
+                    type="button"
+                    onClick={sendMsgClick}
+                    aria-label={t("sendMessage")}
+                    disabled={activeChannelType === "announcements" && !can("manage_messages")}
+                  >
+                    <Icon name="share" className="ic-sm" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </main>
 
-              // Group DM → server-style member list.
-              if (conv && others.length > 1) {
-                return (
-                  <div className="members-list">
-                    <div className="grp-head">
-                      <div className="grp-head-av" aria-hidden="true">
-                        {isImageIcon(conv.icon) ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            className="grp-head-av-img"
-                            src={conv.icon}
-                            alt={convoTitle(conv)}
-                          />
-                        ) : (
-                          conv.icon || GROUP_ICON_FALLBACK
-                        )}
+          {/* SERVER: MEMBERS PANEL (right) */}
+          <aside
+            className={"members-panel" + (appMode !== "server" ? " dm-hidden" : "")}
+            id="panel-members"
+            aria-label={t("participants")}
+            style={appMode === "server" && !membersVisible ? { display: "none" } : undefined}
+          >
+            <div className="members-header">
+              {t("participants")} <span className="members-count">{members.length}</span>
+            </div>
+            <div className="members-list">
+              {/* Real hackathon info card. Hidden entirely until the hackathon is
+                loaded (no fake numbers). prizePool stat is rendered only when
+                the backend provides one. */}
+              {hackathon && (
+                <div className="hack-info-card">
+                  <div className="hack-info-top">
+                    <div className="hack-info-name" title={hackathon.title}>
+                      {hackathon.title}
+                    </div>
+                    {isHackathonActive ? (
+                      <div className="hack-info-sub" id="hack-elapsed">
+                        {elapsedLabel}
                       </div>
-                      <button
-                        type="button"
-                        className="grp-head-name-btn"
-                        title={convoTitle(conv)}
-                        onClick={openGroupSettings}
-                      >
-                        {convoTitle(conv)}
-                      </button>
-                      <button
-                        type="button"
-                        className="grp-head-edit"
-                        aria-label={t("grpEditAria")}
-                        title={t("grpSettings")}
-                        onClick={openGroupSettings}
-                      >
-                        <Icon name="settings" className="ic-sm" />
-                      </button>
+                    ) : nowMs > hackEndMs ? (
+                      <div className="hack-info-sub hack-info-ended">{t("hackEnded")}</div>
+                    ) : (
+                      <div className="hack-info-sub">{t("hackNotStarted")}</div>
+                    )}
+                  </div>
+                  <div className="hack-info-stats">
+                    {isHackathonActive && (
+                      <>
+                        <div className="hack-stat">
+                          <span className="hack-stat-label">{t("remaining")}</span>
+                          <span className="hack-stat-val" id="timer-val">
+                            {timerVal}
+                          </span>
+                        </div>
+                        <div className="progress-bar">
+                          <div
+                            className="progress-fill"
+                            id="progress-fill"
+                            style={{ width: progressPct + "%" }}
+                          ></div>
+                        </div>
+                      </>
+                    )}
+                    <div className="hack-stat">
+                      <span className="hack-stat-label">{t("teamsStat")}</span>
+                      <span className="hack-stat-val">{hackathon.teamCount}</span>
                     </div>
-                    <div className="members-section">
-                      {t("dmMembersLabel")} ({conv.members.length})
+                    {hackathon.prizePool && (
+                      <div className="hack-stat hack-stat-prize">
+                        <span className="hack-stat-label">{t("prizeStat")}</span>
+                        <span className="hack-stat-val hack-stat-lemon" title={hackathon.prizePool}>
+                          {hackathon.prizePool}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+              {members.length > 0 && (
+                <>
+                  {moderatorMembers.length > 0 && (
+                    <>
+                      <div className="members-section">
+                        {t("moderators")} ({moderatorMembers.length})
+                      </div>
+                      {moderatorMembers.map((m) => renderMemberRow(m, onlineUsers.has(m.userId)))}
+                    </>
+                  )}
+                  <div className="members-section">
+                    {t("membersOnline")} ({onlineNonMods.length})
+                  </div>
+                  {onlineNonMods.map((m) => renderMemberRow(m, true))}
+                  <div className="members-section">
+                    {t("membersOffline")} ({offlineNonMods.length})
+                  </div>
+                  {offlineNonMods.map((m) => renderMemberRow(m, false))}
+                </>
+              )}
+              {members.length === 0 && (
+                <div className="members-offline-note">{t("membersOffline")} (0)</div>
+              )}
+            </div>
+          </aside>
+
+          {/* DM: PROFILE PANEL */}
+          <aside
+            className={"dm-profile-panel" + (appMode === "dm" ? " dm-visible" : "")}
+            id="panel-dm-profile"
+            aria-label={t("dmProfilePanelAria")}
+          >
+            {appMode === "dm" &&
+              (() => {
+                // Real conversation drives the panel; the static DmProfile is
+                // only a fallback when there is no real active conversation.
+                const conv = dmConvos.find((c) => c.conversationId === activeConvoId);
+                const others = conv ? conv.members.filter((m) => m.userId !== user?.userId) : [];
+
+                // 1-1 DM → permanent docked profile card for the other person.
+                if (conv && others.length === 1) {
+                  const o = others[0];
+                  return (
+                    <div
+                      className="dm-docked-card"
+                      onContextMenu={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        openProfileMenu(
+                          { userId: o.userId, username: o.username },
+                          e.clientX,
+                          e.clientY,
+                        );
+                      }}
+                    >
+                      <MiniProfileCard
+                        member={o}
+                        onOpenProfile={setProfileUsername}
+                        viewProfileLabel={t("miniViewProfile")}
+                      />
                     </div>
-                    {conv.members.map((m) => (
-                      <div
-                        className="member-row"
-                        key={m.userId}
-                        role="button"
-                        tabIndex={0}
-                        style={{ cursor: "pointer" }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const r = e.currentTarget.getBoundingClientRect();
-                          setMiniProfile({
-                            member: {
-                              userId: m.userId,
-                              username: m.username,
-                              displayName: m.displayName,
-                              avatarUrl: m.avatarUrl,
-                              bannerUrl: m.bannerUrl,
-                              roles: [],
-                              teamName: null,
-                              isModerator: false,
-                              isPremium: m.isPremium,
-                            },
-                            anchorTop: r.top,
-                            anchorLeft: r.left,
-                          });
-                        }}
-                        onContextMenu={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          openProfileMenu(
-                            { userId: m.userId, username: m.username },
-                            e.clientX,
-                            e.clientY,
-                          );
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key !== "Enter") return;
-                          e.stopPropagation();
-                          const r = e.currentTarget.getBoundingClientRect();
-                          setMiniProfile({
-                            member: {
-                              userId: m.userId,
-                              username: m.username,
-                              displayName: m.displayName,
-                              avatarUrl: m.avatarUrl,
-                              bannerUrl: m.bannerUrl,
-                              roles: [],
-                              teamName: null,
-                              isModerator: false,
-                              isPremium: m.isPremium,
-                            },
-                            anchorTop: r.top,
-                            anchorLeft: r.left,
-                          });
-                        }}
-                      >
-                        <div className="member-av is-orb">
-                          {m.avatarUrl ? (
+                  );
+                }
+
+                // Group DM → server-style member list.
+                if (conv && others.length > 1) {
+                  return (
+                    <div className="members-list">
+                      <div className="grp-head">
+                        <div className="grp-head-av" aria-hidden="true">
+                          {isImageIcon(conv.icon) ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
-                              src={m.avatarUrl}
-                              alt={m.username}
-                              className="orb-art"
+                              className="grp-head-av-img"
+                              src={conv.icon}
+                              alt={convoTitle(conv)}
                             />
                           ) : (
-                            <GenerativeAvatar
-                              seed={m.username}
-                              className="orb-art"
-                            />
+                            conv.icon || GROUP_ICON_FALLBACK
                           )}
                         </div>
-                        <div className="member-info">
-                          <div className="member-name">
-                            {personName({
-                              displayName: m.displayName,
-                              username: m.username,
-                            })}
-                          </div>
-                          <div className="member-handle">@{m.username}</div>
-                        </div>
+                        <button
+                          type="button"
+                          className="grp-head-name-btn"
+                          title={convoTitle(conv)}
+                          onClick={openGroupSettings}
+                        >
+                          {convoTitle(conv)}
+                        </button>
+                        <button
+                          type="button"
+                          className="grp-head-edit"
+                          aria-label={t("grpEditAria")}
+                          title={t("grpSettings")}
+                          onClick={openGroupSettings}
+                        >
+                          <Icon name="settings" className="ic-sm" />
+                        </button>
                       </div>
-                    ))}
-                  </div>
-                );
-              }
+                      <div className="members-section">
+                        {t("dmMembersLabel")} ({conv.members.length})
+                      </div>
+                      {conv.members.map((m) => (
+                        <div
+                          className="member-row"
+                          key={m.userId}
+                          role="button"
+                          tabIndex={0}
+                          style={{ cursor: "pointer" }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const r = e.currentTarget.getBoundingClientRect();
+                            setMiniProfile({
+                              member: {
+                                userId: m.userId,
+                                username: m.username,
+                                displayName: m.displayName,
+                                avatarUrl: m.avatarUrl,
+                                bannerUrl: m.bannerUrl,
+                                roles: [],
+                                teamName: null,
+                                isModerator: false,
+                                isPremium: m.isPremium,
+                              },
+                              anchorTop: r.top,
+                              anchorLeft: r.left,
+                            });
+                          }}
+                          onContextMenu={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            openProfileMenu(
+                              { userId: m.userId, username: m.username },
+                              e.clientX,
+                              e.clientY,
+                            );
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key !== "Enter") return;
+                            e.stopPropagation();
+                            const r = e.currentTarget.getBoundingClientRect();
+                            setMiniProfile({
+                              member: {
+                                userId: m.userId,
+                                username: m.username,
+                                displayName: m.displayName,
+                                avatarUrl: m.avatarUrl,
+                                bannerUrl: m.bannerUrl,
+                                roles: [],
+                                teamName: null,
+                                isModerator: false,
+                                isPremium: m.isPremium,
+                              },
+                              anchorTop: r.top,
+                              anchorLeft: r.left,
+                            });
+                          }}
+                        >
+                          <div className="member-av is-orb">
+                            {m.avatarUrl ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={m.avatarUrl} alt={m.username} className="orb-art" />
+                            ) : (
+                              <GenerativeAvatar seed={m.username} className="orb-art" />
+                            )}
+                          </div>
+                          <div className="member-info">
+                            <div className="member-name">
+                              {personName({
+                                displayName: m.displayName,
+                                username: m.username,
+                              })}
+                            </div>
+                            <div className="member-handle">@{m.username}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                }
 
-              // No real active conversation → static fallback only.
-              if (!activeConvoId && activeDm) {
-                return <DmProfile entry={DM[activeDm]} />;
-              }
-              return null;
-            })()}
-        </aside>
+                // No real active conversation → static fallback only.
+                if (!activeConvoId && activeDm) {
+                  return <DmProfile entry={DM[activeDm]} />;
+                }
+                return null;
+              })()}
+          </aside>
         </div>
       </div>
 
@@ -5126,9 +4933,7 @@ export function CohorClient() {
           {toast.content}
         </CohorToast>
       )}
-      {chatLb && (
-        <ImageLightbox url={chatLb} onClose={() => setChatLb(null)} />
-      )}
+      {chatLb && <ImageLightbox url={chatLb} onClose={() => setChatLb(null)} />}
       <BountyUnapplyModal
         open={unapplyTarget !== null}
         bountyName={unapplyTarget ? unapplyTarget.title : ""}
@@ -5152,13 +4957,7 @@ export function CohorClient() {
             // height so it is always fully visible (NOT the mouse position).
             top:
               typeof window !== "undefined"
-                ? Math.max(
-                    8,
-                    Math.min(
-                      miniProfile.anchorTop,
-                      window.innerHeight - miniCardH - 8,
-                    ),
-                  )
+                ? Math.max(8, Math.min(miniProfile.anchorTop, window.innerHeight - miniCardH - 8))
                 : miniProfile.anchorTop,
             // Sit just to the LEFT of the clicked element so the whole member
             // list stays visible; flip to the right only if there's no room.
@@ -5259,13 +5058,9 @@ export function CohorClient() {
                   <button
                     key={emo}
                     type="button"
-                    className={
-                      "grp-emoji" + (groupIcon === emo ? " grp-emoji-on" : "")
-                    }
+                    className={"grp-emoji" + (groupIcon === emo ? " grp-emoji-on" : "")}
                     aria-pressed={groupIcon === emo}
-                    onClick={() =>
-                      setGroupIcon((cur) => (cur === emo ? "" : emo))
-                    }
+                    onClick={() => setGroupIcon((cur) => (cur === emo ? "" : emo))}
                   >
                     {emo}
                   </button>
@@ -5276,9 +5071,7 @@ export function CohorClient() {
                 type="file"
                 accept="image/*"
                 hidden
-                onChange={(e) =>
-                  handleIconFileChange(e, setGroupIconUploading, setGroupIcon)
-                }
+                onChange={(e) => handleIconFileChange(e, setGroupIconUploading, setGroupIcon)}
               />
               <button
                 type="button"
@@ -5295,31 +5088,20 @@ export function CohorClient() {
             <div className="grp-field grp-field-grow">
               <span className="grp-label">{t("grpMembersHeader")}</span>
               <div className="grp-member-list">
-                {members.length === 0 && (
-                  <div className="grp-empty">{t("groupModalEmpty")}</div>
-                )}
+                {members.length === 0 && <div className="grp-empty">{t("groupModalEmpty")}</div>}
                 {members.map((m) => {
                   const checked = groupPick.includes(m.userId);
                   return (
                     <label
                       key={m.userId}
-                      className={
-                        "grp-member-row" + (checked ? " grp-member-on" : "")
-                      }
+                      className={"grp-member-row" + (checked ? " grp-member-on" : "")}
                     >
                       <span className="grp-member-av is-orb">
                         {m.avatarUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={m.avatarUrl}
-                            alt={m.username}
-                            className="orb-art"
-                          />
+                          <img src={m.avatarUrl} alt={m.username} className="orb-art" />
                         ) : (
-                          <GenerativeAvatar
-                            seed={m.username}
-                            className="orb-art"
-                          />
+                          <GenerativeAvatar seed={m.username} className="orb-art" />
                         )}
                       </span>
                       <span className="grp-member-name">
@@ -5347,11 +5129,7 @@ export function CohorClient() {
             </div>
 
             <div className="grp-modal-actions">
-              <button
-                type="button"
-                className="grp-btn grp-btn-ghost"
-                onClick={closeGroupModal}
-              >
+              <button type="button" className="grp-btn grp-btn-ghost" onClick={closeGroupModal}>
                 {t("grpCancel")}
               </button>
               <button
@@ -5370,9 +5148,7 @@ export function CohorClient() {
       {/* GROUP SETTINGS (rename / re-icon / add members) */}
       {showGroupSettings &&
         (() => {
-          const conv = dmConvos.find(
-            (c) => c.conversationId === activeConvoId,
-          );
+          const conv = dmConvos.find((c) => c.conversationId === activeConvoId);
           if (!conv) return null;
           const memberIds = new Set(conv.members.map((m) => m.userId));
           const addable = members.filter((m) => !memberIds.has(m.userId));
@@ -5401,18 +5177,11 @@ export function CohorClient() {
                 <div className="grp-field">
                   <span className="grp-label">{t("grpRename")}</span>
                   <div className="grp-name-row">
-                    <div
-                      className="grp-avatar-wrap"
-                      title={t("grpAvatarPreview")}
-                    >
+                    <div className="grp-avatar-wrap" title={t("grpAvatarPreview")}>
                       <div className="grp-avatar-preview" aria-hidden="true">
                         {isImageIcon(gsIcon) ? (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            className="grp-avatar-preview-img"
-                            src={gsIcon}
-                            alt={gsName || ""}
-                          />
+                          <img className="grp-avatar-preview-img" src={gsIcon} alt={gsName || ""} />
                         ) : (
                           gsIcon || GROUP_ICON_FALLBACK
                         )}
@@ -5443,13 +5212,9 @@ export function CohorClient() {
                       <button
                         key={emo}
                         type="button"
-                        className={
-                          "grp-emoji" + (gsIcon === emo ? " grp-emoji-on" : "")
-                        }
+                        className={"grp-emoji" + (gsIcon === emo ? " grp-emoji-on" : "")}
                         aria-pressed={gsIcon === emo}
-                        onClick={() =>
-                          setGsIcon((cur) => (cur === emo ? "" : emo))
-                        }
+                        onClick={() => setGsIcon((cur) => (cur === emo ? "" : emo))}
                       >
                         {emo}
                       </button>
@@ -5460,9 +5225,7 @@ export function CohorClient() {
                     type="file"
                     accept="image/*"
                     hidden
-                    onChange={(e) =>
-                      handleIconFileChange(e, setGsIconUploading, setGsIcon)
-                    }
+                    onChange={(e) => handleIconFileChange(e, setGsIconUploading, setGsIcon)}
                   />
                   <button
                     type="button"
@@ -5494,23 +5257,14 @@ export function CohorClient() {
                       return (
                         <label
                           key={m.userId}
-                          className={
-                            "grp-member-row" + (checked ? " grp-member-on" : "")
-                          }
+                          className={"grp-member-row" + (checked ? " grp-member-on" : "")}
                         >
                           <span className="grp-member-av is-orb">
                             {m.avatarUrl ? (
                               // eslint-disable-next-line @next/next/no-img-element
-                              <img
-                                src={m.avatarUrl}
-                                alt={m.username}
-                                className="orb-art"
-                              />
+                              <img src={m.avatarUrl} alt={m.username} className="orb-art" />
                             ) : (
-                              <GenerativeAvatar
-                                seed={m.username}
-                                className="orb-art"
-                              />
+                              <GenerativeAvatar seed={m.username} className="orb-art" />
                             )}
                           </span>
                           <span className="grp-member-name">
@@ -5572,8 +5326,14 @@ export function CohorClient() {
           }}
           style={{
             position: "fixed",
-            top: Math.min(ctxMenu.y, (typeof window !== "undefined" ? window.innerHeight : 800) - 280),
-            left: Math.min(ctxMenu.x, (typeof window !== "undefined" ? window.innerWidth : 1200) - 220),
+            top: Math.min(
+              ctxMenu.y,
+              (typeof window !== "undefined" ? window.innerHeight : 800) - 280,
+            ),
+            left: Math.min(
+              ctxMenu.x,
+              (typeof window !== "undefined" ? window.innerWidth : 1200) - 220,
+            ),
             zIndex: 2000,
             minWidth: 190,
             padding: 6,
@@ -5671,8 +5431,8 @@ export function CohorClient() {
           {/* Delete — own messages always; others' CHANNEL messages with
               manage_messages. DM messages: author only. Destructive, two-step. */}
           {(ctxMenu.m.senderId === user?.userId ||
-            (!!ctxMenu.m.channelId && can("manage_messages"))) && (
-            ctxConfirmDelete ? (
+            (!!ctxMenu.m.channelId && can("manage_messages"))) &&
+            (ctxConfirmDelete ? (
               <button
                 type="button"
                 role="menuitem"
@@ -5692,8 +5452,7 @@ export function CohorClient() {
               >
                 {t("ctxDelete")}
               </button>
-            )
-          )}
+            ))}
         </div>
       )}
 
@@ -5767,10 +5526,7 @@ export function CohorClient() {
                   cursor: relBusy ? "default" : "pointer",
                 }}
                 onClick={() =>
-                  pmToggleFriend(
-                    profileMenu.userId,
-                    profileMenu.rel?.friendStatus === "friends",
-                  )
+                  pmToggleFriend(profileMenu.userId, profileMenu.rel?.friendStatus === "friends")
                 }
               >
                 {profileMenu.rel?.friendStatus === "friends"
@@ -5785,17 +5541,12 @@ export function CohorClient() {
                 disabled={relBusy}
                 style={{
                   ...CTX_MENU_ITEM_STYLE,
-                  color: profileMenu.rel?.isBlocked
-                    ? "inherit"
-                    : "var(--red, #ef5f6b)",
+                  color: profileMenu.rel?.isBlocked ? "inherit" : "var(--red, #ef5f6b)",
                   opacity: relBusy ? 0.5 : 1,
                   cursor: relBusy ? "default" : "pointer",
                 }}
                 onClick={() =>
-                  pmToggleBlock(
-                    profileMenu.userId,
-                    profileMenu.rel?.isBlocked ?? false,
-                  )
+                  pmToggleBlock(profileMenu.userId, profileMenu.rel?.isBlocked ?? false)
                 }
               >
                 {profileMenu.rel?.isBlocked ? t("pmUnblock") : t("pmBlock")}
@@ -5859,9 +5610,7 @@ export function CohorClient() {
                 </button>
               ))}
               {dmConvos.length > 0 && (
-                <div style={{ fontSize: 12, opacity: 0.6, marginTop: 8 }}>
-                  {t("ctxForwardDms")}
-                </div>
+                <div style={{ fontSize: 12, opacity: 0.6, marginTop: 8 }}>{t("ctxForwardDms")}</div>
               )}
               {dmConvos.map((c) => (
                 <button
@@ -6209,10 +5958,7 @@ export function CohorClient() {
           aria-label={t("srvSettingsTitle")}
           onClick={() => setServerSettingsOpen(false)}
         >
-          <div
-            className="grp-modal srv-modal"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="grp-modal srv-modal" onClick={(e) => e.stopPropagation()}>
             <div className="grp-modal-head">
               <div className="grp-modal-title">{t("srvSettingsTitle")}</div>
               <button
@@ -6400,12 +6146,8 @@ export function CohorClient() {
 
                   {roles.map((r) => {
                     const editing = roleEditing === r.serverRoleId;
-                    const roleMembers = members.filter((m) =>
-                      m.roles.includes(r.name),
-                    );
-                    const addable = members.filter(
-                      (m) => !m.roles.includes(r.name),
-                    );
+                    const roleMembers = members.filter((m) => m.roles.includes(r.name));
+                    const addable = members.filter((m) => !m.roles.includes(r.name));
                     return (
                       <div className="srv-role" key={r.serverRoleId}>
                         {editing ? (
@@ -6456,9 +6198,7 @@ export function CohorClient() {
                                   <button
                                     type="button"
                                     className="srv-mini-btn srv-mini-btn-danger"
-                                    onClick={() =>
-                                      setRoleConfirmDelete(r.serverRoleId)
-                                    }
+                                    onClick={() => setRoleConfirmDelete(r.serverRoleId)}
                                   >
                                     {t("srvRoleDelete")}
                                   </button>
@@ -6503,9 +6243,7 @@ export function CohorClient() {
                                       type="button"
                                       className="srv-role-member-x"
                                       aria-label={t("srvRoleRemoveAria")}
-                                      onClick={() =>
-                                        removeMemberFromRole(r.serverRoleId, m.userId)
-                                      }
+                                      onClick={() => removeMemberFromRole(r.serverRoleId, m.userId)}
                                     >
                                       <Icon name="x" className="ic-sm" />
                                     </button>
@@ -6567,9 +6305,7 @@ export function CohorClient() {
               {settingsTab === "members" && can("kick_members") && (
                 <div className="srv-pane">
                   {membersErr && <div className="srv-inline-err">{membersErr}</div>}
-                  {members.length === 0 && (
-                    <div className="srv-empty">{t("srvMembersEmpty")}</div>
-                  )}
+                  {members.length === 0 && <div className="srv-empty">{t("srvMembersEmpty")}</div>}
                   {members.map((m) => {
                     const isSelf = m.userId === user?.userId;
                     // The organizer carries all permissions and cannot be kicked
@@ -6587,9 +6323,7 @@ export function CohorClient() {
                               username: m.username,
                             })}
                             {m.isModerator && (
-                              <span className="member-mod-badge">
-                                {t("srvModeratorBadge")}
-                              </span>
+                              <span className="member-mod-badge">{t("srvModeratorBadge")}</span>
                             )}
                           </div>
                           <div className="srv-member-handle">@{m.username}</div>

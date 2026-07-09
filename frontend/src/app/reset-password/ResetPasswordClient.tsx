@@ -26,28 +26,49 @@ const MIN_PASSWORD = 8;
 const MAX_PASSWORD = 128;
 
 const M = {
-  heading:       { en: "Choose a new password",          sr: "Izaberi novu lozinku" },
-  newPassword:   { en: "New password",                   sr: "Nova lozinka" },
-  confirm:       { en: "Confirm password",               sr: "Potvrdi lozinku" },
-  showLabel:     { en: "Show",                           sr: "Prikaži" },
-  hideLabel:     { en: "Hide",                           sr: "Sakrij" },
-  showPassword:  { en: "Show password",                  sr: "Prikaži lozinku" },
-  hidePassword:  { en: "Hide password",                  sr: "Sakrij lozinku" },
-  submit:        { en: "Reset password",                 sr: "Resetuj lozinku" },
-  submitting:    { en: "Resetting…",                     sr: "Resetovanje…" },
-  pwRequired:    { en: "Enter a new password.",          sr: "Unesi novu lozinku." },
-  tooShort:      { en: "Password needs at least 8 characters.", sr: "Lozinka mora imati bar 8 karaktera." },
-  tooLong:       { en: "Password can have at most 128 characters.", sr: "Lozinka može imati najviše 128 karaktera." },
-  confirmRequired:{ en: "Repeat your new password.",     sr: "Ponovi novu lozinku." },
-  mismatch:      { en: "Passwords don't match.",         sr: "Lozinke se ne poklapaju." },
-  capsLock:      { en: "Caps Lock is on.",               sr: "Uključen je Caps Lock." },
-  missingToken:  { en: "This reset link is missing its token.", sr: "Ovom linku za reset nedostaje token." },
-  missingTokenBody:{ en: "Open the link from the reset email again, or request a new one from the sign-in page.", sr: "Otvori link iz mejla ponovo, ili zatraži novi sa strane za prijavu." },
-  invalidToken:  { en: "This reset link is invalid or has expired.", sr: "Ovaj link za reset je nevažeći ili je istekao." },
-  genericError:  { en: "Could not reset your password. Try again.", sr: "Resetovanje lozinke nije uspelo. Pokušaj ponovo." },
-  success:       { en: "Password updated",               sr: "Lozinka je ažurirana" },
-  successBody:   { en: "Your password has been changed. You can sign in now.", sr: "Tvoja lozinka je promenjena. Sada se možeš prijaviti." },
-  goToLogin:     { en: "Continue to sign in",            sr: "Nastavi na prijavu" },
+  heading: { en: "Choose a new password", sr: "Izaberi novu lozinku" },
+  newPassword: { en: "New password", sr: "Nova lozinka" },
+  confirm: { en: "Confirm password", sr: "Potvrdi lozinku" },
+  showLabel: { en: "Show", sr: "Prikaži" },
+  hideLabel: { en: "Hide", sr: "Sakrij" },
+  showPassword: { en: "Show password", sr: "Prikaži lozinku" },
+  hidePassword: { en: "Hide password", sr: "Sakrij lozinku" },
+  submit: { en: "Reset password", sr: "Resetuj lozinku" },
+  submitting: { en: "Resetting…", sr: "Resetovanje…" },
+  pwRequired: { en: "Enter a new password.", sr: "Unesi novu lozinku." },
+  tooShort: {
+    en: "Password needs at least 8 characters.",
+    sr: "Lozinka mora imati bar 8 karaktera.",
+  },
+  tooLong: {
+    en: "Password can have at most 128 characters.",
+    sr: "Lozinka može imati najviše 128 karaktera.",
+  },
+  confirmRequired: { en: "Repeat your new password.", sr: "Ponovi novu lozinku." },
+  mismatch: { en: "Passwords don't match.", sr: "Lozinke se ne poklapaju." },
+  capsLock: { en: "Caps Lock is on.", sr: "Uključen je Caps Lock." },
+  missingToken: {
+    en: "This reset link is missing its token.",
+    sr: "Ovom linku za reset nedostaje token.",
+  },
+  missingTokenBody: {
+    en: "Open the link from the reset email again, or request a new one from the sign-in page.",
+    sr: "Otvori link iz mejla ponovo, ili zatraži novi sa strane za prijavu.",
+  },
+  invalidToken: {
+    en: "This reset link is invalid or has expired.",
+    sr: "Ovaj link za reset je nevažeći ili je istekao.",
+  },
+  genericError: {
+    en: "Could not reset your password. Try again.",
+    sr: "Resetovanje lozinke nije uspelo. Pokušaj ponovo.",
+  },
+  success: { en: "Password updated", sr: "Lozinka je ažurirana" },
+  successBody: {
+    en: "Your password has been changed. You can sign in now.",
+    sr: "Tvoja lozinka je promenjena. Sada se možeš prijaviti.",
+  },
+  goToLogin: { en: "Continue to sign in", sr: "Nastavi na prijavu" },
 } as const;
 
 type MsgKey = keyof typeof M;
@@ -121,8 +142,7 @@ export function ResetPasswordClient() {
       setDone(true);
     } catch (err) {
       setFormError(
-        err instanceof ApiError &&
-          (err.status === 400 || err.status === 404 || err.status === 410)
+        err instanceof ApiError && (err.status === 400 || err.status === 404 || err.status === 410)
           ? t("invalidToken")
           : t("genericError"),
       );
@@ -138,7 +158,9 @@ export function ResetPasswordClient() {
 
         {!token ? (
           <div role="alert">
-            <p className="auth-error" style={{ fontWeight: 700 }}>{t("missingToken")}</p>
+            <p className="auth-error" style={{ fontWeight: 700 }}>
+              {t("missingToken")}
+            </p>
             <p style={{ fontSize: "0.9rem", opacity: 0.85, marginBottom: "1.1rem" }}>
               {t("missingTokenBody")}
             </p>

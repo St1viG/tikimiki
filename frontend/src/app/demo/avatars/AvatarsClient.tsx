@@ -4,10 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Icon } from "@/components/Icon";
 import { AppShell } from "@/components/shell/AppShell";
-import {
-  AVATAR_VARIANTS,
-  type AvatarVariantEntry,
-} from "@/components/ui/GenerativeAvatar";
+import { AVATAR_VARIANTS, type AvatarVariantEntry } from "@/components/ui/GenerativeAvatar";
 import { useT } from "@/components/i18n/LanguageProvider";
 
 /**
@@ -23,15 +20,21 @@ import { useT } from "@/components/i18n/LanguageProvider";
  */
 
 const M = {
-  backLabel:         { en: "Back",                                       sr: "Nazad" },
-  pageTitle:         { en: "Generative avatars",                         sr: "Generativni avatari" },
-  pageSub:           { en: "Demo · default profile avatars",             sr: "Demo · podrazumevani avatari profila" },
-  introP:            { en: "These are the default avatars — not an initial, but a unique generative image for each profile. Everything is deterministic: the same seed (user ID or @handle) always yields the same avatar, on all devices and on every load. Different profiles get visibly different art. Enter a seed below to compare all five styles live.", sr: "Ovo su podrazumevani avatari — nije inicijal, već jedinstvena generativna sličica za svaki profil. Sve je deterministički: isti seed (ID korisnika ili @handle) uvek daje isti avatar, na svim uređajima i pri svakom učitavanju. Različiti profili dobijaju vidno drugačiju umetnost. Upiši seed ispod da uživo uporediš svih pet stilova." },
-  seedLabel:         { en: "Seed (e.g. @handle)",                        sr: "Seed (npr. @handle)" },
-  circleShape:       { en: "Circle (border-radius 50%)",                 sr: "Krug (border-radius 50%)" },
-  roundedShape:      { en: "Rounded square (radius 18px)",               sr: "Zaobljeni kvadrat (radius 18px)" },
-  uniquenessStrip:   { en: "Different profiles (same style, different seed)", sr: "Različiti profili (isti stil, drugi seed)" },
-  inContext:         { en: "In context (profile-mini, 40px)",            sr: "U kontekstu (profil-mini, 40px)" },
+  backLabel: { en: "Back", sr: "Nazad" },
+  pageTitle: { en: "Generative avatars", sr: "Generativni avatari" },
+  pageSub: { en: "Demo · default profile avatars", sr: "Demo · podrazumevani avatari profila" },
+  introP: {
+    en: "These are the default avatars — not an initial, but a unique generative image for each profile. Everything is deterministic: the same seed (user ID or @handle) always yields the same avatar, on all devices and on every load. Different profiles get visibly different art. Enter a seed below to compare all five styles live.",
+    sr: "Ovo su podrazumevani avatari — nije inicijal, već jedinstvena generativna sličica za svaki profil. Sve je deterministički: isti seed (ID korisnika ili @handle) uvek daje isti avatar, na svim uređajima i pri svakom učitavanju. Različiti profili dobijaju vidno drugačiju umetnost. Upiši seed ispod da uživo uporediš svih pet stilova.",
+  },
+  seedLabel: { en: "Seed (e.g. @handle)", sr: "Seed (npr. @handle)" },
+  circleShape: { en: "Circle (border-radius 50%)", sr: "Krug (border-radius 50%)" },
+  roundedShape: { en: "Rounded square (radius 18px)", sr: "Zaobljeni kvadrat (radius 18px)" },
+  uniquenessStrip: {
+    en: "Different profiles (same style, different seed)",
+    sr: "Različiti profili (isti stil, drugi seed)",
+  },
+  inContext: { en: "In context (profile-mini, 40px)", sr: "U kontekstu (profil-mini, 40px)" },
 } as const;
 
 /** Sample handles so uniqueness across profiles is obvious at a glance. */
@@ -103,10 +106,7 @@ function VariantCard({
             <div className="av-sizes">
               {UI_SIZES.map((s) => (
                 <figure className="av-size" key={`c-${s}`}>
-                  <span
-                    className="av-frame circle"
-                    style={{ width: s, height: s }}
-                  >
+                  <span className="av-frame circle" style={{ width: s, height: s }}>
                     <Avatar seed={seed} size={s} />
                   </span>
                   <figcaption>{s}px</figcaption>
@@ -120,10 +120,7 @@ function VariantCard({
             <div className="av-sizes">
               {UI_SIZES.map((s) => (
                 <figure className="av-size" key={`r-${s}`}>
-                  <span
-                    className="av-frame rounded"
-                    style={{ width: s, height: s }}
-                  >
+                  <span className="av-frame rounded" style={{ width: s, height: s }}>
                     <Avatar seed={seed} size={s} />
                   </span>
                   <figcaption>{s}px</figcaption>

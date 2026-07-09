@@ -4,13 +4,28 @@ const fs = require("fs");
 
 const html = fs.readFileSync(".next/server/app/demo/avatars.html", "utf8");
 
-const seeds = ["andrej","stiveng","nenad","dimitrije","miki","tiki","mara","moljac","fenjer","etf","garaza","lumen","vatra","kvant"];
+const seeds = [
+  "andrej",
+  "stiveng",
+  "nenad",
+  "dimitrije",
+  "miki",
+  "tiki",
+  "mara",
+  "moljac",
+  "fenjer",
+  "etf",
+  "garaza",
+  "lumen",
+  "vatra",
+  "kvant",
+];
 const variants = [
-  { id: "grid",     label: "Voltage Grid", desc: "Identikon mreža 5×5, mirror simetrija" },
-  { id: "hex",      label: "Gem",          desc: "Brušeni dragulj — heksagon sa fasetama" },
-  { id: "gradient", label: "Aurora",       desc: "Mirni gradijent + meki sjaj" },
-  { id: "circuit",  label: "Voltage",      desc: "Štampana ploča + munja u centru" },
-  { id: "orbit",    label: "Constellation",desc: "Sazvežđe — centar i sateliti (graf tima)" },
+  { id: "grid", label: "Voltage Grid", desc: "Identikon mreža 5×5, mirror simetrija" },
+  { id: "hex", label: "Gem", desc: "Brušeni dragulj — heksagon sa fasetama" },
+  { id: "gradient", label: "Aurora", desc: "Mirni gradijent + meki sjaj" },
+  { id: "circuit", label: "Voltage", desc: "Štampana ploča + munja u centru" },
+  { id: "orbit", label: "Constellation", desc: "Sazvežđe — centar i sateliti (graf tima)" },
 ];
 
 const anchors = variants
@@ -36,7 +51,10 @@ const cards = anchors.map((a, i) => {
 
 const stripRow = (c) =>
   c.strip
-    .map((svg, j) => `<figure><span class="clip">${svg}</span><figcaption>@${seeds[j] || ""}</figcaption></figure>`)
+    .map(
+      (svg, j) =>
+        `<figure><span class="clip">${svg}</span><figcaption>@${seeds[j] || ""}</figcaption></figure>`,
+    )
     .join("");
 
 const sections = cards
@@ -47,7 +65,7 @@ const sections = cards
   <div class="hero"><span class="clip big">${c.hero}</span>
     <p>Isti stil, 14 različitih profila — svaki @handle daje drugačiju umetnost ↓</p></div>
   <div class="strip">${stripRow(c)}</div>
-</section>`
+</section>`,
   )
   .join("");
 
@@ -81,4 +99,7 @@ ${sections}
 </body></html>`;
 
 fs.writeFileSync("avatar-preview.html", out);
-console.log("wrote avatar-preview.html ·", cards.map((c) => c.id + ":" + (c.hero ? c.strip.length + "seeds" : "NO-HERO")).join("  "));
+console.log(
+  "wrote avatar-preview.html ·",
+  cards.map((c) => c.id + ":" + (c.hero ? c.strip.length + "seeds" : "NO-HERO")).join("  "),
+);

@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  Query,
-  UseGuards,
-} from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Query, UseGuards } from "@nestjs/common";
 import { CurrentUser } from "../auth/current-user.decorator";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { ZodValidationPipe } from "../common/zod.pipe";
@@ -48,10 +40,7 @@ export class AdminController {
   }
 
   @Post("organizations/:userId/verify")
-  verifyOrganization(
-    @CurrentUser() callerId: string,
-    @Param("userId") targetUserId: string,
-  ) {
+  verifyOrganization(@CurrentUser() callerId: string, @Param("userId") targetUserId: string) {
     return this.svc.verifyOrganization(callerId, targetUserId);
   }
 
@@ -74,10 +63,7 @@ export class AdminController {
   }
 
   @Post("users/:userId/unban")
-  unbanUser(
-    @CurrentUser() callerId: string,
-    @Param("userId") targetUserId: string,
-  ) {
+  unbanUser(@CurrentUser() callerId: string, @Param("userId") targetUserId: string) {
     return this.svc.unbanUser(callerId, targetUserId);
   }
 

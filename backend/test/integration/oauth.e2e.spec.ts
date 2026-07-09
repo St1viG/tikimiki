@@ -36,9 +36,7 @@ describe("auth/oauth (e2e)", () => {
 
   it("redirects to /login?oauth=unconfigured when linkedin keys are missing", async () => {
     const res = await http().get("/api/v1/auth/oauth/linkedin").expect(302);
-    expect(res.headers.location).toBe(
-      `${env.WEB_ORIGIN}/login?oauth=unconfigured`,
-    );
+    expect(res.headers.location).toBe(`${env.WEB_ORIGIN}/login?oauth=unconfigured`);
   });
 
   it("starts the linkedin flow when configured", async () => {
@@ -60,9 +58,7 @@ describe("auth/oauth (e2e)", () => {
     const state = location.searchParams.get("state");
     expect(state).toBeTruthy();
     const cookies = res.headers["set-cookie"] as unknown as string[];
-    expect(
-      cookies.some((c) => c.startsWith(`tikimiki_oauth_state=${state}`)),
-    ).toBe(true);
+    expect(cookies.some((c) => c.startsWith(`tikimiki_oauth_state=${state}`))).toBe(true);
   });
 
   it("rejects a callback whose state does not match the cookie", async () => {
@@ -76,9 +72,7 @@ describe("auth/oauth (e2e)", () => {
   });
 
   it("rejects a callback with no code", async () => {
-    const res = await http()
-      .get("/api/v1/auth/oauth/linkedin/callback")
-      .expect(302);
+    const res = await http().get("/api/v1/auth/oauth/linkedin/callback").expect(302);
     expect(res.headers.location).toBe(`${env.WEB_ORIGIN}/login?oauth=error`);
   });
 });

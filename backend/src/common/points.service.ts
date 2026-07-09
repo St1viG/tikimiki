@@ -1,20 +1,13 @@
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from "@nestjs/common";
+import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { eq } from "drizzle-orm";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import { members, pointTransactions } from "../db/schema";
 
 /** A Drizzle transaction handle (the argument passed to `db.transaction`). */
-export type DrizzleTx = Parameters<
-  Parameters<DrizzleDB["transaction"]>[0]
->[0];
+export type DrizzleTx = Parameters<Parameters<DrizzleDB["transaction"]>[0]>[0];
 
 /** Allowed `point_transactions.type` values. */
-export type PointTxnType = typeof pointTransactions.$inferInsert["type"];
+export type PointTxnType = (typeof pointTransactions.$inferInsert)["type"];
 
 export interface PointsLedgerMeta {
   type: PointTxnType;
@@ -84,10 +77,7 @@ export class PointsService {
       throw new BadRequestException("insufficient points");
     }
 
-    await tx
-      .update(members)
-      .set({ points: newBalance })
-      .where(eq(members.userId, userId));
+    await tx.update(members).set({ points: newBalance }).where(eq(members.userId, userId));
 
     await tx.insert(pointTransactions).values({
       userId,

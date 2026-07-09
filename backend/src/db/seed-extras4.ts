@@ -59,11 +59,36 @@ async function main() {
   }
 
   const seed = [
-    { channelId: najave, senderId: orgId, content: "Dobrodošli na ETF HackWeek 2026! 🎉 Sva važna obaveštenja stižu ovde.", mins: 240 },
-    { channelId: najave, senderId: orgId, content: "Predaja projekata je do nedelje 18h. Ne zaboravite video prezentaciju.", mins: 120 },
-    { channelId: najave, senderId: orgId, content: "Glasanje publike otvara se u poslednja 2 sata. Sponzorski bounty-ji su aktivni!", mins: 30 },
-    { channelId: teamCh, senderId: andrej, content: "Ekipa, podelimo taskove — ja uzimam backend.", mins: 200 },
-    { channelId: teamCh, senderId: mohammed, content: "Ja radim frontend i dizajn. Push-ujem skicu večeras.", mins: 180 },
+    {
+      channelId: najave,
+      senderId: orgId,
+      content: "Dobrodošli na ETF HackWeek 2026! 🎉 Sva važna obaveštenja stižu ovde.",
+      mins: 240,
+    },
+    {
+      channelId: najave,
+      senderId: orgId,
+      content: "Predaja projekata je do nedelje 18h. Ne zaboravite video prezentaciju.",
+      mins: 120,
+    },
+    {
+      channelId: najave,
+      senderId: orgId,
+      content: "Glasanje publike otvara se u poslednja 2 sata. Sponzorski bounty-ji su aktivni!",
+      mins: 30,
+    },
+    {
+      channelId: teamCh,
+      senderId: andrej,
+      content: "Ekipa, podelimo taskove — ja uzimam backend.",
+      mins: 200,
+    },
+    {
+      channelId: teamCh,
+      senderId: mohammed,
+      content: "Ja radim frontend i dizajn. Push-ujem skicu večeras.",
+      mins: 180,
+    },
     { channelId: teamCh, senderId: andrej, content: "Top. Demo snimamo sutra ujutru.", mins: 60 },
   ];
 

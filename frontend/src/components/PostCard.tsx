@@ -28,29 +28,32 @@ import { deletePost, updatePost } from "@/lib/api";
  */
 
 const M = {
-  postOptions:   { en: "Post options",  sr: "Opcije objave" },
-  editPost:      { en: "Edit",          sr: "Izmeni" },
-  deletePost:    { en: "Delete",        sr: "Obriši" },
-  deleteTitle:   { en: "Delete post?",  sr: "Obrisati objavu?" },
-  deleteConfirm: { en: "This post will be permanently removed. This action can't be undone.", sr: "Ova objava će biti trajno uklonjena. Ova radnja se ne može poništiti." },
-  deleting:      { en: "Deleting…",     sr: "Brisanje…" },
-  editedLabel:   { en: "(Edited)",      sr: "(Izmenjeno)" },
-  saveEdit:      { en: "Save",          sr: "Sačuvaj" },
-  saving:        { en: "Saving…",       sr: "Čuvanje…" },
-  cancelEdit:    { en: "Cancel",        sr: "Otkaži" },
-  like:          { en: "Like",          sr: "Sviđa mi se" },
-  comments:      { en: "Comments",      sr: "Komentari" },
-  share:         { en: "Share",         sr: "Podeli" },
-  linkCopied:    { en: "Link copied",   sr: "Link kopiran" },
-  mdBold:        { en: "Bold",          sr: "Podebljano" },
-  mdItalic:      { en: "Italic",        sr: "Kurziv" },
-  mdH1:          { en: "Large heading", sr: "Veliki naslov" },
-  mdH2:          { en: "Medium heading", sr: "Srednji naslov" },
-  mdH3:          { en: "Small heading", sr: "Mali naslov" },
-  mdList:        { en: "Bulleted list", sr: "Lista" },
-  mdQuote:       { en: "Quote",         sr: "Citat" },
-  mdCode:        { en: "Code",          sr: "Kôd" },
-  mdLink:        { en: "Link",          sr: "Link" },
+  postOptions: { en: "Post options", sr: "Opcije objave" },
+  editPost: { en: "Edit", sr: "Izmeni" },
+  deletePost: { en: "Delete", sr: "Obriši" },
+  deleteTitle: { en: "Delete post?", sr: "Obrisati objavu?" },
+  deleteConfirm: {
+    en: "This post will be permanently removed. This action can't be undone.",
+    sr: "Ova objava će biti trajno uklonjena. Ova radnja se ne može poništiti.",
+  },
+  deleting: { en: "Deleting…", sr: "Brisanje…" },
+  editedLabel: { en: "(Edited)", sr: "(Izmenjeno)" },
+  saveEdit: { en: "Save", sr: "Sačuvaj" },
+  saving: { en: "Saving…", sr: "Čuvanje…" },
+  cancelEdit: { en: "Cancel", sr: "Otkaži" },
+  like: { en: "Like", sr: "Sviđa mi se" },
+  comments: { en: "Comments", sr: "Komentari" },
+  share: { en: "Share", sr: "Podeli" },
+  linkCopied: { en: "Link copied", sr: "Link kopiran" },
+  mdBold: { en: "Bold", sr: "Podebljano" },
+  mdItalic: { en: "Italic", sr: "Kurziv" },
+  mdH1: { en: "Large heading", sr: "Veliki naslov" },
+  mdH2: { en: "Medium heading", sr: "Srednji naslov" },
+  mdH3: { en: "Small heading", sr: "Mali naslov" },
+  mdList: { en: "Bulleted list", sr: "Lista" },
+  mdQuote: { en: "Quote", sr: "Citat" },
+  mdCode: { en: "Code", sr: "Kôd" },
+  mdLink: { en: "Link", sr: "Link" },
 } as const;
 
 const MAX_LEN = 5000; // matches the backend content limit
@@ -341,7 +344,9 @@ export function PostCard({
               <button
                 className="btn btn-violet"
                 onClick={saveEdit}
-                disabled={savingEdit || (editDraft.trim() === "" && (post.attachments?.length ?? 0) === 0)}
+                disabled={
+                  savingEdit || (editDraft.trim() === "" && (post.attachments?.length ?? 0) === 0)
+                }
               >
                 {savingEdit ? t("saving") : t("saveEdit")}
               </button>
@@ -370,7 +375,11 @@ export function PostCard({
             <span>{post.reactionCount}</span>
           </button>
           {onComment ? (
-            <button className="act" aria-label={t("comments")} onClick={() => onComment(post.postId)}>
+            <button
+              className="act"
+              aria-label={t("comments")}
+              onClick={() => onComment(post.postId)}
+            >
               <Icon name="comment" /> <span>{post.commentCount}</span>
             </button>
           ) : (
@@ -414,7 +423,12 @@ export function PostCard({
               >
                 {t("cancelEdit")}
               </button>
-              <button type="button" className="btn btn-danger" onClick={confirmDelete} disabled={deleting}>
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={confirmDelete}
+                disabled={deleting}
+              >
                 {deleting ? t("deleting") : t("deletePost")}
               </button>
             </div>

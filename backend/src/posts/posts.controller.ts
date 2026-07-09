@@ -34,10 +34,7 @@ export class PostsController {
 
   @Get("posts/:postId")
   @UseGuards(OptionalJwtAuthGuard)
-  getOne(
-    @Param("postId", ParseUUIDPipe) postId: string,
-    @OptionalUser() userId: string | null,
-  ) {
+  getOne(@Param("postId", ParseUUIDPipe) postId: string, @OptionalUser() userId: string | null) {
     return this.posts.getOne(postId, userId);
   }
 
@@ -62,10 +59,7 @@ export class PostsController {
 
   @Delete("posts/:postId")
   @UseGuards(JwtAuthGuard)
-  remove(
-    @CurrentUser() userId: string,
-    @Param("postId", ParseUUIDPipe) postId: string,
-  ) {
+  remove(@CurrentUser() userId: string, @Param("postId", ParseUUIDPipe) postId: string) {
     return this.posts.remove(userId, postId);
   }
 }

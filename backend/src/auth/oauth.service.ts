@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  UnauthorizedException,
-} from "@nestjs/common";
+import { BadRequestException, Inject, Injectable, UnauthorizedException } from "@nestjs/common";
 import { hash } from "@node-rs/argon2";
 import { eq } from "drizzle-orm";
 import { env } from "../config/env";
@@ -106,22 +101,19 @@ export class OAuthService {
   }
 
   private async fetchGithub(code: string): Promise<NormalizedProfile> {
-    const tokenRes = await fetch(
-      "https://github.com/login/oauth/access_token",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          client_id: env.GITHUB_CLIENT_ID,
-          client_secret: env.GITHUB_CLIENT_SECRET,
-          code,
-          redirect_uri: this.redirectUri("github"),
-        }),
+    const tokenRes = await fetch("https://github.com/login/oauth/access_token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
       },
-    );
+      body: JSON.stringify({
+        client_id: env.GITHUB_CLIENT_ID,
+        client_secret: env.GITHUB_CLIENT_SECRET,
+        code,
+        redirect_uri: this.redirectUri("github"),
+      }),
+    });
     const token = (await tokenRes.json()) as { access_token?: string };
     if (!token.access_token) {
       throw new UnauthorizedException("GitHub token exchange failed");
@@ -131,9 +123,7 @@ export class OAuthService {
       "User-Agent": "tikimiki",
       Accept: "application/vnd.github+json",
     };
-    const user = (await (
-      await fetch("https://api.github.com/user", { headers })
-    ).json()) as {
+    const user = (await (await fetch("https://api.github.com/user", { headers })).json()) as {
       id: number;
       login: string;
       name: string | null;
@@ -149,10 +139,7 @@ export class OAuthService {
         primary: boolean;
         verified: boolean;
       }>;
-      email =
-        emails.find((e) => e.primary && e.verified)?.email ??
-        emails[0]?.email ??
-        null;
+      email = emails.find((e) => e.primary && e.verified)?.email ?? emails[0]?.email ?? null;
     }
     return {
       providerId: String(user.id),
@@ -258,10 +245,7 @@ export class OAuthService {
   }
 
   /** Link the provider to an existing account, or create a fresh member user. */
-  private async upsertUser(
-    provider: OAuthProvider,
-    profile: NormalizedProfile,
-  ): Promise<string> {
+  private async upsertUser(provider: OAuthProvider, profile: NormalizedProfile): Promise<string> {
     const idColumn =
       provider === "github"
         ? users.githubId
@@ -302,12 +286,9 @@ export class OAuthService {
 
     // 3. Brand-new user (+ members row). OAuth users never sign in with a
     // password, but the column is NOT NULL, so store an unusable hash.
-    const email =
-      profile.email ?? `${provider}_${profile.providerId}@users.tikimiki.local`;
+    const email = profile.email ?? `${provider}_${profile.providerId}@users.tikimiki.local`;
     const username = await this.uniqueUsername(profile.username);
-    const passwordHash = await hash(
-      `oauth:${provider}:${profile.providerId}`,
-    );
+    const passwordHash = await hash(`oauth:${provider}:${profile.providerId}`);
 
     return this.db.transaction(async (tx) => {
       const [u] = await tx

@@ -30,26 +30,26 @@ import { ProfilePopup } from "@/components/popups/ProfilePopup";
 /** Public account page at /u/[username]: profile header + posts / followers / following / badges. */
 
 const M = {
-  back:           { en: "Back",                       sr: "Nazad" },
-  pageSub:        { en: "Profile & posts",            sr: "Profil i objave" },
-  loading:        { en: "Loading…",                   sr: "Učitavanje…" },
-  notFound:       { en: "Profile not found.",         sr: "Profil nije pronađen." },
-  edit:           { en: "Edit",                       sr: "Izmena" },
-  follow:         { en: "Follow",                     sr: "Zaprati" },
-  following:      { en: "Following ✓",                sr: "Pratiš ✓" },
-  memberSince:    { en: "member since",               sr: "član od" },
-  statXp:         { en: "XP",                         sr: "XP" },
-  tabPosts:       { en: "Posts",                      sr: "Objave" },
-  tabFollowers:   { en: "Followers",                  sr: "Pratioci" },
-  tabFollowing:   { en: "Following",                  sr: "Prati" },
-  tabBadges:      { en: "Badges",                     sr: "Bedževi" },
-  sections:       { en: "Profile sections",           sr: "Sekcije profila" },
-  noPosts:        { en: "No posts yet.",              sr: "Još nema objava." },
-  noFollowers:    { en: "No followers yet.",          sr: "Nema pratilaca." },
-  noFollowing:    { en: "Not following anyone.",      sr: "Ne prati nikoga." },
-  noBadges:       { en: "No badges yet.",             sr: "Još nema bedževa." },
-  message:        { en: "Message",                    sr: "Poruka" },
-  verifiedSkill:  { en: "Verified via GitHub",        sr: "Verifikovano preko GitHub-a" },
+  back: { en: "Back", sr: "Nazad" },
+  pageSub: { en: "Profile & posts", sr: "Profil i objave" },
+  loading: { en: "Loading…", sr: "Učitavanje…" },
+  notFound: { en: "Profile not found.", sr: "Profil nije pronađen." },
+  edit: { en: "Edit", sr: "Izmena" },
+  follow: { en: "Follow", sr: "Zaprati" },
+  following: { en: "Following ✓", sr: "Pratiš ✓" },
+  memberSince: { en: "member since", sr: "član od" },
+  statXp: { en: "XP", sr: "XP" },
+  tabPosts: { en: "Posts", sr: "Objave" },
+  tabFollowers: { en: "Followers", sr: "Pratioci" },
+  tabFollowing: { en: "Following", sr: "Prati" },
+  tabBadges: { en: "Badges", sr: "Bedževi" },
+  sections: { en: "Profile sections", sr: "Sekcije profila" },
+  noPosts: { en: "No posts yet.", sr: "Još nema objava." },
+  noFollowers: { en: "No followers yet.", sr: "Nema pratilaca." },
+  noFollowing: { en: "Not following anyone.", sr: "Ne prati nikoga." },
+  noBadges: { en: "No badges yet.", sr: "Još nema bedževa." },
+  message: { en: "Message", sr: "Poruka" },
+  verifiedSkill: { en: "Verified via GitHub", sr: "Verifikovano preko GitHub-a" },
 } as const;
 
 type Tab = "posts" | "followers" | "following" | "badges";
@@ -124,9 +124,13 @@ export function UserProfileClient({ username }: { username: string }) {
         .catch(() => setPosts([]));
     }
     if (tab === "followers" && followers === null)
-      getFollowers(username).then(setFollowers).catch(() => setFollowers([]));
+      getFollowers(username)
+        .then(setFollowers)
+        .catch(() => setFollowers([]));
     if (tab === "following" && followingList === null)
-      getFollowing(username).then(setFollowingList).catch(() => setFollowingList([]));
+      getFollowing(username)
+        .then(setFollowingList)
+        .catch(() => setFollowingList([]));
   }, [tab, username, notFound, posts, followers, followingList]);
 
   const toggleLike = async (id: string) => {
@@ -138,8 +142,10 @@ export function UserProfileClient({ username }: { username: string }) {
     });
     try {
       const r = await togglePostLike(id);
-      setPosts((prev) =>
-        prev?.map((p) => (p.postId === id ? { ...p, reactionCount: r.reactionCount } : p)) ?? prev,
+      setPosts(
+        (prev) =>
+          prev?.map((p) => (p.postId === id ? { ...p, reactionCount: r.reactionCount } : p)) ??
+          prev,
       );
       setLikedSet((prev) => {
         const n = new Set(prev);
@@ -170,13 +176,21 @@ export function UserProfileClient({ username }: { username: string }) {
       key={u.userId}
       href={`/u/${u.username}`}
       className="post"
-      style={{ display: "flex", alignItems: "center", gap: 12, padding: 12, textDecoration: "none" }}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+        padding: 12,
+        textDecoration: "none",
+      }}
     >
       <span className="avatar v is-orb" aria-hidden="true" style={{ width: 40, height: 40 }}>
         <OrbArt url={u.avatarUrl} seed={u.username} />
       </span>
       <span className="who">
-        <span className="name">{personName({ displayName: u.displayName, username: u.username })}</span>
+        <span className="name">
+          {personName({ displayName: u.displayName, username: u.username })}
+        </span>
         <span className="post-handle">@{u.username}</span>
       </span>
     </Link>
@@ -189,7 +203,9 @@ export function UserProfileClient({ username }: { username: string }) {
           className="post"
           key={i}
           aria-hidden="true"
-          style={{ display: "flex", alignItems: "center", gap: 12, padding: 12 } as React.CSSProperties}
+          style={
+            { display: "flex", alignItems: "center", gap: 12, padding: 12 } as React.CSSProperties
+          }
         >
           <span
             className="avatar v is-orb skel skel-circle"
@@ -197,7 +213,10 @@ export function UserProfileClient({ username }: { username: string }) {
           />
           <span style={{ flex: 1 }}>
             <span className="skel skel-line" style={{ width: "38%" } as React.CSSProperties} />
-            <span className="skel skel-line" style={{ width: "24%", marginTop: 6 } as React.CSSProperties} />
+            <span
+              className="skel skel-line"
+              style={{ width: "24%", marginTop: 6 } as React.CSSProperties}
+            />
           </span>
         </div>
       ))}
@@ -229,25 +248,48 @@ export function UserProfileClient({ username }: { username: string }) {
                 style={{ width: 72, height: 72 }}
               />
               <div style={{ flex: 1 }}>
-                <span className="skel skel-line" style={{ width: "40%", height: 18 } as React.CSSProperties} />
-                <span className="skel skel-line" style={{ width: "25%", marginTop: 8 } as React.CSSProperties} />
-                <span className="skel skel-line" style={{ width: "80%", marginTop: 10 } as React.CSSProperties} />
-                <span className="skel skel-line" style={{ width: "55%", marginTop: 7 } as React.CSSProperties} />
+                <span
+                  className="skel skel-line"
+                  style={{ width: "40%", height: 18 } as React.CSSProperties}
+                />
+                <span
+                  className="skel skel-line"
+                  style={{ width: "25%", marginTop: 8 } as React.CSSProperties}
+                />
+                <span
+                  className="skel skel-line"
+                  style={{ width: "80%", marginTop: 10 } as React.CSSProperties}
+                />
+                <span
+                  className="skel skel-line"
+                  style={{ width: "55%", marginTop: 7 } as React.CSSProperties}
+                />
               </div>
-              <span className="skel" style={{ width: 96, height: 36, borderRadius: 10 } as React.CSSProperties} />
+              <span
+                className="skel"
+                style={{ width: 96, height: 36, borderRadius: 10 } as React.CSSProperties}
+              />
             </div>
 
             <div style={{ display: "flex", gap: 22, flexWrap: "wrap" }} aria-hidden="true">
               {[0, 1, 2, 3, 4].map((i) => (
                 <span key={i} style={{ display: "inline-block" }}>
-                  <span className="skel skel-line" style={{ width: 34, height: 16 } as React.CSSProperties} />
-                  <span className="skel skel-line" style={{ width: 48, marginTop: 6 } as React.CSSProperties} />
+                  <span
+                    className="skel skel-line"
+                    style={{ width: 34, height: 16 } as React.CSSProperties}
+                  />
+                  <span
+                    className="skel skel-line"
+                    style={{ width: 48, marginTop: 6 } as React.CSSProperties}
+                  />
                 </span>
               ))}
             </div>
           </div>
         ) : notFound || !profile ? (
-          <p className="page-sub" style={{ padding: "0 4px" }}>{t("notFound")}</p>
+          <p className="page-sub" style={{ padding: "0 4px" }}>
+            {t("notFound")}
+          </p>
         ) : (
           <>
             {profile.bannerUrl && (
@@ -264,18 +306,41 @@ export function UserProfileClient({ username }: { username: string }) {
                 }}
               />
             )}
-            <div className="post reveal" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div
+              className="post reveal"
+              style={{ display: "flex", flexDirection: "column", gap: 12 }}
+            >
               <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
-                <span className="avatar v is-orb" aria-hidden="true" style={{ width: 72, height: 72 }}>
+                <span
+                  className="avatar v is-orb"
+                  aria-hidden="true"
+                  style={{ width: 72, height: 72 }}
+                >
                   <OrbArt url={profile?.avatarUrl} seed={name} />
                 </span>
                 <div style={{ flex: 1 }}>
-                  <div className="name" style={{ fontSize: 20, fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 8 }}>
+                  <div
+                    className="name"
+                    style={{
+                      fontSize: 20,
+                      fontWeight: 700,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 8,
+                    }}
+                  >
                     {displayName}
                     {profile.isPremium && <PremiumBadge size={15} />}
                   </div>
-                  <div className="time"><span className="post-handle">@{name}</span> · {t("memberSince")} {joined(profile.createdAt)}</div>
-                  {profile.bio && <p className="post-body" style={{ marginTop: 6 }}>{profile.bio}</p>}
+                  <div className="time">
+                    <span className="post-handle">@{name}</span> · {t("memberSince")}{" "}
+                    {joined(profile.createdAt)}
+                  </div>
+                  {profile.bio && (
+                    <p className="post-body" style={{ marginTop: 6 }}>
+                      {profile.bio}
+                    </p>
+                  )}
                 </div>
                 {isOwn ? (
                   <Link className="btn btn-violet" href="/settings">
@@ -309,11 +374,30 @@ export function UserProfileClient({ username }: { username: string }) {
               </div>
 
               <div style={{ display: "flex", gap: 22, flexWrap: "wrap" }}>
-                <Stat label={t("statXp")} value={profile.points.toLocaleString(locale === "sr" ? "sr-RS" : "en-US")} />
-                <Stat label={t("tabPosts")} value={posts?.length ?? "–"} onClick={() => setTab("posts")} />
-                <Stat label={t("tabFollowers")} value={followerCount} onClick={() => setTab("followers")} />
-                <Stat label={t("tabFollowing")} value={profile.followingCount} onClick={() => setTab("following")} />
-                <Stat label={t("tabBadges")} value={profile.badges.length} onClick={() => setTab("badges")} />
+                <Stat
+                  label={t("statXp")}
+                  value={profile.points.toLocaleString(locale === "sr" ? "sr-RS" : "en-US")}
+                />
+                <Stat
+                  label={t("tabPosts")}
+                  value={posts?.length ?? "–"}
+                  onClick={() => setTab("posts")}
+                />
+                <Stat
+                  label={t("tabFollowers")}
+                  value={followerCount}
+                  onClick={() => setTab("followers")}
+                />
+                <Stat
+                  label={t("tabFollowing")}
+                  value={profile.followingCount}
+                  onClick={() => setTab("following")}
+                />
+                <Stat
+                  label={t("tabBadges")}
+                  value={profile.badges.length}
+                  onClick={() => setTab("badges")}
+                />
               </div>
 
               {profile.skills.length > 0 && (
@@ -335,7 +419,12 @@ export function UserProfileClient({ username }: { username: string }) {
               )}
             </div>
 
-            <div className="feed-switch" role="tablist" aria-label={t("sections")} style={{ marginTop: 4 }}>
+            <div
+              className="feed-switch"
+              role="tablist"
+              aria-label={t("sections")}
+              style={{ marginTop: 4 }}
+            >
               {(["posts", "followers", "following", "badges"] as Tab[]).map((tb) => (
                 <button
                   key={tb}
@@ -344,7 +433,13 @@ export function UserProfileClient({ username }: { username: string }) {
                   aria-selected={tab === tb}
                   onClick={() => setTab(tb)}
                 >
-                  {tb === "posts" ? t("tabPosts") : tb === "followers" ? t("tabFollowers") : tb === "following" ? t("tabFollowing") : t("tabBadges")}
+                  {tb === "posts"
+                    ? t("tabPosts")
+                    : tb === "followers"
+                      ? t("tabFollowers")
+                      : tb === "following"
+                        ? t("tabFollowing")
+                        : t("tabBadges")}
                 </button>
               ))}
             </div>
@@ -358,17 +453,33 @@ export function UserProfileClient({ username }: { username: string }) {
                         <div className="post-head">
                           <span className="avatar v is-orb skel skel-circle" />
                           <span className="who">
-                            <span className="skel skel-line" style={{ width: "32%" } as React.CSSProperties} />
-                            <span className="skel skel-line" style={{ width: "18%", marginTop: 6 } as React.CSSProperties} />
+                            <span
+                              className="skel skel-line"
+                              style={{ width: "32%" } as React.CSSProperties}
+                            />
+                            <span
+                              className="skel skel-line"
+                              style={{ width: "18%", marginTop: 6 } as React.CSSProperties}
+                            />
                           </span>
                         </div>
-                        <span className="skel skel-line" style={{ width: "92%", marginTop: 10 } as React.CSSProperties} />
-                        <span className="skel skel-line" style={{ width: "70%", marginTop: 7 } as React.CSSProperties} />
+                        <span
+                          className="skel skel-line"
+                          style={{ width: "92%", marginTop: 10 } as React.CSSProperties}
+                        />
+                        <span
+                          className="skel skel-line"
+                          style={{ width: "70%", marginTop: 7 } as React.CSSProperties}
+                        />
                       </article>
                     ))}
                   </div>
                 )}
-                {posts?.length === 0 && <p className="time" style={{ padding: 8 }}>{t("noPosts")}</p>}
+                {posts?.length === 0 && (
+                  <p className="time" style={{ padding: 8 }}>
+                    {t("noPosts")}
+                  </p>
+                )}
                 {posts?.map((p, idx) => (
                   <PostCard
                     key={p.postId}
@@ -389,14 +500,22 @@ export function UserProfileClient({ username }: { username: string }) {
             {tab === "followers" && (
               <div style={{ display: "grid", gap: 8 }}>
                 {followers === null && userRowSkeleton}
-                {followers?.length === 0 && <p className="time" style={{ padding: 8 }}>{t("noFollowers")}</p>}
+                {followers?.length === 0 && (
+                  <p className="time" style={{ padding: 8 }}>
+                    {t("noFollowers")}
+                  </p>
+                )}
                 {followers?.map(userRow)}
               </div>
             )}
             {tab === "following" && (
               <div style={{ display: "grid", gap: 8 }}>
                 {followingList === null && userRowSkeleton}
-                {followingList?.length === 0 && <p className="time" style={{ padding: 8 }}>{t("noFollowing")}</p>}
+                {followingList?.length === 0 && (
+                  <p className="time" style={{ padding: 8 }}>
+                    {t("noFollowing")}
+                  </p>
+                )}
                 {followingList?.map(userRow)}
               </div>
             )}
@@ -440,9 +559,17 @@ function Stat({
       type="button"
       onClick={onClick}
       disabled={!onClick}
-      style={{ background: "none", border: "none", padding: 0, cursor: onClick ? "pointer" : "default", textAlign: "left" }}
+      style={{
+        background: "none",
+        border: "none",
+        padding: 0,
+        cursor: onClick ? "pointer" : "default",
+        textAlign: "left",
+      }}
     >
-      <div className="name" style={{ fontSize: 18, fontWeight: 700 }}>{value}</div>
+      <div className="name" style={{ fontSize: 18, fontWeight: 700 }}>
+        {value}
+      </div>
       <div className="time">{label}</div>
     </button>
   );

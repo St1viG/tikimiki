@@ -19,36 +19,29 @@ describe("createHackathonSchema", () => {
   });
 
   it("rejects date-only (non ISO-8601 datetime) strings", () => {
-    expect(
-      createHackathonSchema.safeParse({ ...valid, startsAt: "2030-01-10" })
-        .success,
-    ).toBe(false);
+    expect(createHackathonSchema.safeParse({ ...valid, startsAt: "2030-01-10" }).success).toBe(
+      false,
+    );
   });
 
   it("rejects a latitude outside [-90, 90]", () => {
     expect(
-      createHackathonSchema.safeParse({ ...valid, latitude: 200, longitude: 10 })
-        .success,
+      createHackathonSchema.safeParse({ ...valid, latitude: 200, longitude: 10 }).success,
     ).toBe(false);
   });
 
   it("rejects a longitude outside [-180, 180]", () => {
     expect(
-      createHackathonSchema.safeParse({ ...valid, latitude: 10, longitude: 999 })
-        .success,
+      createHackathonSchema.safeParse({ ...valid, latitude: 10, longitude: 999 }).success,
     ).toBe(false);
   });
 
   it("rejects an unknown hackathon type", () => {
-    expect(
-      createHackathonSchema.safeParse({ ...valid, type: "remote" }).success,
-    ).toBe(false);
+    expect(createHackathonSchema.safeParse({ ...valid, type: "remote" }).success).toBe(false);
   });
 
   it("rejects an empty title", () => {
-    expect(createHackathonSchema.safeParse({ ...valid, title: "" }).success).toBe(
-      false,
-    );
+    expect(createHackathonSchema.safeParse({ ...valid, title: "" }).success).toBe(false);
   });
 
   it("requires maxTeamSize", () => {

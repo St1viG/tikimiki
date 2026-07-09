@@ -18,14 +18,23 @@ import { useT } from "@/components/i18n/LanguageProvider";
  */
 
 const M = {
-  backLabel:    { en: "Back",                                         sr: "Nazad" },
-  pageTitle:    { en: "Notifications",                                sr: "Notifikacije" },
-  pageSub:      { en: "Component demo · notification dropdown",       sr: "Demo komponente · padajući prozor sa notifikacijama" },
-  searchLabel:  { en: "Search",                                       sr: "Pretraži" },
-  searchPlaceholder: { en: "Search…",                                 sr: "Pretraži…" },
-  demoEyebrow:  { en: "Component demo",                               sr: "Demo komponente" },
-  demoText:     { en: "Click the bell in the top navigation to open notifications.", sr: "Klikni na zvonce u gornjoj navigaciji da otvoriš notifikacije." },
-  demoNoteBell: { en: "Demo page · click the bell in the navigation", sr: "Demo stranica · klikni na zvonce u navigaciji" },
+  backLabel: { en: "Back", sr: "Nazad" },
+  pageTitle: { en: "Notifications", sr: "Notifikacije" },
+  pageSub: {
+    en: "Component demo · notification dropdown",
+    sr: "Demo komponente · padajući prozor sa notifikacijama",
+  },
+  searchLabel: { en: "Search", sr: "Pretraži" },
+  searchPlaceholder: { en: "Search…", sr: "Pretraži…" },
+  demoEyebrow: { en: "Component demo", sr: "Demo komponente" },
+  demoText: {
+    en: "Click the bell in the top navigation to open notifications.",
+    sr: "Klikni na zvonce u gornjoj navigaciji da otvoriš notifikacije.",
+  },
+  demoNoteBell: {
+    en: "Demo page · click the bell in the navigation",
+    sr: "Demo stranica · klikni na zvonce u navigaciji",
+  },
 } as const;
 
 export function NotificationsClient() {
@@ -65,9 +74,7 @@ export function NotificationsClient() {
               <Icon name="bell" />
             </span>
             <span className="stage-eyebrow">{t("demoEyebrow")}</span>
-            <p>
-              {t("demoText")}
-            </p>
+            <p>{t("demoText")}</p>
           </div>
         </main>
       </AppShell>

@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 
 /**
@@ -36,25 +30,53 @@ export const THEMES: readonly ThemeMeta[] = [
     id: "default",
     name: "Midnight Voltage",
     tag: "Tamna · original",
-    sw: { bg: "#07060F", surface: "#100D22", line: "#2B2552", accent: "#ECE23A", violet: "#B49BFF", ink: "#EDE9FF" },
+    sw: {
+      bg: "#07060F",
+      surface: "#100D22",
+      line: "#2B2552",
+      accent: "#ECE23A",
+      violet: "#B49BFF",
+      ink: "#EDE9FF",
+    },
   },
   {
     id: "mono",
     name: "Noir",
     tag: "Tamna · crno-bela",
-    sw: { bg: "#040405", surface: "#101012", line: "#2E2E34", accent: "#F2F2F4", violet: "#C6C6D0", ink: "#F4F4F6" },
+    sw: {
+      bg: "#040405",
+      surface: "#101012",
+      line: "#2E2E34",
+      accent: "#F2F2F4",
+      violet: "#C6C6D0",
+      ink: "#F4F4F6",
+    },
   },
   {
     id: "light",
     name: "Svitanje",
     tag: "Svetla · violet",
-    sw: { bg: "#F4F2FC", surface: "#FFFFFF", line: "#DAD3EF", accent: "#6E54B5", violet: "#6E54B5", ink: "#191430" },
+    sw: {
+      bg: "#F4F2FC",
+      surface: "#FFFFFF",
+      line: "#DAD3EF",
+      accent: "#6E54B5",
+      violet: "#6E54B5",
+      ink: "#191430",
+    },
   },
   {
     id: "light-mono",
     name: "Papir",
     tag: "Svetla · crno-bela",
-    sw: { bg: "#F5F5F7", surface: "#FFFFFF", line: "#DBDBE0", accent: "#1C1C20", violet: "#5A5A63", ink: "#15151A" },
+    sw: {
+      bg: "#F5F5F7",
+      surface: "#FFFFFF",
+      line: "#DBDBE0",
+      accent: "#1C1C20",
+      violet: "#5A5A63",
+      ink: "#15151A",
+    },
   },
 ];
 
@@ -95,11 +117,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={{ theme, setTheme }}>{children}</ThemeContext.Provider>;
 }
 
 export function useTheme(): ThemeContextValue {

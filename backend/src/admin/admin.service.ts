@@ -1,19 +1,5 @@
-import {
-  ConflictException,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from "@nestjs/common";
-import {
-  and,
-  eq,
-  gte,
-  ilike,
-  inArray,
-  isNull,
-  or,
-  sql,
-} from "drizzle-orm";
+import { ConflictException, Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { and, eq, gte, ilike, inArray, isNull, or, sql } from "drizzle-orm";
 import { AuthzService } from "../common/authz.service";
 import { DAY_MS } from "../common/constants";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
@@ -28,12 +14,7 @@ import {
   userBans,
   users,
 } from "../db/schema";
-import type {
-  BanUserInput,
-  ListUsersQuery,
-  RejectOrgInput,
-  ResolveAppealInput,
-} from "./dto";
+import type { BanUserInput, ListUsersQuery, RejectOrgInput, ResolveAppealInput } from "./dto";
 
 export type AdminUserRole = "admin" | "organization" | "member";
 export type OrgVerificationStatus = "pending" | "approved" | "rejected";
@@ -128,9 +109,7 @@ export class AdminService {
     targetId: string | null,
     summary: string,
   ): Promise<void> {
-    await this.db
-      .insert(auditLog)
-      .values({ actorId, action, targetType, targetId, summary });
+    await this.db.insert(auditLog).values({ actorId, action, targetType, targetId, summary });
   }
 
   async getMetrics(callerId: string): Promise<AdminMetrics> {
@@ -167,9 +146,7 @@ export class AdminService {
       .from(users)
       .where(and(isNull(users.deletedAt), gte(users.createdAt, since)))
       .groupBy(sql`1`);
-    const byDate = new Map(
-      activityRows.map((r) => [r.date, Number(r.count)]),
-    );
+    const byDate = new Map(activityRows.map((r) => [r.date, Number(r.count)]));
     const activity: { date: string; count: number }[] = [];
     for (let i = 6; i >= 0; i--) {
       const key = new Date(Date.now() - i * DAY_MS).toISOString().slice(0, 10);
@@ -231,19 +208,13 @@ export class AdminService {
     };
   }
 
-  async listUsers(
-    callerId: string,
-    query: ListUsersQuery,
-  ): Promise<UserRowDto[]> {
+  async listUsers(callerId: string, query: ListUsersQuery): Promise<UserRowDto[]> {
     await this.authz.assertAdmin(callerId);
 
     const conditions = [isNull(users.deletedAt)];
     if (query.search) {
       const pattern = `%${query.search}%`;
-      const searchClause = or(
-        ilike(users.username, pattern),
-        ilike(users.email, pattern),
-      );
+      const searchClause = or(ilike(users.username, pattern), ilike(users.email, pattern));
       if (searchClause) conditions.push(searchClause);
     }
 
@@ -287,16 +258,14 @@ export class AdminService {
       .from(organizations)
       .orderBy(organizations.name);
 
-    const mapped = rows.map(
-      (r): OrgDto => ({
-        userId: r.userId,
-        name: r.name,
-        websiteUrl: r.websiteUrl,
-        contactEmail: r.contactEmail,
-        verificationStatus: r.verificationStatus,
-        reviewedAt: r.reviewedAt ? r.reviewedAt.toISOString() : null,
-      }),
-    );
+    const mapped = rows.map((r): OrgDto => ({
+      userId: r.userId,
+      name: r.name,
+      websiteUrl: r.websiteUrl,
+      contactEmail: r.contactEmail,
+      verificationStatus: r.verificationStatus,
+      reviewedAt: r.reviewedAt ? r.reviewedAt.toISOString() : null,
+    }));
 
     return {
       pending: mapped.filter((o) => o.verificationStatus === "pending"),
@@ -304,10 +273,7 @@ export class AdminService {
     };
   }
 
-  async verifyOrganization(
-    callerId: string,
-    targetUserId: string,
-  ): Promise<OrgDto> {
+  async verifyOrganization(callerId: string, targetUserId: string): Promise<OrgDto> {
     await this.authz.assertAdmin(callerId);
 
     const now = new Date();
@@ -418,9 +384,7 @@ export class AdminService {
     const [existing] = await this.db
       .select({ banId: userBans.banId })
       .from(userBans)
-      .where(
-        and(eq(userBans.userId, targetUserId), isNull(userBans.liftedAt)),
-      )
+      .where(and(eq(userBans.userId, targetUserId), isNull(userBans.liftedAt)))
       .limit(1);
     if (existing) {
       throw new ConflictException("User already has an active ban");
@@ -432,60 +396,37 @@ export class AdminService {
       reason: body.reason,
     });
 
-    await this.audit(
-      callerId,
-      "user.ban",
-      "user",
-      targetUserId,
-      `Banned user: ${body.reason}`,
-    );
+    await this.audit(callerId, "user.ban", "user", targetUserId, `Banned user: ${body.reason}`);
 
     return { success: true };
   }
 
-  async unbanUser(
-    callerId: string,
-    targetUserId: string,
-  ): Promise<SuccessResponse> {
+  async unbanUser(callerId: string, targetUserId: string): Promise<SuccessResponse> {
     await this.authz.assertAdmin(callerId);
 
     const now = new Date();
     const [lifted] = await this.db
       .update(userBans)
       .set({ liftedAt: now, liftedBy: callerId })
-      .where(
-        and(eq(userBans.userId, targetUserId), isNull(userBans.liftedAt)),
-      )
+      .where(and(eq(userBans.userId, targetUserId), isNull(userBans.liftedAt)))
       .returning({ banId: userBans.banId });
 
     if (!lifted) {
       throw new NotFoundException("No active ban found for this user");
     }
 
-    await this.audit(
-      callerId,
-      "user.unban",
-      "user",
-      targetUserId,
-      "Lifted the user's active ban",
-    );
+    await this.audit(callerId, "user.unban", "user", targetUserId, "Lifted the user's active ban");
 
     return { success: true };
   }
 
   /* ── Audit log ────────────────────────────────────────────── */
 
-  async listAudit(
-    callerId: string,
-    search?: string,
-  ): Promise<AuditEntryDto[]> {
+  async listAudit(callerId: string, search?: string): Promise<AuditEntryDto[]> {
     await this.authz.assertAdmin(callerId);
 
     const where = search
-      ? or(
-          ilike(auditLog.summary, `%${search}%`),
-          ilike(auditLog.action, `%${search}%`),
-        )
+      ? or(ilike(auditLog.summary, `%${search}%`), ilike(auditLog.action, `%${search}%`))
       : undefined;
 
     const rows = await this.db
@@ -536,18 +477,16 @@ export class AdminService {
       .orderBy(sql`${appeals.createdAt} desc`)
       .limit(100);
 
-    const mapped = rows.map(
-      (r): AppealDto => ({
-        appealId: r.appealId,
-        userId: r.userId,
-        username: r.username,
-        reason: r.reason,
-        status: r.status,
-        reviewNote: r.reviewNote,
-        reviewedAt: r.reviewedAt ? r.reviewedAt.toISOString() : null,
-        createdAt: r.createdAt.toISOString(),
-      }),
-    );
+    const mapped = rows.map((r): AppealDto => ({
+      appealId: r.appealId,
+      userId: r.userId,
+      username: r.username,
+      reason: r.reason,
+      status: r.status,
+      reviewNote: r.reviewNote,
+      reviewedAt: r.reviewedAt ? r.reviewedAt.toISOString() : null,
+      createdAt: r.createdAt.toISOString(),
+    }));
 
     return {
       pending: mapped.filter((a) => a.status === "pending"),
@@ -584,9 +523,7 @@ export class AdminService {
       await this.db
         .update(userBans)
         .set({ liftedAt: now, liftedBy: callerId })
-        .where(
-          and(eq(userBans.userId, appeal.userId), isNull(userBans.liftedAt)),
-        );
+        .where(and(eq(userBans.userId, appeal.userId), isNull(userBans.liftedAt)));
     }
 
     const [updated] = await this.db

@@ -6,12 +6,18 @@ import { useT } from "@/components/i18n/LanguageProvider";
 /* RejectModal — the "Reject application" reason modal for the /applications page. */
 
 const M = {
-  title:       { en: "Reject application",                                                       sr: "Odbij prijavu" },
-  sub:         { en: "Enter a rejection reason (optional). Candidate @{username} will be notified.", sr: "Unesite razlog odbijanja (opciono). Kandidat @{username} će biti obavešten." },
-  reasonLabel: { en: "Rejection reason",                                                          sr: "Razlog odbijanja" },
-  reasonPh:    { en: "e.g. Profile does not match the hackathon theme...",                        sr: "npr. Profil ne odgovara temi hackathona..." },
-  cancelBtn:   { en: "Cancel",                                                                    sr: "Otkaži" },
-  confirmBtn:  { en: "Confirm rejection",                                                         sr: "Potvrdi odbijanje" },
+  title: { en: "Reject application", sr: "Odbij prijavu" },
+  sub: {
+    en: "Enter a rejection reason (optional). Candidate @{username} will be notified.",
+    sr: "Unesite razlog odbijanja (opciono). Kandidat @{username} će biti obavešten.",
+  },
+  reasonLabel: { en: "Rejection reason", sr: "Razlog odbijanja" },
+  reasonPh: {
+    en: "e.g. Profile does not match the hackathon theme...",
+    sr: "npr. Profil ne odgovara temi hackathona...",
+  },
+  cancelBtn: { en: "Cancel", sr: "Otkaži" },
+  confirmBtn: { en: "Confirm rejection", sr: "Potvrdi odbijanje" },
 } as const;
 
 export function RejectModal({
@@ -54,10 +60,7 @@ export function RejectModal({
           <button className="modal-cancel" onClick={onCancel}>
             {t("cancelBtn")}
           </button>
-          <button
-            className="modal-confirm"
-            onClick={() => onConfirm(reason.trim())}
-          >
+          <button className="modal-confirm" onClick={() => onConfirm(reason.trim())}>
             {t("confirmBtn")}
           </button>
         </div>

@@ -150,9 +150,7 @@ export function useMentionAutocomplete({
                 <OrbArt url={c.avatarUrl ?? null} seed={c.username} />
               </span>
               <span className="mention-opt-text">
-                {c.displayName && (
-                  <span className="mention-opt-name">{c.displayName}</span>
-                )}
+                {c.displayName && <span className="mention-opt-name">{c.displayName}</span>}
                 <span className="mention-opt-handle">@{c.username}</span>
               </span>
             </button>

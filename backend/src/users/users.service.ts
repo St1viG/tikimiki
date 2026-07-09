@@ -129,9 +129,7 @@ export class UsersService {
   }
 
   /** Skill rows attached to a user (name + GitHub-verified flag), ascending by name. */
-  private async getSkillRows(
-    userId: string,
-  ): Promise<{ name: string; verified: boolean }[]> {
+  private async getSkillRows(userId: string): Promise<{ name: string; verified: boolean }[]> {
     return this.db
       .select({ name: skills.name, verified: memberSkills.verified })
       .from(memberSkills)
@@ -181,10 +179,7 @@ export class UsersService {
   }
 
   /** Update the authenticated user's profile (and skills, if provided). */
-  async updateMyProfile(
-    userId: string,
-    input: UpdateProfileInput,
-  ): Promise<MyProfileDto> {
+  async updateMyProfile(userId: string, input: UpdateProfileInput): Promise<MyProfileDto> {
     const userUpdates: {
       username?: string;
       displayName?: string | null;
@@ -194,8 +189,7 @@ export class UsersService {
       updatedAt?: Date;
     } = {};
     if (input.username !== undefined) userUpdates.username = input.username;
-    if (input.displayName !== undefined)
-      userUpdates.displayName = input.displayName;
+    if (input.displayName !== undefined) userUpdates.displayName = input.displayName;
     if (input.bio !== undefined) userUpdates.bio = input.bio;
     if (input.avatarUrl !== undefined) userUpdates.avatarUrl = input.avatarUrl;
     if (input.bannerUrl !== undefined) userUpdates.bannerUrl = input.bannerUrl;
@@ -205,9 +199,7 @@ export class UsersService {
       const [taken] = await this.db
         .select({ userId: users.userId })
         .from(users)
-        .where(
-          and(eq(users.username, input.username), ne(users.userId, userId)),
-        )
+        .where(and(eq(users.username, input.username), ne(users.userId, userId)))
         .limit(1);
       if (taken) throw new ConflictException("Username already taken");
     }
@@ -242,11 +234,7 @@ export class UsersService {
   }
 
   /** Resolve skill names to ids (creating missing rows) and replace the set. */
-  private async replaceSkills(
-    tx: Tx,
-    userId: string,
-    names: string[],
-  ): Promise<void> {
+  private async replaceSkills(tx: Tx, userId: string, names: string[]): Promise<void> {
     // Deduplicate case-sensitively on the trimmed value.
     const unique = [...new Set(names.map((n) => n.trim()).filter(Boolean))];
 
@@ -293,10 +281,7 @@ export class UsersService {
   }
 
   /** Verify the current password and set a new one. */
-  async changePassword(
-    userId: string,
-    input: ChangePasswordInput,
-  ): Promise<ChangePasswordResult> {
+  async changePassword(userId: string, input: ChangePasswordInput): Promise<ChangePasswordResult> {
     const [user] = await this.db
       .select({ passwordHash: users.passwordHash })
       .from(users)
@@ -343,41 +328,35 @@ export class UsersService {
       const [f] = await this.db
         .select({ followerId: follows.followerId })
         .from(follows)
-        .where(
-          and(
-            eq(follows.followerId, viewerId),
-            eq(follows.followeeId, user.userId),
-          ),
-        )
+        .where(and(eq(follows.followerId, viewerId), eq(follows.followeeId, user.userId)))
         .limit(1);
       isFollowing = Boolean(f);
     }
 
-    const [points, skillRows, badgeRows, followerRow, followingRow, isPremium] =
-      await Promise.all([
-        this.getPoints(user.userId),
-        this.getSkillRows(user.userId),
-        this.db
-          .select({
-            badgeId: badges.badgeId,
-            name: badges.name,
-            iconUrl: badges.iconUrl,
-            category: badges.category,
-          })
-          .from(userBadges)
-          .innerJoin(badges, eq(userBadges.badgeId, badges.badgeId))
-          .where(eq(userBadges.userId, user.userId))
-          .orderBy(desc(userBadges.awardedAt)),
-        this.db
-          .select({ value: sql<number>`count(*)::int` })
-          .from(follows)
-          .where(eq(follows.followeeId, user.userId)),
-        this.db
-          .select({ value: sql<number>`count(*)::int` })
-          .from(follows)
-          .where(eq(follows.followerId, user.userId)),
-        this.subscriptions.isPremium(user.userId),
-      ]);
+    const [points, skillRows, badgeRows, followerRow, followingRow, isPremium] = await Promise.all([
+      this.getPoints(user.userId),
+      this.getSkillRows(user.userId),
+      this.db
+        .select({
+          badgeId: badges.badgeId,
+          name: badges.name,
+          iconUrl: badges.iconUrl,
+          category: badges.category,
+        })
+        .from(userBadges)
+        .innerJoin(badges, eq(userBadges.badgeId, badges.badgeId))
+        .where(eq(userBadges.userId, user.userId))
+        .orderBy(desc(userBadges.awardedAt)),
+      this.db
+        .select({ value: sql<number>`count(*)::int` })
+        .from(follows)
+        .where(eq(follows.followeeId, user.userId)),
+      this.db
+        .select({ value: sql<number>`count(*)::int` })
+        .from(follows)
+        .where(eq(follows.followerId, user.userId)),
+      this.subscriptions.isPremium(user.userId),
+    ]);
 
     return {
       userId: user.userId,
@@ -527,11 +506,7 @@ export class UsersService {
    * Returns an empty list for a blank query (so an empty `@` doesn't dump the
    * whole user table).
    */
-  async searchUsers(
-    q: string,
-    viewerId: string,
-    limit = 8,
-  ): Promise<SocialUserDto[]> {
+  async searchUsers(q: string, viewerId: string, limit = 8): Promise<SocialUserDto[]> {
     const term = q.trim();
     if (term.length === 0) return [];
     // Escape LIKE wildcards so a literal % / _ in the query can't widen it.
@@ -557,10 +532,7 @@ export class UsersService {
   }
 
   /** Toggle the caller's follow relationship with the target user. */
-  async toggleFollow(
-    followerId: string,
-    followeeId: string,
-  ): Promise<FollowResult> {
+  async toggleFollow(followerId: string, followeeId: string): Promise<FollowResult> {
     if (followerId === followeeId) {
       throw new BadRequestException("You cannot follow yourself");
     }
@@ -576,30 +548,17 @@ export class UsersService {
       const [existing] = await tx
         .select({ followerId: follows.followerId })
         .from(follows)
-        .where(
-          and(
-            eq(follows.followerId, followerId),
-            eq(follows.followeeId, followeeId),
-          ),
-        )
+        .where(and(eq(follows.followerId, followerId), eq(follows.followeeId, followeeId)))
         .limit(1);
 
       if (existing) {
         await tx
           .delete(follows)
-          .where(
-            and(
-              eq(follows.followerId, followerId),
-              eq(follows.followeeId, followeeId),
-            ),
-          );
+          .where(and(eq(follows.followerId, followerId), eq(follows.followeeId, followeeId)));
         return false;
       }
 
-      await tx
-        .insert(follows)
-        .values({ followerId, followeeId })
-        .onConflictDoNothing();
+      await tx.insert(follows).values({ followerId, followeeId }).onConflictDoNothing();
       return true;
     });
 

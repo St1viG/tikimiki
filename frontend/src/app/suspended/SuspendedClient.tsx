@@ -20,23 +20,35 @@ import { AuthShell } from "@/components/auth/AuthShell";
  */
 
 const M = {
-  suspendedTitle:      { en: "Account suspended",                          sr: "Nalog suspendovan" },
-  suspendedSub:        { en: "Your account has been temporarily suspended due to a violation of platform rules. Access is disabled until the suspension period expires.", sr: "Tvoj nalog je privremeno suspendovan zbog kršenja pravila platforme. Pristup je onemogućen do isteka perioda suspenzije." },
-  reasonLabel:         { en: "Reason",                                     sr: "Razlog" },
-  suspensionDate:      { en: "Suspension date",                            sr: "Datum suspenzije" },
-  unlockDate:          { en: "Unlock date",                                sr: "Datum otključavanja" },
-  issuedBy:            { en: "Issued by",                                  sr: "Izrečena od strane" },
-  unlockingIn:         { en: "Unlocking in",                               sr: "Otključavanje za" },
-  countdownExpired:    { en: "Expired: account is unlocked",               sr: "Isteklo: nalog je otključan" },
-  unlockingOn:         { en: "Unlocking: 16.05.2026 at 00:00",             sr: "Otključavanje: 16.05.2026 u 00:00" },
-  submitAppealTitle:   { en: "Submit appeal",                              sr: "Podnesi žalbu" },
-  appealSub:           { en: "If you believe the suspension is unwarranted, you can submit an appeal. The moderation team will review it within 48 hours. You can only submit an appeal once.", sr: "Ako smatraš da je suspenzija neosnovana, možeš podneti žalbu. Tim za moderaciju će je pregledati u roku od 48 sati. Žalbu možeš podneti samo jednom." },
-  appealTextLabel:     { en: "Appeal explanation",                         sr: "Obrazloženje žalbe" },
-  appealPlaceholder:   { en: "Explain why you believe the suspension is unwarranted…", sr: "Obrazloži zašto smatraš da je suspenzija neosnovana…" },
-  appealToastMsg:      { en: "Appeal successfully submitted. The moderation team will respond within 48 hours.", sr: "Žalba je uspešno podneta. Tim za moderaciju će ti odgovoriti u roku od 48 sati." },
-  submitAppeal:        { en: "Submit appeal",                              sr: "Podnesi žalbu" },
-  appealSubmitted:     { en: "Appeal submitted",                           sr: "Žalba podneta" },
-  signOut:             { en: "Sign out",                                   sr: "Odjavi se sa naloga" },
+  suspendedTitle: { en: "Account suspended", sr: "Nalog suspendovan" },
+  suspendedSub: {
+    en: "Your account has been temporarily suspended due to a violation of platform rules. Access is disabled until the suspension period expires.",
+    sr: "Tvoj nalog je privremeno suspendovan zbog kršenja pravila platforme. Pristup je onemogućen do isteka perioda suspenzije.",
+  },
+  reasonLabel: { en: "Reason", sr: "Razlog" },
+  suspensionDate: { en: "Suspension date", sr: "Datum suspenzije" },
+  unlockDate: { en: "Unlock date", sr: "Datum otključavanja" },
+  issuedBy: { en: "Issued by", sr: "Izrečena od strane" },
+  unlockingIn: { en: "Unlocking in", sr: "Otključavanje za" },
+  countdownExpired: { en: "Expired: account is unlocked", sr: "Isteklo: nalog je otključan" },
+  unlockingOn: { en: "Unlocking: 16.05.2026 at 00:00", sr: "Otključavanje: 16.05.2026 u 00:00" },
+  submitAppealTitle: { en: "Submit appeal", sr: "Podnesi žalbu" },
+  appealSub: {
+    en: "If you believe the suspension is unwarranted, you can submit an appeal. The moderation team will review it within 48 hours. You can only submit an appeal once.",
+    sr: "Ako smatraš da je suspenzija neosnovana, možeš podneti žalbu. Tim za moderaciju će je pregledati u roku od 48 sati. Žalbu možeš podneti samo jednom.",
+  },
+  appealTextLabel: { en: "Appeal explanation", sr: "Obrazloženje žalbe" },
+  appealPlaceholder: {
+    en: "Explain why you believe the suspension is unwarranted…",
+    sr: "Obrazloži zašto smatraš da je suspenzija neosnovana…",
+  },
+  appealToastMsg: {
+    en: "Appeal successfully submitted. The moderation team will respond within 48 hours.",
+    sr: "Žalba je uspešno podneta. Tim za moderaciju će ti odgovoriti u roku od 48 sati.",
+  },
+  submitAppeal: { en: "Submit appeal", sr: "Podnesi žalbu" },
+  appealSubmitted: { en: "Appeal submitted", sr: "Žalba podneta" },
+  signOut: { en: "Sign out", sr: "Odjavi se sa naloga" },
 } as const;
 
 const UNLOCK = new Date("2026-05-16T00:00:00");
@@ -78,7 +90,7 @@ export function SuspendedClient() {
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function submitAppeal() {
@@ -102,40 +114,46 @@ export function SuspendedClient() {
 
   return (
     <AuthShell as="main" wordmarkVariant="logo" footerVariant="inline">
-
       <section className="susp-card" aria-labelledby="susp-heading">
         <div className="susp-badge" aria-hidden="true">
           <Icon name="lock" />
         </div>
 
-        <h1 className="susp-title" id="susp-heading">{t("suspendedTitle")}</h1>
-        <p className="susp-sub">
-          {t("suspendedSub")}
-        </p>
+        <h1 className="susp-title" id="susp-heading">
+          {t("suspendedTitle")}
+        </h1>
+        <p className="susp-sub">{t("suspendedSub")}</p>
 
         <div className="susp-info-box">
           <div className="susp-row">
             <span className="susp-label">{t("reasonLabel")}</span>
-            <span className="susp-val is-reason" id="susp-reason">Uznemiravanje korisnika</span>
+            <span className="susp-val is-reason" id="susp-reason">
+              Uznemiravanje korisnika
+            </span>
           </div>
           <div className="susp-row">
             <span className="susp-label">{t("suspensionDate")}</span>
-            <span className="susp-val" id="susp-start">14.04.2026</span>
+            <span className="susp-val" id="susp-start">
+              14.04.2026
+            </span>
           </div>
           <div className="susp-row">
             <span className="susp-label">{t("unlockDate")}</span>
-            <span className="susp-val is-unlock" id="susp-end">16.05.2026</span>
+            <span className="susp-val is-unlock" id="susp-end">
+              16.05.2026
+            </span>
           </div>
           <div className="susp-row">
             <span className="susp-label">{t("issuedBy")}</span>
-            <span className="susp-val" id="susp-by">Admin Đurić</span>
+            <span className="susp-val" id="susp-by">
+              Admin Đurić
+            </span>
           </div>
         </div>
 
         <div className="susp-countdown">
           <div className="susp-countdown-label">
-            <Icon name="clock" />
-            {" "}{t("unlockingIn")}
+            <Icon name="clock" /> {t("unlockingIn")}
           </div>
           <div
             className="susp-countdown-timer"
@@ -152,14 +170,13 @@ export function SuspendedClient() {
         <hr className="susp-divider" />
 
         <h2 className="susp-appeal-title">
-          <Icon name="flag" />
-          {" "}{t("submitAppealTitle")}
+          <Icon name="flag" /> {t("submitAppealTitle")}
         </h2>
-        <p className="susp-appeal-sub">
-          {t("appealSub")}
-        </p>
+        <p className="susp-appeal-sub">{t("appealSub")}</p>
 
-        <label className="sr-only" htmlFor="appeal-text">{t("appealTextLabel")}</label>
+        <label className="sr-only" htmlFor="appeal-text">
+          {t("appealTextLabel")}
+        </label>
         <textarea
           className="susp-textarea"
           id="appeal-text"
@@ -191,12 +208,10 @@ export function SuspendedClient() {
 
         <div className="susp-switch">
           <Link href="/login">
-            <Icon name="arrow-left" />
-            {" "}{t("signOut")}
+            <Icon name="arrow-left" /> {t("signOut")}
           </Link>
         </div>
       </section>
-
     </AuthShell>
   );
 }

@@ -57,10 +57,7 @@ export const hackathons = pgTable(
   },
   (t) => [
     check("chk_hackathons_dates", sql`${t.startsAt} < ${t.endsAt}`),
-    check(
-      "chk_hackathons_registration_deadline",
-      sql`${t.registrationDeadline} < ${t.startsAt}`,
-    ),
+    check("chk_hackathons_registration_deadline", sql`${t.registrationDeadline} < ${t.startsAt}`),
     check(
       "chk_hackathons_max_participants",
       sql`${t.maxParticipants} is null or ${t.maxParticipants} > 0`,

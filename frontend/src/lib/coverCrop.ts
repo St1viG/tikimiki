@@ -33,11 +33,7 @@ export function coverStyle(
   focalY: number,
   zoom: number,
 ): CSSProperties {
-  const { dispW, dispH, overflowX, overflowY } = coverMetrics(
-    imgRatio,
-    frameRatio,
-    zoom,
-  );
+  const { dispW, dispH, overflowX, overflowY } = coverMetrics(imgRatio, frameRatio, zoom);
   return {
     position: "absolute",
     width: `${dispW * 100}%`,

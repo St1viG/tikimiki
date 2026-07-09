@@ -16,6 +16,9 @@
     "db:seed": "pnpm --filter ./backend db:seed",
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky",
     "test": "pnpm -r test",
     "test:unit": "pnpm --filter ./backend test:unit",
     "test:ui": "cd tests/selenium-webdriver && npm test",
@@ -23,5 +26,13 @@
     "db:down": "docker compose down",
     "db:generate": "pnpm --filter ./backend db:generate",
     "db:migrate": "pnpm --filter ./backend db:migrate"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.8",
+    "prettier": "^3.9.5"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,mjs,cjs,json,css,md,yml,yaml}": "prettier --write"
   }
 }

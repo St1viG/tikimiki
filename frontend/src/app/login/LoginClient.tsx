@@ -9,13 +9,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { Captcha } from "@/components/auth/Captcha";
 import { OAuthButtons } from "@/components/auth/OAuthButtons";
-import {
-  ApiError,
-  forgotPassword,
-  me,
-  refreshSession,
-  submitBanAppeal,
-} from "@/lib/api";
+import { ApiError, forgotPassword, me, refreshSession, submitBanAppeal } from "@/lib/api";
 
 /**
  * LoginClient — interactive login page.
@@ -33,38 +27,62 @@ import {
  */
 
 const M = {
-  heading:         { en: "Sign in to tikimiki",          sr: "Prijavi se na tikimiki" },
-  emailOrUsername: { en: "Email or username",            sr: "Email ili korisničko ime" },
-  password:        { en: "Password",                     sr: "Lozinka" },
-  enterPassword:   { en: "Enter your password",          sr: "Unesi lozinku" },
-  showPassword:    { en: "Show password",                sr: "Prikaži lozinku" },
-  hidePassword:    { en: "Hide password",                sr: "Sakrij lozinku" },
-  showLabel:       { en: "Show",                         sr: "Prikaži" },
-  hideLabel:       { en: "Hide",                         sr: "Sakrij" },
-  rememberMe:      { en: "Remember me",                  sr: "Zapamti me" },
-  forgotPassword:  { en: "Forgot password?",             sr: "Zaboravljena lozinka?" },
-  signIn:          { en: "Sign in",                      sr: "Prijavi se" },
-  signingIn:       { en: "Signing in…",                  sr: "Prijavljivanje…" },
-  invalidCreds:    { en: "Invalid email or password.",   sr: "Pogrešan email ili lozinka." },
-  genericError:    { en: "Something went wrong. Try again.", sr: "Nešto je pošlo naopako. Pokušaj ponovo." },
-  bannedTitle:     { en: "Your account is suspended",    sr: "Tvoj nalog je suspendovan" },
-  bannedReason:    { en: "Reason:",                       sr: "Razlog:" },
-  appealLabel:     { en: "Submit an appeal",             sr: "Podnesi žalbu" },
-  appealPlaceholder:{ en: "Explain why this ban should be lifted…", sr: "Objasni zašto ovaj ban treba ukinuti…" },
-  appealSubmit:    { en: "Submit appeal",                 sr: "Pošalji žalbu" },
-  appealSubmitting:{ en: "Submitting…",                   sr: "Slanje…" },
-  appealSubmitted: { en: "Appeal submitted. We'll review it soon.", sr: "Žalba je poslata. Pregledaćemo je uskoro." },
-  appealPending:   { en: "You already have an appeal pending review.", sr: "Već imaš žalbu na čekanju." },
-  appealError:     { en: "Could not submit your appeal. Try again.", sr: "Slanje žalbe nije uspelo. Pokušaj ponovo." },
-  appealNeedReason:{ en: "Please describe your appeal first.", sr: "Prvo opiši svoju žalbu." },
-  forgotNeedEmail: { en: "Enter your email first.",       sr: "Prvo unesi email." },
-  forgotSent:      { en: "If that email is registered, a reset link is on its way.", sr: "Ako je taj email registrovan, link za reset stiže uskoro." },
-  forgotDevLink:   { en: "Reset link (dev):",             sr: "Link za reset (dev):" },
-  orContinueWith:  { en: "or continue with",             sr: "ili nastavi sa" },
-  oauthError:      { en: "Could not sign you in. Please try again.", sr: "Prijava nije uspela. Pokušaj ponovo." },
-  oauthUnconfigured:{ en: "This sign-in method isn't enabled yet.",  sr: "Ovaj način prijave još nije omogućen." },
-  noAccount:       { en: "Don't have an account?",       sr: "Nemaš nalog?" },
-  signUp:          { en: "Sign up",                      sr: "Registruj se" },
+  heading: { en: "Sign in to tikimiki", sr: "Prijavi se na tikimiki" },
+  emailOrUsername: { en: "Email or username", sr: "Email ili korisničko ime" },
+  password: { en: "Password", sr: "Lozinka" },
+  enterPassword: { en: "Enter your password", sr: "Unesi lozinku" },
+  showPassword: { en: "Show password", sr: "Prikaži lozinku" },
+  hidePassword: { en: "Hide password", sr: "Sakrij lozinku" },
+  showLabel: { en: "Show", sr: "Prikaži" },
+  hideLabel: { en: "Hide", sr: "Sakrij" },
+  rememberMe: { en: "Remember me", sr: "Zapamti me" },
+  forgotPassword: { en: "Forgot password?", sr: "Zaboravljena lozinka?" },
+  signIn: { en: "Sign in", sr: "Prijavi se" },
+  signingIn: { en: "Signing in…", sr: "Prijavljivanje…" },
+  invalidCreds: { en: "Invalid email or password.", sr: "Pogrešan email ili lozinka." },
+  genericError: {
+    en: "Something went wrong. Try again.",
+    sr: "Nešto je pošlo naopako. Pokušaj ponovo.",
+  },
+  bannedTitle: { en: "Your account is suspended", sr: "Tvoj nalog je suspendovan" },
+  bannedReason: { en: "Reason:", sr: "Razlog:" },
+  appealLabel: { en: "Submit an appeal", sr: "Podnesi žalbu" },
+  appealPlaceholder: {
+    en: "Explain why this ban should be lifted…",
+    sr: "Objasni zašto ovaj ban treba ukinuti…",
+  },
+  appealSubmit: { en: "Submit appeal", sr: "Pošalji žalbu" },
+  appealSubmitting: { en: "Submitting…", sr: "Slanje…" },
+  appealSubmitted: {
+    en: "Appeal submitted. We'll review it soon.",
+    sr: "Žalba je poslata. Pregledaćemo je uskoro.",
+  },
+  appealPending: {
+    en: "You already have an appeal pending review.",
+    sr: "Već imaš žalbu na čekanju.",
+  },
+  appealError: {
+    en: "Could not submit your appeal. Try again.",
+    sr: "Slanje žalbe nije uspelo. Pokušaj ponovo.",
+  },
+  appealNeedReason: { en: "Please describe your appeal first.", sr: "Prvo opiši svoju žalbu." },
+  forgotNeedEmail: { en: "Enter your email first.", sr: "Prvo unesi email." },
+  forgotSent: {
+    en: "If that email is registered, a reset link is on its way.",
+    sr: "Ako je taj email registrovan, link za reset stiže uskoro.",
+  },
+  forgotDevLink: { en: "Reset link (dev):", sr: "Link za reset (dev):" },
+  orContinueWith: { en: "or continue with", sr: "ili nastavi sa" },
+  oauthError: {
+    en: "Could not sign you in. Please try again.",
+    sr: "Prijava nije uspela. Pokušaj ponovo.",
+  },
+  oauthUnconfigured: {
+    en: "This sign-in method isn't enabled yet.",
+    sr: "Ovaj način prijave još nije omogućen.",
+  },
+  noAccount: { en: "Don't have an account?", sr: "Nemaš nalog?" },
+  signUp: { en: "Sign up", sr: "Registruj se" },
 } as const;
 
 export function LoginClient() {
@@ -132,9 +150,7 @@ export function LoginClient() {
         }
       }
       setError(
-        err instanceof ApiError && err.status === 401
-          ? t("invalidCreds")
-          : t("genericError"),
+        err instanceof ApiError && err.status === 401 ? t("invalidCreds") : t("genericError"),
       );
     } finally {
       setLoading(false);
@@ -154,9 +170,7 @@ export function LoginClient() {
       setAppealDone(true);
     } catch (err) {
       setAppealError(
-        err instanceof ApiError && err.status === 409
-          ? t("appealPending")
-          : t("appealError"),
+        err instanceof ApiError && err.status === 409 ? t("appealPending") : t("appealError"),
       );
     } finally {
       setAppealLoading(false);
@@ -173,9 +187,7 @@ export function LoginClient() {
     try {
       const res = await forgotPassword(identifier.trim());
       setInfo(
-        res.devLink
-          ? `${t("forgotSent")} ${t("forgotDevLink")} ${res.devLink}`
-          : t("forgotSent"),
+        res.devLink ? `${t("forgotSent")} ${t("forgotDevLink")} ${res.devLink}` : t("forgotSent"),
       );
     } catch {
       setInfo(t("forgotSent"));
@@ -184,12 +196,10 @@ export function LoginClient() {
 
   return (
     <AuthShell wordmarkVariant="tilted">
-
       <main className="auth-card">
         <h1 className="auth-heading">{t("heading")}</h1>
 
         <form onSubmit={handleLogin}>
-
           <div className="field-group">
             <label className="field-label" htmlFor="login-id">
               {t("emailOrUsername")}
@@ -259,10 +269,7 @@ export function LoginClient() {
           <Captcha variant="login" id="captcha-login" />
 
           {error && (
-            <div
-              className="auth-error"
-              role="alert"
-            >
+            <div className="auth-error" role="alert">
               {error}
             </div>
           )}
@@ -289,7 +296,9 @@ export function LoginClient() {
               )}
 
               {appealDone ? (
-                <p className="auth-success" style={{ margin: 0 }}>{t("appealSubmitted")}</p>
+                <p className="auth-success" style={{ margin: 0 }}>
+                  {t("appealSubmitted")}
+                </p>
               ) : (
                 <div className="field-group" style={{ marginBottom: 0 }}>
                   <label className="field-label" htmlFor="appeal-reason">
@@ -328,18 +337,15 @@ export function LoginClient() {
             </div>
           )}
 
-          <button
-            type="submit"
-            className="btn btn-primary btn-block"
-            disabled={loading}
-          >
+          <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
             {loading ? t("signingIn") : t("signIn")}
           </button>
-
         </form>
 
         {/* Divider */}
-        <div className="auth-divider"><span>{t("orContinueWith")}</span></div>
+        <div className="auth-divider">
+          <span>{t("orContinueWith")}</span>
+        </div>
 
         {info && (
           <div
@@ -358,9 +364,7 @@ export function LoginClient() {
         <div className="auth-switch">
           {t("noAccount")} <Link href="/signup">{t("signUp")}</Link>
         </div>
-
       </main>
-
     </AuthShell>
   );
 }

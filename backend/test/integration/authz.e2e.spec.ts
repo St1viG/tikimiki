@@ -58,9 +58,7 @@ describe("authorization boundaries (e2e)", () => {
     it("401 without a token", async () => {
       const org = await registerOrganization(app);
       const hk = await createHackathon(app, org);
-      await http()
-        .get(`/api/v1/applications/hackathon/${hk.hackathonId}`)
-        .expect(401);
+      await http().get(`/api/v1/applications/hackathon/${hk.hackathonId}`).expect(401);
     });
   });
 
@@ -76,10 +74,7 @@ describe("authorization boundaries (e2e)", () => {
     it("200 for a platform admin", async () => {
       const admin = await registerMember(app);
       await makeAdmin(app, admin);
-      await http()
-        .get("/api/v1/reports")
-        .set("Authorization", `Bearer ${admin.token}`)
-        .expect(200);
+      await http().get("/api/v1/reports").set("Authorization", `Bearer ${admin.token}`).expect(200);
     });
 
     it("401 without a token", async () => {

@@ -25,33 +25,54 @@ import { ApiError } from "@/lib/api";
  */
 
 const M = {
-  heading:            { en: "Register organization",                       sr: "Registruj organizaciju" },
-  approvalNotice:     { en: "Organization accounts go through admin approval before activation. After confirming your email address, your request is forwarded to the admin team. A notification about the outcome will arrive by email.", sr: "Organizacioni nalozi prolaze kroz administratorsko odobravanje pre aktivacije. Nakon potvrde email adrese, tvoj zahtev se prosleđuje admin timu. Obaveštenje o ishodu stiže na email." },
-  or:                 { en: "or",                                          sr: "ili" },
-  orgName:            { en: "Organization name",                           sr: "Naziv organizacije" },
-  emailAddress:       { en: "Email address",                               sr: "Email adresa" },
-  username:           { en: "Username",                                    sr: "Korisničko ime" },
-  password:           { en: "Password",                                    sr: "Lozinka" },
-  passwordMin:        { en: "At least 8 characters",                       sr: "Najmanje 8 karaktera" },
-  confirmPassword:    { en: "Confirm password",                            sr: "Potvrda lozinke" },
-  repeatPassword:     { en: "Repeat password",                             sr: "Ponovi lozinku" },
-  passwordsMatch:     { en: "Passwords match",                             sr: "Lozinke se poklapaju" },
-  passwordsNoMatch:   { en: "Passwords do not match",                      sr: "Lozinke se ne poklapaju" },
-  termsAgreeOrg:      { en: "On behalf of the organization I accept the",  sr: "U ime organizacije prihvatam" },
-  termsOfUse:         { en: "Terms of use",                                sr: "Uslove korišćenja" },
-  and:                { en: "and",                                         sr: "i" },
-  privacyPolicy:      { en: "Privacy policy",                              sr: "Politiku privatnosti" },
-  termsError:         { en: "You must accept the terms of use to continue.", sr: "Moraš prihvatiti uslove korišćenja da bi nastavio." },
-  orgNameRequired:    { en: "Enter your organization's name.",             sr: "Unesi naziv organizacije." },
-  passwordTooShort:   { en: "Password must be at least 8 characters.",     sr: "Lozinka mora imati najmanje 8 karaktera." },
-  emailTaken:         { en: "That email or username is already taken.",    sr: "Taj email ili korisničko ime je već zauzeto." },
-  genericError:       { en: "Something went wrong. Try again.",            sr: "Nešto je pošlo naopako. Pokušaj ponovo." },
-  submitRequest:      { en: "Submit request",                              sr: "Podnesi zahtev" },
-  submitting:         { en: "Submitting…",                                 sr: "Slanje…" },
-  alreadyHaveAccount: { en: "Already have an account?",                    sr: "Već imaš nalog?" },
-  signIn:             { en: "Sign in",                                     sr: "Prijavi se" },
-  registeringAsIndividual: { en: "Registering as an individual?",          sr: "Registruješ se kao pojedinac?" },
-  createUserAccount:  { en: "Create user account",                         sr: "Kreiraj korisnički nalog" },
+  heading: { en: "Register organization", sr: "Registruj organizaciju" },
+  approvalNotice: {
+    en: "Organization accounts go through admin approval before activation. After confirming your email address, your request is forwarded to the admin team. A notification about the outcome will arrive by email.",
+    sr: "Organizacioni nalozi prolaze kroz administratorsko odobravanje pre aktivacije. Nakon potvrde email adrese, tvoj zahtev se prosleđuje admin timu. Obaveštenje o ishodu stiže na email.",
+  },
+  or: { en: "or", sr: "ili" },
+  orgName: { en: "Organization name", sr: "Naziv organizacije" },
+  emailAddress: { en: "Email address", sr: "Email adresa" },
+  username: { en: "Username", sr: "Korisničko ime" },
+  password: { en: "Password", sr: "Lozinka" },
+  passwordMin: { en: "At least 8 characters", sr: "Najmanje 8 karaktera" },
+  confirmPassword: { en: "Confirm password", sr: "Potvrda lozinke" },
+  repeatPassword: { en: "Repeat password", sr: "Ponovi lozinku" },
+  passwordsMatch: { en: "Passwords match", sr: "Lozinke se poklapaju" },
+  passwordsNoMatch: { en: "Passwords do not match", sr: "Lozinke se ne poklapaju" },
+  termsAgreeOrg: {
+    en: "On behalf of the organization I accept the",
+    sr: "U ime organizacije prihvatam",
+  },
+  termsOfUse: { en: "Terms of use", sr: "Uslove korišćenja" },
+  and: { en: "and", sr: "i" },
+  privacyPolicy: { en: "Privacy policy", sr: "Politiku privatnosti" },
+  termsError: {
+    en: "You must accept the terms of use to continue.",
+    sr: "Moraš prihvatiti uslove korišćenja da bi nastavio.",
+  },
+  orgNameRequired: { en: "Enter your organization's name.", sr: "Unesi naziv organizacije." },
+  passwordTooShort: {
+    en: "Password must be at least 8 characters.",
+    sr: "Lozinka mora imati najmanje 8 karaktera.",
+  },
+  emailTaken: {
+    en: "That email or username is already taken.",
+    sr: "Taj email ili korisničko ime je već zauzeto.",
+  },
+  genericError: {
+    en: "Something went wrong. Try again.",
+    sr: "Nešto je pošlo naopako. Pokušaj ponovo.",
+  },
+  submitRequest: { en: "Submit request", sr: "Podnesi zahtev" },
+  submitting: { en: "Submitting…", sr: "Slanje…" },
+  alreadyHaveAccount: { en: "Already have an account?", sr: "Već imaš nalog?" },
+  signIn: { en: "Sign in", sr: "Prijavi se" },
+  registeringAsIndividual: {
+    en: "Registering as an individual?",
+    sr: "Registruješ se kao pojedinac?",
+  },
+  createUserAccount: { en: "Create user account", sr: "Kreiraj korisnički nalog" },
 } as const;
 
 export function SignupOrganizationClient() {
@@ -114,9 +135,7 @@ export function SignupOrganizationClient() {
       router.push("/");
     } catch (err) {
       setSubmitError(
-        err instanceof ApiError && err.status === 409
-          ? t("emailTaken")
-          : t("genericError"),
+        err instanceof ApiError && err.status === 409 ? t("emailTaken") : t("genericError"),
       );
     } finally {
       setLoading(false);
@@ -125,17 +144,13 @@ export function SignupOrganizationClient() {
 
   return (
     <AuthShell wrapWordmark>
-
       <div className="auth-card">
-
         <h1 className="auth-heading">{t("heading")}</h1>
 
         {/* Admin approval notice */}
         <div className="auth-info-banner">
           <Icon name="shield" />
-          <div className="auth-info-banner-text">
-            {t("approvalNotice")}
-          </div>
+          <div className="auth-info-banner-text">{t("approvalNotice")}</div>
         </div>
 
         {/* OAuth providers (Google + GitHub; LinkedIn removed — no provider wired) */}
@@ -148,9 +163,10 @@ export function SignupOrganizationClient() {
 
         {/* Form */}
         <form id="auth-form" onSubmit={(e) => e.preventDefault()}>
-
           <div className="auth-field">
-            <label className="auth-label" htmlFor="org-name">{t("orgName")}</label>
+            <label className="auth-label" htmlFor="org-name">
+              {t("orgName")}
+            </label>
             <input
               className="auth-input"
               id="org-name"
@@ -162,7 +178,9 @@ export function SignupOrganizationClient() {
           </div>
 
           <div className="auth-field">
-            <label className="auth-label" htmlFor="org-email">{t("emailAddress")}</label>
+            <label className="auth-label" htmlFor="org-email">
+              {t("emailAddress")}
+            </label>
             <input
               className="auth-input"
               id="org-email"
@@ -174,9 +192,13 @@ export function SignupOrganizationClient() {
           </div>
 
           <div className="auth-field">
-            <label className="auth-label" htmlFor="org-username">{t("username")}</label>
+            <label className="auth-label" htmlFor="org-username">
+              {t("username")}
+            </label>
             <div className="auth-input-wrap">
-              <span className="auth-input-prefix" aria-hidden="true">@</span>
+              <span className="auth-input-prefix" aria-hidden="true">
+                @
+              </span>
               <input
                 className="auth-input has-prefix"
                 id="org-username"
@@ -189,7 +211,9 @@ export function SignupOrganizationClient() {
           </div>
 
           <div className="auth-field">
-            <label className="auth-label" htmlFor="pw-signup">{t("password")}</label>
+            <label className="auth-label" htmlFor="pw-signup">
+              {t("password")}
+            </label>
             <PasswordField
               id="pw-signup"
               value={password}
@@ -200,7 +224,9 @@ export function SignupOrganizationClient() {
           </div>
 
           <div className="auth-field">
-            <label className="auth-label" htmlFor="pw-confirm">{t("confirmPassword")}</label>
+            <label className="auth-label" htmlFor="pw-confirm">
+              {t("confirmPassword")}
+            </label>
             <PasswordField
               id="pw-confirm"
               value={confirmPw}
@@ -233,7 +259,10 @@ export function SignupOrganizationClient() {
               <span className="auth-checkbox-mark" aria-hidden="true">
                 <Icon name="check" />
               </span>
-              <span>{t("termsAgreeOrg")} <a href="#">{t("termsOfUse")}</a> {t("and")} <a href="#">{t("privacyPolicy")}</a>.</span>
+              <span>
+                {t("termsAgreeOrg")} <a href="#">{t("termsOfUse")}</a> {t("and")}{" "}
+                <a href="#">{t("privacyPolicy")}</a>.
+              </span>
             </label>
             <div
               className={`auth-error-msg${termsMsg ? " visible error" : ""}`}
@@ -260,7 +289,6 @@ export function SignupOrganizationClient() {
           >
             {loading ? t("submitting") : t("submitRequest")}
           </button>
-
         </form>
 
         {/* Switch */}
@@ -272,9 +300,7 @@ export function SignupOrganizationClient() {
         <Link className="auth-subtle-link" href="/signup">
           {t("registeringAsIndividual")} <span>{t("createUserAccount")}</span>
         </Link>
-
       </div>
-
     </AuthShell>
   );
 }

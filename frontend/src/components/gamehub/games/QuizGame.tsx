@@ -56,7 +56,12 @@ interface Question {
 const QUESTION_POOL: Question[] = [
   {
     clue: "Koji princip kaže da softverski entiteti treba da budu otvoreni za proširenje, a zatvoreni za modifikaciju?",
-    options: ["Single Responsibility", "Open/Closed", "Liskov Substitution", "Interface Segregation"],
+    options: [
+      "Single Responsibility",
+      "Open/Closed",
+      "Liskov Substitution",
+      "Interface Segregation",
+    ],
     answer: 1,
   },
   {
@@ -86,7 +91,12 @@ const QUESTION_POOL: Question[] = [
   },
   {
     clue: "Koji Git komand pravi novu granu i odmah prebacuje na nju?",
-    options: ["git branch nova", "git merge nova", "git checkout -b nova", "git push --branch nova"],
+    options: [
+      "git branch nova",
+      "git merge nova",
+      "git checkout -b nova",
+      "git push --branch nova",
+    ],
     answer: 2,
   },
   {
@@ -297,7 +307,11 @@ export function QuizGame({ open, onClose, onComplete }: GameModalProps) {
 
   function advance() {
     if (isLastQuestion) {
-      const result: GameResult = finalResult ?? { kind: "score", display: `${score}/5`, raw: score };
+      const result: GameResult = finalResult ?? {
+        kind: "score",
+        display: `${score}/5`,
+        raw: score,
+      };
       onComplete?.(result);
       setPhase("result");
     } else {
@@ -320,8 +334,12 @@ export function QuizGame({ open, onClose, onComplete }: GameModalProps) {
 
   return (
     <div className="gm-overlay" onClick={handleOverlayClick} style={{ alignItems: "center" }}>
-      <div className="gm-dialog qz-dialog" role="dialog" aria-modal="true" aria-label={t("gameName")}>
-
+      <div
+        className="gm-dialog qz-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-label={t("gameName")}
+      >
         {/* Accent bar is rendered via ::before in gamehub.css */}
 
         {/* Close button */}
@@ -363,11 +381,7 @@ export function QuizGame({ open, onClose, onComplete }: GameModalProps) {
             <div
               className="qz-bar-fill"
               style={{
-                width: `${
-                  phase === "result"
-                    ? 100
-                    : (qIndex / questions.length) * 100
-                }%`,
+                width: `${phase === "result" ? 100 : (qIndex / questions.length) * 100}%`,
               }}
             />
           </div>
@@ -413,7 +427,9 @@ export function QuizGame({ open, onClose, onComplete }: GameModalProps) {
             {answer.revealed && (
               <div
                 className={`qz-feedback ${
-                  answer.selected === currentQ.answer ? "qz-feedback--correct" : "qz-feedback--wrong"
+                  answer.selected === currentQ.answer
+                    ? "qz-feedback--correct"
+                    : "qz-feedback--wrong"
                 }`}
               >
                 {answer.selected === currentQ.answer ? (
@@ -425,8 +441,7 @@ export function QuizGame({ open, onClose, onComplete }: GameModalProps) {
                   <>
                     <Icon name="x" />
                     <span>
-                      {t("wrongPrefix")}{" "}
-                      <strong>{currentQ.options[currentQ.answer]}</strong>
+                      {t("wrongPrefix")} <strong>{currentQ.options[currentQ.answer]}</strong>
                     </span>
                   </>
                 )}
@@ -468,7 +483,10 @@ export function QuizGame({ open, onClose, onComplete }: GameModalProps) {
                 {friendPlays.map((fp, idx) => {
                   const isTop = idx === 0;
                   return (
-                    <div key={fp.handle} className={`qz-friend-row${isTop ? " qz-friend-row--top" : ""}`}>
+                    <div
+                      key={fp.handle}
+                      className={`qz-friend-row${isTop ? " qz-friend-row--top" : ""}`}
+                    >
                       <span className="qz-friend-rank u-mono tnum">{idx + 1}</span>
                       <div
                         className="qz-friend-av"

@@ -4,24 +4,24 @@
 
 ## 1. users
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| user_id | uuid | ✓ | | |
-| username | varchar(32) | | | |
-| email | varchar(254) | | | |
-| password_hash | text | | | |
-| is_email_verified | boolean | | | |
-| google_id | text | | | ✓ |
-| github_id | text | | | ✓ |
-| github_username | varchar(39) | | | ✓ |
-| linkedin_id | text | | | ✓ |
-| avatar_url | text | | | ✓ |
-| banner_url | text | | | ✓ |
-| bio | text | | | ✓ |
-| last_login_at | timestamptz | | | ✓ |
-| created_at | timestamptz | | | |
-| updated_at | timestamptz | | | |
-| deleted_at | timestamptz | | | ✓ |
+| Column            | Type         | PK  | FK  | Nullable |
+| ----------------- | ------------ | --- | --- | -------- |
+| user_id           | uuid         | ✓   |     |          |
+| username          | varchar(32)  |     |     |          |
+| email             | varchar(254) |     |     |          |
+| password_hash     | text         |     |     |          |
+| is_email_verified | boolean      |     |     |          |
+| google_id         | text         |     |     | ✓        |
+| github_id         | text         |     |     | ✓        |
+| github_username   | varchar(39)  |     |     | ✓        |
+| linkedin_id       | text         |     |     | ✓        |
+| avatar_url        | text         |     |     | ✓        |
+| banner_url        | text         |     |     | ✓        |
+| bio               | text         |     |     | ✓        |
+| last_login_at     | timestamptz  |     |     | ✓        |
+| created_at        | timestamptz  |     |     |          |
+| updated_at        | timestamptz  |     |     |          |
+| deleted_at        | timestamptz  |     |     | ✓        |
 
 ```sql
 CREATE TABLE users (
@@ -57,11 +57,11 @@ CREATE INDEX        idx_users_deleted        ON users (deleted_at)      WHERE de
 
 ## 2. administrators
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| user_id | uuid | ✓ | users | |
-| granted_by | uuid | | administrators | ✓ |
-| granted_at | timestamptz | | | |
+| Column     | Type        | PK  | FK             | Nullable |
+| ---------- | ----------- | --- | -------------- | -------- |
+| user_id    | uuid        | ✓   | users          |          |
+| granted_by | uuid        |     | administrators | ✓        |
+| granted_at | timestamptz |     |                |          |
 
 ```sql
 CREATE TABLE administrators (
@@ -75,10 +75,10 @@ CREATE TABLE administrators (
 
 ## 3. members
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| user_id | uuid | ✓ | users | |
-| points | bigint | | | |
+| Column  | Type   | PK  | FK    | Nullable |
+| ------- | ------ | --- | ----- | -------- |
+| user_id | uuid   | ✓   | users |          |
+| points  | bigint |     |       |          |
 
 ```sql
 CREATE TABLE members (
@@ -95,17 +95,17 @@ CREATE INDEX idx_members_points ON members (points DESC);
 
 ## 4. organizations
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| user_id | uuid | ✓ | users | |
-| name | varchar(100) | | | |
-| website_url | text | | | ✓ |
-| logo_url | text | | | ✓ |
-| contact_email | varchar(254) | | | ✓ |
-| verification_status | org_verification_status | | | |
-| reviewed_by | uuid | | administrators | ✓ |
-| reviewed_at | timestamptz | | | ✓ |
-| rejection_reason | text | | | ✓ |
+| Column              | Type                    | PK  | FK             | Nullable |
+| ------------------- | ----------------------- | --- | -------------- | -------- |
+| user_id             | uuid                    | ✓   | users          |          |
+| name                | varchar(100)            |     |                |          |
+| website_url         | text                    |     |                | ✓        |
+| logo_url            | text                    |     |                | ✓        |
+| contact_email       | varchar(254)            |     |                | ✓        |
+| verification_status | org_verification_status |     |                |          |
+| reviewed_by         | uuid                    |     | administrators | ✓        |
+| reviewed_at         | timestamptz             |     |                | ✓        |
+| rejection_reason    | text                    |     |                | ✓        |
 
 ```sql
 CREATE TYPE org_verification_status AS ENUM ('pending', 'approved', 'rejected');
@@ -142,15 +142,15 @@ CREATE TABLE organizations (
 
 ## 5. user_bans
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| ban_id | uuid | ✓ | | |
-| user_id | uuid | | users | |
-| banned_by | uuid | | administrators | |
-| reason | text | | | |
-| banned_at | timestamptz | | | |
-| lifted_at | timestamptz | | | ✓ |
-| lifted_by | uuid | | administrators | ✓ |
+| Column    | Type        | PK  | FK             | Nullable |
+| --------- | ----------- | --- | -------------- | -------- |
+| ban_id    | uuid        | ✓   |                |          |
+| user_id   | uuid        |     | users          |          |
+| banned_by | uuid        |     | administrators |          |
+| reason    | text        |     |                |          |
+| banned_at | timestamptz |     |                |          |
+| lifted_at | timestamptz |     |                | ✓        |
+| lifted_by | uuid        |     | administrators | ✓        |
 
 ```sql
 CREATE TABLE user_bans (
@@ -175,11 +175,11 @@ CREATE UNIQUE INDEX uq_user_bans_active_per_user ON user_bans (user_id) WHERE li
 
 ## 6. follows
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| follower_id | uuid | ✓ | users | |
-| followee_id | uuid | ✓ | users | |
-| created_at | timestamptz | | | |
+| Column      | Type        | PK  | FK    | Nullable |
+| ----------- | ----------- | --- | ----- | -------- |
+| follower_id | uuid        | ✓   | users |          |
+| followee_id | uuid        | ✓   | users |          |
+| created_at  | timestamptz |     |       |          |
 
 ```sql
 CREATE TABLE follows (
@@ -199,14 +199,14 @@ CREATE INDEX idx_follows_followee_id ON follows (followee_id);
 
 ## 7. friendships
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| user_id_a | uuid | ✓ | members | |
-| user_id_b | uuid | ✓ | members | |
-| requester_id | uuid | | members | |
-| status | friendship_status | | | |
-| requested_at | timestamptz | | | |
-| responded_at | timestamptz | | | ✓ |
+| Column       | Type              | PK  | FK      | Nullable |
+| ------------ | ----------------- | --- | ------- | -------- |
+| user_id_a    | uuid              | ✓   | members |          |
+| user_id_b    | uuid              | ✓   | members |          |
+| requester_id | uuid              |     | members |          |
+| status       | friendship_status |     |         |          |
+| requested_at | timestamptz       |     |         |          |
+| responded_at | timestamptz       |     |         | ✓        |
 
 ```sql
 CREATE TYPE friendship_status AS ENUM ('pending', 'accepted');
@@ -243,11 +243,11 @@ CREATE INDEX idx_friendships_requester ON friendships (requester_id);
 
 ## 8. skills
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| skill_id | uuid | ✓ | | |
-| name | varchar(100) | | | |
-| category | varchar(50) | | | ✓ |
+| Column   | Type         | PK  | FK  | Nullable |
+| -------- | ------------ | --- | --- | -------- |
+| skill_id | uuid         | ✓   |     |          |
+| name     | varchar(100) |     |     |          |
+| category | varchar(50)  |     |     | ✓        |
 
 ```sql
 CREATE TABLE skills (
@@ -263,10 +263,10 @@ CREATE TABLE skills (
 
 ## 9. member_skills
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| user_id | uuid | ✓ | members | |
-| skill_id | uuid | ✓ | skills | |
+| Column   | Type | PK  | FK      | Nullable |
+| -------- | ---- | --- | ------- | -------- |
+| user_id  | uuid | ✓   | members |          |
+| skill_id | uuid | ✓   | skills  |          |
 
 ```sql
 CREATE TABLE member_skills (
@@ -283,28 +283,28 @@ CREATE INDEX idx_member_skills_skill_id ON member_skills (skill_id);
 
 ## 10. hackathons
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| hackathon_id | uuid | ✓ | | |
-| organization_id | uuid | | organizations | |
-| title | varchar(200) | | | |
-| description | text | | | |
-| type | hackathon_type | | | |
-| status | hackathon_status | | | |
-| theme | varchar(100) | | | ✓ |
-| starts_at | timestamptz | | | |
-| ends_at | timestamptz | | | |
-| registration_deadline | timestamptz | | | |
-| max_participants | integer | | | ✓ |
-| min_team_size | smallint | | | |
-| max_team_size | smallint | | | |
-| location | varchar(200) | | | ✓ |
-| coordinates | geography(Point, 4326) | | | ✓ |
-| logo_url | text | | | ✓ |
-| banner_url | text | | | ✓ |
-| created_at | timestamptz | | | |
-| updated_at | timestamptz | | | |
-| deleted_at | timestamptz | | | ✓ |
+| Column                | Type                   | PK  | FK            | Nullable |
+| --------------------- | ---------------------- | --- | ------------- | -------- |
+| hackathon_id          | uuid                   | ✓   |               |          |
+| organization_id       | uuid                   |     | organizations |          |
+| title                 | varchar(200)           |     |               |          |
+| description           | text                   |     |               |          |
+| type                  | hackathon_type         |     |               |          |
+| status                | hackathon_status       |     |               |          |
+| theme                 | varchar(100)           |     |               | ✓        |
+| starts_at             | timestamptz            |     |               |          |
+| ends_at               | timestamptz            |     |               |          |
+| registration_deadline | timestamptz            |     |               |          |
+| max_participants      | integer                |     |               | ✓        |
+| min_team_size         | smallint               |     |               |          |
+| max_team_size         | smallint               |     |               |          |
+| location              | varchar(200)           |     |               | ✓        |
+| coordinates           | geography(Point, 4326) |     |               | ✓        |
+| logo_url              | text                   |     |               | ✓        |
+| banner_url            | text                   |     |               | ✓        |
+| created_at            | timestamptz            |     |               |          |
+| updated_at            | timestamptz            |     |               |          |
+| deleted_at            | timestamptz            |     |               | ✓        |
 
 ```sql
 CREATE TYPE hackathon_type   AS ENUM ('physical', 'virtual', 'hybrid');
@@ -359,10 +359,10 @@ CREATE INDEX idx_hackathons_coordinates     ON hackathons USING GIST (coordinate
 
 ## 11. hackathon_required_skills
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| hackathon_id | uuid | ✓ | hackathons | |
-| skill_id | uuid | ✓ | skills | |
+| Column       | Type | PK  | FK         | Nullable |
+| ------------ | ---- | --- | ---------- | -------- |
+| hackathon_id | uuid | ✓   | hackathons |          |
+| skill_id     | uuid | ✓   | skills     |          |
 
 ```sql
 CREATE TABLE hackathon_required_skills (
@@ -379,16 +379,16 @@ CREATE INDEX idx_hackathon_required_skills_skill_id ON hackathon_required_skills
 
 ## 12. bounties
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| bounty_id | uuid | ✓ | | |
-| hackathon_id | uuid | | hackathons | |
-| sponsor_name | varchar(100) | | | |
-| title | varchar(200) | | | |
-| theme | varchar(100) | | | ✓ |
-| description | text | | | ✓ |
-| created_at | timestamptz | | | |
-| updated_at | timestamptz | | | |
+| Column       | Type         | PK  | FK         | Nullable |
+| ------------ | ------------ | --- | ---------- | -------- |
+| bounty_id    | uuid         | ✓   |            |          |
+| hackathon_id | uuid         |     | hackathons |          |
+| sponsor_name | varchar(100) |     |            |          |
+| title        | varchar(200) |     |            |          |
+| theme        | varchar(100) |     |            | ✓        |
+| description  | text         |     |            | ✓        |
+| created_at   | timestamptz  |     |            |          |
+| updated_at   | timestamptz  |     |            |          |
 
 ```sql
 CREATE TABLE bounties (
@@ -409,16 +409,16 @@ CREATE INDEX idx_bounties_hackathon_id ON bounties (hackathon_id);
 
 ## 13. hackathon_prizes
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| prize_id | uuid | ✓ | | |
-| hackathon_id | uuid | | hackathons | |
-| bounty_id | uuid | | bounties | ✓ |
-| sponsor_name | varchar(100) | | | ✓ |
-| title | varchar(200) | | | |
-| description | text | | | ✓ |
-| rank | smallint | | | ✓ |
-| award_value | text | | | ✓ |
+| Column       | Type         | PK  | FK         | Nullable |
+| ------------ | ------------ | --- | ---------- | -------- |
+| prize_id     | uuid         | ✓   |            |          |
+| hackathon_id | uuid         |     | hackathons |          |
+| bounty_id    | uuid         |     | bounties   | ✓        |
+| sponsor_name | varchar(100) |     |            | ✓        |
+| title        | varchar(200) |     |            |          |
+| description  | text         |     |            | ✓        |
+| rank         | smallint     |     |            | ✓        |
+| award_value  | text         |     |            | ✓        |
 
 ```sql
 CREATE TABLE hackathon_prizes (
@@ -443,14 +443,14 @@ CREATE INDEX        idx_hackathon_prizes_hackathon_id ON hackathon_prizes (hacka
 
 ## 14. teams
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| team_id | uuid | ✓ | | |
-| hackathon_id | uuid | | hackathons | |
-| name | varchar(100) | | | |
-| created_at | timestamptz | | | |
-| updated_at | timestamptz | | | |
-| deleted_at | timestamptz | | | ✓ |
+| Column       | Type         | PK  | FK         | Nullable |
+| ------------ | ------------ | --- | ---------- | -------- |
+| team_id      | uuid         | ✓   |            |          |
+| hackathon_id | uuid         |     | hackathons |          |
+| name         | varchar(100) |     |            |          |
+| created_at   | timestamptz  |     |            |          |
+| updated_at   | timestamptz  |     |            |          |
+| deleted_at   | timestamptz  |     |            | ✓        |
 
 ```sql
 CREATE TABLE teams (
@@ -470,14 +470,14 @@ CREATE INDEX        idx_teams_hackathon_id ON teams (hackathon_id);
 
 ## 15. team_members
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| team_id | uuid | ✓ | teams | |
-| user_id | uuid | ✓ | members | |
-| role | team_role | | | |
-| joined_at | timestamptz | | | |
-| left_at | timestamptz | | | ✓ |
-| deleted_at | timestamptz | | | ✓ |
+| Column     | Type        | PK  | FK      | Nullable |
+| ---------- | ----------- | --- | ------- | -------- |
+| team_id    | uuid        | ✓   | teams   |          |
+| user_id    | uuid        | ✓   | members |          |
+| role       | team_role   |     |         |          |
+| joined_at  | timestamptz |     |         |          |
+| left_at    | timestamptz |     |         | ✓        |
+| deleted_at | timestamptz |     |         | ✓        |
 
 ```sql
 CREATE TYPE team_role AS ENUM ('leader', 'member');
@@ -505,19 +505,19 @@ CREATE INDEX        idx_team_members_user_id ON team_members (user_id);
 
 ## 16. applications
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| application_id | uuid | ✓ | | |
-| user_id | uuid | | members | |
-| hackathon_id | uuid | | hackathons | |
-| team_id | uuid | | teams | ✓ |
-| status | application_status | | | |
-| reviewed_by | uuid | | users | ✓ |
-| reviewed_at | timestamptz | | | ✓ |
-| rejection_reason | text | | | ✓ |
-| created_at | timestamptz | | | |
-| updated_at | timestamptz | | | |
-| deleted_at | timestamptz | | | ✓ |
+| Column           | Type               | PK  | FK         | Nullable |
+| ---------------- | ------------------ | --- | ---------- | -------- |
+| application_id   | uuid               | ✓   |            |          |
+| user_id          | uuid               |     | members    |          |
+| hackathon_id     | uuid               |     | hackathons |          |
+| team_id          | uuid               |     | teams      | ✓        |
+| status           | application_status |     |            |          |
+| reviewed_by      | uuid               |     | users      | ✓        |
+| reviewed_at      | timestamptz        |     |            | ✓        |
+| rejection_reason | text               |     |            | ✓        |
+| created_at       | timestamptz        |     |            |          |
+| updated_at       | timestamptz        |     |            |          |
+| deleted_at       | timestamptz        |     |            | ✓        |
 
 ```sql
 CREATE TYPE application_status AS ENUM ('pending', 'approved', 'rejected', 'waitlisted', 'withdrawn');
@@ -553,19 +553,19 @@ CREATE INDEX idx_applications_hackathon_status ON applications (hackathon_id, st
 
 ## 17. projects
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| project_id | uuid | ✓ | | |
-| team_id | uuid | | teams | |
-| status | project_status | | | |
-| title | varchar(200) | | | |
-| description | text | | | ✓ |
-| repository_url | text | | | ✓ |
-| video_url | text | | | ✓ |
-| submitted_at | timestamptz | | | ✓ |
-| created_at | timestamptz | | | |
-| updated_at | timestamptz | | | |
-| deleted_at | timestamptz | | | ✓ |
+| Column         | Type           | PK  | FK    | Nullable |
+| -------------- | -------------- | --- | ----- | -------- |
+| project_id     | uuid           | ✓   |       |          |
+| team_id        | uuid           |     | teams |          |
+| status         | project_status |     |       |          |
+| title          | varchar(200)   |     |       |          |
+| description    | text           |     |       | ✓        |
+| repository_url | text           |     |       | ✓        |
+| video_url      | text           |     |       | ✓        |
+| submitted_at   | timestamptz    |     |       | ✓        |
+| created_at     | timestamptz    |     |       |          |
+| updated_at     | timestamptz    |     |       |          |
+| deleted_at     | timestamptz    |     |       | ✓        |
 
 ```sql
 CREATE TYPE project_status AS ENUM ('draft', 'submitted', 'under_review', 'judged');
@@ -595,13 +595,13 @@ CREATE INDEX        idx_projects_team_id ON projects (team_id);
 
 ## 18. hackathon_results
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| result_id | uuid | ✓ | | |
-| project_id | uuid | | projects | |
-| bounty_id | uuid | | bounties | ✓ |
-| rank | integer | | | ✓ |
-| prize_id | uuid | | hackathon_prizes | ✓ |
+| Column     | Type    | PK  | FK               | Nullable |
+| ---------- | ------- | --- | ---------------- | -------- |
+| result_id  | uuid    | ✓   |                  |          |
+| project_id | uuid    |     | projects         |          |
+| bounty_id  | uuid    |     | bounties         | ✓        |
+| rank       | integer |     |                  | ✓        |
+| prize_id   | uuid    |     | hackathon_prizes | ✓        |
 
 ```sql
 CREATE TABLE hackathon_results (
@@ -624,10 +624,10 @@ CREATE INDEX        idx_hackathon_results_bounty_id  ON hackathon_results (bount
 
 ## 19. bounty_submissions
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| bounty_id | uuid | ✓ | bounties | |
-| project_id | uuid | ✓ | projects | |
+| Column     | Type | PK  | FK       | Nullable |
+| ---------- | ---- | --- | -------- | -------- |
+| bounty_id  | uuid | ✓   | bounties |          |
+| project_id | uuid | ✓   | projects |          |
 
 ```sql
 CREATE TABLE bounty_submissions (
@@ -644,14 +644,14 @@ CREATE INDEX idx_bounty_submissions_project_id ON bounty_submissions (project_id
 
 ## 20. votes
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| vote_id | uuid | ✓ | | |
-| hackathon_id | uuid | | hackathons | |
-| project_id | uuid | | projects | |
-| voter_id | uuid | | users | ✓ |
-| voter_fingerprint | text | | | ✓ |
-| created_at | timestamptz | | | |
+| Column            | Type        | PK  | FK         | Nullable |
+| ----------------- | ----------- | --- | ---------- | -------- |
+| vote_id           | uuid        | ✓   |            |          |
+| hackathon_id      | uuid        |     | hackathons |          |
+| project_id        | uuid        |     | projects   |          |
+| voter_id          | uuid        |     | users      | ✓        |
+| voter_fingerprint | text        |     |            | ✓        |
+| created_at        | timestamptz |     |            |          |
 
 ```sql
 CREATE TABLE votes (
@@ -682,12 +682,12 @@ CREATE INDEX        idx_votes_project_id          ON votes (project_id);
 
 ## 21. kanban_boards
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| board_id | uuid | ✓ | | |
-| team_id | uuid | | teams | |
-| created_at | timestamptz | | | |
-| updated_at | timestamptz | | | |
+| Column     | Type        | PK  | FK    | Nullable |
+| ---------- | ----------- | --- | ----- | -------- |
+| board_id   | uuid        | ✓   |       |          |
+| team_id    | uuid        |     | teams |          |
+| created_at | timestamptz |     |       |          |
+| updated_at | timestamptz |     |       |          |
 
 ```sql
 CREATE TABLE kanban_boards (
@@ -704,14 +704,14 @@ CREATE TABLE kanban_boards (
 
 ## 22. kanban_columns
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| column_id | uuid | ✓ | | |
-| board_id | uuid | | kanban_boards | |
-| name | varchar(100) | | | |
-| position | real | | | |
-| created_at | timestamptz | | | |
-| updated_at | timestamptz | | | |
+| Column     | Type         | PK  | FK            | Nullable |
+| ---------- | ------------ | --- | ------------- | -------- |
+| column_id  | uuid         | ✓   |               |          |
+| board_id   | uuid         |     | kanban_boards |          |
+| name       | varchar(100) |     |               |          |
+| position   | real         |     |               |          |
+| created_at | timestamptz  |     |               |          |
+| updated_at | timestamptz  |     |               |          |
 
 ```sql
 CREATE TABLE kanban_columns (
@@ -732,19 +732,19 @@ CREATE INDEX idx_kanban_columns_board_id ON kanban_columns (board_id);
 
 ## 23. kanban_cards
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| card_id | uuid | ✓ | | |
-| column_id | uuid | | kanban_columns | |
-| created_by | uuid | | members | |
-| assigned_to | uuid | | members | ✓ |
-| title | varchar(200) | | | |
-| description | text | | | ✓ |
-| position | real | | | |
-| due_at | timestamptz | | | ✓ |
-| created_at | timestamptz | | | |
-| updated_at | timestamptz | | | |
-| deleted_at | timestamptz | | | ✓ |
+| Column      | Type         | PK  | FK             | Nullable |
+| ----------- | ------------ | --- | -------------- | -------- |
+| card_id     | uuid         | ✓   |                |          |
+| column_id   | uuid         |     | kanban_columns |          |
+| created_by  | uuid         |     | members        |          |
+| assigned_to | uuid         |     | members        | ✓        |
+| title       | varchar(200) |     |                |          |
+| description | text         |     |                | ✓        |
+| position    | real         |     |                |          |
+| due_at      | timestamptz  |     |                | ✓        |
+| created_at  | timestamptz  |     |                |          |
+| updated_at  | timestamptz  |     |                |          |
+| deleted_at  | timestamptz  |     |                | ✓        |
 
 ```sql
 CREATE TABLE kanban_cards (
@@ -772,15 +772,15 @@ CREATE INDEX        idx_kanban_cards_assigned_to     ON kanban_cards (assigned_t
 
 ## 24. servers
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| server_id | uuid | ✓ | | |
-| hackathon_id | uuid | | hackathons | |
-| name | varchar(200) | | | |
-| logo_url | text | | | ✓ |
-| banner_url | text | | | ✓ |
-| created_at | timestamptz | | | |
-| updated_at | timestamptz | | | |
+| Column       | Type         | PK  | FK         | Nullable |
+| ------------ | ------------ | --- | ---------- | -------- |
+| server_id    | uuid         | ✓   |            |          |
+| hackathon_id | uuid         |     | hackathons |          |
+| name         | varchar(200) |     |            |          |
+| logo_url     | text         |     |            | ✓        |
+| banner_url   | text         |     |            | ✓        |
+| created_at   | timestamptz  |     |            |          |
+| updated_at   | timestamptz  |     |            |          |
 
 ```sql
 CREATE TABLE servers (
@@ -800,12 +800,12 @@ CREATE TABLE servers (
 
 ## 25. server_roles
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| server_role_id | uuid | ✓ | | |
-| server_id | uuid | | servers | |
-| name | varchar(100) | | | |
-| created_at | timestamptz | | | |
+| Column         | Type         | PK  | FK      | Nullable |
+| -------------- | ------------ | --- | ------- | -------- |
+| server_role_id | uuid         | ✓   |         |          |
+| server_id      | uuid         |     | servers |          |
+| name           | varchar(100) |     |         |          |
+| created_at     | timestamptz  |     |         |          |
 
 ```sql
 CREATE TABLE server_roles (
@@ -824,11 +824,11 @@ CREATE INDEX idx_server_roles_server_id ON server_roles (server_id);
 
 ## 26. permissions
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| permission_id | uuid | ✓ | | |
-| name | varchar(100) | | | |
-| description | text | | | |
+| Column        | Type         | PK  | FK  | Nullable |
+| ------------- | ------------ | --- | --- | -------- |
+| permission_id | uuid         | ✓   |     |          |
+| name          | varchar(100) |     |     |          |
+| description   | text         |     |     |          |
 
 ```sql
 CREATE TABLE permissions (
@@ -844,10 +844,10 @@ CREATE TABLE permissions (
 
 ## 27. server_role_permissions
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| server_role_id | uuid | ✓ | server_roles | |
-| permission_id | uuid | ✓ | permissions | |
+| Column         | Type | PK  | FK           | Nullable |
+| -------------- | ---- | --- | ------------ | -------- |
+| server_role_id | uuid | ✓   | server_roles |          |
+| permission_id  | uuid | ✓   | permissions  |          |
 
 ```sql
 CREATE TABLE server_role_permissions (
@@ -864,12 +864,12 @@ CREATE INDEX idx_server_role_permissions_permission_id ON server_role_permission
 
 ## 28. user_roles
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| server_role_id | uuid | ✓ | server_roles | |
-| user_id | uuid | ✓ | members | |
-| assigned_by | uuid | | users | ✓ |
-| assigned_at | timestamptz | | | |
+| Column         | Type        | PK  | FK           | Nullable |
+| -------------- | ----------- | --- | ------------ | -------- |
+| server_role_id | uuid        | ✓   | server_roles |          |
+| user_id        | uuid        | ✓   | members      |          |
+| assigned_by    | uuid        |     | users        | ✓        |
+| assigned_at    | timestamptz |     |              |          |
 
 ```sql
 CREATE TABLE user_roles (
@@ -888,14 +888,14 @@ CREATE INDEX idx_user_roles_user_id ON user_roles (user_id);
 
 ## 29. channel_groups
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| group_id | uuid | ✓ | | |
-| server_id | uuid | | servers | |
-| name | varchar(100) | | | |
-| position | real | | | |
-| created_at | timestamptz | | | |
-| updated_at | timestamptz | | | |
+| Column     | Type         | PK  | FK      | Nullable |
+| ---------- | ------------ | --- | ------- | -------- |
+| group_id   | uuid         | ✓   |         |          |
+| server_id  | uuid         |     | servers |          |
+| name       | varchar(100) |     |         |          |
+| position   | real         |     |         |          |
+| created_at | timestamptz  |     |         |          |
+| updated_at | timestamptz  |     |         |          |
 
 ```sql
 CREATE TABLE channel_groups (
@@ -918,17 +918,17 @@ CREATE INDEX        idx_channel_groups_server_id           ON channel_groups (se
 
 ## 30. channels
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| channel_id | uuid | ✓ | | |
-| group_id | uuid | | channel_groups | |
-| team_id | uuid | | teams | ✓ |
-| type | channel_type | | | |
-| name | varchar(100) | | | |
-| position | real | | | |
-| created_at | timestamptz | | | |
-| updated_at | timestamptz | | | |
-| deleted_at | timestamptz | | | ✓ |
+| Column     | Type         | PK  | FK             | Nullable |
+| ---------- | ------------ | --- | -------------- | -------- |
+| channel_id | uuid         | ✓   |                |          |
+| group_id   | uuid         |     | channel_groups |          |
+| team_id    | uuid         |     | teams          | ✓        |
+| type       | channel_type |     |                |          |
+| name       | varchar(100) |     |                |          |
+| position   | real         |     |                |          |
+| created_at | timestamptz  |     |                |          |
+| updated_at | timestamptz  |     |                |          |
+| deleted_at | timestamptz  |     |                | ✓        |
 
 ```sql
 CREATE TYPE channel_type AS ENUM ('general', 'announcements', 'team', 'private');
@@ -959,16 +959,16 @@ CREATE INDEX        idx_channels_group_id                  ON channels (group_id
 
 ## 31. messages
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| message_id | uuid | ✓ | | |
-| sender_id | uuid | | users | |
-| reply_to_id | uuid | | messages | ✓ |
-| content | text | | | |
-| sent_at | timestamptz | | | |
-| edited_at | timestamptz | | | ✓ |
-| deleted_at | timestamptz | | | ✓ |
-| deleted_by | uuid | | users | ✓ |
+| Column      | Type        | PK  | FK       | Nullable |
+| ----------- | ----------- | --- | -------- | -------- |
+| message_id  | uuid        | ✓   |          |          |
+| sender_id   | uuid        |     | users    |          |
+| reply_to_id | uuid        |     | messages | ✓        |
+| content     | text        |     |          |          |
+| sent_at     | timestamptz |     |          |          |
+| edited_at   | timestamptz |     |          | ✓        |
+| deleted_at  | timestamptz |     |          | ✓        |
+| deleted_by  | uuid        |     | users    | ✓        |
 
 ```sql
 CREATE TABLE messages (
@@ -994,14 +994,14 @@ CREATE INDEX idx_messages_sent_at   ON messages (sent_at DESC);
 
 ## 32. message_attachments
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| attachment_id | uuid | ✓ | | |
-| message_id | uuid | | messages | |
-| url | text | | | |
-| filename | varchar(255) | | | ✓ |
-| position | smallint | | | |
-| created_at | timestamptz | | | |
+| Column        | Type         | PK  | FK       | Nullable |
+| ------------- | ------------ | --- | -------- | -------- |
+| attachment_id | uuid         | ✓   |          |          |
+| message_id    | uuid         |     | messages |          |
+| url           | text         |     |          |          |
+| filename      | varchar(255) |     |          | ✓        |
+| position      | smallint     |     |          |          |
+| created_at    | timestamptz  |     |          |          |
 
 ```sql
 CREATE TABLE message_attachments (
@@ -1020,10 +1020,10 @@ CREATE INDEX idx_message_attachments_message_id ON message_attachments (message_
 
 ## 33. channel_messages
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| message_id | uuid | ✓ | messages | |
-| channel_id | uuid | | channels | |
+| Column     | Type | PK  | FK       | Nullable |
+| ---------- | ---- | --- | -------- | -------- |
+| message_id | uuid | ✓   | messages |          |
+| channel_id | uuid |     | channels |          |
 
 ```sql
 CREATE TABLE channel_messages (
@@ -1040,11 +1040,11 @@ CREATE INDEX idx_channel_messages_channel_id ON channel_messages (channel_id);
 
 ## 34. conversations
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| conversation_id | uuid | ✓ | | |
-| created_by | uuid | | users | |
-| created_at | timestamptz | | | |
+| Column          | Type        | PK  | FK    | Nullable |
+| --------------- | ----------- | --- | ----- | -------- |
+| conversation_id | uuid        | ✓   |       |          |
+| created_by      | uuid        |     | users |          |
+| created_at      | timestamptz |     |       |          |
 
 ```sql
 CREATE TABLE conversations (
@@ -1058,12 +1058,12 @@ CREATE TABLE conversations (
 
 ## 35. conversation_members
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| conversation_id | uuid | ✓ | conversations | |
-| user_id | uuid | ✓ | users | |
-| joined_at | timestamptz | | | |
-| left_at | timestamptz | | | ✓ |
+| Column          | Type        | PK  | FK            | Nullable |
+| --------------- | ----------- | --- | ------------- | -------- |
+| conversation_id | uuid        | ✓   | conversations |          |
+| user_id         | uuid        | ✓   | users         |          |
+| joined_at       | timestamptz |     |               |          |
+| left_at         | timestamptz |     |               | ✓        |
 
 ```sql
 CREATE TABLE conversation_members (
@@ -1082,10 +1082,10 @@ CREATE INDEX idx_conversation_members_user_id ON conversation_members (user_id);
 
 ## 36. direct_messages
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| message_id | uuid | ✓ | messages | |
-| conversation_id | uuid | | conversations | |
+| Column          | Type | PK  | FK            | Nullable |
+| --------------- | ---- | --- | ------------- | -------- |
+| message_id      | uuid | ✓   | messages      |          |
+| conversation_id | uuid |     | conversations |          |
 
 ```sql
 CREATE TABLE direct_messages (
@@ -1102,12 +1102,12 @@ CREATE INDEX idx_direct_messages_conversation_id ON direct_messages (conversatio
 
 ## 37. message_reactions
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| user_id | uuid | ✓ | users | |
-| message_id | uuid | ✓ | messages | |
-| symbol | text | ✓ | | |
-| created_at | timestamptz | | | |
+| Column     | Type        | PK  | FK       | Nullable |
+| ---------- | ----------- | --- | -------- | -------- |
+| user_id    | uuid        | ✓   | users    |          |
+| message_id | uuid        | ✓   | messages |          |
+| symbol     | text        | ✓   |          |          |
+| created_at | timestamptz |     |          |          |
 
 ```sql
 CREATE TABLE message_reactions (
@@ -1127,14 +1127,14 @@ CREATE INDEX idx_message_reactions_message_id ON message_reactions (message_id);
 
 ## 38. posts
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| post_id | uuid | ✓ | | |
-| user_id | uuid | | users | |
-| content | text | | | |
-| created_at | timestamptz | | | |
-| edited_at | timestamptz | | | ✓ |
-| deleted_at | timestamptz | | | ✓ |
+| Column     | Type        | PK  | FK    | Nullable |
+| ---------- | ----------- | --- | ----- | -------- |
+| post_id    | uuid        | ✓   |       |          |
+| user_id    | uuid        |     | users |          |
+| content    | text        |     |       |          |
+| created_at | timestamptz |     |       |          |
+| edited_at  | timestamptz |     |       | ✓        |
+| deleted_at | timestamptz |     |       | ✓        |
 
 ```sql
 CREATE TABLE posts (
@@ -1154,14 +1154,14 @@ CREATE INDEX idx_posts_created_at ON posts (created_at DESC);
 
 ## 39. post_attachments
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| attachment_id | uuid | ✓ | | |
-| post_id | uuid | | posts | |
-| url | text | | | |
-| filename | varchar(255) | | | ✓ |
-| position | smallint | | | |
-| created_at | timestamptz | | | |
+| Column        | Type         | PK  | FK    | Nullable |
+| ------------- | ------------ | --- | ----- | -------- |
+| attachment_id | uuid         | ✓   |       |          |
+| post_id       | uuid         |     | posts |          |
+| url           | text         |     |       |          |
+| filename      | varchar(255) |     |       | ✓        |
+| position      | smallint     |     |       |          |
+| created_at    | timestamptz  |     |       |          |
 
 ```sql
 CREATE TABLE post_attachments (
@@ -1180,12 +1180,12 @@ CREATE INDEX idx_post_attachments_post_id ON post_attachments (post_id);
 
 ## 40. post_reactions
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| user_id | uuid | ✓ | users | |
-| post_id | uuid | ✓ | posts | |
-| symbol | text | ✓ | | |
-| created_at | timestamptz | | | |
+| Column     | Type        | PK  | FK    | Nullable |
+| ---------- | ----------- | --- | ----- | -------- |
+| user_id    | uuid        | ✓   | users |          |
+| post_id    | uuid        | ✓   | posts |          |
+| symbol     | text        | ✓   |       |          |
+| created_at | timestamptz |     |       |          |
 
 ```sql
 CREATE TABLE post_reactions (
@@ -1205,16 +1205,16 @@ CREATE INDEX idx_post_reactions_post_id ON post_reactions (post_id);
 
 ## 41. comments
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| comment_id | uuid | ✓ | | |
-| post_id | uuid | | posts | |
-| user_id | uuid | | users | |
-| parent_comment_id | uuid | | comments | ✓ |
-| content | text | | | |
-| edited_at | timestamptz | | | ✓ |
-| created_at | timestamptz | | | |
-| deleted_at | timestamptz | | | ✓ |
+| Column            | Type        | PK  | FK       | Nullable |
+| ----------------- | ----------- | --- | -------- | -------- |
+| comment_id        | uuid        | ✓   |          |          |
+| post_id           | uuid        |     | posts    |          |
+| user_id           | uuid        |     | users    |          |
+| parent_comment_id | uuid        |     | comments | ✓        |
+| content           | text        |     |          |          |
+| edited_at         | timestamptz |     |          | ✓        |
+| created_at        | timestamptz |     |          |          |
+| deleted_at        | timestamptz |     |          | ✓        |
 
 ```sql
 CREATE TABLE comments (
@@ -1237,14 +1237,14 @@ CREATE INDEX idx_comments_parent_comment_id ON comments (parent_comment_id) WHER
 
 ## 42. comment_attachments
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| attachment_id | uuid | ✓ | | |
-| comment_id | uuid | | comments | |
-| url | text | | | |
-| filename | varchar(255) | | | ✓ |
-| position | smallint | | | |
-| created_at | timestamptz | | | |
+| Column        | Type         | PK  | FK       | Nullable |
+| ------------- | ------------ | --- | -------- | -------- |
+| attachment_id | uuid         | ✓   |          |          |
+| comment_id    | uuid         |     | comments |          |
+| url           | text         |     |          |          |
+| filename      | varchar(255) |     |          | ✓        |
+| position      | smallint     |     |          |          |
+| created_at    | timestamptz  |     |          |          |
 
 ```sql
 CREATE TABLE comment_attachments (
@@ -1263,12 +1263,12 @@ CREATE INDEX idx_comment_attachments_comment_id ON comment_attachments (comment_
 
 ## 43. comment_reactions
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| user_id | uuid | ✓ | users | |
-| comment_id | uuid | ✓ | comments | |
-| symbol | text | ✓ | | |
-| created_at | timestamptz | | | |
+| Column     | Type        | PK  | FK       | Nullable |
+| ---------- | ----------- | --- | -------- | -------- |
+| user_id    | uuid        | ✓   | users    |          |
+| comment_id | uuid        | ✓   | comments |          |
+| symbol     | text        | ✓   |          |          |
+| created_at | timestamptz |     |          |          |
 
 ```sql
 CREATE TABLE comment_reactions (
@@ -1288,15 +1288,15 @@ CREATE INDEX idx_comment_reactions_comment_id ON comment_reactions (comment_id);
 
 ## 44. badges
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| badge_id | uuid | ✓ | | |
-| name | varchar(100) | | | |
-| description | text | | | |
-| category | badge_category | | | |
-| icon_url | text | | | |
-| created_at | timestamptz | | | |
-| updated_at | timestamptz | | | |
+| Column      | Type           | PK  | FK  | Nullable |
+| ----------- | -------------- | --- | --- | -------- |
+| badge_id    | uuid           | ✓   |     |          |
+| name        | varchar(100)   |     |     |          |
+| description | text           |     |     |          |
+| category    | badge_category |     |     |          |
+| icon_url    | text           |     |     |          |
+| created_at  | timestamptz    |     |     |          |
+| updated_at  | timestamptz    |     |     |          |
 
 ```sql
 CREATE TYPE badge_category AS ENUM ('participation', 'achievement', 'social', 'special');
@@ -1318,11 +1318,11 @@ CREATE TABLE badges (
 
 ## 45. user_badges
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| user_id | uuid | ✓ | members | |
-| badge_id | uuid | ✓ | badges | |
-| awarded_at | timestamptz | | | |
+| Column     | Type        | PK  | FK      | Nullable |
+| ---------- | ----------- | --- | ------- | -------- |
+| user_id    | uuid        | ✓   | members |          |
+| badge_id   | uuid        | ✓   | badges  |          |
+| awarded_at | timestamptz |     |         |          |
 
 ```sql
 CREATE TABLE user_badges (
@@ -1340,19 +1340,19 @@ CREATE INDEX idx_user_badges_badge_id ON user_badges (badge_id);
 
 ## 46. games
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| game_id | uuid | ✓ | | |
-| slug | varchar(50) | | | |
-| name | varchar(100) | | | |
-| description | text | | | ✓ |
-| thumbnail_url | text | | | ✓ |
-| is_active | boolean | | | |
-| base_daily_plays | smallint | | | |
-| premium_daily_plays | smallint | | | |
-| max_points_per_play | integer | | | ✓ |
-| created_at | timestamptz | | | |
-| updated_at | timestamptz | | | |
+| Column              | Type         | PK  | FK  | Nullable |
+| ------------------- | ------------ | --- | --- | -------- |
+| game_id             | uuid         | ✓   |     |          |
+| slug                | varchar(50)  |     |     |          |
+| name                | varchar(100) |     |     |          |
+| description         | text         |     |     | ✓        |
+| thumbnail_url       | text         |     |     | ✓        |
+| is_active           | boolean      |     |     |          |
+| base_daily_plays    | smallint     |     |     |          |
+| premium_daily_plays | smallint     |     |     |          |
+| max_points_per_play | integer      |     |     | ✓        |
+| created_at          | timestamptz  |     |     |          |
+| updated_at          | timestamptz  |     |     |          |
 
 ```sql
 CREATE TABLE games (
@@ -1387,14 +1387,14 @@ CREATE INDEX idx_games_active ON games (is_active) WHERE is_active;
 
 ## 47. game_plays
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| play_id | uuid | ✓ | | |
-| game_id | uuid | | games | |
-| user_id | uuid | | members | |
-| score | integer | | | |
-| points_awarded | integer | | | |
-| played_at | timestamptz | | | |
+| Column         | Type        | PK  | FK      | Nullable |
+| -------------- | ----------- | --- | ------- | -------- |
+| play_id        | uuid        | ✓   |         |          |
+| game_id        | uuid        |     | games   |          |
+| user_id        | uuid        |     | members |          |
+| score          | integer     |     |         |          |
+| points_awarded | integer     |     |         |          |
+| played_at      | timestamptz |     |         |          |
 
 ```sql
 CREATE TABLE game_plays (
@@ -1422,16 +1422,16 @@ CREATE INDEX idx_game_plays_leaderboard   ON game_plays (game_id, score DESC);
 
 ## 48. point_transactions
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| transaction_id | uuid | ✓ | | |
-| user_id | uuid | | members | |
-| type | point_txn_type | | | |
-| delta | bigint | | | |
-| balance_after | bigint | | | |
-| reference_id | uuid | | | ✓ |
-| note | text | | | ✓ |
-| created_at | timestamptz | | | |
+| Column         | Type           | PK  | FK      | Nullable |
+| -------------- | -------------- | --- | ------- | -------- |
+| transaction_id | uuid           | ✓   |         |          |
+| user_id        | uuid           |     | members |          |
+| type           | point_txn_type |     |         |          |
+| delta          | bigint         |     |         |          |
+| balance_after  | bigint         |     |         |          |
+| reference_id   | uuid           |     |         | ✓        |
+| note           | text           |     |         | ✓        |
+| created_at     | timestamptz    |     |         |          |
 
 ```sql
 CREATE TYPE point_txn_type AS ENUM (
@@ -1472,16 +1472,16 @@ CREATE INDEX idx_point_transactions_user_id ON point_transactions (user_id, crea
 
 ## 49. cosmetic_items
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| cosmetic_id | uuid | ✓ | | |
-| type | cosmetic_type | | | |
-| name | varchar(100) | | | |
-| description | text | | | ✓ |
-| rarity | cosmetic_rarity | | | |
-| render_data | jsonb | | | |
-| point_cost | integer | | | ✓ |
-| created_at | timestamptz | | | |
+| Column      | Type            | PK  | FK  | Nullable |
+| ----------- | --------------- | --- | --- | -------- |
+| cosmetic_id | uuid            | ✓   |     |          |
+| type        | cosmetic_type   |     |     |          |
+| name        | varchar(100)    |     |     |          |
+| description | text            |     |     | ✓        |
+| rarity      | cosmetic_rarity |     |     |          |
+| render_data | jsonb           |     |     |          |
+| point_cost  | integer         |     |     | ✓        |
+| created_at  | timestamptz     |     |     |          |
 
 ```sql
 CREATE TYPE cosmetic_type   AS ENUM ('username_effect', 'avatar_decoration', 'banner_effect');
@@ -1506,12 +1506,12 @@ CREATE TABLE cosmetic_items (
 
 ## 50. user_cosmetics
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| user_id | uuid | ✓ | members | |
-| cosmetic_id | uuid | ✓ | cosmetic_items | |
-| obtained_at | timestamptz | | | |
-| source | varchar(50) | | | |
+| Column      | Type        | PK  | FK             | Nullable |
+| ----------- | ----------- | --- | -------------- | -------- |
+| user_id     | uuid        | ✓   | members        |          |
+| cosmetic_id | uuid        | ✓   | cosmetic_items |          |
+| obtained_at | timestamptz |     |                |          |
+| source      | varchar(50) |     |                |          |
 
 ```sql
 CREATE TABLE user_cosmetics (
@@ -1530,11 +1530,11 @@ CREATE INDEX idx_user_cosmetics_cosmetic_id ON user_cosmetics (cosmetic_id);
 
 ## 51. user_equipped_cosmetics
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| user_id | uuid | ✓ | members | |
-| slot | cosmetic_type | ✓ | | |
-| cosmetic_id | uuid | | cosmetic_items | |
+| Column      | Type          | PK  | FK             | Nullable |
+| ----------- | ------------- | --- | -------------- | -------- |
+| user_id     | uuid          | ✓   | members        |          |
+| slot        | cosmetic_type | ✓   |                |          |
+| cosmetic_id | uuid          |     | cosmetic_items |          |
 
 ```sql
 CREATE TABLE user_equipped_cosmetics (
@@ -1556,16 +1556,16 @@ CREATE INDEX idx_user_equipped_cosmetics_cosmetic_id ON user_equipped_cosmetics 
 
 ## 52. merch_items
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| merch_id | uuid | ✓ | | |
-| name | varchar(200) | | | |
-| description | text | | | ✓ |
-| image_url | text | | | ✓ |
-| point_cost | integer | | | |
-| is_available | boolean | | | |
-| created_at | timestamptz | | | |
-| updated_at | timestamptz | | | |
+| Column       | Type         | PK  | FK  | Nullable |
+| ------------ | ------------ | --- | --- | -------- |
+| merch_id     | uuid         | ✓   |     |          |
+| name         | varchar(200) |     |     |          |
+| description  | text         |     |     | ✓        |
+| image_url    | text         |     |     | ✓        |
+| point_cost   | integer      |     |     |          |
+| is_available | boolean      |     |     |          |
+| created_at   | timestamptz  |     |     |          |
+| updated_at   | timestamptz  |     |     |          |
 
 ```sql
 CREATE TABLE merch_items (
@@ -1587,12 +1587,12 @@ CREATE TABLE merch_items (
 
 ## 53. merch_variants
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| variant_id | uuid | ✓ | | |
-| merch_id | uuid | | merch_items | |
-| label | varchar(100) | | | |
-| stock | integer | | | |
+| Column     | Type         | PK  | FK          | Nullable |
+| ---------- | ------------ | --- | ----------- | -------- |
+| variant_id | uuid         | ✓   |             |          |
+| merch_id   | uuid         |     | merch_items |          |
+| label      | varchar(100) |     |             |          |
+| stock      | integer      |     |             |          |
 
 ```sql
 CREATE TABLE merch_variants (
@@ -1612,20 +1612,20 @@ CREATE INDEX idx_merch_variants_merch_id ON merch_variants (merch_id);
 
 ## 54. merch_orders
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| order_id | uuid | ✓ | | |
-| user_id | uuid | | members | |
-| points_spent | integer | | | |
-| status | merch_order_status | | | |
-| shipping_name | varchar(200) | | | |
-| shipping_address | text | | | |
-| shipping_city | varchar(100) | | | |
-| shipping_country | char(2) | | | |
-| shipping_zip | varchar(20) | | | |
-| tracking_number | varchar(100) | | | ✓ |
-| created_at | timestamptz | | | |
-| updated_at | timestamptz | | | |
+| Column           | Type               | PK  | FK      | Nullable |
+| ---------------- | ------------------ | --- | ------- | -------- |
+| order_id         | uuid               | ✓   |         |          |
+| user_id          | uuid               |     | members |          |
+| points_spent     | integer            |     |         |          |
+| status           | merch_order_status |     |         |          |
+| shipping_name    | varchar(200)       |     |         |          |
+| shipping_address | text               |     |         |          |
+| shipping_city    | varchar(100)       |     |         |          |
+| shipping_country | char(2)            |     |         |          |
+| shipping_zip     | varchar(20)        |     |         |          |
+| tracking_number  | varchar(100)       |     |         | ✓        |
+| created_at       | timestamptz        |     |         |          |
+| updated_at       | timestamptz        |     |         |          |
 
 ```sql
 CREATE TYPE merch_order_status AS ENUM ('pending', 'processing', 'shipped', 'delivered', 'cancelled');
@@ -1655,14 +1655,14 @@ CREATE INDEX idx_merch_orders_status  ON merch_orders (status);
 
 ## 55. merch_order_items
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| order_item_id | uuid | ✓ | | |
-| order_id | uuid | | merch_orders | |
-| merch_id | uuid | | merch_items | |
-| variant_id | uuid | | merch_variants | ✓ |
-| quantity | smallint | | | |
-| point_cost | integer | | | |
+| Column        | Type     | PK  | FK             | Nullable |
+| ------------- | -------- | --- | -------------- | -------- |
+| order_item_id | uuid     | ✓   |                |          |
+| order_id      | uuid     |     | merch_orders   |          |
+| merch_id      | uuid     |     | merch_items    |          |
+| variant_id    | uuid     |     | merch_variants | ✓        |
+| quantity      | smallint |     |                |          |
+| point_cost    | integer  |     |                |          |
 
 ```sql
 CREATE TABLE merch_order_items (
@@ -1684,15 +1684,15 @@ CREATE INDEX idx_merch_order_items_order_id ON merch_order_items (order_id);
 
 ## 56. subscriptions
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| subscription_id | uuid | ✓ | | |
-| user_id | uuid | | members | |
-| plan | subscription_plan | | | |
-| status | subscription_status | | | |
-| started_at | timestamptz | | | |
-| ends_at | timestamptz | | | |
-| cancelled_at | timestamptz | | | ✓ |
+| Column          | Type                | PK  | FK      | Nullable |
+| --------------- | ------------------- | --- | ------- | -------- |
+| subscription_id | uuid                | ✓   |         |          |
+| user_id         | uuid                |     | members |          |
+| plan            | subscription_plan   |     |         |          |
+| status          | subscription_status |     |         |          |
+| started_at      | timestamptz         |     |         |          |
+| ends_at         | timestamptz         |     |         |          |
+| cancelled_at    | timestamptz         |     |         | ✓        |
 
 ```sql
 CREATE TYPE subscription_plan   AS ENUM ('premium');
@@ -1721,15 +1721,15 @@ CREATE INDEX idx_subscriptions_active  ON subscriptions (user_id, status) WHERE 
 
 ## 57. subscription_payments
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| payment_id | uuid | ✓ | | |
-| subscription_id | uuid | | subscriptions | |
-| amount_cents | integer | | | |
-| currency | char(3) | | | |
-| payment_provider | varchar(50) | | | |
-| provider_payment_id | text | | | |
-| paid_at | timestamptz | | | |
+| Column              | Type        | PK  | FK            | Nullable |
+| ------------------- | ----------- | --- | ------------- | -------- |
+| payment_id          | uuid        | ✓   |               |          |
+| subscription_id     | uuid        |     | subscriptions |          |
+| amount_cents        | integer     |     |               |          |
+| currency            | char(3)     |     |               |          |
+| payment_provider    | varchar(50) |     |               |          |
+| provider_payment_id | text        |     |               |          |
+| paid_at             | timestamptz |     |               |          |
 
 ```sql
 CREATE TABLE subscription_payments (
@@ -1752,18 +1752,18 @@ CREATE INDEX idx_subscription_payments_subscription_id ON subscription_payments 
 
 ## 58. reports
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| report_id | uuid | ✓ | | |
-| reporter_id | uuid | | users | |
-| target_type | report_target_type | | | |
-| target_id | uuid | | | |
-| reason | text | | | |
-| status | report_status | | | |
-| reviewed_by | uuid | | administrators | ✓ |
-| reviewed_at | timestamptz | | | ✓ |
-| resolution_note | text | | | ✓ |
-| created_at | timestamptz | | | |
+| Column          | Type               | PK  | FK             | Nullable |
+| --------------- | ------------------ | --- | -------------- | -------- |
+| report_id       | uuid               | ✓   |                |          |
+| reporter_id     | uuid               |     | users          |          |
+| target_type     | report_target_type |     |                |          |
+| target_id       | uuid               |     |                |          |
+| reason          | text               |     |                |          |
+| status          | report_status      |     |                |          |
+| reviewed_by     | uuid               |     | administrators | ✓        |
+| reviewed_at     | timestamptz        |     |                | ✓        |
+| resolution_note | text               |     |                | ✓        |
+| created_at      | timestamptz        |     |                |          |
 
 ```sql
 CREATE TYPE report_target_type AS ENUM ('user', 'post', 'comment', 'message', 'hackathon');
@@ -1800,17 +1800,17 @@ CREATE INDEX idx_reports_target      ON reports (target_type, target_id);
 
 ## 59. notifications
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| notification_id | uuid | ✓ | | |
-| user_id | uuid | | users | |
-| type | notification_type | | | |
-| title | varchar(100) | | | |
-| body | text | | | ✓ |
-| entity_type | entity_type | | | ✓ |
-| entity_id | uuid | | | ✓ |
-| read_at | timestamptz | | | ✓ |
-| created_at | timestamptz | | | |
+| Column          | Type              | PK  | FK    | Nullable |
+| --------------- | ----------------- | --- | ----- | -------- |
+| notification_id | uuid              | ✓   |       |          |
+| user_id         | uuid              |     | users |          |
+| type            | notification_type |     |       |          |
+| title           | varchar(100)      |     |       |          |
+| body            | text              |     |       | ✓        |
+| entity_type     | entity_type       |     |       | ✓        |
+| entity_id       | uuid              |     |       | ✓        |
+| read_at         | timestamptz       |     |       | ✓        |
+| created_at      | timestamptz       |     |       |          |
 
 ```sql
 CREATE TYPE entity_type AS ENUM (
@@ -1867,16 +1867,16 @@ CREATE INDEX idx_notifications_unread  ON notifications (user_id, created_at DES
 
 Custom questions an organizer attaches to a hackathon's application form. `type` drives the input widget; `options` holds the choices for `single_choice` / `multi_choice` types.
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| question_id | uuid | ✓ | | |
-| hackathon_id | uuid | | hackathons | |
-| prompt | text | | | |
-| type | varchar(20) | | | |
-| options | jsonb | | | ✓ |
-| required | boolean | | | |
-| position | integer | | | |
-| created_at | timestamptz | | | |
+| Column       | Type        | PK  | FK         | Nullable |
+| ------------ | ----------- | --- | ---------- | -------- |
+| question_id  | uuid        | ✓   |            |          |
+| hackathon_id | uuid        |     | hackathons |          |
+| prompt       | text        |     |            |          |
+| type         | varchar(20) |     |            |          |
+| options      | jsonb       |     |            | ✓        |
+| required     | boolean     |     |            |          |
+| position     | integer     |     |            |          |
+| created_at   | timestamptz |     |            |          |
 
 ```sql
 CREATE TABLE application_questions (
@@ -1906,13 +1906,13 @@ CREATE INDEX idx_application_questions_hackathon_id ON application_questions (ha
 
 An applicant's answer to a single application question. For choice questions the selected option(s) are stored as text / JSON-encoded text. One answer per (application, question).
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| answer_id | uuid | ✓ | | |
-| application_id | uuid | | applications | |
-| question_id | uuid | | application_questions | |
-| answer | text | | | |
-| created_at | timestamptz | | | |
+| Column         | Type        | PK  | FK                    | Nullable |
+| -------------- | ----------- | --- | --------------------- | -------- |
+| answer_id      | uuid        | ✓   |                       |          |
+| application_id | uuid        |     | applications          |          |
+| question_id    | uuid        |     | application_questions |          |
+| answer         | text        |     |                       |          |
+| created_at     | timestamptz |     |                       |          |
 
 ```sql
 CREATE TABLE question_answers (
@@ -1934,16 +1934,16 @@ CREATE INDEX        idx_question_answers_question_id         ON question_answers
 
 A member's request to join an open team; the team leader accepts or declines. At most one pending request per (team, user).
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| request_id | uuid | ✓ | | |
-| team_id | uuid | | teams | |
-| user_id | uuid | | members | |
-| message | text | | | ✓ |
-| status | varchar(20) | | | |
-| created_at | timestamptz | | | |
-| responded_at | timestamptz | | | ✓ |
-| responded_by | uuid | | users | ✓ |
+| Column       | Type        | PK  | FK      | Nullable |
+| ------------ | ----------- | --- | ------- | -------- |
+| request_id   | uuid        | ✓   |         |          |
+| team_id      | uuid        |     | teams   |          |
+| user_id      | uuid        |     | members |          |
+| message      | text        |     |         | ✓        |
+| status       | varchar(20) |     |         |          |
+| created_at   | timestamptz |     |         |          |
+| responded_at | timestamptz |     |         | ✓        |
+| responded_by | uuid        |     | users   | ✓        |
 
 ```sql
 CREATE TABLE team_join_requests (
@@ -1972,16 +1972,16 @@ CREATE INDEX        idx_team_join_requests_user_id ON team_join_requests (user_i
 
 A team leader's invitation to a (solo) member; the invitee accepts or declines. At most one pending invitation per (team, user).
 
-| Column | Type | PK | FK | Nullable |
-| --- | --- | --- | --- | --- |
-| invitation_id | uuid | ✓ | | |
-| team_id | uuid | | teams | |
-| user_id | uuid | | members | |
-| invited_by | uuid | | users | ✓ |
-| message | text | | | ✓ |
-| status | varchar(20) | | | |
-| created_at | timestamptz | | | |
-| responded_at | timestamptz | | | ✓ |
+| Column        | Type        | PK  | FK      | Nullable |
+| ------------- | ----------- | --- | ------- | -------- |
+| invitation_id | uuid        | ✓   |         |          |
+| team_id       | uuid        |     | teams   |          |
+| user_id       | uuid        |     | members |          |
+| invited_by    | uuid        |     | users   | ✓        |
+| message       | text        |     |         | ✓        |
+| status        | varchar(20) |     |         |          |
+| created_at    | timestamptz |     |         |          |
+| responded_at  | timestamptz |     |         | ✓        |
 
 ```sql
 CREATE TABLE team_invitations (

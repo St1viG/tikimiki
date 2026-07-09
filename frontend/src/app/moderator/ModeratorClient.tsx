@@ -16,43 +16,67 @@ import { getReports, resolveReport as apiResolveReport, type Report } from "@/li
  */
 
 const M = {
-  backLabel:         { en: "Back",                                                sr: "Nazad" },
-  pageTitle:         { en: "Content reports",                                    sr: "Prijave sadržaja" },
-  modeBadge:         { en: "Moderator",                                          sr: "Moderator" },
-  pageSub:           { en: "ETF HackWeek 2026 · Review and process reports for this hackathon", sr: "ETF HackWeek 2026 · Pregled i obrada prijava za ovaj hakathon" },
-  searchLabel:       { en: "Search",                                             sr: "Pretraži" },
-  searchPh:          { en: "Search…",                                            sr: "Pretraži…" },
-  statOpen:          { en: "Open reports",                                       sr: "Otvorene prijave" },
-  statResolved:      { en: "Resolved today",                                     sr: "Rešene danas" },
-  statTotal:         { en: "Total (this hackathon)",                             sr: "Ukupno (ovaj hakathon)" },
-  filterSearchAria:  { en: "Search reports by user or content",                  sr: "Pretraži prijave po korisniku ili sadržaju" },
-  filterSearchPh:    { en: "Search reports by user or content…",                 sr: "Pretraži prijave po korisniku ili sadržaju…" },
-  chipStatus:        { en: "Status: Open",                                       sr: "Status: Otvorene" },
-  chipReason:        { en: "Reason",                                             sr: "Razlog" },
-  chipSort:          { en: "Sort:",                                              sr: "Sortiraj:" },
-  chipNewest:        { en: "Newest",                                             sr: "Najnovije" },
-  removeMsgBtn:      { en: "Remove message",                                     sr: "Ukloni poruku" },
-  removePostBtn:     { en: "Remove post",                                        sr: "Ukloni objavu" },
-  warnUserBtn:       { en: "Warn user",                                         sr: "Upozori korisnika" },
-  dismissBtn:        { en: "Dismiss report",                                     sr: "Odbaci prijavu" },
-  viewProfileBtn:    { en: "View profile",                                       sr: "Pregledaj profil" },
-  resolvedLabel:     { en: "Resolved",                                           sr: "Rešeno" },
-  showCount:         { en: "Showing",                                            sr: "Prikazano" },
-  ofCount:           { en: "of",                                                 sr: "od" },
-  reportsFor:        { en: "reports for ETF HackWeek 2026",                      sr: "prijava za ETF HackWeek 2026" },
-  dismissModalTitle: { en: "Dismiss report",                                     sr: "Odbaci prijavu" },
-  dismissModalBody:  { en: "The report will be marked as dismissed. The reporter will be notified that the content did not violate community guidelines.", sr: "Prijava će biti označena kao odbačena. Podnosilac prijave će biti obavešten da sadržaj nije prekršio pravila zajednice." },
-  dismissModalCancel:{ en: "Cancel",                                             sr: "Otkaži" },
-  dismissModalConfirm:{ en: "Dismiss",                                           sr: "Odbaci" },
-  toastRemoved:      { en: "Content removed. Reporter notified.",                sr: "Sadržaj uklonjen. Podnosilac prijave je obavešten." },
-  toastWarned:       { en: "Warning sent. Reporter notified.",                   sr: "Upozorenje poslato. Podnosilac prijave je obavešten." },
-  toastDismissed:    { en: "Report dismissed. Reporter notified.",               sr: "Prijava odbijena. Podnosilac je obavešten." },
-  toastError:        { en: "Could not process the report. Please try again.",    sr: "Prijava nije mogla biti obrađena. Pokušajte ponovo." },
-  loading:           { en: "Loading reports…",                                   sr: "Učitavanje prijava…" },
-  empty:             { en: "No open reports.",                                   sr: "Nema otvorenih prijava." },
-  reportedBy:        { en: "Reported by",                                        sr: "Prijavio" },
-  reportKind:        { en: "Report",                                             sr: "Prijava" },
-  targetLabel:       { en: "Target",                                             sr: "Cilj" },
+  backLabel: { en: "Back", sr: "Nazad" },
+  pageTitle: { en: "Content reports", sr: "Prijave sadržaja" },
+  modeBadge: { en: "Moderator", sr: "Moderator" },
+  pageSub: {
+    en: "ETF HackWeek 2026 · Review and process reports for this hackathon",
+    sr: "ETF HackWeek 2026 · Pregled i obrada prijava za ovaj hakathon",
+  },
+  searchLabel: { en: "Search", sr: "Pretraži" },
+  searchPh: { en: "Search…", sr: "Pretraži…" },
+  statOpen: { en: "Open reports", sr: "Otvorene prijave" },
+  statResolved: { en: "Resolved today", sr: "Rešene danas" },
+  statTotal: { en: "Total (this hackathon)", sr: "Ukupno (ovaj hakathon)" },
+  filterSearchAria: {
+    en: "Search reports by user or content",
+    sr: "Pretraži prijave po korisniku ili sadržaju",
+  },
+  filterSearchPh: {
+    en: "Search reports by user or content…",
+    sr: "Pretraži prijave po korisniku ili sadržaju…",
+  },
+  chipStatus: { en: "Status: Open", sr: "Status: Otvorene" },
+  chipReason: { en: "Reason", sr: "Razlog" },
+  chipSort: { en: "Sort:", sr: "Sortiraj:" },
+  chipNewest: { en: "Newest", sr: "Najnovije" },
+  removeMsgBtn: { en: "Remove message", sr: "Ukloni poruku" },
+  removePostBtn: { en: "Remove post", sr: "Ukloni objavu" },
+  warnUserBtn: { en: "Warn user", sr: "Upozori korisnika" },
+  dismissBtn: { en: "Dismiss report", sr: "Odbaci prijavu" },
+  viewProfileBtn: { en: "View profile", sr: "Pregledaj profil" },
+  resolvedLabel: { en: "Resolved", sr: "Rešeno" },
+  showCount: { en: "Showing", sr: "Prikazano" },
+  ofCount: { en: "of", sr: "od" },
+  reportsFor: { en: "reports for ETF HackWeek 2026", sr: "prijava za ETF HackWeek 2026" },
+  dismissModalTitle: { en: "Dismiss report", sr: "Odbaci prijavu" },
+  dismissModalBody: {
+    en: "The report will be marked as dismissed. The reporter will be notified that the content did not violate community guidelines.",
+    sr: "Prijava će biti označena kao odbačena. Podnosilac prijave će biti obavešten da sadržaj nije prekršio pravila zajednice.",
+  },
+  dismissModalCancel: { en: "Cancel", sr: "Otkaži" },
+  dismissModalConfirm: { en: "Dismiss", sr: "Odbaci" },
+  toastRemoved: {
+    en: "Content removed. Reporter notified.",
+    sr: "Sadržaj uklonjen. Podnosilac prijave je obavešten.",
+  },
+  toastWarned: {
+    en: "Warning sent. Reporter notified.",
+    sr: "Upozorenje poslato. Podnosilac prijave je obavešten.",
+  },
+  toastDismissed: {
+    en: "Report dismissed. Reporter notified.",
+    sr: "Prijava odbijena. Podnosilac je obavešten.",
+  },
+  toastError: {
+    en: "Could not process the report. Please try again.",
+    sr: "Prijava nije mogla biti obrađena. Pokušajte ponovo.",
+  },
+  loading: { en: "Loading reports…", sr: "Učitavanje prijava…" },
+  empty: { en: "No open reports.", sr: "Nema otvorenih prijava." },
+  reportedBy: { en: "Reported by", sr: "Prijavio" },
+  reportKind: { en: "Report", sr: "Prijava" },
+  targetLabel: { en: "Target", sr: "Cilj" },
 } as const;
 
 type ModalKind = "remove" | "warn" | "dismiss" | null;
@@ -160,7 +184,6 @@ export function ModeratorClient() {
   return (
     <>
       <main className="mod-page" id="main" data-filter="prijave">
-
         {/* PAGE HEADER */}
         <div className="page-head">
           <Link className="col-back" href="/cohor" aria-label={t("backLabel")}>
@@ -181,7 +204,9 @@ export function ModeratorClient() {
             <input type="search" aria-label={t("searchLabel")} placeholder={t("searchPh")} />
           </div>
           <div className="mod-admin-chip">
-            <span className="avatar v is-orb" aria-hidden="true"><GenerativeAvatar seed="andrej" className="orb-art" /></span>
+            <span className="avatar v is-orb" aria-hidden="true">
+              <GenerativeAvatar seed="andrej" className="orb-art" />
+            </span>
             <div>
               <div className="mod-admin-chip-name">Andrej Čolić</div>
               <div className="mod-admin-chip-sub">{t("modeBadge")} · ETF HackWeek 2026</div>
@@ -193,11 +218,15 @@ export function ModeratorClient() {
         <div className="mod-stats">
           <div className="mod-stat mod-stat--lead">
             <div className="mod-stat-label">{t("statOpen")}</div>
-            <div className="mod-stat-val v-red" id="count-open">{stats.open}</div>
+            <div className="mod-stat-val v-red" id="count-open">
+              {stats.open}
+            </div>
           </div>
           <div className="mod-stat">
             <div className="mod-stat-label">{t("statResolved")}</div>
-            <div className="mod-stat-val v-violet" id="count-resolved">{stats.resolvedToday}</div>
+            <div className="mod-stat-val v-violet" id="count-resolved">
+              {stats.resolvedToday}
+            </div>
           </div>
           <div className="mod-stat">
             <div className="mod-stat-label">{t("statTotal")}</div>
@@ -207,7 +236,6 @@ export function ModeratorClient() {
 
         {/* FILTER BAR + REPORT LIST */}
         <section className="adm-section" data-section="prijave">
-
           <div className="mod-filter-bar">
             <div className="mod-search" role="search">
               <Icon name="search" />
@@ -239,7 +267,6 @@ export function ModeratorClient() {
           </div>
 
           <div className="mod-list" style={{ marginTop: "14px" }}>
-
             {loading ? (
               Array.from({ length: 3 }).map((_, i) => (
                 <div className="mod-report" key={`skel-${i}`} aria-busy="true">
@@ -251,7 +278,10 @@ export function ModeratorClient() {
                     />
                     <div className="mod-report-titlewrap">
                       <span className="skel skel-line" style={{ width: 110, height: 13 }} />
-                      <span className="skel skel-line" style={{ width: 200, height: 11, marginTop: 7 }} />
+                      <span
+                        className="skel skel-line"
+                        style={{ width: 200, height: 11, marginTop: 7 }}
+                      />
                     </div>
                     <span
                       className="skel"
@@ -264,9 +294,21 @@ export function ModeratorClient() {
                     <span className="skel skel-line" style={{ width: 170, height: 12 }} />
                   </div>
                   <div className="mod-report-actions mod-actions">
-                    <span className="skel" aria-hidden="true" style={{ width: 104, height: 34, borderRadius: 9 }} />
-                    <span className="skel" aria-hidden="true" style={{ width: 96, height: 34, borderRadius: 9 }} />
-                    <span className="skel" aria-hidden="true" style={{ width: 88, height: 34, borderRadius: 9 }} />
+                    <span
+                      className="skel"
+                      aria-hidden="true"
+                      style={{ width: 104, height: 34, borderRadius: 9 }}
+                    />
+                    <span
+                      className="skel"
+                      aria-hidden="true"
+                      style={{ width: 96, height: 34, borderRadius: 9 }}
+                    />
+                    <span
+                      className="skel"
+                      aria-hidden="true"
+                      style={{ width: 88, height: 34, borderRadius: 9 }}
+                    />
                   </div>
                 </div>
               ))
@@ -293,8 +335,12 @@ export function ModeratorClient() {
                       </span>
                     </div>
                     <div className="mod-report-meta">
-                      <span>{t("targetLabel")}: <strong>{report.targetType}</strong></span>
-                      <span>ID: <strong>{report.targetId}</strong></span>
+                      <span>
+                        {t("targetLabel")}: <strong>{report.targetType}</strong>
+                      </span>
+                      <span>
+                        ID: <strong>{report.targetId}</strong>
+                      </span>
                     </div>
                     <div className="mod-report-actions mod-actions">
                       <button
@@ -315,10 +361,7 @@ export function ModeratorClient() {
                       >
                         <Icon name="check" /> {t("dismissBtn")}
                       </button>
-                      <Link
-                        className="mod-btn-xs profile"
-                        href={`/u/${report.reporterUsername}`}
-                      >
+                      <Link className="mod-btn-xs profile" href={`/u/${report.reporterUsername}`}>
                         {t("viewProfileBtn")}
                       </Link>
                     </div>
@@ -326,14 +369,12 @@ export function ModeratorClient() {
                 );
               })
             )}
-
           </div>
 
           <div className="mod-count-foot">
             {t("showCount")} <span className="tnum">{visibleReports.length}</span> {t("ofCount")}{" "}
             <span className="tnum">{stats.total}</span> {t("reportsFor")}
           </div>
-
         </section>
       </main>
 
@@ -357,17 +398,19 @@ export function ModeratorClient() {
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-dismiss-title"
-        onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) closeModal();
+        }}
       >
         <div className="modal-box">
           <div className="modal-title" id="modal-dismiss-title">
             <Icon name="check" /> {t("dismissModalTitle")}
           </div>
-          <div className="modal-body">
-            {t("dismissModalBody")}
-          </div>
+          <div className="modal-body">{t("dismissModalBody")}</div>
           <div className="modal-actions">
-            <button className="btn btn-ghost" onClick={closeModal}>{t("dismissModalCancel")}</button>
+            <button className="btn btn-ghost" onClick={closeModal}>
+              {t("dismissModalCancel")}
+            </button>
             <button
               className="btn btn-violet modal-confirm"
               onClick={() => confirmAction("dismissed", "Report dismissed", t("toastDismissed"))}

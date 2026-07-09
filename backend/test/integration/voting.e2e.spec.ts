@@ -39,9 +39,7 @@ describe("audience voting (e2e)", () => {
 
   it("reports voting closed when no window is configured", async () => {
     const { hk } = await scenario();
-    const res = await http()
-      .get(`/api/v1/hackathons/${hk.hackathonId}/voting-status`)
-      .expect(200);
+    const res = await http().get(`/api/v1/hackathons/${hk.hackathonId}/voting-status`).expect(200);
     expect(res.body.isOpen).toBe(false);
   });
 
@@ -53,9 +51,7 @@ describe("audience voting (e2e)", () => {
       new Date(Date.now() - HOUR_MS),
       new Date(Date.now() + HOUR_MS),
     );
-    const res = await http()
-      .get(`/api/v1/hackathons/${hk.hackathonId}/voting-status`)
-      .expect(200);
+    const res = await http().get(`/api/v1/hackathons/${hk.hackathonId}/voting-status`).expect(200);
     expect(res.body.isOpen).toBe(true);
   });
 

@@ -92,11 +92,7 @@ export function AvatarStack({
         );
       })}
       {Array.from({ length: Math.max(emptySlots, 0) }).map((_, i) => (
-        <div
-          key={`slot-${i}`}
-          className={`tm-av tm-av-slot ${sizeClass}`}
-          aria-hidden="true"
-        >
+        <div key={`slot-${i}`} className={`tm-av tm-av-slot ${sizeClass}`} aria-hidden="true">
           {slotContent}
         </div>
       ))}

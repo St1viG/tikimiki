@@ -10,10 +10,9 @@ const videoUrlSchema = z
   .string()
   .trim()
   .max(2048)
-  .refine(
-    (v) => v.startsWith("/uploads/") || z.string().url().safeParse(v).success,
-    { message: "Must be a URL or an uploaded video path" },
-  );
+  .refine((v) => v.startsWith("/uploads/") || z.string().url().safeParse(v).success, {
+    message: "Must be a URL or an uploaded video path",
+  });
 
 /**
  * Body for `POST /teams/:teamId/project`. A team's project starts as a draft;

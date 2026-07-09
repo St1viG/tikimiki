@@ -1,25 +1,11 @@
-import {
-  ConflictException,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from "@nestjs/common";
+import { ConflictException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { and, count, desc, eq, gte, inArray } from "drizzle-orm";
 import { AuthzService } from "../common/authz.service";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import { reports, users } from "../db/schema";
-import type {
-  CreateReportInput,
-  ListReportsQuery,
-  ResolveReportInput,
-} from "./dto";
+import type { CreateReportInput, ListReportsQuery, ResolveReportInput } from "./dto";
 
-export type ReportTargetType =
-  | "user"
-  | "post"
-  | "comment"
-  | "message"
-  | "hackathon";
+export type ReportTargetType = "user" | "post" | "comment" | "message" | "hackathon";
 export type ReportStatus = "pending" | "reviewed" | "resolved" | "dismissed";
 
 export interface ReportDto {
@@ -94,10 +80,7 @@ export class ReportsService {
     private readonly authz: AuthzService,
   ) {}
 
-  async create(
-    reporterId: string,
-    input: CreateReportInput,
-  ): Promise<ReportDto> {
+  async create(reporterId: string, input: CreateReportInput): Promise<ReportDto> {
     const existing = await this.db
       .select({ reportId: reports.reportId })
       .from(reports)
@@ -142,10 +125,7 @@ export class ReportsService {
     return toReportDto(created);
   }
 
-  async list(
-    userId: string,
-    query: ListReportsQuery,
-  ): Promise<ListReportsResponse> {
+  async list(userId: string, query: ListReportsQuery): Promise<ListReportsResponse> {
     await this.authz.assertAdmin(userId);
     const baseWhere =
       query.status === "all"
@@ -180,9 +160,7 @@ export class ReportsService {
         ),
       );
 
-    const [totalRow] = await this.db
-      .select({ value: count() })
-      .from(reports);
+    const [totalRow] = await this.db.select({ value: count() }).from(reports);
 
     return {
       reports: rows.map(toReportDto),

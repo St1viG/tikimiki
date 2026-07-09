@@ -31,19 +31,22 @@ import {
  */
 
 const M = {
-  backLabel:         { en: "Back",                             sr: "Nazad" },
-  pageTitle:         { en: "Notifications",                   sr: "Notifikacije" },
-  pageSub:           { en: "Everything happening in your community.", sr: "Sve što se dešava u tvojoj zajednici." },
-  filterLabel:       { en: "Filter notifications",            sr: "Filter notifikacija" },
-  tabAll:            { en: "All",                             sr: "Sve" },
-  tabUnread:         { en: "Unread",                          sr: "Nepročitane" },
-  markAllRead:       { en: "Mark all as read",                sr: "Označi sve kao pročitano" },
-  groupToday:        { en: "Today",                           sr: "Danas" },
-  groupEarlier:      { en: "Earlier",                         sr: "Ranije" },
-  unreadDot:         { en: "unread",                          sr: "nepročitano" },
-  loading:           { en: "Loading…",                        sr: "Učitavanje…" },
-  emptyAll:          { en: "You have no notifications yet.",   sr: "Još uvek nemaš notifikacija." },
-  emptyUnread:       { en: "You're all caught up.",            sr: "Sve je pročitano." },
+  backLabel: { en: "Back", sr: "Nazad" },
+  pageTitle: { en: "Notifications", sr: "Notifikacije" },
+  pageSub: {
+    en: "Everything happening in your community.",
+    sr: "Sve što se dešava u tvojoj zajednici.",
+  },
+  filterLabel: { en: "Filter notifications", sr: "Filter notifikacija" },
+  tabAll: { en: "All", sr: "Sve" },
+  tabUnread: { en: "Unread", sr: "Nepročitane" },
+  markAllRead: { en: "Mark all as read", sr: "Označi sve kao pročitano" },
+  groupToday: { en: "Today", sr: "Danas" },
+  groupEarlier: { en: "Earlier", sr: "Ranije" },
+  unreadDot: { en: "unread", sr: "nepročitano" },
+  loading: { en: "Loading…", sr: "Učitavanje…" },
+  emptyAll: { en: "You have no notifications yet.", sr: "Još uvek nemaš notifikacija." },
+  emptyUnread: { en: "You're all caught up.", sr: "Sve je pročitano." },
 } as const;
 
 type FilterMode = "sve" | "unread";
@@ -140,11 +143,7 @@ export function NotificationsClient() {
     // After the fade transition, clear the dotFading flag.
     setTimeout(() => {
       setNotifs((prev) =>
-        prev
-          ? prev.map((n) =>
-              n.notificationId === id ? { ...n, dotFading: false } : n,
-            )
-          : prev,
+        prev ? prev.map((n) => (n.notificationId === id ? { ...n, dotFading: false } : n)) : prev,
       );
     }, 360);
   }
@@ -157,9 +156,7 @@ export function NotificationsClient() {
     const stamp = new Date().toISOString();
     setNotifs((prev) =>
       prev
-        ? prev.map((n) =>
-            n.readAt === null ? { ...n, readAt: stamp, dotFading: true } : n,
-          )
+        ? prev.map((n) => (n.readAt === null ? { ...n, readAt: stamp, dotFading: true } : n))
         : prev,
     );
 
@@ -167,23 +164,17 @@ export function NotificationsClient() {
       console.error(err);
       // Reload from the server to restore the true state on failure.
       getNotifications("all")
-        .then((data) =>
-          setNotifs(data.map((n) => ({ ...n, dotFading: false }))),
-        )
+        .then((data) => setNotifs(data.map((n) => ({ ...n, dotFading: false }))))
         .catch(() => {});
     });
 
     setTimeout(() => {
-      setNotifs((prev) =>
-        prev ? prev.map((n) => ({ ...n, dotFading: false })) : prev,
-      );
+      setNotifs((prev) => (prev ? prev.map((n) => ({ ...n, dotFading: false })) : prev));
     }, 360);
   }
 
   // Filtered (by tab) list, then split into Today vs Earlier groups.
-  const visible = (notifs ?? []).filter(
-    (n) => filter !== "unread" || n.readAt === null,
-  );
+  const visible = (notifs ?? []).filter((n) => filter !== "unread" || n.readAt === null);
   const todayList = visible.filter((n) => isToday(n.createdAt));
   const earlierList = visible.filter((n) => !isToday(n.createdAt));
 
@@ -194,17 +185,11 @@ export function NotificationsClient() {
   function renderSkelRow(i: number) {
     return (
       <div className="notif" key={i} aria-hidden="true">
-        <span
-          className="notif-ic skel"
-          style={{ borderRadius: 12 }}
-        />
+        <span className="notif-ic skel" style={{ borderRadius: 12 }} />
         <div className="notif-body">
           <div className="notif-text">
             <span className="skel skel-line" style={{ width: "75%" }} />
-            <span
-              className="skel skel-line"
-              style={{ width: "45%", marginTop: 7 }}
-            />
+            <span className="skel skel-line" style={{ width: "45%", marginTop: 7 }} />
           </div>
           <div className="notif-time">
             <span className="skel skel-line" style={{ width: "18%" }} />

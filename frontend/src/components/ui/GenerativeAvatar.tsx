@@ -49,14 +49,16 @@ export const AVATAR_VARIANTS: readonly AvatarVariantEntry[] = [
 ];
 
 /** Fast variant -> component lookup, derived from the registry. */
-const VARIANT_COMPONENTS: Record<AvatarVariant, ComponentType<AvatarArtProps>> =
-  AVATAR_VARIANTS.reduce(
-    (acc, entry) => {
-      acc[entry.id] = entry.component;
-      return acc;
-    },
-    {} as Record<AvatarVariant, ComponentType<AvatarArtProps>>,
-  );
+const VARIANT_COMPONENTS: Record<
+  AvatarVariant,
+  ComponentType<AvatarArtProps>
+> = AVATAR_VARIANTS.reduce(
+  (acc, entry) => {
+    acc[entry.id] = entry.component;
+    return acc;
+  },
+  {} as Record<AvatarVariant, ComponentType<AvatarArtProps>>,
+);
 
 export function GenerativeAvatar({
   seed,

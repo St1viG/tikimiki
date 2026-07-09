@@ -1,13 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Query,
-  UseGuards,
-} from "@nestjs/common";
+import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
 import { CurrentUser } from "../auth/current-user.decorator";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { OptionalJwtAuthGuard } from "../auth/optional-jwt-auth.guard";
@@ -73,10 +64,7 @@ export class UsersController {
 
   @Post(":userId/follow")
   @UseGuards(JwtAuthGuard)
-  toggleFollow(
-    @CurrentUser() userId: string,
-    @Param("userId") targetUserId: string,
-  ) {
+  toggleFollow(@CurrentUser() userId: string, @Param("userId") targetUserId: string) {
     return this.users.toggleFollow(userId, targetUserId);
   }
 
@@ -94,19 +82,13 @@ export class UsersController {
 
   @Get(":username/posts")
   @UseGuards(OptionalJwtAuthGuard)
-  listUserPosts(
-    @Param("username") username: string,
-    @OptionalUser() viewerId: string | null,
-  ) {
+  listUserPosts(@Param("username") username: string, @OptionalUser() viewerId: string | null) {
     return this.users.listUserPosts(username, viewerId);
   }
 
   @Get(":username")
   @UseGuards(OptionalJwtAuthGuard)
-  getPublicProfile(
-    @Param("username") username: string,
-    @OptionalUser() viewerId: string | null,
-  ) {
+  getPublicProfile(@Param("username") username: string, @OptionalUser() viewerId: string | null) {
     return this.users.getPublicProfile(username, viewerId);
   }
 }

@@ -11,10 +11,7 @@ import {
 import { CurrentUser } from "../auth/current-user.decorator";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { ZodValidationPipe } from "../common/zod.pipe";
-import {
-  listNotificationsSchema,
-  type ListNotificationsQuery,
-} from "./dto";
+import { listNotificationsSchema, type ListNotificationsQuery } from "./dto";
 import { NotificationsService } from "./notifications.service";
 
 @Controller("notifications")
@@ -44,10 +41,7 @@ export class NotificationsController {
   }
 
   @Patch(":id/read")
-  markRead(
-    @CurrentUser() userId: string,
-    @Param("id", new ParseUUIDPipe()) id: string,
-  ) {
+  markRead(@CurrentUser() userId: string, @Param("id", new ParseUUIDPipe()) id: string) {
     return this.svc.markRead(userId, id);
   }
 }

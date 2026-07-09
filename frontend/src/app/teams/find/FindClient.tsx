@@ -8,22 +8,11 @@ import { RailRight } from "@/components/shell/RailRight";
 import { CreateTeamPopup } from "@/components/popups/CreateTeamPopup";
 import { JoinTeamPopup } from "@/components/popups/JoinTeamPopup";
 import { ProfilePopup } from "@/components/popups/ProfilePopup";
-import {
-  OpenTeamCard,
-  SoloPlayerCard,
-  InviteCard,
-  TeamLeaderboardRow,
-} from "@/components/teams";
+import { OpenTeamCard, SoloPlayerCard, InviteCard, TeamLeaderboardRow } from "@/components/teams";
 import { useT } from "@/components/i18n/LanguageProvider";
 import { useRequireAuth } from "@/components/auth/AuthProvider";
 import * as api from "@/lib/api";
-import type {
-  OpenTeam,
-  SoloPlayer,
-  LeaderboardEntry,
-  TeamInvitation,
-  Team,
-} from "@/lib/api";
+import type { OpenTeam, SoloPlayer, LeaderboardEntry, TeamInvitation, Team } from "@/lib/api";
 
 /**
  * FindClient — interactive /teams/find page.
@@ -48,32 +37,38 @@ import type {
  */
 
 const M = {
-  back:              { en: "Back",                          sr: "Nazad" },
-  pageTitle:         { en: "Teams",                         sr: "Timovi" },
-  pageSub:           { en: "Teammates for the next hackathon.", sr: "Saigrači za naredni hackathon." },
-  tablistLabel:      { en: "Filter teams",                  sr: "Filter timova" },
-  tabMine:           { en: "My teams",                      sr: "Moji timovi" },
-  tabInvites:        { en: "Invites",                       sr: "Pozivi" },
-  createTeam:        { en: "Create team",                   sr: "Kreiraj tim" },
-  emptyTitle:        { en: "You're not in a team yet",      sr: "Nisi još u timu" },
-  emptyDesc:         { en: "Join an existing team, accept an invite, or create your own.", sr: "Pridruži se postojećem timu, prihvati poziv ili kreiraj sopstveni." },
-  viewInvites:       { en: "View invites",                  sr: "Pogledaj pozive" },
-  sectionInvites:    { en: "Invites",                       sr: "Pozivnice" },
-  invitesHeadline:   { en: "Teams inviting you to join.",   sr: "Timovi koji te pozivaju da im se pridružiš." },
-  acceptInvite:      { en: "Accept invite",                 sr: "Prihvati poziv" },
-  declineFind:       { en: "Decline and find new suggestion", sr: "Odbij i traži nov predlog" },
-  youLabel:          { en: "you",                           sr: "ti" },
-  lookingFor:        { en: "Looking for",                   sr: "Traže" },
-  members:           { en: "members",                       sr: "člana" },
-  requestJoin:       { en: "Request to join",               sr: "Zatraži priključenje" },
-  requested:         { en: "Requested",                     sr: "Zahtev poslat" },
-  inviteToTeam:      { en: "Invite to team",                sr: "Pozovi u tim" },
-  invited:           { en: "Invited",                       sr: "Pozvan" },
-  loading:           { en: "Loading…",                      sr: "Učitavanje…" },
-  emptyInvites:      { en: "No invites right now.",         sr: "Trenutno nema poziva." },
-  emptyOpen:         { en: "No open teams right now.",      sr: "Trenutno nema otvorenih timova." },
-  emptySolo:         { en: "No free agents right now.",     sr: "Trenutno nema slobodnih igrača." },
-  emptyBoard:        { en: "No ranked teams yet.",          sr: "Još nema rangiranih timova." },
+  back: { en: "Back", sr: "Nazad" },
+  pageTitle: { en: "Teams", sr: "Timovi" },
+  pageSub: { en: "Teammates for the next hackathon.", sr: "Saigrači za naredni hackathon." },
+  tablistLabel: { en: "Filter teams", sr: "Filter timova" },
+  tabMine: { en: "My teams", sr: "Moji timovi" },
+  tabInvites: { en: "Invites", sr: "Pozivi" },
+  createTeam: { en: "Create team", sr: "Kreiraj tim" },
+  emptyTitle: { en: "You're not in a team yet", sr: "Nisi još u timu" },
+  emptyDesc: {
+    en: "Join an existing team, accept an invite, or create your own.",
+    sr: "Pridruži se postojećem timu, prihvati poziv ili kreiraj sopstveni.",
+  },
+  viewInvites: { en: "View invites", sr: "Pogledaj pozive" },
+  sectionInvites: { en: "Invites", sr: "Pozivnice" },
+  invitesHeadline: {
+    en: "Teams inviting you to join.",
+    sr: "Timovi koji te pozivaju da im se pridružiš.",
+  },
+  acceptInvite: { en: "Accept invite", sr: "Prihvati poziv" },
+  declineFind: { en: "Decline and find new suggestion", sr: "Odbij i traži nov predlog" },
+  youLabel: { en: "you", sr: "ti" },
+  lookingFor: { en: "Looking for", sr: "Traže" },
+  members: { en: "members", sr: "člana" },
+  requestJoin: { en: "Request to join", sr: "Zatraži priključenje" },
+  requested: { en: "Requested", sr: "Zahtev poslat" },
+  inviteToTeam: { en: "Invite to team", sr: "Pozovi u tim" },
+  invited: { en: "Invited", sr: "Pozvan" },
+  loading: { en: "Loading…", sr: "Učitavanje…" },
+  emptyInvites: { en: "No invites right now.", sr: "Trenutno nema poziva." },
+  emptyOpen: { en: "No open teams right now.", sr: "Trenutno nema otvorenih timova." },
+  emptySolo: { en: "No free agents right now.", sr: "Trenutno nema slobodnih igrača." },
+  emptyBoard: { en: "No ranked teams yet.", sr: "Još nema rangiranih timova." },
 } as const;
 
 type Filter = "mine" | "invites" | "open" | "solo" | "board";
@@ -211,7 +206,6 @@ export function FindClient() {
     <>
       <AppShell right={<RailRight />}>
         <main className="tm-page" id="tm-main" data-filter={filter}>
-
           <div className="page-head">
             <Link className="col-back" href="/" aria-label={t("back")}>
               <Icon name="arrow-left" />
@@ -240,15 +234,10 @@ export function FindClient() {
                 onClick={() => switchTab("invites")}
               >
                 {t("tabInvites")}{" "}
-                {inviteCount > 0 && (
-                  <span className="tm-tab-count">{inviteCount}</span>
-                )}
+                {inviteCount > 0 && <span className="tm-tab-count">{inviteCount}</span>}
               </button>
             </div>
-            <button
-              className="btn btn-violet"
-              onClick={() => setCreateOpen(true)}
-            >
+            <button className="btn btn-violet" onClick={() => setCreateOpen(true)}>
               <Icon name="plus" /> {t("createTeam")}
             </button>
           </div>
@@ -260,20 +249,12 @@ export function FindClient() {
                 <Icon name="teams" />
               </span>
               <h2 className="tm-empty-title">{t("emptyTitle")}</h2>
-              <p className="tm-empty-desc">
-                {t("emptyDesc")}
-              </p>
+              <p className="tm-empty-desc">{t("emptyDesc")}</p>
               <div className="tm-hero-actions">
-                <button
-                  className="btn btn-primary tm-cta-glow"
-                  onClick={() => setCreateOpen(true)}
-                >
+                <button className="btn btn-primary tm-cta-glow" onClick={() => setCreateOpen(true)}>
                   <Icon name="plus" /> {t("createTeam")}
                 </button>
-                <button
-                  className="btn btn-ghost"
-                  onClick={() => switchTab("invites")}
-                >
+                <button className="btn btn-ghost" onClick={() => switchTab("invites")}>
                   {t("viewInvites")}
                 </button>
               </div>
@@ -287,9 +268,7 @@ export function FindClient() {
                 <div className="tm-ai-eyebrow">
                   <Icon name="teams" /> {t("sectionInvites")}
                 </div>
-                <h2 className="tm-ai-h">
-                  {t("invitesHeadline")}
-                </h2>
+                <h2 className="tm-ai-h">{t("invitesHeadline")}</h2>
               </div>
             </div>
 
@@ -298,23 +277,14 @@ export function FindClient() {
                 [0, 1, 2].map((i) => (
                   <div key={`sk-sug-${i}`} className="card tm-sug" aria-hidden="true">
                     <div className="tm-sug-body">
-                      <span
-                        className="skel skel-line"
-                        style={{ width: "30%", marginBottom: 10 }}
-                      />
+                      <span className="skel skel-line" style={{ width: "30%", marginBottom: 10 }} />
                       <div className="tm-sug-avs">
                         <span className="tm-av tm-av-md is-orb skel skel-circle" />
                         <span className="tm-av tm-av-md is-orb skel skel-circle" />
                         <span className="tm-av tm-av-md is-orb skel skel-circle" />
                       </div>
-                      <span
-                        className="skel skel-line"
-                        style={{ width: "55%", marginBottom: 6 }}
-                      />
-                      <span
-                        className="skel skel-line"
-                        style={{ width: "80%", marginBottom: 14 }}
-                      />
+                      <span className="skel skel-line" style={{ width: "55%", marginBottom: 6 }} />
+                      <span className="skel skel-line" style={{ width: "80%", marginBottom: 14 }} />
                       <div className="tm-sug-actions">
                         <span
                           className="skel"
@@ -358,23 +328,14 @@ export function FindClient() {
               {loading ? (
                 [0, 1, 2, 3].map((i) => (
                   <div key={`sk-open-${i}`} className="card tm-open-card" aria-hidden="true">
-                    <span
-                      className="skel skel-line"
-                      style={{ width: "40%" }}
-                    />
-                    <span
-                      className="skel skel-line"
-                      style={{ width: "60%", height: 18 }}
-                    />
+                    <span className="skel skel-line" style={{ width: "40%" }} />
+                    <span className="skel skel-line" style={{ width: "60%", height: 18 }} />
                     <div className="tm-open-avs">
                       <span className="tm-av tm-av-md is-orb skel skel-circle" />
                       <span className="tm-av tm-av-md is-orb skel skel-circle" />
                       <span className="tm-av tm-av-md is-orb skel skel-circle" />
                     </div>
-                    <span
-                      className="skel skel-line"
-                      style={{ width: "50%" }}
-                    />
+                    <span className="skel skel-line" style={{ width: "50%" }} />
                     <span
                       className="skel"
                       style={{ width: 130, height: 36, borderRadius: 10, marginTop: "auto" }}
@@ -412,20 +373,9 @@ export function FindClient() {
               {loading ? (
                 [0, 1, 2, 3].map((i) => (
                   <div key={i} className="card tm-solo" aria-busy="true">
-                    <span
-                      className="tm-av tm-av-xl is-orb skel skel-circle"
-                      aria-hidden="true"
-                    />
-                    <span
-                      className="skel skel-line"
-                      style={{ width: "55%" }}
-                      aria-hidden="true"
-                    />
-                    <span
-                      className="skel skel-line"
-                      style={{ width: "38%" }}
-                      aria-hidden="true"
-                    />
+                    <span className="tm-av tm-av-xl is-orb skel skel-circle" aria-hidden="true" />
+                    <span className="skel skel-line" style={{ width: "55%" }} aria-hidden="true" />
+                    <span className="skel skel-line" style={{ width: "38%" }} aria-hidden="true" />
                     <span
                       className="skel"
                       style={{ width: "100%", height: 33, borderRadius: 11 }}
@@ -464,30 +414,17 @@ export function FindClient() {
                 [0, 1, 2, 3, 4].map((i) => (
                   <div key={i} className="card tm-lb-row" aria-busy="true">
                     <div className="tm-lb-rank" aria-hidden="true">
-                      <span
-                        className="skel skel-line"
-                        style={{ width: 12, height: 14 }}
-                      />
+                      <span className="skel skel-line" style={{ width: 12, height: 14 }} />
                     </div>
                     <div className="tm-lb-avs" aria-hidden="true">
                       {[0, 1, 2].map((j) => (
-                        <span
-                          key={j}
-                          className="tm-av tm-av-sm is-orb skel skel-circle"
-                        />
+                        <span key={j} className="tm-av tm-av-sm is-orb skel skel-circle" />
                       ))}
                     </div>
                     <div className="tm-lb-name" aria-hidden="true">
-                      <span
-                        className="skel skel-line"
-                        style={{ width: "60%" }}
-                      />
+                      <span className="skel skel-line" style={{ width: "60%" }} />
                     </div>
-                    <span
-                      className="skel skel-line"
-                      style={{ width: 56 }}
-                      aria-hidden="true"
-                    />
+                    <span className="skel skel-line" style={{ width: 56 }} aria-hidden="true" />
                   </div>
                 ))
               ) : leaderboard.length === 0 ? (
@@ -505,7 +442,6 @@ export function FindClient() {
               )}
             </div>
           </section>
-
         </main>
       </AppShell>
 

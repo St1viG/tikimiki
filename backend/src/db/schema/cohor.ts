@@ -118,10 +118,7 @@ export const channelGroups = pgTable(
   (t) => [
     uniqueIndex("uq_channel_groups_name_per_server").on(t.serverId, t.name),
     check("chk_channel_groups_position", sql`${t.position} >= 0.0`),
-    uniqueIndex("uq_channel_groups_position_per_server").on(
-      t.serverId,
-      t.position,
-    ),
+    uniqueIndex("uq_channel_groups_position_per_server").on(t.serverId, t.position),
     index("idx_channel_groups_server_id").on(t.serverId),
   ],
 );
@@ -144,10 +141,7 @@ export const channels = pgTable(
   },
   (t) => [
     uniqueIndex("uq_channels_name_per_group").on(t.groupId, t.name),
-    check(
-      "chk_channels_team_consistency",
-      sql`(${t.type} = 'team') = (${t.teamId} is not null)`,
-    ),
+    check("chk_channels_team_consistency", sql`(${t.type} = 'team') = (${t.teamId} is not null)`),
     check("chk_channels_position", sql`${t.position} >= 0.0`),
     uniqueIndex("uq_channels_active_position_per_group")
       .on(t.groupId, t.position)
@@ -279,10 +273,7 @@ export const messageReactions = pgTable(
   },
   (t) => [
     primaryKey({ columns: [t.userId, t.messageId, t.symbol] }),
-    check(
-      "chk_message_reaction_symbol_length",
-      sql`char_length(${t.symbol}) <= 8`,
-    ),
+    check("chk_message_reaction_symbol_length", sql`char_length(${t.symbol}) <= 8`),
     index("idx_message_reactions_message_id").on(t.messageId),
   ],
 );

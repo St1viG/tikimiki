@@ -73,9 +73,7 @@ export class ApplicationsController {
   }
 
   @Get("hackathon/:hackathonId/questions")
-  listQuestions(
-    @Param("hackathonId", new ParseUUIDPipe()) hackathonId: string,
-  ) {
+  listQuestions(@Param("hackathonId", new ParseUUIDPipe()) hackathonId: string) {
     return this.svc.listQuestions(hackathonId);
   }
 
@@ -108,10 +106,7 @@ export class ApplicationsController {
   }
 
   @Get(":id/answers")
-  getAnswers(
-    @CurrentUser() userId: string,
-    @Param("id", new ParseUUIDPipe()) id: string,
-  ) {
+  getAnswers(@CurrentUser() userId: string, @Param("id", new ParseUUIDPipe()) id: string) {
     return this.svc.getAnswers(id, userId);
   }
 
@@ -126,10 +121,7 @@ export class ApplicationsController {
   }
 
   @Patch(":id/approve")
-  approve(
-    @CurrentUser() userId: string,
-    @Param("id", new ParseUUIDPipe()) id: string,
-  ) {
+  approve(@CurrentUser() userId: string, @Param("id", new ParseUUIDPipe()) id: string) {
     return this.svc.approve(id, userId);
   }
 

@@ -36,10 +36,7 @@ export const teamJoinRequests = pgTable(
     }),
   },
   (t) => [
-    check(
-      "chk_team_join_requests_status",
-      sql`${t.status} in ('pending', 'accepted', 'declined')`,
-    ),
+    check("chk_team_join_requests_status", sql`${t.status} in ('pending', 'accepted', 'declined')`),
     uniqueIndex("uq_team_join_requests_pending")
       .on(t.teamId, t.userId)
       .where(sql`${t.status} = 'pending'`),
@@ -70,10 +67,7 @@ export const teamInvitations = pgTable(
     respondedAt: timestamp("responded_at", tz),
   },
   (t) => [
-    check(
-      "chk_team_invitations_status",
-      sql`${t.status} in ('pending', 'accepted', 'declined')`,
-    ),
+    check("chk_team_invitations_status", sql`${t.status} in ('pending', 'accepted', 'declined')`),
     uniqueIndex("uq_team_invitations_pending")
       .on(t.teamId, t.userId)
       .where(sql`${t.status} = 'pending'`),

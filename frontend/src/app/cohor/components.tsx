@@ -248,16 +248,10 @@ export function DmStream({ entry, extra }: { entry: DmEntry; extra: ChatMsg[] })
   const t = useT(M);
   const introAv = entry.group ? (
     <div className="dm-group-av" style={{ width: 52, height: 52 }}>
-      <div
-        className="ga1 is-orb"
-        style={{ width: 28, height: 28 }}
-      >
+      <div className="ga1 is-orb" style={{ width: 28, height: 28 }}>
         <GenerativeAvatar seed="andrej" className="orb-art" />
       </div>
-      <div
-        className="ga2 is-orb"
-        style={{ width: 28, height: 28 }}
-      >
+      <div className="ga2 is-orb" style={{ width: 28, height: 28 }}>
         <GenerativeAvatar seed="stevangnjato" className="orb-art" />
       </div>
     </div>
@@ -274,10 +268,7 @@ export function DmStream({ entry, extra }: { entry: DmEntry; extra: ChatMsg[] })
         position: "relative",
       }}
     >
-      <GenerativeAvatar
-        seed={personSeed(entry.fullName)}
-        className="orb-art"
-      />
+      <GenerativeAvatar seed={personSeed(entry.fullName)} className="orb-art" />
       <span
         style={{
           position: "absolute",
@@ -303,7 +294,9 @@ export function DmStream({ entry, extra }: { entry: DmEntry; extra: ChatMsg[] })
         <div className="dm-conv-intro-bio">{t(entry.bio as keyof typeof M)}</div>
         <div className="dm-conv-intro-start">
           {t("dmConvStartPre")}
-          <strong style={{ color: "var(--violet-light)" }}>{t(entry.fullName as keyof typeof M)}</strong>
+          <strong style={{ color: "var(--violet-light)" }}>
+            {t(entry.fullName as keyof typeof M)}
+          </strong>
           {t("dmConvStartPost")}
         </div>
       </div>
@@ -356,16 +349,10 @@ export function DmProfile({ entry }: { entry: DmEntry }) {
   const t = useT(M);
   const profAv = entry.group ? (
     <div className="dm-group-av" style={{ width: 52, height: 52 }}>
-      <div
-        className="ga1 is-orb"
-        style={{ width: 28, height: 28 }}
-      >
+      <div className="ga1 is-orb" style={{ width: 28, height: 28 }}>
         <GenerativeAvatar seed="andrej" className="orb-art" />
       </div>
-      <div
-        className="ga2 is-orb"
-        style={{ width: 28, height: 28 }}
-      >
+      <div className="ga2 is-orb" style={{ width: 28, height: 28 }}>
         <GenerativeAvatar seed="stevangnjato" className="orb-art" />
       </div>
     </div>
@@ -397,9 +384,7 @@ export function DmProfile({ entry }: { entry: DmEntry }) {
         <div className="dm-profile-name">{t(entry.fullName as keyof typeof M)}</div>
         <div className="dm-profile-handle">
           {t(entry.handle as keyof typeof M)} ·{" "}
-          <span style={{ color: entry.statusBg }}>
-            {t(entry.statusLabel as keyof typeof M)}
-          </span>
+          <span style={{ color: entry.statusBg }}>{t(entry.statusLabel as keyof typeof M)}</span>
         </div>
         <div className="dm-profile-card">
           <div className="dm-profile-card-label">{t("dmAboutUser")}</div>
@@ -470,8 +455,8 @@ export function BountyCard({
       </div>
       <div className="bounty-footer">
         <div className="bounty-applicants" id={`bounty-${id}-count`}>
-          <Icon name="teams" className="ic-sm" />{" "}
-          <span id={`${id}-count-num`}>{count}</span>{t("bountyApplicantsSuffix")}
+          <Icon name="teams" className="ic-sm" /> <span id={`${id}-count-num`}>{count}</span>
+          {t("bountyApplicantsSuffix")}
         </div>
         <button
           className={"bounty-apply-btn" + (applied ? " bounty-apply-btn-done" : "")}
@@ -528,11 +513,7 @@ export function ProjectCard({
   if (isVotingOpen && voted) btnClass += " voted";
   else if (isVotingOpen && spent) btnClass += " vote-btn-spent";
 
-  const label = !isVotingOpen
-    ? t("voteBtn")
-    : voted
-    ? t("votedBtn")
-    : t("voteBtn");
+  const label = !isVotingOpen ? t("voteBtn") : voted ? t("votedBtn") : t("voteBtn");
 
   return (
     <div className="project-card" data-team={team}>

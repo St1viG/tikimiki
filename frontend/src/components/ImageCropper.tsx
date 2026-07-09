@@ -94,11 +94,7 @@ export function ImageCropper({
     const dx = e.clientX - drag.current.x;
     const dy = e.clientY - drag.current.y;
     drag.current = { x: e.clientX, y: e.clientY };
-    const { overflowX, overflowY } = coverMetrics(
-      imgRatio,
-      ratio,
-      latest.current.z,
-    );
+    const { overflowX, overflowY } = coverMetrics(imgRatio, ratio, latest.current.z);
     const ovX = overflowX * el.clientWidth;
     const ovY = overflowY * el.clientHeight;
     // Dragging the image right reveals its left side → focal decreases.
@@ -166,10 +162,7 @@ export function ImageCropper({
           {lockedRatio != null ? (
             <div className="crop-ratios">
               <span className="crop-ratio is-on" aria-hidden="true">
-                <span
-                  className="crop-ratio-ico"
-                  style={{ aspectRatio: String(lockedRatio) }}
-                />
+                <span className="crop-ratio-ico" style={{ aspectRatio: String(lockedRatio) }} />
                 {lockedLabel}
               </span>
             </div>
@@ -193,11 +186,7 @@ export function ImageCropper({
             </div>
           )}
           <span className="crop-hint">{hint}</span>
-          <button
-            type="button"
-            className="btn btn-violet crop-done"
-            onClick={onDone ?? onClose}
-          >
+          <button type="button" className="btn btn-violet crop-done" onClick={onDone ?? onClose}>
             {done}
           </button>
         </div>

@@ -42,10 +42,7 @@ export const cosmeticItems = pgTable(
   },
   (t) => [
     uniqueIndex("uq_cosmetic_items_name").on(t.name),
-    check(
-      "chk_cosmetic_point_cost",
-      sql`${t.pointCost} is null or ${t.pointCost} > 0`,
-    ),
+    check("chk_cosmetic_point_cost", sql`${t.pointCost} is null or ${t.pointCost} > 0`),
   ],
 );
 
@@ -218,10 +215,7 @@ export const subscriptionPayments = pgTable(
     paidAt: timestamp("paid_at", tz).notNull().defaultNow(),
   },
   (t) => [
-    uniqueIndex("uq_subscription_payments_provider_id").on(
-      t.paymentProvider,
-      t.providerPaymentId,
-    ),
+    uniqueIndex("uq_subscription_payments_provider_id").on(t.paymentProvider, t.providerPaymentId),
     check("chk_subscription_payments_amount", sql`${t.amountCents} > 0`),
     index("idx_subscription_payments_subscription_id").on(t.subscriptionId),
   ],

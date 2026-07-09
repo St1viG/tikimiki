@@ -32,19 +32,16 @@ describe("Kanban tabla (Selenium WebDriver)", function () {
     await driver.findElements(By.css(".kb-add-card-btn")).then((b) => b[0].click());
 
     const title = `Auto zadatak ${Date.now()}`;
-    const input = await driver.wait(
-      until.elementLocated(By.css(".kb-add-card-input")),
-      5000,
-    );
+    const input = await driver.wait(until.elementLocated(By.css(".kb-add-card-input")), 5000);
     await input.sendKeys(title);
     // Prvo dugme u akcijama forme je "Dodaj".
-    await driver
-      .findElement(By.css(".kb-add-card-actions .btn-primary"))
-      .click();
+    await driver.findElement(By.css(".kb-add-card-actions .btn-primary")).click();
 
     // Kartica sa našim naslovom se pojavljuje na tabli.
     const card = await driver.wait(
-      until.elementLocated(By.xpath(`//div[contains(@class,'kb-card-title')][contains(text(),'${title}')]`)),
+      until.elementLocated(
+        By.xpath(`//div[contains(@class,'kb-card-title')][contains(text(),'${title}')]`),
+      ),
       10000,
       "Očekivana nova kartica na kanban tabli",
     );

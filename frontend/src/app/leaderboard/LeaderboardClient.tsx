@@ -18,33 +18,36 @@ import { formatNumber } from "@/lib/format";
  */
 
 const M = {
-  backLabel:         { en: "Back",                                              sr: "Nazad" },
-  pageTitle:         { en: "Leaderboard",                                       sr: "Rang lista" },
-  pageSub:           { en: "Member rankings by total points",                   sr: "Rang lista članova po ukupnom broju poena" },
-  searchLabel:       { en: "Search",                                            sr: "Pretraži" },
-  searchPh:          { en: "Search…",                                           sr: "Pretraži…" },
-  periodLabel:       { en: "Leaderboard period",                                sr: "Period rang liste" },
-  tabAll:            { en: "All time",                                          sr: "Svi" },
-  tabMonth:          { en: "This month",                                        sr: "Ovaj mesec" },
-  tabWeek:           { en: "This week",                                         sr: "Ova nedelja" },
-  hackFilterLabel:   { en: "Filter by hackathon",                               sr: "Filtriraj po hakathonu" },
-  hackAll:           { en: "All hackathons",                                    sr: "Svi hakathoni" },
-  podiumLabel:       { en: "Top members",                                       sr: "Najbolji članovi" },
-  tableLabel:        { en: "Leaderboard",                                       sr: "Rang lista" },
-  colRank:           { en: "#",                                                 sr: "#" },
-  colUser:           { en: "User",                                              sr: "Korisnik" },
-  colPoints:         { en: "Points",                                            sr: "Poeni" },
-  colBadges:         { en: "Badges",                                            sr: "Bedževi" },
-  colHacks:          { en: "Hackathons",                                        sr: "Hakathoni" },
-  mePill:            { en: "you",                                               sr: "ti" },
-  myPositionLabel:   { en: "Your position",                                     sr: "Tvoja pozicija" },
-  myPositionAria:    { en: "Your position",                                     sr: "Tvoja pozicija" },
-  nextPlace:         { en: "To the next place",                                 sr: "Do sledećeg mesta" },
-  ptsUnit:           { en: "pts",                                               sr: "pts" },
-  pointsUnit:        { en: "points",                                            sr: "poena" },
-  badgesUnit:        { en: "badges",                                            sr: "bedževa" },
-  hacksUnit:         { en: "hackathons",                                        sr: "hakathona" },
-  emptyFilter:       { en: "No members for this hackathon.",                    sr: "Nema članova za ovaj hakaton." },
+  backLabel: { en: "Back", sr: "Nazad" },
+  pageTitle: { en: "Leaderboard", sr: "Rang lista" },
+  pageSub: {
+    en: "Member rankings by total points",
+    sr: "Rang lista članova po ukupnom broju poena",
+  },
+  searchLabel: { en: "Search", sr: "Pretraži" },
+  searchPh: { en: "Search…", sr: "Pretraži…" },
+  periodLabel: { en: "Leaderboard period", sr: "Period rang liste" },
+  tabAll: { en: "All time", sr: "Svi" },
+  tabMonth: { en: "This month", sr: "Ovaj mesec" },
+  tabWeek: { en: "This week", sr: "Ova nedelja" },
+  hackFilterLabel: { en: "Filter by hackathon", sr: "Filtriraj po hakathonu" },
+  hackAll: { en: "All hackathons", sr: "Svi hakathoni" },
+  podiumLabel: { en: "Top members", sr: "Najbolji članovi" },
+  tableLabel: { en: "Leaderboard", sr: "Rang lista" },
+  colRank: { en: "#", sr: "#" },
+  colUser: { en: "User", sr: "Korisnik" },
+  colPoints: { en: "Points", sr: "Poeni" },
+  colBadges: { en: "Badges", sr: "Bedževi" },
+  colHacks: { en: "Hackathons", sr: "Hakathoni" },
+  mePill: { en: "you", sr: "ti" },
+  myPositionLabel: { en: "Your position", sr: "Tvoja pozicija" },
+  myPositionAria: { en: "Your position", sr: "Tvoja pozicija" },
+  nextPlace: { en: "To the next place", sr: "Do sledećeg mesta" },
+  ptsUnit: { en: "pts", sr: "pts" },
+  pointsUnit: { en: "points", sr: "poena" },
+  badgesUnit: { en: "badges", sr: "bedževa" },
+  hacksUnit: { en: "hackathons", sr: "hakathona" },
+  emptyFilter: { en: "No members for this hackathon.", sr: "Nema članova za ovaj hakaton." },
 } as const;
 
 type Period = "svi" | "mesec" | "nedelja";
@@ -72,16 +75,86 @@ interface Row {
 }
 
 const ROWS: Row[] = [
-  { username: "moljac",         seed: "moljac",        pts: { svi: 3200, mesec: 720, nedelja: 180 }, badges: 14, hacks: 11, in: ["etf", "garaza", "hacknight", "milano"] },
-  { username: "Mohammed Avdol", seed: "mohammedavdol", pts: { svi: 2850, mesec: 540, nedelja: 90  }, badges: 11, hacks: 9,  in: ["etf", "garaza", "milano"] },
-  { username: "miki",           seed: "miki",          pts: { svi: 2600, mesec: 610, nedelja: 220 }, badges: 9,  hacks: 8,  in: ["etf", "hacknight"] },
-  { username: "Andrej Čolić",   seed: "andrej",        pts: { svi: 2450, mesec: 480, nedelja: 130 }, badges: 8,  hacks: 7,  in: ["etf", "garaza"] },
-  { username: "fenjer",         seed: "fenjer",        pts: { svi: 2100, mesec: 300, nedelja: 70  }, badges: 7,  hacks: 7,  in: ["garaza", "hacknight"] },
-  { username: "tiki",           seed: "tiki",          pts: { svi: 1900, mesec: 410, nedelja: 160 }, badges: 6,  hacks: 6,  in: ["etf", "milano"] },
-  { username: "mara",           seed: "mara",          pts: { svi: 1750, mesec: 260, nedelja: 40  }, badges: 5,  hacks: 5,  in: ["hacknight"] },
-  { username: "nullptr",        seed: "nullptr",       pts: { svi: 1500, mesec: 330, nedelja: 110 }, badges: 4,  hacks: 4,  in: ["etf", "garaza", "hacknight"] },
-  { username: "lale",           seed: "lale",          pts: { svi: 1200, mesec: 150, nedelja: 30  }, badges: 3,  hacks: 4,  in: ["garaza"] },
-  { username: "menjači",        seed: "menjaci",       pts: { svi: 980,  mesec: 200, nedelja: 95  }, badges: 2,  hacks: 3,  in: ["milano"] },
+  {
+    username: "moljac",
+    seed: "moljac",
+    pts: { svi: 3200, mesec: 720, nedelja: 180 },
+    badges: 14,
+    hacks: 11,
+    in: ["etf", "garaza", "hacknight", "milano"],
+  },
+  {
+    username: "Mohammed Avdol",
+    seed: "mohammedavdol",
+    pts: { svi: 2850, mesec: 540, nedelja: 90 },
+    badges: 11,
+    hacks: 9,
+    in: ["etf", "garaza", "milano"],
+  },
+  {
+    username: "miki",
+    seed: "miki",
+    pts: { svi: 2600, mesec: 610, nedelja: 220 },
+    badges: 9,
+    hacks: 8,
+    in: ["etf", "hacknight"],
+  },
+  {
+    username: "Andrej Čolić",
+    seed: "andrej",
+    pts: { svi: 2450, mesec: 480, nedelja: 130 },
+    badges: 8,
+    hacks: 7,
+    in: ["etf", "garaza"],
+  },
+  {
+    username: "fenjer",
+    seed: "fenjer",
+    pts: { svi: 2100, mesec: 300, nedelja: 70 },
+    badges: 7,
+    hacks: 7,
+    in: ["garaza", "hacknight"],
+  },
+  {
+    username: "tiki",
+    seed: "tiki",
+    pts: { svi: 1900, mesec: 410, nedelja: 160 },
+    badges: 6,
+    hacks: 6,
+    in: ["etf", "milano"],
+  },
+  {
+    username: "mara",
+    seed: "mara",
+    pts: { svi: 1750, mesec: 260, nedelja: 40 },
+    badges: 5,
+    hacks: 5,
+    in: ["hacknight"],
+  },
+  {
+    username: "nullptr",
+    seed: "nullptr",
+    pts: { svi: 1500, mesec: 330, nedelja: 110 },
+    badges: 4,
+    hacks: 4,
+    in: ["etf", "garaza", "hacknight"],
+  },
+  {
+    username: "lale",
+    seed: "lale",
+    pts: { svi: 1200, mesec: 150, nedelja: 30 },
+    badges: 3,
+    hacks: 4,
+    in: ["garaza"],
+  },
+  {
+    username: "menjači",
+    seed: "menjaci",
+    pts: { svi: 980, mesec: 200, nedelja: 95 },
+    badges: 2,
+    hacks: 3,
+    in: ["milano"],
+  },
 ];
 
 export function LeaderboardClient() {
@@ -105,14 +178,12 @@ export function LeaderboardClient() {
   // The table additionally honours the username search box.
   const ranked = useMemo(() => {
     const q = searchQ.trim().toLowerCase();
-    return q
-      ? rankedFull.filter((r) => r.username.toLowerCase().includes(q))
-      : rankedFull;
+    return q ? rankedFull.filter((r) => r.username.toLowerCase().includes(q)) : rankedFull;
   }, [rankedFull, searchQ]);
 
   const podium = rankedFull.slice(0, 3);
   const me = rankedFull.find((r) => r.username === meUsername) ?? null;
-  const nextUp = me ? rankedFull.find((r) => r.rank === me.rank - 1) ?? null : null;
+  const nextUp = me ? (rankedFull.find((r) => r.rank === me.rank - 1) ?? null) : null;
   const toNext = me && nextUp ? nextUp.pts[period] - me.pts[period] : 0;
 
   return (
@@ -141,11 +212,7 @@ export function LeaderboardClient() {
 
       {/* Filters */}
       <div className="lb-filters">
-        <div
-          className="lb-period-tabs"
-          role="group"
-          aria-label={t("periodLabel")}
-        >
+        <div className="lb-period-tabs" role="group" aria-label={t("periodLabel")}>
           <button
             className={`lb-tab${period === "svi" ? " active" : ""}`}
             onClick={() => setPeriod("svi")}
@@ -196,10 +263,7 @@ export function LeaderboardClient() {
                 <span className={`podium-medal ${medal}`}>
                   <Icon name="trophy" /> {place}.
                 </span>
-                <div
-                  className={`podium-avatar podium-avatar-${place} is-orb`}
-                  aria-hidden="true"
-                >
+                <div className={`podium-avatar podium-avatar-${place} is-orb`} aria-hidden="true">
                   <GenerativeAvatar seed={r.seed} className="orb-art" />
                 </div>
                 <div className="podium-name">{r.username}</div>
@@ -225,9 +289,7 @@ export function LeaderboardClient() {
 
         {ranked.length === 0 && (
           <div className="lb-grid lb-row">
-            <div style={{ gridColumn: "1 / -1", color: "var(--muted)" }}>
-              {t("emptyFilter")}
-            </div>
+            <div style={{ gridColumn: "1 / -1", color: "var(--muted)" }}>{t("emptyFilter")}</div>
           </div>
         )}
 
@@ -235,11 +297,10 @@ export function LeaderboardClient() {
           const isMe = r.username === meUsername;
           const avClass = AV_BY_RANK[Math.min(r.rank - 1, AV_BY_RANK.length - 1)];
           return (
-            <div
-              className={`lb-grid lb-row${isMe ? " lb-me" : ""}`}
-              key={r.username}
-            >
-              <div className={`lb-rank${isMe ? " lb-rank-me" : r.rank <= 3 ? ` lb-rank-${r.rank}` : ""}`}>
+            <div className={`lb-grid lb-row${isMe ? " lb-me" : ""}`} key={r.username}>
+              <div
+                className={`lb-rank${isMe ? " lb-rank-me" : r.rank <= 3 ? ` lb-rank-${r.rank}` : ""}`}
+              >
                 {r.rank}
               </div>
               <div className="lb-user">

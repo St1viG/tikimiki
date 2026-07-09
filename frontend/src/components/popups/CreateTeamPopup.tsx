@@ -18,29 +18,26 @@ import type { HackathonSummary } from "@tikimiki/types";
  */
 
 const M = {
-  dialogLabel:      { en: "Create team",                      sr: "Kreiraj tim" },
-  title:            { en: "Create team",                      sr: "Kreiraj tim" },
-  close:            { en: "Close",                            sr: "Zatvori" },
-  labelName:        { en: "Team name",                        sr: "Naziv tima" },
-  placeholderName:  { en: "e.g. nullptr, bytecraft…",         sr: "npr. nullptr, bytecraft…" },
-  labelHackathon:   { en: "Hackathon",                        sr: "Hackathon" },
-  selectHackathon:  { en: "— Select hackathon —",             sr: "— Odaberi hackathon —" },
-  loadingHackathons:{ en: "Loading hackathons…",              sr: "Učitavanje hackathona…" },
-  labelRoles:       { en: "Roles you're looking for?",        sr: "Koje uloge tražite?" },
-  placeholderRoles: { en: "e.g. Backend, ML, Frontend…",      sr: "npr. Backend, ML, Frontend…" },
-  cancel:           { en: "Cancel",                           sr: "Otkaži" },
-  create:           { en: "Create team",                      sr: "Kreiraj tim" },
-  creating:         { en: "Creating…",                        sr: "Kreiranje…" },
-  error:            { en: "Could not create team. Try again.", sr: "Kreiranje tima nije uspelo. Pokušaj ponovo." },
+  dialogLabel: { en: "Create team", sr: "Kreiraj tim" },
+  title: { en: "Create team", sr: "Kreiraj tim" },
+  close: { en: "Close", sr: "Zatvori" },
+  labelName: { en: "Team name", sr: "Naziv tima" },
+  placeholderName: { en: "e.g. nullptr, bytecraft…", sr: "npr. nullptr, bytecraft…" },
+  labelHackathon: { en: "Hackathon", sr: "Hackathon" },
+  selectHackathon: { en: "— Select hackathon —", sr: "— Odaberi hackathon —" },
+  loadingHackathons: { en: "Loading hackathons…", sr: "Učitavanje hackathona…" },
+  labelRoles: { en: "Roles you're looking for?", sr: "Koje uloge tražite?" },
+  placeholderRoles: { en: "e.g. Backend, ML, Frontend…", sr: "npr. Backend, ML, Frontend…" },
+  cancel: { en: "Cancel", sr: "Otkaži" },
+  create: { en: "Create team", sr: "Kreiraj tim" },
+  creating: { en: "Creating…", sr: "Kreiranje…" },
+  error: {
+    en: "Could not create team. Try again.",
+    sr: "Kreiranje tima nije uspelo. Pokušaj ponovo.",
+  },
 } as const;
 
-export function CreateTeamPopup({
-  open,
-  onClose,
-}: {
-  open: boolean;
-  onClose: () => void;
-}) {
+export function CreateTeamPopup({ open, onClose }: { open: boolean; onClose: () => void }) {
   const t = useT(M);
   const dialogRef = useRef<HTMLDialogElement>(null);
 
@@ -132,11 +129,7 @@ export function CreateTeamPopup({
           <h2 className="modal-title">
             <Icon name="teams" /> {t("title")}
           </h2>
-          <button
-            className="modal-close"
-            aria-label={t("close")}
-            onClick={onClose}
-          >
+          <button className="modal-close" aria-label={t("close")} onClick={onClose}>
             <Icon name="x" />
           </button>
         </div>
@@ -165,9 +158,7 @@ export function CreateTeamPopup({
             onChange={(e) => setHackathonId(e.target.value)}
             disabled={loadingHk}
           >
-            <option value="">
-              {loadingHk ? t("loadingHackathons") : t("selectHackathon")}
-            </option>
+            <option value="">{loadingHk ? t("loadingHackathons") : t("selectHackathon")}</option>
             {hackathons.map((hk) => (
               <option key={hk.hackathonId} value={hk.hackathonId}>
                 {hk.title}
@@ -200,11 +191,7 @@ export function CreateTeamPopup({
           <button className="btn btn-ghost" onClick={onClose}>
             {t("cancel")}
           </button>
-          <button
-            className="btn btn-primary"
-            disabled={!canSubmit}
-            onClick={handleCreate}
-          >
+          <button className="btn btn-primary" disabled={!canSubmit} onClick={handleCreate}>
             <Icon name="plus" /> {submitting ? t("creating") : t("create")}
           </button>
         </div>

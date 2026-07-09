@@ -44,98 +44,155 @@ import {
  */
 
 const M = {
-  headingLogin:     { en: "Welcome back",                   sr: "Zdravo opet" },
-  headingRegister:  { en: "Create your account",            sr: "Napravi nalog" },
+  headingLogin: { en: "Welcome back", sr: "Zdravo opet" },
+  headingRegister: { en: "Create your account", sr: "Napravi nalog" },
 
-  identifierLabel:  { en: "Email or username",              sr: "Email ili korisničko ime" },
-  emailLabel:       { en: "Email",                          sr: "Email" },
-  usernameLabel:    { en: "Username",                       sr: "Korisničko ime" },
-  passwordLabel:    { en: "Password",                       sr: "Lozinka" },
-  confirmLabel:     { en: "Confirm password",               sr: "Potvrdi lozinku" },
+  identifierLabel: { en: "Email or username", sr: "Email ili korisničko ime" },
+  emailLabel: { en: "Email", sr: "Email" },
+  usernameLabel: { en: "Username", sr: "Korisničko ime" },
+  passwordLabel: { en: "Password", sr: "Lozinka" },
+  confirmLabel: { en: "Confirm password", sr: "Potvrdi lozinku" },
 
-  identifierRequired:{ en: "Enter your email or username.",                     sr: "Unesi email ili korisničko ime." },
-  emailRequired:    { en: "Enter your email.",                                  sr: "Unesi email adresu." },
-  emailNoSpaces:    { en: "Email can't contain spaces.",                        sr: "Email ne sme da sadrži razmake." },
-  emailMissingAt:   { en: "Email is missing an @.",                             sr: "Email adresi nedostaje @." },
-  emailOneAt:       { en: "Email has more than one @.",                         sr: "Email ima više od jednog @." },
-  emailMissingLocal:{ en: "There's nothing before the @.",                      sr: "Nedostaje deo pre @." },
-  emailMissingDomain:{ en: "Add a domain after the @, like gmail.com.",         sr: "Dodaj domen posle @, npr. gmail.com." },
-  emailDomainDot:   { en: "The domain needs a dot, like gmail.com.",            sr: "Domenu nedostaje tačka, npr. gmail.com." },
-  emailTaken:       { en: "This email is already registered.",                  sr: "Ovaj email je već registrovan." },
-  useLoginInstead:  { en: "Sign in instead",                                    sr: "Prijavi se umesto toga" },
-  checking:         { en: "Checking availability…",                             sr: "Proveravamo dostupnost…" },
-  emailFree:        { en: "This email is available.",                           sr: "Ovaj email je slobodan." },
+  identifierRequired: {
+    en: "Enter your email or username.",
+    sr: "Unesi email ili korisničko ime.",
+  },
+  emailRequired: { en: "Enter your email.", sr: "Unesi email adresu." },
+  emailNoSpaces: { en: "Email can't contain spaces.", sr: "Email ne sme da sadrži razmake." },
+  emailMissingAt: { en: "Email is missing an @.", sr: "Email adresi nedostaje @." },
+  emailOneAt: { en: "Email has more than one @.", sr: "Email ima više od jednog @." },
+  emailMissingLocal: { en: "There's nothing before the @.", sr: "Nedostaje deo pre @." },
+  emailMissingDomain: {
+    en: "Add a domain after the @, like gmail.com.",
+    sr: "Dodaj domen posle @, npr. gmail.com.",
+  },
+  emailDomainDot: {
+    en: "The domain needs a dot, like gmail.com.",
+    sr: "Domenu nedostaje tačka, npr. gmail.com.",
+  },
+  emailTaken: { en: "This email is already registered.", sr: "Ovaj email je već registrovan." },
+  useLoginInstead: { en: "Sign in instead", sr: "Prijavi se umesto toga" },
+  checking: { en: "Checking availability…", sr: "Proveravamo dostupnost…" },
+  emailFree: { en: "This email is available.", sr: "Ovaj email je slobodan." },
 
-  usernameRequired: { en: "Choose a username.",                                 sr: "Izaberi korisničko ime." },
-  usernameNoSpaces: { en: "Usernames can't contain spaces.",                    sr: "Korisničko ime ne sme da sadrži razmake." },
-  usernameChars:    { en: "Only letters, numbers, and . _ - are allowed.",      sr: "Dozvoljena su samo slova, brojevi i . _ -" },
-  usernameTooShort: { en: "Username needs at least 3 characters.",              sr: "Korisničko ime mora imati bar 3 karaktera." },
-  usernameTooLong:  { en: "Username can have at most 32 characters.",           sr: "Korisničko ime može imati najviše 32 karaktera." },
-  usernameTaken:    { en: "This username is taken.",                            sr: "Ovo korisničko ime je zauzeto." },
-  usernameFree:     { en: "This username is available.",                        sr: "Ovo korisničko ime je slobodno." },
+  usernameRequired: { en: "Choose a username.", sr: "Izaberi korisničko ime." },
+  usernameNoSpaces: {
+    en: "Usernames can't contain spaces.",
+    sr: "Korisničko ime ne sme da sadrži razmake.",
+  },
+  usernameChars: {
+    en: "Only letters, numbers, and . _ - are allowed.",
+    sr: "Dozvoljena su samo slova, brojevi i . _ -",
+  },
+  usernameTooShort: {
+    en: "Username needs at least 3 characters.",
+    sr: "Korisničko ime mora imati bar 3 karaktera.",
+  },
+  usernameTooLong: {
+    en: "Username can have at most 32 characters.",
+    sr: "Korisničko ime može imati najviše 32 karaktera.",
+  },
+  usernameTaken: { en: "This username is taken.", sr: "Ovo korisničko ime je zauzeto." },
+  usernameFree: { en: "This username is available.", sr: "Ovo korisničko ime je slobodno." },
 
-  pwRequired:       { en: "Enter your password.",                               sr: "Unesi lozinku." },
-  pwTooShort:       { en: "Password needs at least 8 characters.",              sr: "Lozinka mora imati bar 8 karaktera." },
-  pwNeedsUpper:     { en: "Add an uppercase letter (A–Z).",                     sr: "Dodaj veliko slovo (A–Z)." },
-  pwNeedsNumber:    { en: "Add a number (0–9).",                                sr: "Dodaj broj (0–9)." },
-  pwNeedsSymbol:    { en: "Add a symbol, like ! or #.",                         sr: "Dodaj simbol, npr. ! ili #." },
-  confirmRequired:  { en: "Repeat your password.",                              sr: "Ponovi lozinku." },
-  confirmMismatch:  { en: "Passwords don't match.",                             sr: "Lozinke se ne poklapaju." },
+  pwRequired: { en: "Enter your password.", sr: "Unesi lozinku." },
+  pwTooShort: {
+    en: "Password needs at least 8 characters.",
+    sr: "Lozinka mora imati bar 8 karaktera.",
+  },
+  pwNeedsUpper: { en: "Add an uppercase letter (A–Z).", sr: "Dodaj veliko slovo (A–Z)." },
+  pwNeedsNumber: { en: "Add a number (0–9).", sr: "Dodaj broj (0–9)." },
+  pwNeedsSymbol: { en: "Add a symbol, like ! or #.", sr: "Dodaj simbol, npr. ! ili #." },
+  confirmRequired: { en: "Repeat your password.", sr: "Ponovi lozinku." },
+  confirmMismatch: { en: "Passwords don't match.", sr: "Lozinke se ne poklapaju." },
 
-  reqsLabel:        { en: "Password requirements",          sr: "Zahtevi za lozinku" },
-  reqLen:           { en: "8+ characters",                  sr: "8+ karaktera" },
-  reqUpper:         { en: "Uppercase letter",               sr: "Veliko slovo" },
-  reqNumber:        { en: "Number",                         sr: "Broj" },
-  reqSymbol:        { en: "Symbol",                         sr: "Simbol" },
-  reqMet:           { en: "met",                            sr: "ispunjeno" },
-  reqUnmet:         { en: "not met",                        sr: "nedostaje" },
+  reqsLabel: { en: "Password requirements", sr: "Zahtevi za lozinku" },
+  reqLen: { en: "8+ characters", sr: "8+ karaktera" },
+  reqUpper: { en: "Uppercase letter", sr: "Veliko slovo" },
+  reqNumber: { en: "Number", sr: "Broj" },
+  reqSymbol: { en: "Symbol", sr: "Simbol" },
+  reqMet: { en: "met", sr: "ispunjeno" },
+  reqUnmet: { en: "not met", sr: "nedostaje" },
 
-  capsLock:         { en: "Caps Lock is on.",               sr: "Uključen je Caps Lock." },
-  showPw:           { en: "Show password",                  sr: "Prikaži lozinku" },
-  hidePw:           { en: "Hide password",                  sr: "Sakrij lozinku" },
-  rememberMe:       { en: "Remember me",                    sr: "Zapamti me" },
-  notARobot:        { en: "I'm not a robot",                sr: "Nisam robot" },
-  captchaLabel:     { en: "I am not a robot",               sr: "Nisam robot" },
-  privacyTerms:     { en: "Privacy · Terms",                sr: "Privatnost · Uslovi" },
-  captchaRequired:  { en: "Confirm you're not a robot.",    sr: "Potvrdi da nisi robot." },
-  forgot:           { en: "Forgot password?",               sr: "Zaboravljena lozinka?" },
-  forgotNeedEmail:  { en: "Enter your email first.",        sr: "Prvo unesi email." },
-  forgotSent:       { en: "If that email is registered, a reset link is on its way.", sr: "Ako je taj email registrovan, link za reset stiže uskoro." },
-  forgotDevLink:    { en: "Reset link (dev):",               sr: "Link za reset (dev):" },
+  capsLock: { en: "Caps Lock is on.", sr: "Uključen je Caps Lock." },
+  showPw: { en: "Show password", sr: "Prikaži lozinku" },
+  hidePw: { en: "Hide password", sr: "Sakrij lozinku" },
+  rememberMe: { en: "Remember me", sr: "Zapamti me" },
+  notARobot: { en: "I'm not a robot", sr: "Nisam robot" },
+  captchaLabel: { en: "I am not a robot", sr: "Nisam robot" },
+  privacyTerms: { en: "Privacy · Terms", sr: "Privatnost · Uslovi" },
+  captchaRequired: { en: "Confirm you're not a robot.", sr: "Potvrdi da nisi robot." },
+  forgot: { en: "Forgot password?", sr: "Zaboravljena lozinka?" },
+  forgotNeedEmail: { en: "Enter your email first.", sr: "Prvo unesi email." },
+  forgotSent: {
+    en: "If that email is registered, a reset link is on its way.",
+    sr: "Ako je taj email registrovan, link za reset stiže uskoro.",
+  },
+  forgotDevLink: { en: "Reset link (dev):", sr: "Link za reset (dev):" },
 
-  submitLogin:      { en: "Sign in",                        sr: "Prijavi se" },
-  submitRegister:   { en: "Create account",                 sr: "Napravi nalog" },
-  submittingLogin:  { en: "Signing in…",                    sr: "Prijavljivanje…" },
-  submittingRegister:{ en: "Creating account…",             sr: "Pravimo nalog…" },
-  loginFailed:      { en: "Invalid credentials. Check your email or username and password.", sr: "Pogrešni podaci. Proveri email ili korisničko ime i lozinku." },
-  registerTaken:    { en: "That email or username is already taken.", sr: "Taj email ili korisničko ime je već zauzeto." },
-  genericError:     { en: "Something went wrong. Try again.", sr: "Nešto je pošlo naopako. Pokušaj ponovo." },
-  fixFields:        { en: "Check the highlighted fields.",  sr: "Proveri označena polja." },
+  submitLogin: { en: "Sign in", sr: "Prijavi se" },
+  submitRegister: { en: "Create account", sr: "Napravi nalog" },
+  submittingLogin: { en: "Signing in…", sr: "Prijavljivanje…" },
+  submittingRegister: { en: "Creating account…", sr: "Pravimo nalog…" },
+  loginFailed: {
+    en: "Invalid credentials. Check your email or username and password.",
+    sr: "Pogrešni podaci. Proveri email ili korisničko ime i lozinku.",
+  },
+  registerTaken: {
+    en: "That email or username is already taken.",
+    sr: "Taj email ili korisničko ime je već zauzeto.",
+  },
+  genericError: {
+    en: "Something went wrong. Try again.",
+    sr: "Nešto je pošlo naopako. Pokušaj ponovo.",
+  },
+  fixFields: { en: "Check the highlighted fields.", sr: "Proveri označena polja." },
 
-  oauthError:       { en: "Could not sign you in. Please try again.", sr: "Prijava nije uspela. Pokušaj ponovo." },
-  oauthUnconfigured:{ en: "This sign-in method isn't enabled yet.",   sr: "Ovaj način prijave još nije omogućen." },
+  oauthError: {
+    en: "Could not sign you in. Please try again.",
+    sr: "Prijava nije uspela. Pokušaj ponovo.",
+  },
+  oauthUnconfigured: {
+    en: "This sign-in method isn't enabled yet.",
+    sr: "Ovaj način prijave još nije omogućen.",
+  },
 
-  bannedTitle:      { en: "Your account is suspended",      sr: "Tvoj nalog je suspendovan" },
-  bannedReason:     { en: "Reason:",                        sr: "Razlog:" },
-  appealLabel:      { en: "Submit an appeal",               sr: "Podnesi žalbu" },
-  appealSubmit:     { en: "Submit appeal",                  sr: "Pošalji žalbu" },
-  appealSubmitting: { en: "Submitting…",                    sr: "Slanje…" },
-  appealSubmitted:  { en: "Appeal submitted. We'll review it soon.", sr: "Žalba je poslata. Pregledaćemo je uskoro." },
-  appealPending:    { en: "You already have an appeal pending review.", sr: "Već imaš žalbu na čekanju." },
-  appealError:      { en: "Could not submit your appeal. Try again.", sr: "Slanje žalbe nije uspelo. Pokušaj ponovo." },
-  appealNeedReason: { en: "Describe your appeal in at least 10 characters.", sr: "Opiši žalbu u bar 10 karaktera." },
+  bannedTitle: { en: "Your account is suspended", sr: "Tvoj nalog je suspendovan" },
+  bannedReason: { en: "Reason:", sr: "Razlog:" },
+  appealLabel: { en: "Submit an appeal", sr: "Podnesi žalbu" },
+  appealSubmit: { en: "Submit appeal", sr: "Pošalji žalbu" },
+  appealSubmitting: { en: "Submitting…", sr: "Slanje…" },
+  appealSubmitted: {
+    en: "Appeal submitted. We'll review it soon.",
+    sr: "Žalba je poslata. Pregledaćemo je uskoro.",
+  },
+  appealPending: {
+    en: "You already have an appeal pending review.",
+    sr: "Već imaš žalbu na čekanju.",
+  },
+  appealError: {
+    en: "Could not submit your appeal. Try again.",
+    sr: "Slanje žalbe nije uspelo. Pokušaj ponovo.",
+  },
+  appealNeedReason: {
+    en: "Describe your appeal in at least 10 characters.",
+    sr: "Opiši žalbu u bar 10 karaktera.",
+  },
 
-  orContinueWith:   { en: "or continue with",               sr: "ili nastavi sa" },
-  continueWithGoogle:{ en: "Continue with Google",          sr: "Nastavi sa Google-om" },
-  continueWithGithub:{ en: "Continue with GitHub",          sr: "Nastavi sa GitHub-om" },
-  continueWithLinkedin:{ en: "Continue with LinkedIn",      sr: "Nastavi sa LinkedIn-om" },
+  orContinueWith: { en: "or continue with", sr: "ili nastavi sa" },
+  continueWithGoogle: { en: "Continue with Google", sr: "Nastavi sa Google-om" },
+  continueWithGithub: { en: "Continue with GitHub", sr: "Nastavi sa GitHub-om" },
+  continueWithLinkedin: { en: "Continue with LinkedIn", sr: "Nastavi sa LinkedIn-om" },
 
-  noAccount:        { en: "Don't have an account?",         sr: "Nemaš nalog?" },
-  switchSignUp:     { en: "Sign up",                        sr: "Registruj se" },
-  haveAccount:      { en: "Already have an account?",       sr: "Već imaš nalog?" },
-  switchSignIn:     { en: "Sign in",                        sr: "Prijavi se" },
-  registeringForOrg:{ en: "Registering on behalf of a company?", sr: "Registruješ se u ime firme?" },
-  createOrgAccount: { en: "Create organization account",    sr: "Kreiraj organizacioni nalog" },
+  noAccount: { en: "Don't have an account?", sr: "Nemaš nalog?" },
+  switchSignUp: { en: "Sign up", sr: "Registruj se" },
+  haveAccount: { en: "Already have an account?", sr: "Već imaš nalog?" },
+  switchSignIn: { en: "Sign in", sr: "Prijavi se" },
+  registeringForOrg: {
+    en: "Registering on behalf of a company?",
+    sr: "Registruješ se u ime firme?",
+  },
+  createOrgAccount: { en: "Create organization account", sr: "Kreiraj organizacioni nalog" },
 } as const;
 
 type MsgKey = keyof typeof M;
@@ -145,8 +202,8 @@ type Avail = "idle" | "checking" | "free" | "taken";
 type Provider = "google" | "github" | "linkedin";
 
 const PW_REQS = [
-  { key: "reqLen",    err: "pwTooShort",    test: (p: string) => p.length >= 8 },
-  { key: "reqUpper",  err: "pwNeedsUpper",  test: (p: string) => /[A-Z]/.test(p) },
+  { key: "reqLen", err: "pwTooShort", test: (p: string) => p.length >= 8 },
+  { key: "reqUpper", err: "pwNeedsUpper", test: (p: string) => /[A-Z]/.test(p) },
   { key: "reqNumber", err: "pwNeedsNumber", test: (p: string) => /\d/.test(p) },
   { key: "reqSymbol", err: "pwNeedsSymbol", test: (p: string) => /[^A-Za-z0-9]/.test(p) },
 ] as const satisfies ReadonlyArray<{ key: MsgKey; err: MsgKey; test: (p: string) => boolean }>;
@@ -187,8 +244,7 @@ function identifierError(value: string): MsgKey | null {
 /* Availability probes against the real endpoint; a missing key or a network
    failure counts as "unknown", which we treat as free — register's 409 is
    the authoritative backstop. */
-const probeEmail = (v: string) =>
-  checkAvailability({ email: v }).then((r) => r.email !== false);
+const probeEmail = (v: string) => checkAvailability({ email: v }).then((r) => r.email !== false);
 const probeUsername = (v: string) =>
   checkAvailability({ username: v }).then((r) => r.username !== false);
 
@@ -227,10 +283,22 @@ function useAvailability(
 
 const GoogleIcon = () => (
   <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
-    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.97 10.97 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05" />
-    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+    <path
+      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
+      fill="#4285F4"
+    />
+    <path
+      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+      fill="#34A853"
+    />
+    <path
+      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18A10.97 10.97 0 0 0 1 12c0 1.77.42 3.45 1.18 4.93l3.66-2.84z"
+      fill="#FBBC05"
+    />
+    <path
+      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+      fill="#EA4335"
+    />
   </svg>
 );
 
@@ -250,12 +318,18 @@ export function AuthClient({ initialMode }: { initialMode: Mode }) {
   const { login, register } = useAuth();
   const uid = useId();
   const ids = {
-    identifier: `${uid}identifier`, identifierMsg: `${uid}identifier-msg`,
-    email: `${uid}email`,           emailMsg: `${uid}email-msg`,
-    username: `${uid}username`,     usernameMsg: `${uid}username-msg`,
-    loginPw: `${uid}login-pw`,      loginPwMsg: `${uid}login-pw-msg`,
-    regPw: `${uid}reg-pw`,          regPwMsg: `${uid}reg-pw-msg`,
-    confirm: `${uid}confirm`,       confirmMsg: `${uid}confirm-msg`,
+    identifier: `${uid}identifier`,
+    identifierMsg: `${uid}identifier-msg`,
+    email: `${uid}email`,
+    emailMsg: `${uid}email-msg`,
+    username: `${uid}username`,
+    usernameMsg: `${uid}username-msg`,
+    loginPw: `${uid}login-pw`,
+    loginPwMsg: `${uid}login-pw-msg`,
+    regPw: `${uid}reg-pw`,
+    regPwMsg: `${uid}reg-pw-msg`,
+    confirm: `${uid}confirm`,
+    confirmMsg: `${uid}confirm-msg`,
     reqs: `${uid}reqs`,
     captchaMsg: `${uid}captcha-msg`,
     appeal: `${uid}appeal`,
@@ -270,7 +344,14 @@ export function AuthClient({ initialMode }: { initialMode: Mode }) {
   const [confirm, setConfirm] = useState("");
 
   /* dirty = user typed in the field at least once; showErr = errors visible */
-  const noFlags = { identifier: false, email: false, username: false, loginPw: false, regPw: false, confirm: false };
+  const noFlags = {
+    identifier: false,
+    email: false,
+    username: false,
+    loginPw: false,
+    regPw: false,
+    confirm: false,
+  };
   const dirty = useRef<Record<Fld, boolean>>({ ...noFlags });
   const [showErr, setShowErr] = useState<Record<Fld, boolean>>({ ...noFlags });
 
@@ -367,30 +448,48 @@ export function AuthClient({ initialMode }: { initialMode: Mode }) {
 
   const emailSyntaxErr = emailError(email);
   const [emailAvail, setEmailAvail] = useAvailability(
-    mode === "register", email, emailSyntaxErr !== null, probeEmail,
+    mode === "register",
+    email,
+    emailSyntaxErr !== null,
+    probeEmail,
   );
   const emailShownErr: MsgKey | null =
-    showErr.email && emailSyntaxErr ? emailSyntaxErr : !emailSyntaxErr && emailAvail === "taken" ? "emailTaken" : null;
+    showErr.email && emailSyntaxErr
+      ? emailSyntaxErr
+      : !emailSyntaxErr && emailAvail === "taken"
+        ? "emailTaken"
+        : null;
   const emailValid = !emailSyntaxErr && email.trim() !== "" && emailAvail === "free";
 
   const usernameSyntaxErr = usernameError(username);
   const [usernameAvail, setUsernameAvail] = useAvailability(
-    mode === "register", username, usernameSyntaxErr !== null, probeUsername,
+    mode === "register",
+    username,
+    usernameSyntaxErr !== null,
+    probeUsername,
   );
   const usernameShownErr: MsgKey | null =
     showErr.username && usernameSyntaxErr
       ? usernameSyntaxErr
-      : !usernameSyntaxErr && usernameAvail === "taken" ? "usernameTaken" : null;
+      : !usernameSyntaxErr && usernameAvail === "taken"
+        ? "usernameTaken"
+        : null;
   const usernameValid = !usernameSyntaxErr && username.trim() !== "" && usernameAvail === "free";
 
   const loginPwErr: MsgKey | null = loginPw ? null : "pwRequired";
   const loginPwShownErr = showErr.loginPw ? loginPwErr : null;
 
-  const regPwErr: MsgKey | null = !regPw ? "pwRequired" : PW_REQS.find((r) => !r.test(regPw))?.err ?? null;
+  const regPwErr: MsgKey | null = !regPw
+    ? "pwRequired"
+    : (PW_REQS.find((r) => !r.test(regPw))?.err ?? null);
   const regPwShownErr = showErr.regPw ? regPwErr : null;
   const regPwValid = regPw !== "" && regPwErr === null;
 
-  const confirmErr: MsgKey | null = !confirm ? "confirmRequired" : confirm !== regPw ? "confirmMismatch" : null;
+  const confirmErr: MsgKey | null = !confirm
+    ? "confirmRequired"
+    : confirm !== regPw
+      ? "confirmMismatch"
+      : null;
   const confirmShownErr = showErr.confirm ? confirmErr : null;
   const confirmValid = confirm !== "" && confirmErr === null;
 
@@ -438,7 +537,8 @@ export function AuthClient({ initialMode }: { initialMode: Mode }) {
   const switchMode = (m: Mode) => {
     if (m === mode || submitting) return;
     /* carry genuinely shared data across modes, never clear anything */
-    if (m === "register" && !email && identifier && !emailError(identifier)) setEmail(identifier.trim());
+    if (m === "register" && !email && identifier && !emailError(identifier))
+      setEmail(identifier.trim());
     if (m === "login" && !identifier && email && !emailError(email)) setIdentifier(email.trim());
     setMode(m);
     setFormError(null);
@@ -464,12 +564,18 @@ export function AuthClient({ initialMode }: { initialMode: Mode }) {
 
   const errFor = (f: Fld): MsgKey | null => {
     switch (f) {
-      case "identifier": return identifierErr;
-      case "email": return emailSyntaxErr ?? (emailAvail === "taken" ? "emailTaken" : null);
-      case "username": return usernameSyntaxErr ?? (usernameAvail === "taken" ? "usernameTaken" : null);
-      case "loginPw": return loginPwErr;
-      case "regPw": return regPwErr;
-      case "confirm": return confirmErr;
+      case "identifier":
+        return identifierErr;
+      case "email":
+        return emailSyntaxErr ?? (emailAvail === "taken" ? "emailTaken" : null);
+      case "username":
+        return usernameSyntaxErr ?? (usernameAvail === "taken" ? "usernameTaken" : null);
+      case "loginPw":
+        return loginPwErr;
+      case "regPw":
+        return regPwErr;
+      case "confirm":
+        return confirmErr;
     }
   };
 
@@ -579,9 +685,7 @@ export function AuthClient({ initialMode }: { initialMode: Mode }) {
     try {
       const res = await forgotPassword(identifier.trim());
       setInfo(
-        res.devLink
-          ? `${t("forgotSent")} ${t("forgotDevLink")} ${res.devLink}`
-          : t("forgotSent"),
+        res.devLink ? `${t("forgotSent")} ${t("forgotDevLink")} ${res.devLink}` : t("forgotSent"),
       );
     } catch {
       /* same neutral copy either way — no account enumeration */
@@ -601,9 +705,7 @@ export function AuthClient({ initialMode }: { initialMode: Mode }) {
       setAppealDone(true);
     } catch (err) {
       setAppealError(
-        err instanceof ApiError && err.status === 409
-          ? t("appealPending")
-          : t("appealError"),
+        err instanceof ApiError && err.status === 409 ? t("appealPending") : t("appealError"),
       );
     } finally {
       setAppealLoading(false);
@@ -625,7 +727,9 @@ export function AuthClient({ initialMode }: { initialMode: Mode }) {
             <>
               {/* Email or username */}
               <div className="au-field">
-                <label className="au-label" htmlFor={ids.identifier}>{t("identifierLabel")}</label>
+                <label className="au-label" htmlFor={ids.identifier}>
+                  {t("identifierLabel")}
+                </label>
                 <div className="au-input-wrap">
                   <input
                     ref={inputRefs.identifier}
@@ -645,13 +749,16 @@ export function AuthClient({ initialMode }: { initialMode: Mode }) {
                     aria-describedby={identifierShownErr ? ids.identifierMsg : undefined}
                   />
                   {identifierValid && (
-                    <span className="au-status ok" aria-hidden="true"><Icon name="check" /></span>
+                    <span className="au-status ok" aria-hidden="true">
+                      <Icon name="check" />
+                    </span>
                   )}
                 </div>
                 <div aria-live="polite">
                   {identifierShownErr && (
                     <p className="au-msg err" id={ids.identifierMsg}>
-                      <Icon name="alert" /><span>{t(identifierShownErr)}</span>
+                      <Icon name="alert" />
+                      <span>{t(identifierShownErr)}</span>
                     </p>
                   )}
                 </div>
@@ -659,7 +766,9 @@ export function AuthClient({ initialMode }: { initialMode: Mode }) {
 
               {/* Login password */}
               <div className="au-field">
-                <label className="au-label" htmlFor={ids.loginPw}>{t("passwordLabel")}</label>
+                <label className="au-label" htmlFor={ids.loginPw}>
+                  {t("passwordLabel")}
+                </label>
                 <div className="au-input-wrap">
                   <input
                     ref={inputRefs.loginPw}
@@ -689,10 +798,14 @@ export function AuthClient({ initialMode }: { initialMode: Mode }) {
                 <div aria-live="polite">
                   {loginPwShownErr ? (
                     <p className="au-msg err" id={ids.loginPwMsg}>
-                      <Icon name="alert" /><span>{t(loginPwShownErr)}</span>
+                      <Icon name="alert" />
+                      <span>{t(loginPwShownErr)}</span>
                     </p>
                   ) : caps === "loginPw" ? (
-                    <p className="au-msg warn"><Icon name="alert" /><span>{t("capsLock")}</span></p>
+                    <p className="au-msg warn">
+                      <Icon name="alert" />
+                      <span>{t("capsLock")}</span>
+                    </p>
                   ) : null}
                 </div>
               </div>
@@ -704,17 +817,23 @@ export function AuthClient({ initialMode }: { initialMode: Mode }) {
                     checked={remember}
                     onChange={(e) => setRemember(e.target.checked)}
                   />
-                  <span className="au-check-mark" aria-hidden="true"><Icon name="check" /></span>
+                  <span className="au-check-mark" aria-hidden="true">
+                    <Icon name="check" />
+                  </span>
                   {t("rememberMe")}
                 </label>
-                <button type="button" className="au-linkbtn" onClick={onForgot}>{t("forgot")}</button>
+                <button type="button" className="au-linkbtn" onClick={onForgot}>
+                  {t("forgot")}
+                </button>
               </div>
             </>
           ) : (
             <>
               {/* Email — carried over from login mode when it looks like one */}
               <div className="au-field">
-                <label className="au-label" htmlFor={ids.email}>{t("emailLabel")}</label>
+                <label className="au-label" htmlFor={ids.email}>
+                  {t("emailLabel")}
+                </label>
                 <div className="au-input-wrap">
                   <input
                     ref={inputRefs.email}
@@ -732,13 +851,19 @@ export function AuthClient({ initialMode }: { initialMode: Mode }) {
                     onKeyDown={enterAdvance("email")}
                     onBlur={() => markBlur("email")}
                     aria-invalid={emailShownErr ? true : undefined}
-                    aria-describedby={emailShownErr || emailAvail === "checking" ? ids.emailMsg : undefined}
+                    aria-describedby={
+                      emailShownErr || emailAvail === "checking" ? ids.emailMsg : undefined
+                    }
                   />
                   {emailValid && (
-                    <span className="au-status ok" aria-hidden="true"><Icon name="check" /></span>
+                    <span className="au-status ok" aria-hidden="true">
+                      <Icon name="check" />
+                    </span>
                   )}
                   {emailAvail === "checking" && (
-                    <span className="au-status" aria-hidden="true"><span className="au-spin" /></span>
+                    <span className="au-status" aria-hidden="true">
+                      <span className="au-spin" />
+                    </span>
                   )}
                 </div>
                 <div aria-live="polite">
@@ -765,7 +890,9 @@ export function AuthClient({ initialMode }: { initialMode: Mode }) {
                       </span>
                     </p>
                   ) : emailAvail === "checking" ? (
-                    <p className="au-msg hint" id={ids.emailMsg}>{t("checking")}</p>
+                    <p className="au-msg hint" id={ids.emailMsg}>
+                      {t("checking")}
+                    </p>
                   ) : emailValid ? (
                     /* the green check is aria-hidden; say it out loud too */
                     <p className="au-sr">{t("emailFree")}</p>
@@ -775,9 +902,13 @@ export function AuthClient({ initialMode }: { initialMode: Mode }) {
 
               {/* Username — same rules as the register API (3–32, letters/numbers/._-) */}
               <div className="au-field">
-                <label className="au-label" htmlFor={ids.username}>{t("usernameLabel")}</label>
+                <label className="au-label" htmlFor={ids.username}>
+                  {t("usernameLabel")}
+                </label>
                 <div className="au-input-wrap">
-                  <span className="au-input-prefix" aria-hidden="true">@</span>
+                  <span className="au-input-prefix" aria-hidden="true">
+                    @
+                  </span>
                   <input
                     ref={inputRefs.username}
                     id={ids.username}
@@ -793,22 +924,31 @@ export function AuthClient({ initialMode }: { initialMode: Mode }) {
                     onKeyDown={enterAdvance("username")}
                     onBlur={() => markBlur("username")}
                     aria-invalid={usernameShownErr ? true : undefined}
-                    aria-describedby={usernameShownErr || usernameAvail === "checking" ? ids.usernameMsg : undefined}
+                    aria-describedby={
+                      usernameShownErr || usernameAvail === "checking" ? ids.usernameMsg : undefined
+                    }
                   />
                   {usernameValid && (
-                    <span className="au-status ok" aria-hidden="true"><Icon name="check" /></span>
+                    <span className="au-status ok" aria-hidden="true">
+                      <Icon name="check" />
+                    </span>
                   )}
                   {usernameAvail === "checking" && (
-                    <span className="au-status" aria-hidden="true"><span className="au-spin" /></span>
+                    <span className="au-status" aria-hidden="true">
+                      <span className="au-spin" />
+                    </span>
                   )}
                 </div>
                 <div aria-live="polite">
                   {usernameShownErr ? (
                     <p className="au-msg err" id={ids.usernameMsg}>
-                      <Icon name="alert" /><span>{t(usernameShownErr)}</span>
+                      <Icon name="alert" />
+                      <span>{t(usernameShownErr)}</span>
                     </p>
                   ) : usernameAvail === "checking" ? (
-                    <p className="au-msg hint" id={ids.usernameMsg}>{t("checking")}</p>
+                    <p className="au-msg hint" id={ids.usernameMsg}>
+                      {t("checking")}
+                    </p>
                   ) : usernameValid ? (
                     <p className="au-sr">{t("usernameFree")}</p>
                   ) : null}
@@ -817,7 +957,9 @@ export function AuthClient({ initialMode }: { initialMode: Mode }) {
 
               {/* Registration password + requirements checklist */}
               <div className="au-field">
-                <label className="au-label" htmlFor={ids.regPw}>{t("passwordLabel")}</label>
+                <label className="au-label" htmlFor={ids.regPw}>
+                  {t("passwordLabel")}
+                </label>
                 <div className="au-input-wrap">
                   <input
                     ref={inputRefs.regPw}
@@ -836,7 +978,9 @@ export function AuthClient({ initialMode }: { initialMode: Mode }) {
                     aria-describedby={regPwShownErr ? `${ids.regPwMsg} ${ids.reqs}` : ids.reqs}
                   />
                   {regPwValid && (
-                    <span className="au-status ok pw" aria-hidden="true"><Icon name="check" /></span>
+                    <span className="au-status ok pw" aria-hidden="true">
+                      <Icon name="check" />
+                    </span>
                   )}
                   <button
                     type="button"
@@ -850,10 +994,14 @@ export function AuthClient({ initialMode }: { initialMode: Mode }) {
                 <div aria-live="polite">
                   {regPwShownErr ? (
                     <p className="au-msg err" id={ids.regPwMsg}>
-                      <Icon name="alert" /><span>{t(regPwShownErr)}</span>
+                      <Icon name="alert" />
+                      <span>{t(regPwShownErr)}</span>
                     </p>
                   ) : caps === "regPw" ? (
-                    <p className="au-msg warn"><Icon name="alert" /><span>{t("capsLock")}</span></p>
+                    <p className="au-msg warn">
+                      <Icon name="alert" />
+                      <span>{t("capsLock")}</span>
+                    </p>
                   ) : null}
                 </div>
 
@@ -862,7 +1010,9 @@ export function AuthClient({ initialMode }: { initialMode: Mode }) {
                     const ok = r.test(regPw);
                     return (
                       <li key={r.key} className={ok ? "au-req met" : "au-req"}>
-                        <span className="au-req-dot" aria-hidden="true"><Icon name="check" /></span>
+                        <span className="au-req-dot" aria-hidden="true">
+                          <Icon name="check" />
+                        </span>
                         {t(r.key)}
                         <span className="au-sr"> ({t(ok ? "reqMet" : "reqUnmet")})</span>
                       </li>
@@ -873,7 +1023,9 @@ export function AuthClient({ initialMode }: { initialMode: Mode }) {
 
               {/* Confirm password — live once both fields are in play */}
               <div className="au-field">
-                <label className="au-label" htmlFor={ids.confirm}>{t("confirmLabel")}</label>
+                <label className="au-label" htmlFor={ids.confirm}>
+                  {t("confirmLabel")}
+                </label>
                 <div className="au-input-wrap">
                   <input
                     ref={inputRefs.confirm}
@@ -899,7 +1051,9 @@ export function AuthClient({ initialMode }: { initialMode: Mode }) {
                     aria-describedby={confirmShownErr ? ids.confirmMsg : undefined}
                   />
                   {confirmValid && (
-                    <span className="au-status ok pw" aria-hidden="true"><Icon name="check" /></span>
+                    <span className="au-status ok pw" aria-hidden="true">
+                      <Icon name="check" />
+                    </span>
                   )}
                   <button
                     type="button"
@@ -913,10 +1067,14 @@ export function AuthClient({ initialMode }: { initialMode: Mode }) {
                 <div aria-live="polite">
                   {confirmShownErr ? (
                     <p className="au-msg err" id={ids.confirmMsg}>
-                      <Icon name="alert" /><span>{t(confirmShownErr)}</span>
+                      <Icon name="alert" />
+                      <span>{t(confirmShownErr)}</span>
                     </p>
                   ) : caps === "confirm" ? (
-                    <p className="au-msg warn"><Icon name="alert" /><span>{t("capsLock")}</span></p>
+                    <p className="au-msg warn">
+                      <Icon name="alert" />
+                      <span>{t("capsLock")}</span>
+                    </p>
                   ) : null}
                 </div>
               </div>
@@ -953,7 +1111,8 @@ export function AuthClient({ initialMode }: { initialMode: Mode }) {
               <div aria-live="polite">
                 {captchaErr && !captchaChecked && (
                   <p className="au-msg err" id={ids.captchaMsg}>
-                    <Icon name="alert" /><span>{t("captchaRequired")}</span>
+                    <Icon name="alert" />
+                    <span>{t("captchaRequired")}</span>
                   </p>
                 )}
               </div>
@@ -964,13 +1123,19 @@ export function AuthClient({ initialMode }: { initialMode: Mode }) {
             <div className="au-banned" role="alert">
               <p className="au-banned-title">{t("bannedTitle")}</p>
               {bannedReason && (
-                <p className="au-banned-reason">{t("bannedReason")} {bannedReason}</p>
+                <p className="au-banned-reason">
+                  {t("bannedReason")} {bannedReason}
+                </p>
               )}
               {appealDone ? (
-                <p className="au-msg hint" role="status">{t("appealSubmitted")}</p>
+                <p className="au-msg hint" role="status">
+                  {t("appealSubmitted")}
+                </p>
               ) : (
                 <div className="au-field">
-                  <label className="au-label" htmlFor={ids.appeal}>{t("appealLabel")}</label>
+                  <label className="au-label" htmlFor={ids.appeal}>
+                    {t("appealLabel")}
+                  </label>
                   <textarea
                     className="au-input"
                     id={ids.appeal}
@@ -981,7 +1146,8 @@ export function AuthClient({ initialMode }: { initialMode: Mode }) {
                   />
                   {appealError && (
                     <p className="au-msg err" role="alert">
-                      <Icon name="alert" /><span>{appealError}</span>
+                      <Icon name="alert" />
+                      <span>{appealError}</span>
                     </p>
                   )}
                   <button
@@ -999,12 +1165,14 @@ export function AuthClient({ initialMode }: { initialMode: Mode }) {
 
           {formError && (
             <div className="au-alert" role="alert">
-              <Icon name="alert" /><span>{formError}</span>
+              <Icon name="alert" />
+              <span>{formError}</span>
             </div>
           )}
           {info && (
             <div className="au-alert is-info" role="status">
-              <Icon name="mail" /><span>{info}</span>
+              <Icon name="mail" />
+              <span>{info}</span>
             </div>
           )}
 
@@ -1023,7 +1191,9 @@ export function AuthClient({ initialMode }: { initialMode: Mode }) {
           </button>
         </form>
 
-        <div className="au-divider"><span>{t("orContinueWith")}</span></div>
+        <div className="au-divider">
+          <span>{t("orContinueWith")}</span>
+        </div>
 
         <div className="au-oauth">
           <button
@@ -1034,7 +1204,11 @@ export function AuthClient({ initialMode }: { initialMode: Mode }) {
             aria-label={t("continueWithGoogle")}
             onClick={() => onSocial("google")}
           >
-            {submitting === "google" ? <span className="au-spin" aria-hidden="true" /> : <GoogleIcon />}
+            {submitting === "google" ? (
+              <span className="au-spin" aria-hidden="true" />
+            ) : (
+              <GoogleIcon />
+            )}
             <span>Google</span>
           </button>
           <button
@@ -1045,7 +1219,11 @@ export function AuthClient({ initialMode }: { initialMode: Mode }) {
             aria-label={t("continueWithGithub")}
             onClick={() => onSocial("github")}
           >
-            {submitting === "github" ? <span className="au-spin" aria-hidden="true" /> : <Icon name="github" />}
+            {submitting === "github" ? (
+              <span className="au-spin" aria-hidden="true" />
+            ) : (
+              <Icon name="github" />
+            )}
             <span>GitHub</span>
           </button>
           <button
@@ -1056,7 +1234,11 @@ export function AuthClient({ initialMode }: { initialMode: Mode }) {
             aria-label={t("continueWithLinkedin")}
             onClick={() => onSocial("linkedin")}
           >
-            {submitting === "linkedin" ? <span className="au-spin" aria-hidden="true" /> : <LinkedinIcon />}
+            {submitting === "linkedin" ? (
+              <span className="au-spin" aria-hidden="true" />
+            ) : (
+              <LinkedinIcon />
+            )}
             <span>LinkedIn</span>
           </button>
         </div>
@@ -1075,7 +1257,9 @@ export function AuthClient({ initialMode }: { initialMode: Mode }) {
         )}
 
         {/* Submit-time announcements for screen readers */}
-        <div className="au-sr" aria-live="assertive">{liveMsg}</div>
+        <div className="au-sr" aria-live="assertive">
+          {liveMsg}
+        </div>
       </main>
 
       <footer className="au-footer">

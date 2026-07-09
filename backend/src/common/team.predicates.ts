@@ -8,7 +8,4 @@ import { teamMembers } from "../db/schema";
  * Combine with the rest of your `where(and(...))` conditions, e.g.
  * `and(eq(teamMembers.teamId, teamId), activeTeamMember)`.
  */
-export const activeTeamMember = and(
-  isNull(teamMembers.leftAt),
-  isNull(teamMembers.deletedAt),
-);
+export const activeTeamMember = and(isNull(teamMembers.leftAt), isNull(teamMembers.deletedAt));

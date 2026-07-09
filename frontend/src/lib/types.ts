@@ -23,45 +23,23 @@ export type HackathonStatus = "upcoming" | "ongoing" | "finished" | "cancelled";
 
 export type TeamRole = "leader" | "member";
 
-export type ApplicationStatus =
-  | "pending"
-  | "approved"
-  | "rejected"
-  | "waitlisted"
-  | "withdrawn";
+export type ApplicationStatus = "pending" | "approved" | "rejected" | "waitlisted" | "withdrawn";
 
 export type ProjectStatus = "draft" | "submitted" | "under_review" | "judged";
 
 export type ChannelType = "general" | "announcements" | "team" | "private";
 
-export type BadgeCategory =
-  | "participation"
-  | "achievement"
-  | "social"
-  | "special";
+export type BadgeCategory = "participation" | "achievement" | "social" | "special";
 
-export type CosmeticType =
-  | "username_effect"
-  | "avatar_decoration"
-  | "banner_effect";
+export type CosmeticType = "username_effect" | "avatar_decoration" | "banner_effect";
 export type CosmeticRarity = "common" | "rare" | "epic" | "legendary";
 
-export type MerchOrderStatus =
-  | "pending"
-  | "processing"
-  | "shipped"
-  | "delivered"
-  | "cancelled";
+export type MerchOrderStatus = "pending" | "processing" | "shipped" | "delivered" | "cancelled";
 
 export type SubscriptionPlan = "premium";
 export type SubscriptionStatus = "active" | "cancelled" | "expired";
 
-export type ReportTargetType =
-  | "user"
-  | "post"
-  | "comment"
-  | "message"
-  | "hackathon";
+export type ReportTargetType = "user" | "post" | "comment" | "message" | "hackathon";
 export type ReportStatus = "pending" | "reviewed" | "resolved" | "dismissed";
 
 export type EntityType =
@@ -96,13 +74,7 @@ export type NotificationType =
 export type AvatarKind = "brand" | "v" | "t" | "org";
 
 /** Status-badge variants from app.css `.badge-*`. */
-export type BadgeVariant =
-  | "live"
-  | "upcoming"
-  | "open"
-  | "ended"
-  | "closed"
-  | "warn";
+export type BadgeVariant = "live" | "upcoming" | "open" | "ended" | "closed" | "warn";
 
 /* Core entities */
 

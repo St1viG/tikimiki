@@ -39,64 +39,82 @@ import {
  */
 
 const M = {
-  back:          { en: "Back",                          sr: "Nazad" },
-  pageTitle:     { en: "Apply",                         sr: "Prijava" },
+  back: { en: "Back", sr: "Nazad" },
+  pageTitle: { en: "Apply", sr: "Prijava" },
 
-  loading:       { en: "Loading…",                      sr: "Učitavanje…" },
-  notFound:      { en: "Hackathon not found.",          sr: "Hackathon nije pronađen." },
-  browse:        { en: "Browse hackathons",             sr: "Pregledaj hackathone" },
+  loading: { en: "Loading…", sr: "Učitavanje…" },
+  notFound: { en: "Hackathon not found.", sr: "Hackathon nije pronađen." },
+  browse: { en: "Browse hackathons", sr: "Pregledaj hackathone" },
 
-  by:            { en: "by",                            sr: "organizuje" },
-  verifiedOrg:   { en: "Verified organizer",            sr: "Verifikovan organizator" },
-  metaParticipants:{ en: "Participants",                sr: "Učesnici" },
-  metaPrize:     { en: "Main prize",                    sr: "Glavna nagrada" },
-  metaDeadline:  { en: "Apply by",                      sr: "Rok za prijavu" },
+  by: { en: "by", sr: "organizuje" },
+  verifiedOrg: { en: "Verified organizer", sr: "Verifikovan organizator" },
+  metaParticipants: { en: "Participants", sr: "Učesnici" },
+  metaPrize: { en: "Main prize", sr: "Glavna nagrada" },
+  metaDeadline: { en: "Apply by", sr: "Rok za prijavu" },
 
   // Anonymous
-  anonTitle:     { en: "Sign in to apply",              sr: "Prijavi se da konkurišeš" },
-  anonBody:      { en: "You need an account to apply to this hackathon.", sr: "Potreban ti je nalog da bi se prijavio na ovaj hackathon." },
-  login:         { en: "Sign in",                       sr: "Prijava" },
+  anonTitle: { en: "Sign in to apply", sr: "Prijavi se da konkurišeš" },
+  anonBody: {
+    en: "You need an account to apply to this hackathon.",
+    sr: "Potreban ti je nalog da bi se prijavio na ovaj hackathon.",
+  },
+  login: { en: "Sign in", sr: "Prijava" },
 
   // Already applied
-  appliedTitle:  { en: "You've applied",                sr: "Već si se prijavio" },
-  appliedBody:   { en: "Your application to this hackathon is in.", sr: "Tvoja prijava za ovaj hackathon je poslata." },
-  appliedTeam:   { en: "Team",                          sr: "Tim" },
-  appliedSolo:   { en: "Applied solo",                  sr: "Prijava pojedinačno" },
-  statusPending: { en: "Pending review",                sr: "Na čekanju" },
-  statusApproved:{ en: "Approved",                      sr: "Odobreno" },
-  statusRejected:{ en: "Rejected",                      sr: "Odbijeno" },
-  statusWaitlisted:{ en: "Waitlisted",                  sr: "Lista čekanja" },
+  appliedTitle: { en: "You've applied", sr: "Već si se prijavio" },
+  appliedBody: {
+    en: "Your application to this hackathon is in.",
+    sr: "Tvoja prijava za ovaj hackathon je poslata.",
+  },
+  appliedTeam: { en: "Team", sr: "Tim" },
+  appliedSolo: { en: "Applied solo", sr: "Prijava pojedinačno" },
+  statusPending: { en: "Pending review", sr: "Na čekanju" },
+  statusApproved: { en: "Approved", sr: "Odobreno" },
+  statusRejected: { en: "Rejected", sr: "Odbijeno" },
+  statusWaitlisted: { en: "Waitlisted", sr: "Lista čekanja" },
 
   // Success
-  successTitle:  { en: "Application sent",              sr: "Prijava poslata" },
-  successBody:   { en: "The organizer will review your application. You'll be notified of the decision.", sr: "Organizator će pregledati tvoju prijavu. Bićeš obavešten o odluci." },
-  backToHacks:   { en: "Back to hackathons",            sr: "Nazad na hackathone" },
+  successTitle: { en: "Application sent", sr: "Prijava poslata" },
+  successBody: {
+    en: "The organizer will review your application. You'll be notified of the decision.",
+    sr: "Organizator će pregledati tvoju prijavu. Bićeš obavešten o odluci.",
+  },
+  backToHacks: { en: "Back to hackathons", sr: "Nazad na hackathone" },
 
   // Team selection
-  teamSection:   { en: "How are you applying?",         sr: "Kako se prijavljuješ?" },
-  applySolo:     { en: "Solo",                          sr: "Pojedinačno" },
-  applySoloSub:  { en: "Apply on your own.",            sr: "Prijavi se samostalno." },
-  withTeam:      { en: "With my team",                  sr: "Sa svojim timom" },
-  members:       { en: "members",                       sr: "članova" },
+  teamSection: { en: "How are you applying?", sr: "Kako se prijavljuješ?" },
+  applySolo: { en: "Solo", sr: "Pojedinačno" },
+  applySoloSub: { en: "Apply on your own.", sr: "Prijavi se samostalno." },
+  withTeam: { en: "With my team", sr: "Sa svojim timom" },
+  members: { en: "members", sr: "članova" },
 
   // Questions
-  questionsSection:{ en: "Application questions",        sr: "Pitanja za prijavu" },
-  required:      { en: "required",                      sr: "obavezno" },
-  optional:      { en: "optional",                      sr: "opciono" },
-  noQuestions:   { en: "No extra questions — just confirm to apply.", sr: "Nema dodatnih pitanja — samo potvrdi prijavu." },
-  otherOption:   { en: "Other",                          sr: "Ostalo" },
-  otherPlaceholder:{ en: "Please specify…",              sr: "Navedi…" },
+  questionsSection: { en: "Application questions", sr: "Pitanja za prijavu" },
+  required: { en: "required", sr: "obavezno" },
+  optional: { en: "optional", sr: "opciono" },
+  noQuestions: {
+    en: "No extra questions — just confirm to apply.",
+    sr: "Nema dodatnih pitanja — samo potvrdi prijavu.",
+  },
+  otherOption: { en: "Other", sr: "Ostalo" },
+  otherPlaceholder: { en: "Please specify…", sr: "Navedi…" },
 
   // Submit
-  submit:        { en: "Submit application",            sr: "Pošalji prijavu" },
-  submitting:    { en: "Submitting…",                   sr: "Slanje…" },
-  cancel:        { en: "Cancel",                        sr: "Otkaži" },
-  fillRequired:  { en: "Please answer all required questions.", sr: "Odgovori na sva obavezna pitanja." },
-  already:       { en: "You already applied to this hackathon.", sr: "Već si se prijavio na ovaj hackathon." },
+  submit: { en: "Submit application", sr: "Pošalji prijavu" },
+  submitting: { en: "Submitting…", sr: "Slanje…" },
+  cancel: { en: "Cancel", sr: "Otkaži" },
+  fillRequired: {
+    en: "Please answer all required questions.",
+    sr: "Odgovori na sva obavezna pitanja.",
+  },
+  already: {
+    en: "You already applied to this hackathon.",
+    sr: "Već si se prijavio na ovaj hackathon.",
+  },
 
-  typePhysical:  { en: "Physical",                      sr: "Fizički" },
-  typeVirtual:   { en: "Virtual",                       sr: "Virtuelni" },
-  typeHybrid:    { en: "Hybrid",                        sr: "Hibridni" },
+  typePhysical: { en: "Physical", sr: "Fizički" },
+  typeVirtual: { en: "Virtual", sr: "Virtuelni" },
+  typeHybrid: { en: "Hybrid", sr: "Hibridni" },
 } as const;
 
 type AnswerMap = Record<string, string | string[]>;
@@ -184,14 +202,11 @@ export function ApplyHackathonClient({ hackathonId }: { hackathonId: string }) {
       const cur = Array.isArray(prev[qid]) ? (prev[qid] as string[]) : [];
       return {
         ...prev,
-        [qid]: cur.includes(option)
-          ? cur.filter((o) => o !== option)
-          : [...cur, option],
+        [qid]: cur.includes(option) ? cur.filter((o) => o !== option) : [...cur, option],
       };
     });
 
-  const setOther = (qid: string, on: boolean) =>
-    setOtherOn((prev) => ({ ...prev, [qid]: on }));
+  const setOther = (qid: string, on: boolean) => setOtherOn((prev) => ({ ...prev, [qid]: on }));
   const setOtherTextFor = (qid: string, v: string) =>
     setOtherText((prev) => ({ ...prev, [qid]: v }));
 
@@ -202,9 +217,7 @@ export function ApplyHackathonClient({ hackathonId }: { hackathonId: string }) {
    */
   const effectiveAnswer = (q: ApplicationQuestion): string => {
     const other =
-      q.allowOther && otherOn[q.questionId]
-        ? (otherText[q.questionId] ?? "").trim()
-        : "";
+      q.allowOther && otherOn[q.questionId] ? (otherText[q.questionId] ?? "").trim() : "";
     if (q.type === "multi_choice") {
       const picked = Array.isArray(answers[q.questionId])
         ? (answers[q.questionId] as string[])
@@ -221,9 +234,7 @@ export function ApplyHackathonClient({ hackathonId }: { hackathonId: string }) {
 
   async function submit() {
     if (!user || !questions) return;
-    const missing = questions.some(
-      (q) => q.required && effectiveAnswer(q) === "",
-    );
+    const missing = questions.some((q) => q.required && effectiveAnswer(q) === "");
     if (missing) {
       setError(t("fillRequired"));
       return;
@@ -293,8 +304,14 @@ export function ApplyHackathonClient({ hackathonId }: { hackathonId: string }) {
           ) : (
             <div className="ap-hero" aria-busy="true">
               <span className="skel skel-line" style={{ width: "40%", height: 14 }} />
-              <span className="skel skel-line" style={{ width: "70%", height: 26, marginTop: 12 }} />
-              <span className="skel skel-line" style={{ width: "55%", height: 13, marginTop: 12 }} />
+              <span
+                className="skel skel-line"
+                style={{ width: "70%", height: 26, marginTop: 12 }}
+              />
+              <span
+                className="skel skel-line"
+                style={{ width: "55%", height: 13, marginTop: 12 }}
+              />
             </div>
           )}
         </main>
@@ -314,7 +331,9 @@ export function ApplyHackathonClient({ hackathonId }: { hackathonId: string }) {
       )}
       <div className="ap-hero-body">
         <div className="ap-org">
-          <div className="ap-org-av" aria-hidden="true">{initials(hack.organizationName)}</div>
+          <div className="ap-org-av" aria-hidden="true">
+            {initials(hack.organizationName)}
+          </div>
           <span className="ap-org-name">
             {t("by")} <strong>{hack.organizationName}</strong>
           </span>
@@ -354,7 +373,9 @@ export function ApplyHackathonClient({ hackathonId }: { hackathonId: string }) {
           )}
           <div className="ap-meta-item">
             <Icon name="clock" />
-            <span>{t("metaDeadline")} {fmtDMY(new Date(hack.registrationDeadline))}</span>
+            <span>
+              {t("metaDeadline")} {fmtDMY(new Date(hack.registrationDeadline))}
+            </span>
           </div>
         </div>
       </div>
@@ -504,7 +525,10 @@ export function ApplyHackathonClient({ hackathonId }: { hackathonId: string }) {
             {questions === null ? (
               <div className="ap-q-loading" aria-busy="true">
                 <span className="skel skel-line" style={{ width: "30%" }} />
-                <span className="skel skel-line" style={{ width: "100%", height: 42, marginTop: 8 }} />
+                <span
+                  className="skel skel-line"
+                  style={{ width: "100%", height: 42, marginTop: 8 }}
+                />
               </div>
             ) : questions.length === 0 ? (
               <p className="ap-note">{t("noQuestions")}</p>
@@ -543,10 +567,7 @@ export function ApplyHackathonClient({ hackathonId }: { hackathonId: string }) {
                             <input
                               type="radio"
                               name={q.questionId}
-                              checked={
-                                !otherOn[q.questionId] &&
-                                answers[q.questionId] === opt
-                              }
+                              checked={!otherOn[q.questionId] && answers[q.questionId] === opt}
                               onChange={() => {
                                 setAnswer(q.questionId, opt);
                                 setOther(q.questionId, false);
@@ -574,9 +595,7 @@ export function ApplyHackathonClient({ hackathonId }: { hackathonId: string }) {
                                 className="ap-input"
                                 placeholder={t("otherPlaceholder")}
                                 value={otherText[q.questionId] ?? ""}
-                                onChange={(e) =>
-                                  setOtherTextFor(q.questionId, e.target.value)
-                                }
+                                onChange={(e) => setOtherTextFor(q.questionId, e.target.value)}
                               />
                             )}
                           </>
@@ -605,9 +624,7 @@ export function ApplyHackathonClient({ hackathonId }: { hackathonId: string }) {
                               <input
                                 type="checkbox"
                                 checked={!!otherOn[q.questionId]}
-                                onChange={(e) =>
-                                  setOther(q.questionId, e.target.checked)
-                                }
+                                onChange={(e) => setOther(q.questionId, e.target.checked)}
                               />
                               {t("otherOption")}
                             </label>
@@ -616,9 +633,7 @@ export function ApplyHackathonClient({ hackathonId }: { hackathonId: string }) {
                                 className="ap-input"
                                 placeholder={t("otherPlaceholder")}
                                 value={otherText[q.questionId] ?? ""}
-                                onChange={(e) =>
-                                  setOtherTextFor(q.questionId, e.target.value)
-                                }
+                                onChange={(e) => setOtherTextFor(q.questionId, e.target.value)}
                               />
                             )}
                           </>

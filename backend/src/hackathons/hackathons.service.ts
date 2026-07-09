@@ -96,12 +96,7 @@ type HackathonRow = {
   teamCount: number;
 } & Omit<
   HackathonSummary,
-  | "startsAt"
-  | "endsAt"
-  | "registrationDeadline"
-  | "createdAt"
-  | "participantCount"
-  | "teamCount"
+  "startsAt" | "endsAt" | "registrationDeadline" | "createdAt" | "participantCount" | "teamCount"
 >;
 
 function toSummary(r: HackathonRow): HackathonSummary {
@@ -131,10 +126,7 @@ export class HackathonsService {
     const rows = await this.db
       .select(columns)
       .from(hackathons)
-      .innerJoin(
-        organizations,
-        eq(hackathons.organizationId, organizations.userId),
-      )
+      .innerJoin(organizations, eq(hackathons.organizationId, organizations.userId))
       .where(isNull(hackathons.deletedAt))
       .orderBy(asc(hackathons.startsAt));
     return rows.map(toSummary);
@@ -144,29 +136,21 @@ export class HackathonsService {
     const [row] = await this.db
       .select(columns)
       .from(hackathons)
-      .innerJoin(
-        organizations,
-        eq(hackathons.organizationId, organizations.userId),
-      )
+      .innerJoin(organizations, eq(hackathons.organizationId, organizations.userId))
       .where(and(eq(hackathons.hackathonId, id), isNull(hackathons.deletedAt)))
       .limit(1);
     if (!row) throw new NotFoundException("Hackathon not found");
     return toSummary(row);
   }
 
-  async create(
-    userId: string,
-    input: CreateHackathonInput,
-  ): Promise<HackathonSummary> {
+  async create(userId: string, input: CreateHackathonInput): Promise<HackathonSummary> {
     const [org] = await this.db
       .select({ userId: organizations.userId })
       .from(organizations)
       .where(eq(organizations.userId, userId))
       .limit(1);
     if (!org) {
-      throw new ForbiddenException(
-        "Only organization accounts can create hackathons",
-      );
+      throw new ForbiddenException("Only organization accounts can create hackathons");
     }
 
     const startsAt = new Date(input.startsAt);
@@ -177,9 +161,7 @@ export class HackathonsService {
       throw new BadRequestException("startsAt must be before endsAt");
     }
     if (!(registrationDeadline.getTime() < startsAt.getTime())) {
-      throw new BadRequestException(
-        "registrationDeadline must be before startsAt",
-      );
+      throw new BadRequestException("registrationDeadline must be before startsAt");
     }
     if (input.maxParticipants != null && input.maxParticipants <= 0) {
       throw new BadRequestException("maxParticipants must be greater than 0");
@@ -189,9 +171,7 @@ export class HackathonsService {
       throw new BadRequestException("minTeamSize must be at least 1");
     }
     if (input.maxTeamSize < minTeamSize) {
-      throw new BadRequestException(
-        "maxTeamSize must be greater than or equal to minTeamSize",
-      );
+      throw new BadRequestException("maxTeamSize must be greater than or equal to minTeamSize");
     }
     const hasCoords = input.latitude != null && input.longitude != null;
     if (input.type !== "virtual") {
@@ -202,9 +182,7 @@ export class HackathonsService {
       }
     }
     if ((input.latitude == null) !== (input.longitude == null)) {
-      throw new BadRequestException(
-        "latitude and longitude must be provided together",
-      );
+      throw new BadRequestException("latitude and longitude must be provided together");
     }
 
     const coordinates = hasCoords
@@ -280,8 +258,7 @@ export class HackathonsService {
       if (input.questions && input.questions.length > 0) {
         await tx.insert(applicationQuestions).values(
           input.questions.map((q, i) => {
-            const isChoice =
-              q.type === "single_choice" || q.type === "multi_choice";
+            const isChoice = q.type === "single_choice" || q.type === "multi_choice";
             return {
               hackathonId: created.hackathonId,
               prompt: q.prompt,
@@ -323,9 +300,7 @@ export class HackathonsService {
       .where(eq(organizations.userId, userId))
       .limit(1);
     if (!org) {
-      throw new ForbiddenException(
-        "Only organization accounts can organize hackathons",
-      );
+      throw new ForbiddenException("Only organization accounts can organize hackathons");
     }
   }
 
@@ -370,22 +345,14 @@ export class HackathonsService {
         updatedAt: hackathonDrafts.updatedAt,
       })
       .from(hackathonDrafts)
-      .where(
-        and(
-          eq(hackathonDrafts.draftId, draftId),
-          eq(hackathonDrafts.organizationId, userId),
-        ),
-      )
+      .where(and(eq(hackathonDrafts.draftId, draftId), eq(hackathonDrafts.organizationId, userId)))
       .limit(1);
     if (!row) throw new NotFoundException("Draft not found");
     return this.toDraft(row);
   }
 
   /** POST /hackathons/drafts — create a new draft. */
-  async createDraft(
-    userId: string,
-    input: SaveDraftInput,
-  ): Promise<HackathonDraftDto> {
+  async createDraft(userId: string, input: SaveDraftInput): Promise<HackathonDraftDto> {
     await this.assertOrganization(userId);
     const [row] = await this.db
       .insert(hackathonDrafts)
@@ -409,12 +376,7 @@ export class HackathonsService {
     const [row] = await this.db
       .update(hackathonDrafts)
       .set({ payload: input.payload, updatedAt: new Date() })
-      .where(
-        and(
-          eq(hackathonDrafts.draftId, draftId),
-          eq(hackathonDrafts.organizationId, userId),
-        ),
-      )
+      .where(and(eq(hackathonDrafts.draftId, draftId), eq(hackathonDrafts.organizationId, userId)))
       .returning({
         draftId: hackathonDrafts.draftId,
         payload: hackathonDrafts.payload,
@@ -426,19 +388,11 @@ export class HackathonsService {
   }
 
   /** DELETE /hackathons/drafts/:id — discard a draft. */
-  async deleteDraft(
-    userId: string,
-    draftId: string,
-  ): Promise<{ success: true }> {
+  async deleteDraft(userId: string, draftId: string): Promise<{ success: true }> {
     await this.assertOrganization(userId);
     const deleted = await this.db
       .delete(hackathonDrafts)
-      .where(
-        and(
-          eq(hackathonDrafts.draftId, draftId),
-          eq(hackathonDrafts.organizationId, userId),
-        ),
-      )
+      .where(and(eq(hackathonDrafts.draftId, draftId), eq(hackathonDrafts.organizationId, userId)))
       .returning({ draftId: hackathonDrafts.draftId });
     if (deleted.length === 0) throw new NotFoundException("Draft not found");
     return { success: true };
@@ -449,16 +403,8 @@ export class HackathonsService {
     const rows = await this.db
       .select(columns)
       .from(hackathons)
-      .innerJoin(
-        organizations,
-        eq(hackathons.organizationId, organizations.userId),
-      )
-      .where(
-        and(
-          eq(hackathons.organizationId, userId),
-          isNull(hackathons.deletedAt),
-        ),
-      )
+      .innerJoin(organizations, eq(hackathons.organizationId, organizations.userId))
+      .where(and(eq(hackathons.organizationId, userId), isNull(hackathons.deletedAt)))
       .orderBy(desc(hackathons.createdAt));
     return rows.map(toSummary);
   }
@@ -482,16 +428,12 @@ export class HackathonsService {
         type: hackathons.type,
       })
       .from(hackathons)
-      .where(
-        and(eq(hackathons.hackathonId, hackathonId), isNull(hackathons.deletedAt)),
-      )
+      .where(and(eq(hackathons.hackathonId, hackathonId), isNull(hackathons.deletedAt)))
       .limit(1);
     if (!existing) throw new NotFoundException("Hackathon not found");
 
     if (existing.status !== "upcoming") {
-      throw new BadRequestException(
-        "Hackathon can only be edited while status is 'upcoming'",
-      );
+      throw new BadRequestException("Hackathon can only be edited while status is 'upcoming'");
     }
 
     // Resolve effective values for cross-field validation.
@@ -508,35 +450,24 @@ export class HackathonsService {
       throw new BadRequestException("startsAt must be before endsAt");
     }
     if (!(registrationDeadline.getTime() < startsAt.getTime())) {
-      throw new BadRequestException(
-        "registrationDeadline must be before startsAt",
-      );
+      throw new BadRequestException("registrationDeadline must be before startsAt");
     }
     if (maxTeamSize < minTeamSize) {
-      throw new BadRequestException(
-        "maxTeamSize must be greater than or equal to minTeamSize",
-      );
+      throw new BadRequestException("maxTeamSize must be greater than or equal to minTeamSize");
     }
 
     // Coordinates must come as a pair.
-    if (
-      input.latitude !== undefined ||
-      input.longitude !== undefined
-    ) {
+    if (input.latitude !== undefined || input.longitude !== undefined) {
       const lat = input.latitude !== undefined ? input.latitude : null;
       const lng = input.longitude !== undefined ? input.longitude : null;
       if ((lat == null) !== (lng == null)) {
-        throw new BadRequestException(
-          "latitude and longitude must be provided together",
-        );
+        throw new BadRequestException("latitude and longitude must be provided together");
       }
     }
 
     // Physical/hybrid still need location + coords.
     if (effectiveType !== "virtual" && input.location === null) {
-      throw new BadRequestException(
-        "Physical and hybrid hackathons require a location",
-      );
+      throw new BadRequestException("Physical and hybrid hackathons require a location");
     }
 
     const patch: Partial<typeof hackathons.$inferInsert> = {
@@ -548,10 +479,8 @@ export class HackathonsService {
     if (input.theme !== undefined) patch.theme = input.theme;
     if (input.startsAt !== undefined) patch.startsAt = startsAt;
     if (input.endsAt !== undefined) patch.endsAt = endsAt;
-    if (input.registrationDeadline !== undefined)
-      patch.registrationDeadline = registrationDeadline;
-    if (input.maxParticipants !== undefined)
-      patch.maxParticipants = input.maxParticipants;
+    if (input.registrationDeadline !== undefined) patch.registrationDeadline = registrationDeadline;
+    if (input.maxParticipants !== undefined) patch.maxParticipants = input.maxParticipants;
     if (input.minTeamSize !== undefined) patch.minTeamSize = input.minTeamSize;
     if (input.maxTeamSize !== undefined) patch.maxTeamSize = input.maxTeamSize;
     if (input.location !== undefined) patch.location = input.location;
@@ -587,9 +516,7 @@ export class HackathonsService {
     const [existing] = await this.db
       .select({ status: hackathons.status })
       .from(hackathons)
-      .where(
-        and(eq(hackathons.hackathonId, hackathonId), isNull(hackathons.deletedAt)),
-      )
+      .where(and(eq(hackathons.hackathonId, hackathonId), isNull(hackathons.deletedAt)))
       .limit(1);
     if (!existing) throw new NotFoundException("Hackathon not found");
 
@@ -604,9 +531,7 @@ export class HackathonsService {
     };
 
     if (!allowed[from]?.includes(to)) {
-      throw new BadRequestException(
-        `Cannot transition from '${from}' to '${to}'`,
-      );
+      throw new BadRequestException(`Cannot transition from '${from}' to '${to}'`);
     }
 
     await this.db
@@ -624,17 +549,13 @@ export class HackathonsService {
     const [existing] = await this.db
       .select({ status: hackathons.status, organizationId: hackathons.organizationId })
       .from(hackathons)
-      .where(
-        and(eq(hackathons.hackathonId, hackathonId), isNull(hackathons.deletedAt)),
-      )
+      .where(and(eq(hackathons.hackathonId, hackathonId), isNull(hackathons.deletedAt)))
       .limit(1);
     if (!existing) throw new NotFoundException("Hackathon not found");
 
     const isAdmin = await this.authz.isAdmin(userId);
     if (!isAdmin && existing.status !== "cancelled") {
-      throw new BadRequestException(
-        "Only cancelled hackathons can be deleted. Cancel it first.",
-      );
+      throw new BadRequestException("Only cancelled hackathons can be deleted. Cancel it first.");
     }
 
     await this.db
@@ -659,12 +580,7 @@ export class HackathonsService {
         sponsorName: hackathonPrizes.sponsorName,
       })
       .from(hackathonPrizes)
-      .where(
-        and(
-          eq(hackathonPrizes.hackathonId, hackathonId),
-          isNull(hackathonPrizes.bountyId),
-        ),
-      )
+      .where(and(eq(hackathonPrizes.hackathonId, hackathonId), isNull(hackathonPrizes.bountyId)))
       .orderBy(asc(hackathonPrizes.rank));
 
     return rows.map((r) => ({
@@ -709,20 +625,11 @@ export class HackathonsService {
     };
   }
 
-  async updatePrize(
-    userId: string,
-    prizeId: string,
-    input: UpdatePrizeInput,
-  ): Promise<PrizeDto> {
+  async updatePrize(userId: string, prizeId: string, input: UpdatePrizeInput): Promise<PrizeDto> {
     const [existing] = await this.db
       .select({ hackathonId: hackathonPrizes.hackathonId })
       .from(hackathonPrizes)
-      .where(
-        and(
-          eq(hackathonPrizes.prizeId, prizeId),
-          isNull(hackathonPrizes.bountyId),
-        ),
-      )
+      .where(and(eq(hackathonPrizes.prizeId, prizeId), isNull(hackathonPrizes.bountyId)))
       .limit(1);
     if (!existing) throw new NotFoundException("Prize not found");
 
@@ -752,27 +659,17 @@ export class HackathonsService {
     };
   }
 
-  async deletePrize(
-    userId: string,
-    prizeId: string,
-  ): Promise<{ success: true }> {
+  async deletePrize(userId: string, prizeId: string): Promise<{ success: true }> {
     const [existing] = await this.db
       .select({ hackathonId: hackathonPrizes.hackathonId })
       .from(hackathonPrizes)
-      .where(
-        and(
-          eq(hackathonPrizes.prizeId, prizeId),
-          isNull(hackathonPrizes.bountyId),
-        ),
-      )
+      .where(and(eq(hackathonPrizes.prizeId, prizeId), isNull(hackathonPrizes.bountyId)))
       .limit(1);
     if (!existing) throw new NotFoundException("Prize not found");
 
     await this.authz.assertHackathonOwnerOrAdmin(existing.hackathonId, userId);
 
-    await this.db
-      .delete(hackathonPrizes)
-      .where(eq(hackathonPrizes.prizeId, prizeId));
+    await this.db.delete(hackathonPrizes).where(eq(hackathonPrizes.prizeId, prizeId));
 
     return { success: true };
   }
@@ -790,12 +687,7 @@ export class HackathonsService {
     const [role] = await this.db
       .select({ serverRoleId: serverRoles.serverRoleId })
       .from(serverRoles)
-      .where(
-        and(
-          eq(serverRoles.serverId, server.serverId),
-          eq(serverRoles.name, "Moderator"),
-        ),
-      )
+      .where(and(eq(serverRoles.serverId, server.serverId), eq(serverRoles.name, "Moderator")))
       .limit(1);
     if (!role) return [];
 
@@ -844,12 +736,7 @@ export class HackathonsService {
     let [role] = await this.db
       .select({ serverRoleId: serverRoles.serverRoleId })
       .from(serverRoles)
-      .where(
-        and(
-          eq(serverRoles.serverId, server.serverId),
-          eq(serverRoles.name, "Moderator"),
-        ),
-      )
+      .where(and(eq(serverRoles.serverId, server.serverId), eq(serverRoles.name, "Moderator")))
       .limit(1);
 
     if (!role) {
@@ -861,13 +748,7 @@ export class HackathonsService {
       const permRows = await this.db
         .select({ permissionId: permissions.permissionId })
         .from(permissions)
-        .where(
-          inArray(permissions.name, [
-            "manage_channels",
-            "manage_messages",
-            "kick_members",
-          ]),
-        );
+        .where(inArray(permissions.name, ["manage_channels", "manage_messages", "kick_members"]));
 
       if (permRows.length > 0) {
         await this.db
@@ -926,23 +807,13 @@ export class HackathonsService {
     const [role] = await this.db
       .select({ serverRoleId: serverRoles.serverRoleId })
       .from(serverRoles)
-      .where(
-        and(
-          eq(serverRoles.serverId, server.serverId),
-          eq(serverRoles.name, "Moderator"),
-        ),
-      )
+      .where(and(eq(serverRoles.serverId, server.serverId), eq(serverRoles.name, "Moderator")))
       .limit(1);
     if (!role) throw new NotFoundException("No moderators assigned yet");
 
     const deleted = await this.db
       .delete(userRoles)
-      .where(
-        and(
-          eq(userRoles.serverRoleId, role.serverRoleId),
-          eq(userRoles.userId, targetUserId),
-        ),
-      )
+      .where(and(eq(userRoles.serverRoleId, role.serverRoleId), eq(userRoles.userId, targetUserId)))
       .returning({ userId: userRoles.userId });
 
     if (deleted.length === 0) throw new NotFoundException("User is not a moderator");
@@ -968,7 +839,10 @@ export class HackathonsService {
     if (!row) throw new NotFoundException("Hackathon not found");
 
     const fmt = (d: Date) =>
-      d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+      d
+        .toISOString()
+        .replace(/[-:]/g, "")
+        .replace(/\.\d{3}/, "");
 
     const fold = (line: string): string => {
       const parts: string[] = [];
@@ -1004,10 +878,7 @@ export class HackathonsService {
 
   /* ── Teams overview ──────────────────────────────────────── */
 
-  async teamsOverview(
-    hackathonId: string,
-    userId: string,
-  ): Promise<TeamOverviewDto[]> {
+  async teamsOverview(hackathonId: string, userId: string): Promise<TeamOverviewDto[]> {
     await this.authz.assertHackathonOwnerOrAdmin(hackathonId, userId);
 
     const rows = await this.db

@@ -16,15 +16,15 @@ import type { UserProfile } from "@/app/admin/_mockProfiles";
 export type { UserProfile } from "@/app/admin/_mockProfiles";
 
 const M = {
-  modalTitle:        { en: "User profile",             sr: "Profil korisnika" },
-  activityHistory:   { en: "Activity history",         sr: "Istorija aktivnosti" },
-  noActivity:        { en: "No recorded activity.",    sr: "Nema zabeležene aktivnosti." },
-  previousMeasures:  { en: "Previous measures",        sr: "Prethodne mere" },
-  noMeasures:        { en: "No previous measures.",    sr: "Nema prethodnih mera." },
-  issuedBy:          { en: "Issued by:",               sr: "Izdao:" },
-  closeBtn:          { en: "Close",                    sr: "Zatvori" },
-  registeredLabel:   { en: "Registered",               sr: "Registrovan" },
-  reportsLabel:      { en: "Reports",                  sr: "Prijave" },
+  modalTitle: { en: "User profile", sr: "Profil korisnika" },
+  activityHistory: { en: "Activity history", sr: "Istorija aktivnosti" },
+  noActivity: { en: "No recorded activity.", sr: "Nema zabeležene aktivnosti." },
+  previousMeasures: { en: "Previous measures", sr: "Prethodne mere" },
+  noMeasures: { en: "No previous measures.", sr: "Nema prethodnih mera." },
+  issuedBy: { en: "Issued by:", sr: "Izdao:" },
+  closeBtn: { en: "Close", sr: "Zatvori" },
+  registeredLabel: { en: "Registered", sr: "Registrovan" },
+  reportsLabel: { en: "Reports", sr: "Prijave" },
 } as const;
 
 function reportsColor(reports: number): string {

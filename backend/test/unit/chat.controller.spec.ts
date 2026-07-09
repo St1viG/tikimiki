@@ -38,12 +38,7 @@ describe("ChatController (unit)", () => {
   it("createConversation spreads memberIds, name and icon (group chat)", () => {
     const body = { memberIds: ["u2", "u3"], name: "Ekipa", icon: "🚀" } as never;
     controller.createConversation(USER, body);
-    expect(chat.createConversation).toHaveBeenCalledWith(
-      USER,
-      ["u2", "u3"],
-      "Ekipa",
-      "🚀",
-    );
+    expect(chat.createConversation).toHaveBeenCalledWith(USER, ["u2", "u3"], "Ekipa", "🚀");
   });
 
   it("sendConversationMessage forwards content, replyToId and attachments", () => {

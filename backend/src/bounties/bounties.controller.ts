@@ -56,9 +56,7 @@ export class BountiesController {
 
   @Get("results")
   @UseGuards(OptionalJwtAuthGuard)
-  getResults(
-    @Param("hackathonId", new ParseUUIDPipe()) hackathonId: string,
-  ) {
+  getResults(@Param("hackathonId", new ParseUUIDPipe()) hackathonId: string) {
     return this.svc.getResults(hackathonId);
   }
 

@@ -132,10 +132,7 @@ export const commentReactions = pgTable(
   },
   (t) => [
     primaryKey({ columns: [t.userId, t.commentId, t.symbol] }),
-    check(
-      "chk_comment_reaction_symbol_length",
-      sql`char_length(${t.symbol}) <= 8`,
-    ),
+    check("chk_comment_reaction_symbol_length", sql`char_length(${t.symbol}) <= 8`),
     index("idx_comment_reactions_comment_id").on(t.commentId),
   ],
 );

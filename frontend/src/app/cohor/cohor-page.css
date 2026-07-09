@@ -31,18 +31,20 @@
   transform: scaleY(0);
   transform-origin: center;
   opacity: 0;
-  transition: transform var(--dur-2, .18s) var(--ease-out, ease),
-              opacity var(--dur-2, .18s) var(--ease-out, ease);
+  transition:
+    transform var(--dur-2, 0.18s) var(--ease-out, ease),
+    opacity var(--dur-2, 0.18s) var(--ease-out, ease);
   pointer-events: none;
 }
 .msg:hover::before {
   transform: scaleY(1);
-  opacity: .9;
+  opacity: 0.9;
 }
 /* echo the lift on the avatar so the hover reads as one unit */
 .msg .msg-av {
-  transition: transform var(--dur-2, .18s) var(--ease-out, ease),
-              box-shadow var(--dur-2, .18s) var(--ease-out, ease);
+  transition:
+    transform var(--dur-2, 0.18s) var(--ease-out, ease),
+    box-shadow var(--dur-2, 0.18s) var(--ease-out, ease);
 }
 .msg:hover .msg-av {
   transform: translateY(-1px);
@@ -88,9 +90,16 @@
 /* E · MOBILE — keep the tilted numeral and prize pills from overflowing
    on very narrow screens. */
 @media (max-width: 480px) {
-  .ch-intro-hash { transform: rotate(-3deg); }
-  .bounty-card-header { flex-wrap: wrap; gap: 6px; }
-  .bounty-prize-pill { white-space: normal; }
+  .ch-intro-hash {
+    transform: rotate(-3deg);
+  }
+  .bounty-card-header {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .bounty-prize-pill {
+    white-space: normal;
+  }
 }
 
 /* F · NO-ACCESS EMPTY STATE — shown in the server chat area when the user

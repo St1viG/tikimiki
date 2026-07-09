@@ -39,9 +39,7 @@ describe("@-mentions (e2e)", () => {
       .expect(201);
 
     const notes = await notificationsOf(mentioned);
-    const mention = notes.find(
-      (n) => n.type === "mention" && n.entityId === post.body.postId,
-    );
+    const mention = notes.find((n) => n.type === "mention" && n.entityId === post.body.postId);
     expect(mention).toBeDefined();
     expect(mention?.entityType).toBe("post");
   });
@@ -63,9 +61,7 @@ describe("@-mentions (e2e)", () => {
       .expect(201);
 
     const notes = await notificationsOf(mentioned);
-    expect(
-      notes.some((n) => n.type === "mention" && n.entityId === post.body.postId),
-    ).toBe(true);
+    expect(notes.some((n) => n.type === "mention" && n.entityId === post.body.postId)).toBe(true);
   });
 
   it("does not notify on a self-mention", async () => {
@@ -102,9 +98,7 @@ describe("@-mentions (e2e)", () => {
         .set("Authorization", `Bearer ${caller.token}`)
         .expect(200);
 
-      const usernames = (res.body as { username: string }[]).map(
-        (u) => u.username,
-      );
+      const usernames = (res.body as { username: string }[]).map((u) => u.username);
       expect(usernames).toContain(target.username);
       expect(usernames).not.toContain(caller.username);
     });

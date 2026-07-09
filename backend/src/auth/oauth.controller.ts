@@ -62,9 +62,7 @@ export class OAuthController {
     @Res() res: Response,
   ): Promise<void> {
     res.clearCookie(STATE_COOKIE, { path: "/api/v1/auth/oauth" });
-    const cookieState = (req.cookies as Record<string, string> | undefined)?.[
-      STATE_COOKIE
-    ];
+    const cookieState = (req.cookies as Record<string, string> | undefined)?.[STATE_COOKIE];
     if (!isProvider(provider) || !code || !state || state !== cookieState) {
       return this.loginRedirect(res, "error");
     }

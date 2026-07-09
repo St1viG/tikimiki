@@ -13,11 +13,7 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
-import {
-  friendshipStatus,
-  orgVerificationStatus,
-  profileVisibility,
-} from "./_enums";
+import { friendshipStatus, orgVerificationStatus, profileVisibility } from "./_enums";
 
 const tz = { withTimezone: true } as const;
 
@@ -112,9 +108,7 @@ export const organizations = pgTable(
     websiteUrl: text("website_url"),
     logoUrl: text("logo_url"),
     contactEmail: varchar("contact_email", { length: 254 }),
-    verificationStatus: orgVerificationStatus("verification_status")
-      .notNull()
-      .default("pending"),
+    verificationStatus: orgVerificationStatus("verification_status").notNull().default("pending"),
     reviewedBy: uuid("reviewed_by").references(() => administrators.userId, {
       onDelete: "set null",
     }),
@@ -161,10 +155,7 @@ export const userBans = pgTable(
     uniqueIndex("uq_user_bans_active_per_user")
       .on(t.userId)
       .where(sql`${t.liftedAt} is null`),
-    check(
-      "chk_user_bans_lift_consistency",
-      sql`(${t.liftedAt} is null) = (${t.liftedBy} is null)`,
-    ),
+    check("chk_user_bans_lift_consistency", sql`(${t.liftedAt} is null) = (${t.liftedBy} is null)`),
   ],
 );
 
@@ -225,9 +216,7 @@ export const userSettings = pgTable("user_settings", {
   userId: uuid("user_id")
     .primaryKey()
     .references(() => users.userId, { onDelete: "cascade" }),
-  profileVisibility: profileVisibility("profile_visibility")
-    .notNull()
-    .default("all"),
+  profileVisibility: profileVisibility("profile_visibility").notNull().default("all"),
   visibleToRecruiters: boolean("visible_to_recruiters").notNull().default(true),
   showEmail: boolean("show_email").notNull().default(false),
   showLocation: boolean("show_location").notNull().default(true),

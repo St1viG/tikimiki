@@ -15,10 +15,6 @@ export const metadata: Metadata = {
   description: "Submit your application to a hackathon.",
 };
 
-export default function ApplyHackathonPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default function ApplyHackathonPage({ params }: { params: { id: string } }) {
   return <ApplyHackathonClient hackathonId={params.id} />;
 }

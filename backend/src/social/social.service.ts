@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from "@nestjs/common";
+import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { and, eq, inArray, or } from "drizzle-orm";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import { friendships, members, userBlocks, users } from "../db/schema";
@@ -73,12 +68,7 @@ export class SocialService {
     const [row] = await this.db
       .select({ blockerId: userBlocks.blockerId })
       .from(userBlocks)
-      .where(
-        and(
-          eq(userBlocks.blockerId, blockerId),
-          eq(userBlocks.blockedId, blockedId),
-        ),
-      )
+      .where(and(eq(userBlocks.blockerId, blockerId), eq(userBlocks.blockedId, blockedId)))
       .limit(1);
     return Boolean(row);
   }
@@ -161,16 +151,12 @@ export class SocialService {
   async unblock(me: string, other: string): Promise<RelationshipDto> {
     await this.db
       .delete(userBlocks)
-      .where(
-        and(eq(userBlocks.blockerId, me), eq(userBlocks.blockedId, other)),
-      );
+      .where(and(eq(userBlocks.blockerId, me), eq(userBlocks.blockedId, other)));
     return { friendStatus: await this.friendStatus(me, other), isBlocked: false };
   }
 
   /** A simple list of the caller's accepted friends. */
-  async listFriends(
-    me: string,
-  ): Promise<
+  async listFriends(me: string): Promise<
     {
       userId: string;
       username: string;

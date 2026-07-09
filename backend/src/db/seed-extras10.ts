@@ -61,10 +61,7 @@ async function main() {
   const [already] = await db
     .select({ channelId: schema.channels.channelId })
     .from(schema.channels)
-    .innerJoin(
-      schema.channelGroups,
-      eq(schema.channelGroups.groupId, schema.channels.groupId),
-    )
+    .innerJoin(schema.channelGroups, eq(schema.channelGroups.groupId, schema.channels.groupId))
     .where(
       and(
         eq(schema.channelGroups.serverId, serverId),
@@ -85,12 +82,7 @@ async function main() {
         m: sql<number>`coalesce(max(${schema.channels.position}), -1)`,
       })
       .from(schema.channels)
-      .where(
-        and(
-          eq(schema.channels.groupId, groupId),
-          isNull(schema.channels.deletedAt),
-        ),
-      );
+      .where(and(eq(schema.channels.groupId, groupId), isNull(schema.channels.deletedAt)));
     return Number(r.m) + 1;
   };
 

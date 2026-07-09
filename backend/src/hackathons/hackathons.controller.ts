@@ -76,10 +76,7 @@ export class HackathonsController {
 
   @Get("drafts/:draftId")
   @UseGuards(JwtAuthGuard)
-  getDraft(
-    @CurrentUser() userId: string,
-    @Param("draftId", ParseUUIDPipe) draftId: string,
-  ) {
+  getDraft(@CurrentUser() userId: string, @Param("draftId", ParseUUIDPipe) draftId: string) {
     return this.hackathons.getDraft(userId, draftId);
   }
 
@@ -95,10 +92,7 @@ export class HackathonsController {
 
   @Delete("drafts/:draftId")
   @UseGuards(JwtAuthGuard)
-  deleteDraft(
-    @CurrentUser() userId: string,
-    @Param("draftId", ParseUUIDPipe) draftId: string,
-  ) {
+  deleteDraft(@CurrentUser() userId: string, @Param("draftId", ParseUUIDPipe) draftId: string) {
     return this.hackathons.deleteDraft(userId, draftId);
   }
 
@@ -108,10 +102,7 @@ export class HackathonsController {
   }
 
   @Get(":id/calendar.ics")
-  async getCalendar(
-    @Param("id", ParseUUIDPipe) id: string,
-    @Res() res: Response,
-  ) {
+  async getCalendar(@Param("id", ParseUUIDPipe) id: string, @Res() res: Response) {
     const ics = await this.hackathons.getCalendar(id);
     res.setHeader("Content-Type", "text/calendar; charset=utf-8");
     res.setHeader("Content-Disposition", 'attachment; filename="hackathon.ics"');
@@ -140,10 +131,7 @@ export class HackathonsController {
 
   @Delete(":id")
   @UseGuards(JwtAuthGuard)
-  remove(
-    @CurrentUser() userId: string,
-    @Param("id", ParseUUIDPipe) id: string,
-  ) {
+  remove(@CurrentUser() userId: string, @Param("id", ParseUUIDPipe) id: string) {
     return this.hackathons.remove(userId, id);
   }
 
@@ -174,10 +162,7 @@ export class HackathonsController {
 
   @Delete("prizes/:prizeId")
   @UseGuards(JwtAuthGuard)
-  deletePrize(
-    @CurrentUser() userId: string,
-    @Param("prizeId", ParseUUIDPipe) prizeId: string,
-  ) {
+  deletePrize(@CurrentUser() userId: string, @Param("prizeId", ParseUUIDPipe) prizeId: string) {
     return this.hackathons.deletePrize(userId, prizeId);
   }
 
@@ -209,10 +194,7 @@ export class HackathonsController {
 
   @Get(":id/teams/overview")
   @UseGuards(JwtAuthGuard)
-  teamsOverview(
-    @CurrentUser() userId: string,
-    @Param("id", ParseUUIDPipe) id: string,
-  ) {
+  teamsOverview(@CurrentUser() userId: string, @Param("id", ParseUUIDPipe) id: string) {
     return this.hackathons.teamsOverview(id, userId);
   }
 }

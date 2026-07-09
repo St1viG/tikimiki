@@ -31,16 +31,13 @@ describe("sendChannelMessageSchema", () => {
   });
 
   it("rejects content longer than 4000 characters", () => {
-    expect(
-      sendChannelMessageSchema.safeParse({ content: "a".repeat(4001) }).success,
-    ).toBe(false);
+    expect(sendChannelMessageSchema.safeParse({ content: "a".repeat(4001) }).success).toBe(false);
   });
 
   it("rejects a non-UUID replyToId", () => {
-    expect(
-      sendChannelMessageSchema.safeParse({ content: "hi", replyToId: "42" })
-        .success,
-    ).toBe(false);
+    expect(sendChannelMessageSchema.safeParse({ content: "hi", replyToId: "42" }).success).toBe(
+      false,
+    );
   });
 
   it("rejects more than 10 attachments", () => {
@@ -56,9 +53,7 @@ describe("sendChannelMessageSchema", () => {
 
 describe("editMessageSchema", () => {
   it("accepts non-empty content", () => {
-    expect(editMessageSchema.safeParse({ content: "izmenjeno" }).success).toBe(
-      true,
-    );
+    expect(editMessageSchema.safeParse({ content: "izmenjeno" }).success).toBe(true);
   });
 
   it("rejects empty content (edit cannot blank a message)", () => {
@@ -72,9 +67,7 @@ describe("toggleReactionSchema", () => {
   });
 
   it("rejects a symbol longer than 8 characters", () => {
-    expect(
-      toggleReactionSchema.safeParse({ symbol: "toolongsymbol" }).success,
-    ).toBe(false);
+    expect(toggleReactionSchema.safeParse({ symbol: "toolongsymbol" }).success).toBe(false);
   });
 });
 
@@ -82,28 +75,21 @@ describe("toggleReactionSchema", () => {
 
 describe("createConversationSchema", () => {
   it("accepts a group with one member id", () => {
-    expect(
-      createConversationSchema.safeParse({ memberIds: [UUID] }).success,
-    ).toBe(true);
+    expect(createConversationSchema.safeParse({ memberIds: [UUID] }).success).toBe(true);
   });
 
   it("rejects an empty member list", () => {
-    expect(createConversationSchema.safeParse({ memberIds: [] }).success).toBe(
-      false,
-    );
+    expect(createConversationSchema.safeParse({ memberIds: [] }).success).toBe(false);
   });
 
   it("rejects a non-UUID member id", () => {
-    expect(
-      createConversationSchema.safeParse({ memberIds: ["nije-uuid"] }).success,
-    ).toBe(false);
+    expect(createConversationSchema.safeParse({ memberIds: ["nije-uuid"] }).success).toBe(false);
   });
 
   it("rejects more than 20 members", () => {
-    expect(
-      createConversationSchema.safeParse({ memberIds: Array(21).fill(UUID) })
-        .success,
-    ).toBe(false);
+    expect(createConversationSchema.safeParse({ memberIds: Array(21).fill(UUID) }).success).toBe(
+      false,
+    );
   });
 });
 
@@ -113,29 +99,21 @@ describe("createChannelSchema", () => {
   const base = { groupId: UUID, name: "opšte" };
 
   it("accepts a valid channel with a known type", () => {
-    expect(
-      createChannelSchema.safeParse({ ...base, type: "announcements" }).success,
-    ).toBe(true);
+    expect(createChannelSchema.safeParse({ ...base, type: "announcements" }).success).toBe(true);
   });
 
   it("rejects an unknown channel type", () => {
-    expect(
-      createChannelSchema.safeParse({ ...base, type: "voice" }).success,
-    ).toBe(false);
+    expect(createChannelSchema.safeParse({ ...base, type: "voice" }).success).toBe(false);
   });
 
   it("rejects an empty channel name", () => {
-    expect(createChannelSchema.safeParse({ ...base, name: "" }).success).toBe(
-      false,
-    );
+    expect(createChannelSchema.safeParse({ ...base, name: "" }).success).toBe(false);
   });
 });
 
 describe("updateServerSchema", () => {
   it("accepts a rename", () => {
-    expect(updateServerSchema.safeParse({ name: "Novi naziv" }).success).toBe(
-      true,
-    );
+    expect(updateServerSchema.safeParse({ name: "Novi naziv" }).success).toBe(true);
   });
 
   it("allows clearing the logo with null", () => {

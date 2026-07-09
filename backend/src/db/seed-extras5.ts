@@ -50,12 +50,7 @@ async function main() {
     const [existing] = await db
       .select({ serverRoleId: schema.serverRoles.serverRoleId })
       .from(schema.serverRoles)
-      .where(
-        and(
-          eq(schema.serverRoles.serverId, serverId),
-          eq(schema.serverRoles.name, name),
-        ),
-      )
+      .where(and(eq(schema.serverRoles.serverId, serverId), eq(schema.serverRoles.name, name)))
       .limit(1);
     if (existing) return existing.serverRoleId;
     const [created] = await db
@@ -65,10 +60,7 @@ async function main() {
     return created.serverRoleId;
   };
   const assign = async (serverRoleId: string, userId: string) =>
-    db
-      .insert(schema.userRoles)
-      .values({ serverRoleId, userId })
-      .onConflictDoNothing();
+    db.insert(schema.userRoles).values({ serverRoleId, userId }).onConflictDoNothing();
 
   const etf = await hackathonByTitle("ETF HackWeek 2026");
   const garaza = await hackathonByTitle("Garaža Hackathon 2026");
@@ -84,10 +76,7 @@ async function main() {
     .select({ serverRoleId: schema.serverRoles.serverRoleId })
     .from(schema.serverRoles)
     .where(
-      and(
-        eq(schema.serverRoles.serverId, etfServer),
-        eq(schema.serverRoles.name, "Participant"),
-      ),
+      and(eq(schema.serverRoles.serverId, etfServer), eq(schema.serverRoles.name, "Participant")),
     )
     .limit(1);
   if (already) {

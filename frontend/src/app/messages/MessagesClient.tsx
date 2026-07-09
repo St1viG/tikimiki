@@ -20,15 +20,15 @@ import { getSocket } from "@/lib/socket";
 /** /messages — real direct-message conversations with live updates. */
 
 const M = {
-  back:        { en: "Back",                  sr: "Nazad" },
-  title:       { en: "Messages",              sr: "Poruke" },
-  sub:         { en: "Your direct messages",  sr: "Tvoje privatne poruke" },
-  empty:       { en: "No conversations yet.", sr: "Još nema konverzacija." },
-  pick:        { en: "Pick a conversation.",  sr: "Izaberi konverzaciju." },
-  loading:     { en: "Loading…",              sr: "Učitavanje…" },
-  noMessages:  { en: "No messages yet — say hi 👋", sr: "Još nema poruka — pozdravi se 👋" },
-  placeholder: { en: "Write a message…",      sr: "Napiši poruku…" },
-  send:        { en: "Send",                  sr: "Pošalji" },
+  back: { en: "Back", sr: "Nazad" },
+  title: { en: "Messages", sr: "Poruke" },
+  sub: { en: "Your direct messages", sr: "Tvoje privatne poruke" },
+  empty: { en: "No conversations yet.", sr: "Još nema konverzacija." },
+  pick: { en: "Pick a conversation.", sr: "Izaberi konverzaciju." },
+  loading: { en: "Loading…", sr: "Učitavanje…" },
+  noMessages: { en: "No messages yet — say hi 👋", sr: "Još nema poruka — pozdravi se 👋" },
+  placeholder: { en: "Write a message…", sr: "Napiši poruku…" },
+  send: { en: "Send", sr: "Pošalji" },
 } as const;
 
 export function MessagesClient() {
@@ -79,9 +79,7 @@ export function MessagesClient() {
     const onDm = (msg: ChatMessage) => {
       if (msg.conversationId !== activeId) return;
       setMessages((prev) =>
-        prev && prev.some((m) => m.messageId === msg.messageId)
-          ? prev
-          : [...(prev ?? []), msg],
+        prev && prev.some((m) => m.messageId === msg.messageId) ? prev : [...(prev ?? []), msg],
       );
       requestAnimationFrame(() => {
         if (streamRef.current) streamRef.current.scrollTop = streamRef.current.scrollHeight;
@@ -118,8 +116,10 @@ export function MessagesClient() {
   };
 
   const title = (c: Conversation) =>
-    c.members.filter((m) => m.userId !== user?.userId).map((m) => m.username).join(", ") ||
-    "—";
+    c.members
+      .filter((m) => m.userId !== user?.userId)
+      .map((m) => m.username)
+      .join(", ") || "—";
 
   return (
     <AppShell variant="no-right">
@@ -164,11 +164,19 @@ export function MessagesClient() {
                   <GenerativeAvatar seed={title(c)} className="orb-art" />
                 </span>
                 <span style={{ overflow: "hidden" }}>
-                  <span className="name" style={{ display: "block" }}>{title(c)}</span>
+                  <span className="name" style={{ display: "block" }}>
+                    {title(c)}
+                  </span>
                   {c.lastMessage && (
                     <span
                       className="time"
-                      style={{ display: "block", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 150 }}
+                      style={{
+                        display: "block",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        maxWidth: 150,
+                      }}
                     >
                       {c.lastMessage.content}
                     </span>
@@ -181,12 +189,20 @@ export function MessagesClient() {
           {/* Thread */}
           <div style={{ flex: 1, minWidth: 0 }}>
             {!activeId ? (
-              <p className="time" style={{ padding: 8 }}>{t("pick")}</p>
+              <p className="time" style={{ padding: 8 }}>
+                {t("pick")}
+              </p>
             ) : (
               <>
                 <div
                   ref={streamRef}
-                  style={{ display: "grid", gap: 10, maxHeight: "60vh", overflowY: "auto", paddingRight: 4 }}
+                  style={{
+                    display: "grid",
+                    gap: 10,
+                    maxHeight: "60vh",
+                    overflowY: "auto",
+                    paddingRight: 4,
+                  }}
                 >
                   {messages === null &&
                     Array.from({ length: 4 }).map((_, i) => (
@@ -211,17 +227,31 @@ export function MessagesClient() {
                     ))}
                   {messages?.length === 0 && <p className="time">{t("noMessages")}</p>}
                   {messages?.map((m) => (
-                    <div key={m.messageId} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-                      <Link href={`/u/${m.senderUsername}`} className="avatar v is-orb" style={{ width: 34, height: 34, flexShrink: 0 }}>
+                    <div
+                      key={m.messageId}
+                      style={{ display: "flex", gap: 10, alignItems: "flex-start" }}
+                    >
+                      <Link
+                        href={`/u/${m.senderUsername}`}
+                        className="avatar v is-orb"
+                        style={{ width: 34, height: 34, flexShrink: 0 }}
+                      >
                         <GenerativeAvatar seed={m.senderUsername} className="orb-art" />
                       </Link>
                       <div>
                         <div>
-                          <Link className="name" href={`/u/${m.senderUsername}`} style={{ textDecoration: "none" }}>
+                          <Link
+                            className="name"
+                            href={`/u/${m.senderUsername}`}
+                            style={{ textDecoration: "none" }}
+                          >
                             {m.senderUsername}
                           </Link>{" "}
                           <span className="time">
-                            {new Date(m.sentAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                            {new Date(m.sentAt).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
                           </span>
                         </div>
                         <div className="post-body">{m.content}</div>
@@ -240,7 +270,11 @@ export function MessagesClient() {
                       if (e.key === "Enter") send();
                     }}
                   />
-                  <button className="btn btn-violet" onClick={send} disabled={sending || draft.trim() === ""}>
+                  <button
+                    className="btn btn-violet"
+                    onClick={send}
+                    disabled={sending || draft.trim() === ""}
+                  >
                     {t("send")}
                   </button>
                 </div>

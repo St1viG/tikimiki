@@ -30,50 +30,56 @@ import { initials } from "@/lib/format";
  */
 
 const M = {
-  back:            { en: "Back",                   sr: "Nazad" },
-  pageTitle:       { en: "Hackathons",             sr: "Hackathoni" },
-  pageSub:         { en: "Find your next hackathon.", sr: "Pronađi svoj naredni hackathon." },
-  organize:        { en: "Organize a hackathon",   sr: "Organizuj hackathon" },
-  tabAll:          { en: "All",                    sr: "Svi" },
-  tabYour:         { en: "Your",                   sr: "Tvoji" },
-  tablistLabel:    { en: "Filter hackathons",      sr: "Filter hackathona" },
-  searchLabel:     { en: "Search hackathons",      sr: "Pretraži hackathone" },
-  searchPlaceholder: { en: "Search hackathons…",   sr: "Pretraži hackathone…" },
-  chipType:        { en: "Type",                   sr: "Tip" },
-  typePhysical:    { en: "Physical",               sr: "Fizički" },
-  typeVirtual:     { en: "Virtual",                sr: "Virtuelni" },
-  typeHybrid:      { en: "Hybrid",                 sr: "Hibridni" },
-  sortLabel:       { en: "Sort: ",                 sr: "Sortiraj: " },
-  sortNewest:      { en: "Newest",                 sr: "Najskoriji" },
-  sortSoonest:     { en: "Starting soon",          sr: "Najskorije počinje" },
-  daysSoon:        { en: "soon",                   sr: "uskoro" },
-  daysOneDay:      { en: "in 1 day",               sr: "za 1 dan" },
-  daysNDays:       { en: "in {n} days",            sr: "za {n} dana" },
-  sectionLive:     { en: "Currently live",         sr: "Trenutno aktivan" },
-  verifiedOrg:     { en: "Verified organizer",     sr: "Verifikovan organizator" },
-  remaining:       { en: "remaining",              sr: "preostalo" },
-  ended:           { en: "ended",                  sr: "završeno" },
-  metaParticipants:{ en: "Participants",            sr: "Učesnici" },
-  metaTeams:       { en: "Teams",                  sr: "Timovi" },
-  metaPrize:       { en: "Main prize",             sr: "Glavna nagrada" },
-  metaDeadline:    { en: "Application deadline",   sr: "Rok za prijavu" },
-  applied:         { en: "Applied",                sr: "Prijavljen" },
-  apply:           { en: "Apply",                  sr: "Prijavi se" },
-  sectionUpcoming: { en: "Upcoming hackathons",    sr: "Predstojeći hackathoni" },
-  sectionApps:     { en: "My applications",        sr: "Moje prijave" },
-  statusPending:   { en: "Pending",                sr: "Na čekanju" },
-  statusApproved:  { en: "Approved",               sr: "Odobren" },
-  statusRejected:  { en: "Rejected",               sr: "Odbijen" },
-  statusWaitlisted:{ en: "Waitlisted",             sr: "Lista čekanja" },
-  appTeam:         { en: "team",                   sr: "tim" },
-  appSolo:         { en: "solo",                   sr: "pojedinačno" },
-  viewApp:         { en: "View hackathon",         sr: "Pogledaj hackathon" },
-  sectionDone:     { en: "Completed hackathons",   sr: "Završeni hackathoni" },
-  empty:           { en: "No hackathons yet.",     sr: "Još nema hackathona." },
-  loadError:       { en: "Couldn't load hackathons.", sr: "Greška pri učitavanju hackathona." },
-  yourAnon:        { en: "Sign in to see the hackathons you've applied to.", sr: "Prijavi se da vidiš hackathone na koje si se prijavio." },
-  yourEmpty:       { en: "You haven't applied to any hackathons yet.", sr: "Još se nisi prijavio ni na jedan hackathon." },
-  signIn:          { en: "Sign in",                sr: "Prijava" },
+  back: { en: "Back", sr: "Nazad" },
+  pageTitle: { en: "Hackathons", sr: "Hackathoni" },
+  pageSub: { en: "Find your next hackathon.", sr: "Pronađi svoj naredni hackathon." },
+  organize: { en: "Organize a hackathon", sr: "Organizuj hackathon" },
+  tabAll: { en: "All", sr: "Svi" },
+  tabYour: { en: "Your", sr: "Tvoji" },
+  tablistLabel: { en: "Filter hackathons", sr: "Filter hackathona" },
+  searchLabel: { en: "Search hackathons", sr: "Pretraži hackathone" },
+  searchPlaceholder: { en: "Search hackathons…", sr: "Pretraži hackathone…" },
+  chipType: { en: "Type", sr: "Tip" },
+  typePhysical: { en: "Physical", sr: "Fizički" },
+  typeVirtual: { en: "Virtual", sr: "Virtuelni" },
+  typeHybrid: { en: "Hybrid", sr: "Hibridni" },
+  sortLabel: { en: "Sort: ", sr: "Sortiraj: " },
+  sortNewest: { en: "Newest", sr: "Najskoriji" },
+  sortSoonest: { en: "Starting soon", sr: "Najskorije počinje" },
+  daysSoon: { en: "soon", sr: "uskoro" },
+  daysOneDay: { en: "in 1 day", sr: "za 1 dan" },
+  daysNDays: { en: "in {n} days", sr: "za {n} dana" },
+  sectionLive: { en: "Currently live", sr: "Trenutno aktivan" },
+  verifiedOrg: { en: "Verified organizer", sr: "Verifikovan organizator" },
+  remaining: { en: "remaining", sr: "preostalo" },
+  ended: { en: "ended", sr: "završeno" },
+  metaParticipants: { en: "Participants", sr: "Učesnici" },
+  metaTeams: { en: "Teams", sr: "Timovi" },
+  metaPrize: { en: "Main prize", sr: "Glavna nagrada" },
+  metaDeadline: { en: "Application deadline", sr: "Rok za prijavu" },
+  applied: { en: "Applied", sr: "Prijavljen" },
+  apply: { en: "Apply", sr: "Prijavi se" },
+  sectionUpcoming: { en: "Upcoming hackathons", sr: "Predstojeći hackathoni" },
+  sectionApps: { en: "My applications", sr: "Moje prijave" },
+  statusPending: { en: "Pending", sr: "Na čekanju" },
+  statusApproved: { en: "Approved", sr: "Odobren" },
+  statusRejected: { en: "Rejected", sr: "Odbijen" },
+  statusWaitlisted: { en: "Waitlisted", sr: "Lista čekanja" },
+  appTeam: { en: "team", sr: "tim" },
+  appSolo: { en: "solo", sr: "pojedinačno" },
+  viewApp: { en: "View hackathon", sr: "Pogledaj hackathon" },
+  sectionDone: { en: "Completed hackathons", sr: "Završeni hackathoni" },
+  empty: { en: "No hackathons yet.", sr: "Još nema hackathona." },
+  loadError: { en: "Couldn't load hackathons.", sr: "Greška pri učitavanju hackathona." },
+  yourAnon: {
+    en: "Sign in to see the hackathons you've applied to.",
+    sr: "Prijavi se da vidiš hackathone na koje si se prijavio.",
+  },
+  yourEmpty: {
+    en: "You haven't applied to any hackathons yet.",
+    sr: "Još se nisi prijavio ni na jedan hackathon.",
+  },
+  signIn: { en: "Sign in", sr: "Prijava" },
 } as const;
 
 type HkFilter = "all" | "your";
@@ -236,14 +242,15 @@ export function HackathonsClient() {
   return (
     <AppShell right={<RailRight />}>
       <main className="hk-page" id="hk-main" data-filter={filter}>
-
         {/* PAGE HEADER */}
         <header className="page-head hk-head">
           <Link className="col-back" href="/" aria-label={t("back")}>
             <Icon name="arrow-left" />
           </Link>
           <div className="col-titles">
-            <h1 className="page-title"><Icon name="hackathon" /> {t("pageTitle")}</h1>
+            <h1 className="page-title">
+              <Icon name="hackathon" /> {t("pageTitle")}
+            </h1>
             <p className="page-sub">{t("pageSub")}</p>
           </div>
         </header>
@@ -271,10 +278,7 @@ export function HackathonsClient() {
             </button>
           </div>
           {user?.roles.isOrganization && (
-            <Link
-              className="btn btn-primary hk-btn-lg hk-organize-btn"
-              href="/hackathons/new"
-            >
+            <Link className="btn btn-primary hk-btn-lg hk-organize-btn" href="/hackathons/new">
               <Icon name="plus" /> {t("organize")}
             </Link>
           )}
@@ -304,9 +308,7 @@ export function HackathonsClient() {
             {/* Sort — toggles Newest ⇄ Starting soon over the grid */}
             <button
               className="hk-chip-sort hk-chip"
-              onClick={() =>
-                setSortMode((m) => (m === "newest" ? "soonest" : "newest"))
-              }
+              onClick={() => setSortMode((m) => (m === "newest" ? "soonest" : "newest"))}
             >
               {t("sortLabel")}
               <strong>{sortMode === "newest" ? t("sortNewest") : t("sortSoonest")}</strong>{" "}
@@ -320,7 +322,8 @@ export function HackathonsClient() {
           <section className="hk-section" data-section="active">
             <div className="hk-section-head">
               <div className="hk-section-title">
-                <span className="hk-live-dot hk-live-dot-lg" aria-hidden="true" /> {t("sectionLive")}
+                <span className="hk-live-dot hk-live-dot-lg" aria-hidden="true" />{" "}
+                {t("sectionLive")}
               </div>
             </div>
 
@@ -333,12 +336,7 @@ export function HackathonsClient() {
                   {h.bannerUrl && (
                     <div className="hk-featured-banner">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={h.bannerUrl}
-                        alt=""
-                        className="hk-banner-img"
-                        loading="lazy"
-                      />
+                      <img src={h.bannerUrl} alt="" className="hk-banner-img" loading="lazy" />
                       <div className="hk-banner-dim" aria-hidden="true" />
                       <div className="hk-featured-pills">
                         <span className="hk-pill">{typeLabel(h.type)}</span>
@@ -349,7 +347,9 @@ export function HackathonsClient() {
                   <div className="hk-featured-body">
                     <div className="hk-featured-top">
                       <div className="hk-card-org">
-                        <div className="hk-org-av" aria-hidden="true">{initials(h.organizationName)}</div>
+                        <div className="hk-org-av" aria-hidden="true">
+                          {initials(h.organizationName)}
+                        </div>
                         <span>{h.organizationName}</span>
                         <span className="hk-verify" title={t("verifiedOrg")}>
                           <Icon name="shield" />
@@ -400,7 +400,9 @@ export function HackathonsClient() {
                       )}
                       <div className="hk-meta-item">
                         <div className="hk-meta-label">{t("metaDeadline")}</div>
-                        <div className="hk-meta-val">{fmtDMY(new Date(h.registrationDeadline))}</div>
+                        <div className="hk-meta-val">
+                          {fmtDMY(new Date(h.registrationDeadline))}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -423,36 +425,21 @@ export function HackathonsClient() {
               [0, 1, 2].map((i) => (
                 <div className="hk-card" key={`skel-${i}`} aria-busy="true">
                   <div className="hk-card-banner" aria-hidden="true">
-                    <span
-                      className="skel"
-                      style={{ width: 54, height: 18, borderRadius: 999 }}
-                    />
-                    <span
-                      className="skel"
-                      style={{ width: 46, height: 18, borderRadius: 999 }}
-                    />
+                    <span className="skel" style={{ width: 54, height: 18, borderRadius: 999 }} />
+                    <span className="skel" style={{ width: 46, height: 18, borderRadius: 999 }} />
                   </div>
                   <div className="hk-card-body" aria-hidden="true">
                     <div className="hk-card-org">
-                      <span
-                        className="skel"
-                        style={{ width: 30, height: 30, borderRadius: 11 }}
-                      />
+                      <span className="skel" style={{ width: 30, height: 30, borderRadius: 11 }} />
                       <span className="skel skel-line" style={{ width: "45%" }} />
                     </div>
                     <span className="skel skel-line" style={{ width: "55%" }} />
                     <span className="skel skel-line" style={{ width: "40%" }} />
                     <div className="hk-card-tags">
-                      <span
-                        className="skel"
-                        style={{ width: 52, height: 20, borderRadius: 999 }}
-                      />
+                      <span className="skel" style={{ width: 52, height: 20, borderRadius: 999 }} />
                     </div>
                     <div className="hk-card-foot">
-                      <span
-                        className="skel"
-                        style={{ width: 82, height: 30, borderRadius: 9 }}
-                      />
+                      <span className="skel" style={{ width: 82, height: 30, borderRadius: 9 }} />
                       <span className="skel skel-line" style={{ width: "30%" }} />
                     </div>
                   </div>
@@ -470,11 +457,7 @@ export function HackathonsClient() {
                 style={hidden(searchText(h)) ? { display: "none" } : undefined}
               >
                 <div
-                  className={
-                    h.type === "virtual"
-                      ? "hk-card-banner hk-banner-v"
-                      : "hk-card-banner"
-                  }
+                  className={h.type === "virtual" ? "hk-card-banner hk-banner-v" : "hk-card-banner"}
                 >
                   <span className="hk-type-pill">{typeLabel(h.type)}</span>
                   <span className="hk-card-days">{daysUntil(h.startsAt)}</span>
@@ -625,7 +608,6 @@ export function HackathonsClient() {
             </div>
           </section>
         )}
-
       </main>
     </AppShell>
   );

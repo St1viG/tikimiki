@@ -15,22 +15,17 @@ describe("createCardSchema", () => {
   });
 
   it("rejects an empty title", () => {
-    expect(
-      createCardSchema.safeParse({ columnId: UUID, title: "" }).success,
-    ).toBe(false);
+    expect(createCardSchema.safeParse({ columnId: UUID, title: "" }).success).toBe(false);
   });
 
   it("rejects a non-UUID column id", () => {
-    expect(
-      createCardSchema.safeParse({ columnId: "col-1", title: "x" }).success,
-    ).toBe(false);
+    expect(createCardSchema.safeParse({ columnId: "col-1", title: "x" }).success).toBe(false);
   });
 
   it("rejects a title longer than 200 characters", () => {
-    expect(
-      createCardSchema.safeParse({ columnId: UUID, title: "a".repeat(201) })
-        .success,
-    ).toBe(false);
+    expect(createCardSchema.safeParse({ columnId: UUID, title: "a".repeat(201) }).success).toBe(
+      false,
+    );
   });
 });
 

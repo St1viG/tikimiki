@@ -80,10 +80,7 @@ export function KanbanClient({ teamId }: { teamId: string }) {
 
   const loadBoard = useCallback(async () => {
     try {
-      const [b, myTeams] = await Promise.all([
-        api.getKanbanBoard(teamId),
-        api.getMyTeams(),
-      ]);
+      const [b, myTeams] = await Promise.all([api.getKanbanBoard(teamId), api.getMyTeams()]);
       setBoard(b);
       setTeam(myTeams.find((t) => t.teamId === teamId) ?? null);
     } catch (e) {
@@ -332,7 +329,9 @@ export function KanbanClient({ teamId }: { teamId: string }) {
                 Kanban
               </h1>
               {team && (
-                <p className="kb-subtitle">{team.name} · {team.hackathonTitle}</p>
+                <p className="kb-subtitle">
+                  {team.name} · {team.hackathonTitle}
+                </p>
               )}
             </div>
           </div>
@@ -419,9 +418,7 @@ export function KanbanClient({ teamId }: { teamId: string }) {
                       <div className="kb-card-meta">
                         {card.assignedToUsername ? (
                           <div className="kb-card-assignee">
-                            <span className="kb-card-av">
-                              {initials(card.assignedToUsername)}
-                            </span>
+                            <span className="kb-card-av">{initials(card.assignedToUsername)}</span>
                             <span>{card.assignedToUsername}</span>
                           </div>
                         ) : (
@@ -539,10 +536,7 @@ export function KanbanClient({ teamId }: { teamId: string }) {
                   </div>
                 </div>
               ) : (
-                <button
-                  className="kb-add-col-btn"
-                  onClick={() => setAddingCol(true)}
-                >
+                <button className="kb-add-col-btn" onClick={() => setAddingCol(true)}>
                   <Icon name="plus" /> Dodaj kolonu
                 </button>
               )}
@@ -561,9 +555,7 @@ export function KanbanClient({ teamId }: { teamId: string }) {
                 <input
                   className="kb-modal-title-input"
                   value={modal.title}
-                  onChange={(e) =>
-                    setModal((m) => m && { ...m, title: e.target.value })
-                  }
+                  onChange={(e) => setModal((m) => m && { ...m, title: e.target.value })}
                   maxLength={200}
                   aria-label="Naziv zadatka"
                 />
@@ -578,9 +570,7 @@ export function KanbanClient({ teamId }: { teamId: string }) {
                   className="kb-modal-desc"
                   placeholder="Dodaj opis…"
                   value={modal.description}
-                  onChange={(e) =>
-                    setModal((m) => m && { ...m, description: e.target.value })
-                  }
+                  onChange={(e) => setModal((m) => m && { ...m, description: e.target.value })}
                   rows={3}
                   maxLength={10000}
                 />
@@ -592,9 +582,7 @@ export function KanbanClient({ teamId }: { teamId: string }) {
                   <select
                     className="kb-modal-select"
                     value={modal.assignedTo}
-                    onChange={(e) =>
-                      setModal((m) => m && { ...m, assignedTo: e.target.value })
-                    }
+                    onChange={(e) => setModal((m) => m && { ...m, assignedTo: e.target.value })}
                   >
                     <option value="">— Nije dodeljeno —</option>
                     {team.members.map((m) => (
@@ -611,9 +599,7 @@ export function KanbanClient({ teamId }: { teamId: string }) {
                 <select
                   className="kb-modal-col-select"
                   value={modal.columnId}
-                  onChange={(e) =>
-                    setModal((m) => m && { ...m, columnId: e.target.value })
-                  }
+                  onChange={(e) => setModal((m) => m && { ...m, columnId: e.target.value })}
                 >
                   {board.columns.map((col) => (
                     <option key={col.columnId} value={col.columnId}>
@@ -632,11 +618,7 @@ export function KanbanClient({ teamId }: { teamId: string }) {
                   <Icon name="trash" /> Obriši
                 </button>
                 <div style={{ display: "flex", gap: 8 }}>
-                  <button
-                    className="btn btn-ghost"
-                    style={{ fontSize: 13 }}
-                    onClick={closeModal}
-                  >
+                  <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={closeModal}>
                     Otkaži
                   </button>
                   <button
@@ -660,8 +642,10 @@ export function KanbanClient({ teamId }: { teamId: string }) {
               <h2 className="kb-confirm-title">Obriši kolonu?</h2>
               <p className="kb-confirm-body">
                 Kolona <strong>&ldquo;{confirm.columnName}&rdquo;</strong> sadrži{" "}
-                <strong>{confirm.cardCount} {confirm.cardCount === 1 ? "zadatak" : "zadataka"}</strong>.
-                {" "}Svi zadaci biće premešteni u prvu kolonu.
+                <strong>
+                  {confirm.cardCount} {confirm.cardCount === 1 ? "zadatak" : "zadataka"}
+                </strong>
+                . Svi zadaci biće premešteni u prvu kolonu.
               </p>
               <div className="kb-confirm-actions">
                 <button

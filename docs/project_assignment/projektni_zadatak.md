@@ -1,5 +1,7 @@
 # tikimiki
+
 ### Platforma za održavanje i učešće na hakatonima
+
 **Projektni zadatak — Verzija 2.1**
 
 ---
@@ -7,6 +9,7 @@
 ## 1. Tim
 
 Članovi tima digitalci:
+
 - Stevan Gnjato (vođa tima)
 - Andrej Čolić
 - Dimitrije Pešić
@@ -251,9 +254,9 @@ Finalna faza razvoja usmerena je na dugoročni angažman korisnika. Implementira
 
 ## Verzije dokumenta
 
-| Verzija | Datum | Opis | Autori |
-| --- | --- | --- | --- |
-| 1.0 | 05.04.2026. | Inicijalna verzija | Andrej Čolić, Stevan Gnjato |
-| 1.1 | 06.04.2026. | Dopuna i ispravka projektnog zadatka | Andrej Čolić |
-| 2.0 | 06.04.2026. | Značajna dopuna projektnog zadatka | Andrej Čolić, Nenad Skoković |
-| 2.1 | 10.04.2026. | Ispravka sekundarne dizajn boje | Dimitrije Pešić |
+| Verzija | Datum       | Opis                                 | Autori                       |
+| ------- | ----------- | ------------------------------------ | ---------------------------- |
+| 1.0     | 05.04.2026. | Inicijalna verzija                   | Andrej Čolić, Stevan Gnjato  |
+| 1.1     | 06.04.2026. | Dopuna i ispravka projektnog zadatka | Andrej Čolić                 |
+| 2.0     | 06.04.2026. | Značajna dopuna projektnog zadatka   | Andrej Čolić, Nenad Skoković |
+| 2.1     | 10.04.2026. | Ispravka sekundarne dizajn boje      | Dimitrije Pešić              |

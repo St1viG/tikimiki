@@ -105,8 +105,22 @@ export const DM: Record<string, DmEntry> = {
     bio: "dmBioNenad",
     hacks: [{ icon: "ETF", name: "ETF HackWeek 2026", sub: "dmHackSameTeam" }],
     msgs: [
-      { av: "NS", avS: NS_AV, name: "Nenad Skoković", nc: "msg-author-p", t: "08:23", text: "dmMsgKalkulator" },
-      { av: "AČ", avS: AC_AV, name: "Andrej Čolić", nc: "msg-author-v", t: "08:24", text: "dmMsgDigitalac" },
+      {
+        av: "NS",
+        avS: NS_AV,
+        name: "Nenad Skoković",
+        nc: "msg-author-p",
+        t: "08:23",
+        text: "dmMsgKalkulator",
+      },
+      {
+        av: "AČ",
+        avS: AC_AV,
+        name: "Andrej Čolić",
+        nc: "msg-author-v",
+        t: "08:24",
+        text: "dmMsgDigitalac",
+      },
     ],
   },
   digitalci: {
@@ -119,8 +133,22 @@ export const DM: Record<string, DmEntry> = {
     bio: "dmBioDigitalci",
     hacks: [{ icon: "ETF", name: "ETF HackWeek 2026", sub: "dmHackAllTogether" }],
     msgs: [
-      { av: "SG", avS: SG_AV, name: "Stevan Gnjato", nc: "msg-author-g", t: "08:20", text: "dmMsgRepoUp" },
-      { av: "DP", avS: DP_AV, name: "Dimitrije Pešić", nc: "msg-author-v", t: "08:21", text: "dmMsgSuper" },
+      {
+        av: "SG",
+        avS: SG_AV,
+        name: "Stevan Gnjato",
+        nc: "msg-author-g",
+        t: "08:20",
+        text: "dmMsgRepoUp",
+      },
+      {
+        av: "DP",
+        avS: DP_AV,
+        name: "Dimitrije Pešić",
+        nc: "msg-author-v",
+        t: "08:21",
+        text: "dmMsgSuper",
+      },
     ],
   },
 };
@@ -184,30 +212,31 @@ export type ChatMsg = {
 };
 
 /* Which swap-panel (or chat stream) is shown for the active channel. */
-export type Panel =
-  | "messages"
-  | "predaja"
-  | "bounties"
-  | "glasanje"
-  | "rezultati"
-  | "kanban";
+export type Panel = "messages" | "predaja" | "bounties" | "glasanje" | "rezultati" | "kanban";
 
 export const MONTHS = [
-  "jan", "feb", "mar", "apr", "maj", "jun", "jul", "avg", "sep", "okt", "nov", "dec",
+  "jan",
+  "feb",
+  "mar",
+  "apr",
+  "maj",
+  "jun",
+  "jul",
+  "avg",
+  "sep",
+  "okt",
+  "nov",
+  "dec",
 ];
 
 /* Preset emoji icons offered when creating / editing a group conversation. */
-export const GROUP_ICONS = [
-  "🚀", "💻", "🔥", "🎮", "🎨", "🤝", "⚡", "🏆", "🌟", "🧠",
-] as const;
+export const GROUP_ICONS = ["🚀", "💻", "🔥", "🎮", "🎨", "🤝", "⚡", "🏆", "🌟", "🧠"] as const;
 /* Fallback avatar for a group with no chosen icon. */
 export const GROUP_ICON_FALLBACK = "👥";
 /* A group icon value is either an emoji (rendered as text) or an uploaded
    image URL — relative ("/uploads/…") or absolute ("http…"). */
 export const isImageIcon = (v: string | null | undefined): v is string =>
   !!v && (v.startsWith("/") || v.startsWith("http"));
-
-
 
 /* Emoji choices offered by the message context menu's "Add reaction" row. */
 export const CTX_EMOJI = ["👍", "❤️", "😂", "🎉", "🔥", "👀"] as const;
@@ -227,9 +256,7 @@ export function mergeReaction(
   const exists = list.some((r) => r.symbol === symbol);
   if (exists) {
     return list.map((r) =>
-      r.symbol === symbol
-        ? { ...r, count, mine: mine === undefined ? r.mine : mine }
-        : r,
+      r.symbol === symbol ? { ...r, count, mine: mine === undefined ? r.mine : mine } : r,
     );
   }
   return [...list, { symbol, count, mine: mine ?? false }];

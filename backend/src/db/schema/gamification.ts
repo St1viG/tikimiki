@@ -72,15 +72,11 @@ export const games = pgTable(
     uniqueIndex("uq_games_slug").on(t.slug),
     uniqueIndex("uq_games_name").on(t.name),
     check("chk_games_base_daily_plays", sql`${t.baseDailyPlays} >= 1`),
-    check(
-      "chk_games_premium_daily_plays",
-      sql`${t.premiumDailyPlays} >= ${t.baseDailyPlays}`,
-    ),
-    check(
-      "chk_games_max_points",
-      sql`${t.maxPointsPerPlay} is null or ${t.maxPointsPerPlay} > 0`,
-    ),
-    index("idx_games_active").on(t.isActive).where(sql`${t.isActive}`),
+    check("chk_games_premium_daily_plays", sql`${t.premiumDailyPlays} >= ${t.baseDailyPlays}`),
+    check("chk_games_max_points", sql`${t.maxPointsPerPlay} is null or ${t.maxPointsPerPlay} > 0`),
+    index("idx_games_active")
+      .on(t.isActive)
+      .where(sql`${t.isActive}`),
   ],
 );
 
@@ -103,11 +99,7 @@ export const gamePlays = pgTable(
     check("chk_game_plays_score", sql`${t.score} >= 0`),
     check("chk_game_plays_points_awarded", sql`${t.pointsAwarded} >= 0`),
     index("idx_game_plays_user_id").on(t.userId),
-    index("idx_game_plays_game_user_day").on(
-      t.gameId,
-      t.userId,
-      t.playedAt.desc(),
-    ),
+    index("idx_game_plays_game_user_day").on(t.gameId, t.userId, t.playedAt.desc()),
     index("idx_game_plays_leaderboard").on(t.gameId, t.score.desc()),
   ],
 );

@@ -40,11 +40,7 @@ export const reports = pgTable(
     createdAt: timestamp("created_at", tz).notNull().defaultNow(),
   },
   (t) => [
-    uniqueIndex("uq_reports_reporter_target").on(
-      t.reporterId,
-      t.targetType,
-      t.targetId,
-    ),
+    uniqueIndex("uq_reports_reporter_target").on(t.reporterId, t.targetType, t.targetId),
     check(
       "chk_reports_review_consistency",
       sql`(${t.reviewedAt} is null) = (${t.reviewedBy} is null)`,
@@ -124,8 +120,5 @@ export const appeals = pgTable(
     reviewedAt: timestamp("reviewed_at", tz),
     createdAt: timestamp("created_at", tz).notNull().defaultNow(),
   },
-  (t) => [
-    index("idx_appeals_status").on(t.status),
-    index("idx_appeals_user_id").on(t.userId),
-  ],
+  (t) => [index("idx_appeals_status").on(t.status), index("idx_appeals_user_id").on(t.userId)],
 );

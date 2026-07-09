@@ -27,10 +27,7 @@ describe("Serveri za komunikaciju (Selenium WebDriver)", function () {
     assert.ok(await app.isDisplayed());
 
     // Traka sa serverima (tabovi) mora postojati.
-    const tabs = await driver.wait(
-      until.elementLocated(By.css(".cohor-tabs")),
-      10000,
-    );
+    const tabs = await driver.wait(until.elementLocated(By.css(".cohor-tabs")), 10000);
     assert.ok(await tabs.isDisplayed());
     assert.ok((await driver.getCurrentUrl()).includes("/cohor"));
   });

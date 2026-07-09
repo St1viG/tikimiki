@@ -27,8 +27,34 @@ export function relTime(iso: string, locale: Locale): string {
 
 /* Month names by locale (genitive in Serbian). */
 const MONTHS: Record<Locale, readonly string[]> = {
-  en: ["January","February","March","April","May","June","July","August","September","October","November","December"],
-  sr: ["januara","februara","marta","aprila","maja","juna","jula","avgusta","septembra","oktobra","novembra","decembra"],
+  en: [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ],
+  sr: [
+    "januara",
+    "februara",
+    "marta",
+    "aprila",
+    "maja",
+    "juna",
+    "jula",
+    "avgusta",
+    "septembra",
+    "oktobra",
+    "novembra",
+    "decembra",
+  ],
 };
 
 /* "June 2026" / "juna 2026." */
@@ -64,10 +90,7 @@ const RELATIVE_UNITS: Array<[Intl.RelativeTimeFormatUnit, number]> = [
 ];
 
 /* Relative time in Serbian, e.g. "pre 2 sata". Accepts an ISO string or Date. */
-export function formatRelativeTime(
-  input: string | Date,
-  now: Date = new Date()
-): string {
+export function formatRelativeTime(input: string | Date, now: Date = new Date()): string {
   const then = typeof input === "string" ? new Date(input) : input;
   const seconds = Math.round((then.getTime() - now.getTime()) / 1000);
   if (Number.isNaN(seconds)) return "";

@@ -52,16 +52,39 @@ const mod = loadModule(file, deps);
 const Comp = mod[name] || mod.default;
 const draw = (seed, size) => renderToStaticMarkup(React.createElement(Comp, { seed, size }));
 
-const seeds = ["andrej","stiveng","nenad","dimitrije","miki","tiki","mara","moljac","fenjer","etf","garaza","lumen","vatra","kvant","claude","pesic"];
+const seeds = [
+  "andrej",
+  "stiveng",
+  "nenad",
+  "dimitrije",
+  "miki",
+  "tiki",
+  "mara",
+  "moljac",
+  "fenjer",
+  "etf",
+  "garaza",
+  "lumen",
+  "vatra",
+  "kvant",
+  "claude",
+  "pesic",
+];
 
 const grid = (size, clip) =>
   seeds
-    .map((s) => `<figure><span class="clip ${clip}" style="width:${size}px;height:${size}px">${draw(s, size)}</span><figcaption>@${s}</figcaption></figure>`)
+    .map(
+      (s) =>
+        `<figure><span class="clip ${clip}" style="width:${size}px;height:${size}px">${draw(s, size)}</span><figcaption>@${s}</figcaption></figure>`,
+    )
     .join("");
 
 const rail = seeds
   .slice(0, 4)
-  .map((s) => `<div class="rail-row"><span class="clip circle" style="width:40px;height:40px">${draw(s, 40)}</span><span class="rail-tx"><b>${s[0].toUpperCase() + s.slice(1)} Čolić</b><i>@${s}</i></span></div>`)
+  .map(
+    (s) =>
+      `<div class="rail-row"><span class="clip circle" style="width:40px;height:40px">${draw(s, 40)}</span><span class="rail-tx"><b>${s[0].toUpperCase() + s.slice(1)} Čolić</b><i>@${s}</i></span></div>`,
+  )
   .join("");
 
 const out = `<!doctype html><html lang="sr"><head><meta charset="utf-8"><title>${label} — pregled</title>
@@ -88,12 +111,12 @@ figcaption{color:var(--muted);font-size:11px}
 <p class="lead">Violet struktura + lemon/green „spark" akcenat na tamnoj pozadini — uklopljeno sa ostatkom stranice. Deterministički: isti @handle = isti avatar.</p>
 
 <div class="card"><h2>Hero (140px) — krug i zaobljeni kvadrat</h2>
-<div class="hero"><span class="clip circle" style="width:140px;height:140px">${draw("andrej",140)}</span>
-<span class="clip rounded" style="width:140px;height:140px">${draw("andrej",140)}</span>
-<span class="clip circle" style="width:72px;height:72px">${draw("nenad",72)}</span>
-<span class="clip circle" style="width:56px;height:56px">${draw("mara",56)}</span></div></div>
+<div class="hero"><span class="clip circle" style="width:140px;height:140px">${draw("andrej", 140)}</span>
+<span class="clip rounded" style="width:140px;height:140px">${draw("andrej", 140)}</span>
+<span class="clip circle" style="width:72px;height:72px">${draw("nenad", 72)}</span>
+<span class="clip circle" style="width:56px;height:56px">${draw("mara", 56)}</span></div></div>
 
-<div class="card"><h2>16 različitih profila · 64px (krug)</h2><div class="row">${grid(64,"circle")}</div></div>
+<div class="card"><h2>16 različitih profila · 64px (krug)</h2><div class="row">${grid(64, "circle")}</div></div>
 
 <div class="card on-surface"><h2>U kontekstu — levi meni (40px, prava veličina)</h2><div class="rail">${rail}</div></div>
 </body></html>`;

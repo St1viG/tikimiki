@@ -45,9 +45,7 @@ export function SoloPlayerCard({
   actionIcon = false,
 }: SoloPlayerCardProps) {
   const name = personName(player);
-  const openProfile = onOpenProfile
-    ? () => onOpenProfile(player.username)
-    : undefined;
+  const openProfile = onOpenProfile ? () => onOpenProfile(player.username) : undefined;
   const identityInteractive = openProfile
     ? {
         role: "button" as const,
@@ -77,9 +75,7 @@ export function SoloPlayerCard({
         {name}
       </div>
       <div className="tm-handle">@{player.username}</div>
-      <div className="tm-solo-role">
-        {player.skills[0] ?? `${formatXp(player.points)} XP`}
-      </div>
+      <div className="tm-solo-role">{player.skills[0] ?? `${formatXp(player.points)} XP`}</div>
       <button
         className="btn btn-ghost"
         disabled={disabled || sending || invited}
@@ -87,7 +83,7 @@ export function SoloPlayerCard({
       >
         {actionIcon && <Icon name="plus" />}{" "}
         {sending
-          ? labels.inviting ?? labels.inviteToTeam
+          ? (labels.inviting ?? labels.inviteToTeam)
           : invited
             ? labels.invited
             : labels.inviteToTeam}

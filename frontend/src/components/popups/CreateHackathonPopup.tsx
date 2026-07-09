@@ -13,28 +13,25 @@ import { useT } from "@/components/i18n/LanguageProvider";
  */
 
 const M = {
-  dialogLabel:    { en: "Create new hackathon",                  sr: "Kreiranje novog hackathona" },
-  title:          { en: "New hackathon",                         sr: "Novi hackathon" },
-  close:          { en: "Close",                                 sr: "Zatvori" },
-  wireframeNote:  { en: "Hackathon creation form (wireframe) — coming soon.", sr: "Forma za kreiranje hackathona (wireframe) — uskoro dostupno." },
-  labelName:      { en: "Hackathon name",                        sr: "Naziv hackathona" },
-  placeholderName:{ en: "e.g. ETF HackWeek 2027",               sr: "npr. ETF HackWeek 2027" },
-  labelType:      { en: "Type",                                  sr: "Tip" },
-  optPhysical:    { en: "Physical",                              sr: "Fizički" },
-  optVirtual:     { en: "Virtual",                               sr: "Virtuelni" },
-  optHybrid:      { en: "Hybrid",                                sr: "Hibridni" },
-  labelDate:      { en: "Start date",                            sr: "Datum početka" },
-  cancel:         { en: "Cancel",                                sr: "Otkaži" },
-  create:         { en: "Create hackathon",                      sr: "Kreiraj hackathon" },
+  dialogLabel: { en: "Create new hackathon", sr: "Kreiranje novog hackathona" },
+  title: { en: "New hackathon", sr: "Novi hackathon" },
+  close: { en: "Close", sr: "Zatvori" },
+  wireframeNote: {
+    en: "Hackathon creation form (wireframe) — coming soon.",
+    sr: "Forma za kreiranje hackathona (wireframe) — uskoro dostupno.",
+  },
+  labelName: { en: "Hackathon name", sr: "Naziv hackathona" },
+  placeholderName: { en: "e.g. ETF HackWeek 2027", sr: "npr. ETF HackWeek 2027" },
+  labelType: { en: "Type", sr: "Tip" },
+  optPhysical: { en: "Physical", sr: "Fizički" },
+  optVirtual: { en: "Virtual", sr: "Virtuelni" },
+  optHybrid: { en: "Hybrid", sr: "Hibridni" },
+  labelDate: { en: "Start date", sr: "Datum početka" },
+  cancel: { en: "Cancel", sr: "Otkaži" },
+  create: { en: "Create hackathon", sr: "Kreiraj hackathon" },
 } as const;
 
-export function CreateHackathonPopup({
-  open,
-  onClose,
-}: {
-  open: boolean;
-  onClose: () => void;
-}) {
+export function CreateHackathonPopup({ open, onClose }: { open: boolean; onClose: () => void }) {
   const t = useT(M);
   const dialogRef = useRef<HTMLDialogElement>(null);
 
@@ -76,18 +73,12 @@ export function CreateHackathonPopup({
             <Icon name="hackathon" />
             {t("title")}
           </h2>
-          <button
-            className="modal-close"
-            aria-label={t("close")}
-            onClick={onClose}
-          >
+          <button className="modal-close" aria-label={t("close")} onClick={onClose}>
             <Icon name="x" />
           </button>
         </div>
         <div className="modal-body">
-          <p className="modal-wireframe-note">
-            {t("wireframeNote")}
-          </p>
+          <p className="modal-wireframe-note">{t("wireframeNote")}</p>
           <div className="modal-field-group">
             <label className="modal-label" htmlFor="chk-title">
               {t("labelName")}
@@ -114,27 +105,14 @@ export function CreateHackathonPopup({
             <label className="modal-label" htmlFor="chk-date">
               {t("labelDate")}
             </label>
-            <input
-              id="chk-date"
-              className="modal-input"
-              type="date"
-              disabled
-            />
+            <input id="chk-date" className="modal-input" type="date" disabled />
           </div>
         </div>
         <div className="modal-foot">
-          <button
-            className="btn btn-ghost hk-btn-sm"
-            type="button"
-            onClick={onClose}
-          >
+          <button className="btn btn-ghost hk-btn-sm" type="button" onClick={onClose}>
             {t("cancel")}
           </button>
-          <button
-            className="btn btn-primary hk-btn-sm"
-            type="button"
-            disabled
-          >
+          <button className="btn btn-primary hk-btn-sm" type="button" disabled>
             <Icon name="plus" />
             {t("create")}
           </button>

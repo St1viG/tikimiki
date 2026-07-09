@@ -7,13 +7,7 @@ import { Icon } from "@/components/Icon";
  * which is the one place the product allows a multi-hue accent. Render it inline
  * after the name; pass `size` to scale it for larger headings.
  */
-export function PremiumBadge({
-  title = "Premium",
-  size = 13,
-}: {
-  title?: string;
-  size?: number;
-}) {
+export function PremiumBadge({ title = "Premium", size = 13 }: { title?: string; size?: number }) {
   return (
     <span
       className="premium-badge"

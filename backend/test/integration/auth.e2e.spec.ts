@@ -27,10 +27,7 @@ describe("auth (e2e)", () => {
     expect(reg.body.user.username).toBe(username);
     expect(reg.body.user.passwordHash).toBeUndefined();
 
-    const login = await http()
-      .post("/api/v1/auth/login")
-      .send({ email, password })
-      .expect(200);
+    const login = await http().post("/api/v1/auth/login").send({ email, password }).expect(200);
     expect(login.body.accessToken).toBeTruthy();
 
     const me = await http()
@@ -62,7 +59,9 @@ describe("auth (e2e)", () => {
     expect(taken.body).toEqual({ email: false, username: false });
 
     const free = await http()
-      .get(`/api/v1/auth/availability?email=${uniqueId("free")}@test.dev&username=${uniqueId("free")}`)
+      .get(
+        `/api/v1/auth/availability?email=${uniqueId("free")}@test.dev&username=${uniqueId("free")}`,
+      )
       .expect(200);
     expect(free.body).toEqual({ email: true, username: true });
 
@@ -119,19 +118,12 @@ describe("auth (e2e)", () => {
       .expect(200);
 
     const cookies = login.headers["set-cookie"] as unknown as string[];
-    const refreshCookie = cookies.find((c) =>
-      c.startsWith("tikimiki_refresh="),
-    );
+    const refreshCookie = cookies.find((c) => c.startsWith("tikimiki_refresh="));
     expect(refreshCookie).toBeTruthy();
-    const refreshToken = decodeURIComponent(
-      refreshCookie!.split(";")[0].split("=")[1],
-    );
+    const refreshToken = decodeURIComponent(refreshCookie!.split(";")[0].split("=")[1]);
 
     // A valid refresh token must NOT be accepted on access-token routes.
-    await http()
-      .get("/api/v1/auth/me")
-      .set("Authorization", `Bearer ${refreshToken}`)
-      .expect(401);
+    await http().get("/api/v1/auth/me").set("Authorization", `Bearer ${refreshToken}`).expect(401);
   });
 
   it("blocks a banned account from logging in (403) and surfaces the reason", async () => {

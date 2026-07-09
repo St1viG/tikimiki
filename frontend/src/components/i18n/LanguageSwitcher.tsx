@@ -18,8 +18,7 @@ const M = {
 export function LanguageSwitcher() {
   const { locale, setLocale } = useLanguage();
   const t = useT(M);
-  const label = (id: (typeof LOCALES)[number]["id"]) =>
-    id === "en" ? t("english") : t("serbian");
+  const label = (id: (typeof LOCALES)[number]["id"]) => (id === "en" ? t("english") : t("serbian"));
 
   return (
     <div className="lang-switch" role="radiogroup" aria-label="Language">

@@ -1,18 +1,7 @@
-import {
-  ForbiddenException,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from "@nestjs/common";
+import { ForbiddenException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
-import {
-  commentReactions,
-  comments,
-  postReactions,
-  posts,
-  users,
-} from "../db/schema";
+import { commentReactions, comments, postReactions, posts, users } from "../db/schema";
 import { LIKE } from "../common/constants";
 import { NotificationsService } from "../notifications/notifications.service";
 import type { CreateCommentInput, UpdateCommentInput } from "./dto";
@@ -136,10 +125,7 @@ export class EngagementService {
     if (!post) throw new NotFoundException("Post not found");
   }
 
-  async listComments(
-    postId: string,
-    viewerId: string | null = null,
-  ): Promise<CommentDto[]> {
+  async listComments(postId: string, viewerId: string | null = null): Promise<CommentDto[]> {
     await this.assertPostExists(postId);
     const rows = await this.db
       .select(this.commentColumns(viewerId))
@@ -250,10 +236,7 @@ export class EngagementService {
     return this.toCommentDto(row);
   }
 
-  async deleteComment(
-    userId: string,
-    commentId: string,
-  ): Promise<DeleteResult> {
+  async deleteComment(userId: string, commentId: string): Promise<DeleteResult> {
     const [comment] = await this.db
       .select({ userId: comments.userId })
       .from(comments)
@@ -315,9 +298,7 @@ export class EngagementService {
           );
         liked = false;
       } else {
-        await tx
-          .insert(postReactions)
-          .values({ userId, postId, symbol: LIKE });
+        await tx.insert(postReactions).values({ userId, postId, symbol: LIKE });
         liked = true;
       }
 
@@ -358,10 +339,7 @@ export class EngagementService {
     return result;
   }
 
-  async toggleCommentLike(
-    userId: string,
-    commentId: string,
-  ): Promise<LikeResult> {
+  async toggleCommentLike(userId: string, commentId: string): Promise<LikeResult> {
     const [comment] = await this.db
       .select({ commentId: comments.commentId })
       .from(comments)
@@ -395,9 +373,7 @@ export class EngagementService {
           );
         liked = false;
       } else {
-        await tx
-          .insert(commentReactions)
-          .values({ userId, commentId, symbol: LIKE });
+        await tx.insert(commentReactions).values({ userId, commentId, symbol: LIKE });
         liked = true;
       }
 

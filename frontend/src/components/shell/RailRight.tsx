@@ -74,11 +74,7 @@ function conversationTitle(c: Conversation, viewerId: string | null): string {
 
 /** Stable avatar seed for a conversation row: always the other member's
  *  username for a 1:1 (independent of display name), else the title. */
-function conversationSeed(
-  c: Conversation,
-  viewerId: string | null,
-  title: string,
-): string {
+function conversationSeed(c: Conversation, viewerId: string | null, title: string): string {
   const others = c.members.filter((m) => m.userId !== viewerId);
   const isGroup = c.members.length > 2;
   if (!isGroup && others[0]) return others[0].username;
@@ -139,11 +135,7 @@ export function RailRight() {
   const searchBox = (
     <div className="search" role="search">
       <Icon name="search" />
-      <input
-        type="search"
-        aria-label={t("searchAria")}
-        placeholder={t("searchPlaceholder")}
-      />
+      <input type="search" aria-label={t("searchAria")} placeholder={t("searchPlaceholder")} />
     </div>
   );
 
@@ -161,10 +153,7 @@ export function RailRight() {
             <span className="cohor-srv-badge skel" />
             <span className="cohor-srv-tx">
               <span className="skel skel-line" style={{ width: "58%" }} />
-              <span
-                className="skel skel-line"
-                style={{ width: "38%", marginTop: 7 }}
-              />
+              <span className="skel skel-line" style={{ width: "38%", marginTop: 7 }} />
             </span>
           </div>
 
@@ -175,10 +164,7 @@ export function RailRight() {
               <span className="avatar is-orb skel skel-circle" />
               <span className="cohor-dm-body">
                 <span className="skel skel-line" style={{ width: "52%" }} />
-                <span
-                  className="skel skel-line"
-                  style={{ width: "78%", marginTop: 7 }}
-                />
+                <span className="skel skel-line" style={{ width: "78%", marginTop: 7 }} />
               </span>
             </div>
           ))}
@@ -221,11 +207,7 @@ export function RailRight() {
     <aside className="rail-right" aria-label={t("cohorAria")}>
       <div className="search" role="search">
         <Icon name="search" />
-        <input
-          type="search"
-          aria-label={t("searchAria")}
-          placeholder={t("searchPlaceholder")}
-        />
+        <input type="search" aria-label={t("searchAria")} placeholder={t("searchPlaceholder")} />
       </div>
 
       {/* The .cohor-top header link is CSS-stretched over the whole card, so
@@ -234,10 +216,7 @@ export function RailRight() {
         {header}
 
         {activeHack && (
-          <Link
-            className="cohor-server"
-            href={`/cohor?server=${activeHack.serverId}`}
-          >
+          <Link className="cohor-server" href={`/cohor?server=${activeHack.serverId}`}>
             <span className="cohor-srv-badge" aria-hidden="true">
               {hackathonBadge(activeHack)}
             </span>
@@ -283,10 +262,7 @@ export function RailRight() {
                   <span className="cohor-dm-name">{title}</span>
                   <span className="cohor-dm-sub">{preview}</span>
                 </span>
-                <span
-                  className="cohor-unread cohor-unread--v"
-                  aria-hidden="true"
-                >
+                <span className="cohor-unread cohor-unread--v" aria-hidden="true">
                   {c.unreadCount}
                 </span>
               </Link>

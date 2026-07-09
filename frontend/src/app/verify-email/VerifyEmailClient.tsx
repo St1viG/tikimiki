@@ -16,14 +16,26 @@ import { ApiError, confirmEmailVerification } from "@/lib/api";
  */
 
 const M = {
-  heading:      { en: "Verify your email",               sr: "Potvrdi svoj email" },
-  verifying:    { en: "Verifying your email…",           sr: "Potvrđivanje emaila…" },
-  success:      { en: "Email verified",                  sr: "Email je potvrđen" },
-  successBody:  { en: "Your email address is now confirmed. You're all set.", sr: "Tvoja email adresa je potvrđena. Sve je spremno." },
-  missingToken: { en: "This verification link is missing its token.", sr: "Ovom linku za potvrdu nedostaje token." },
-  invalidToken: { en: "This verification link is invalid or has expired.", sr: "Ovaj link za potvrdu je nevažeći ili je istekao." },
-  genericError: { en: "Could not verify your email. Try again.", sr: "Potvrda emaila nije uspela. Pokušaj ponovo." },
-  goToLogin:    { en: "Continue to sign in",             sr: "Nastavi na prijavu" },
+  heading: { en: "Verify your email", sr: "Potvrdi svoj email" },
+  verifying: { en: "Verifying your email…", sr: "Potvrđivanje emaila…" },
+  success: { en: "Email verified", sr: "Email je potvrđen" },
+  successBody: {
+    en: "Your email address is now confirmed. You're all set.",
+    sr: "Tvoja email adresa je potvrđena. Sve je spremno.",
+  },
+  missingToken: {
+    en: "This verification link is missing its token.",
+    sr: "Ovom linku za potvrdu nedostaje token.",
+  },
+  invalidToken: {
+    en: "This verification link is invalid or has expired.",
+    sr: "Ovaj link za potvrdu je nevažeći ili je istekao.",
+  },
+  genericError: {
+    en: "Could not verify your email. Try again.",
+    sr: "Potvrda emaila nije uspela. Pokušaj ponovo.",
+  },
+  goToLogin: { en: "Continue to sign in", sr: "Nastavi na prijavu" },
 } as const;
 
 type Status = "verifying" | "success" | "error";
@@ -76,9 +88,7 @@ export function VerifyEmailClient() {
 
         {status === "success" && (
           <div role="status">
-            <p className="auth-success">
-              {t("success")}
-            </p>
+            <p className="auth-success">{t("success")}</p>
             <p style={{ fontSize: "0.9rem", opacity: 0.85, marginBottom: "1.1rem" }}>
               {t("successBody")}
             </p>
@@ -90,10 +100,7 @@ export function VerifyEmailClient() {
 
         {status === "error" && (
           <div role="alert">
-            <p
-              className="auth-error"
-              style={{ fontSize: "0.9rem", marginBottom: "1.1rem" }}
-            >
+            <p className="auth-error" style={{ fontSize: "0.9rem", marginBottom: "1.1rem" }}>
               {errorMsg}
             </p>
             <Link href="/login" className="btn btn-primary btn-block">

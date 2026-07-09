@@ -1,14 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  Post,
-  Query,
-  Req,
-  Res,
-  UseGuards,
-} from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, Post, Query, Req, Res, UseGuards } from "@nestjs/common";
 import type { Request, Response } from "express";
 import { env } from "../config/env";
 import { ZodValidationPipe } from "../common/zod.pipe";
@@ -42,9 +32,7 @@ export class AuthController {
 
   /** Public pre-flight for the registration form's live availability check. */
   @Get("availability")
-  availability(
-    @Query(new ZodValidationPipe(availabilityQuerySchema)) q: AvailabilityQuery,
-  ) {
+  availability(@Query(new ZodValidationPipe(availabilityQuerySchema)) q: AvailabilityQuery) {
     return this.auth.availability(q.email, q.username);
   }
 
@@ -71,13 +59,8 @@ export class AuthController {
 
   @Post("refresh")
   @HttpCode(200)
-  async refresh(
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    const fromCookie = (req.cookies as Record<string, string> | undefined)?.[
-      REFRESH_COOKIE
-    ];
+  async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const fromCookie = (req.cookies as Record<string, string> | undefined)?.[REFRESH_COOKIE];
     const { accessToken, refreshToken } = await this.auth.refresh(fromCookie);
     this.setRefreshCookie(res, refreshToken);
     return { accessToken };

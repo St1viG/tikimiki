@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from "@nestjs/common";
+import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { activeTeamMember } from "../common/team.predicates";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
@@ -104,13 +99,8 @@ export class BountiesService {
 
   /* ── Bounties ────────────────────────────────────────────── */
 
-  async listBounties(
-    hackathonId: string,
-    userId: string | null,
-  ): Promise<BountyDto[]> {
-    const viewerProject = userId
-      ? await this.callersProjectInHackathon(hackathonId, userId)
-      : null;
+  async listBounties(hackathonId: string, userId: string | null): Promise<BountyDto[]> {
+    const viewerProject = userId ? await this.callersProjectInHackathon(hackathonId, userId) : null;
     const viewerProjectId = viewerProject?.projectId ?? null;
 
     const bountyRows = await this.db
@@ -197,12 +187,7 @@ export class BountiesService {
     const [bounty] = await this.db
       .select({ bountyId: bounties.bountyId })
       .from(bounties)
-      .where(
-        and(
-          eq(bounties.bountyId, bountyId),
-          eq(bounties.hackathonId, hackathonId),
-        ),
-      )
+      .where(and(eq(bounties.bountyId, bountyId), eq(bounties.hackathonId, hackathonId)))
       .limit(1);
     if (!bounty) {
       throw new NotFoundException("Bounty not found");
@@ -210,11 +195,7 @@ export class BountiesService {
     return bounty;
   }
 
-  async apply(
-    hackathonId: string,
-    bountyId: string,
-    userId: string,
-  ): Promise<ApplyResultDto> {
+  async apply(hackathonId: string, bountyId: string, userId: string): Promise<ApplyResultDto> {
     await this.getBountyInHackathon(hackathonId, bountyId);
 
     const project = await this.callersProjectInHackathon(hackathonId, userId);
@@ -233,11 +214,7 @@ export class BountiesService {
     };
   }
 
-  async unapply(
-    hackathonId: string,
-    bountyId: string,
-    userId: string,
-  ): Promise<ApplyResultDto> {
+  async unapply(hackathonId: string, bountyId: string, userId: string): Promise<ApplyResultDto> {
     await this.getBountyInHackathon(hackathonId, bountyId);
 
     const project = await this.callersProjectInHackathon(hackathonId, userId);
@@ -274,12 +251,7 @@ export class BountiesService {
       .from(hackathonResults)
       .innerJoin(projects, eq(projects.projectId, hackathonResults.projectId))
       .innerJoin(teams, eq(teams.teamId, projects.teamId))
-      .where(
-        and(
-          isNull(hackathonResults.bountyId),
-          eq(teams.hackathonId, hackathonId),
-        ),
-      )
+      .where(and(isNull(hackathonResults.bountyId), eq(teams.hackathonId, hackathonId)))
       .orderBy(asc(hackathonResults.rank));
 
     // Bounty winners: results tied to one of this hackathon's bounties.
@@ -334,18 +306,11 @@ export class BountiesService {
         .select({ projectId: projects.projectId })
         .from(projects)
         .innerJoin(teams, eq(teams.teamId, projects.teamId))
-        .where(
-          and(
-            inArray(projects.projectId, projectIds),
-            eq(teams.hackathonId, hackathonId),
-          ),
-        );
+        .where(and(inArray(projects.projectId, projectIds), eq(teams.hackathonId, hackathonId)));
       const validIds = new Set(valid.map((p) => p.projectId));
       for (const id of projectIds) {
         if (!validIds.has(id)) {
-          throw new BadRequestException(
-            "All projects must belong to a team in this hackathon",
-          );
+          throw new BadRequestException("All projects must belong to a team in this hackathon");
         }
       }
     }
@@ -416,13 +381,9 @@ export class BountiesService {
 
     await this.db.transaction(async (tx) => {
       // One winner per bounty — clear any existing winner first.
-      await tx
-        .delete(hackathonResults)
-        .where(eq(hackathonResults.bountyId, bountyId));
+      await tx.delete(hackathonResults).where(eq(hackathonResults.bountyId, bountyId));
       if (projectId) {
-        await tx
-          .insert(hackathonResults)
-          .values({ projectId, bountyId, rank: 1 });
+        await tx.insert(hackathonResults).values({ projectId, bountyId, rank: 1 });
       }
     });
 

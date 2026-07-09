@@ -72,20 +72,11 @@ export class KanbanService {
   ) {}
 
   /** Throws ForbiddenException unless `userId` is an active member of `teamId`. */
-  private async assertTeamMember(
-    teamId: string,
-    userId: string,
-  ): Promise<void> {
+  private async assertTeamMember(teamId: string, userId: string): Promise<void> {
     const [row] = await this.db
       .select({ userId: teamMembers.userId })
       .from(teamMembers)
-      .where(
-        and(
-          eq(teamMembers.teamId, teamId),
-          eq(teamMembers.userId, userId),
-          activeTeamMember,
-        ),
-      )
+      .where(and(eq(teamMembers.teamId, teamId), eq(teamMembers.userId, userId), activeTeamMember))
       .limit(1);
     if (!row) {
       throw new ForbiddenException("Not an active member of this team");
@@ -96,20 +87,11 @@ export class KanbanService {
    * Allows team members, platform admins, and the hackathon organizer to view
    * the board. Write endpoints still require full team membership.
    */
-  private async assertBoardReadAccess(
-    teamId: string,
-    userId: string,
-  ): Promise<void> {
+  private async assertBoardReadAccess(teamId: string, userId: string): Promise<void> {
     const [member] = await this.db
       .select({ userId: teamMembers.userId })
       .from(teamMembers)
-      .where(
-        and(
-          eq(teamMembers.teamId, teamId),
-          eq(teamMembers.userId, userId),
-          activeTeamMember,
-        ),
-      )
+      .where(and(eq(teamMembers.teamId, teamId), eq(teamMembers.userId, userId), activeTeamMember))
       .limit(1);
     if (member) return;
 
@@ -127,19 +109,12 @@ export class KanbanService {
   }
 
   /** Throws unless `assigneeId` is an active member of `teamId`. */
-  private async assertAssigneeIsMember(
-    teamId: string,
-    assigneeId: string,
-  ): Promise<void> {
+  private async assertAssigneeIsMember(teamId: string, assigneeId: string): Promise<void> {
     const [row] = await this.db
       .select({ userId: teamMembers.userId })
       .from(teamMembers)
       .where(
-        and(
-          eq(teamMembers.teamId, teamId),
-          eq(teamMembers.userId, assigneeId),
-          activeTeamMember,
-        ),
+        and(eq(teamMembers.teamId, teamId), eq(teamMembers.userId, assigneeId), activeTeamMember),
       )
       .limit(1);
     if (!row) {
@@ -189,9 +164,7 @@ export class KanbanService {
   }
 
   /** Finds or lazily creates the board for a team. Verifies the team exists. */
-  private async ensureBoard(
-    teamId: string,
-  ): Promise<{ boardId: string; teamId: string }> {
+  private async ensureBoard(teamId: string): Promise<{ boardId: string; teamId: string }> {
     const [existing] = await this.db
       .select({ boardId: kanbanBoards.boardId, teamId: kanbanBoards.teamId })
       .from(kanbanBoards)
@@ -208,13 +181,10 @@ export class KanbanService {
     if (!team) throw new NotFoundException("Team not found");
 
     return this.db.transaction(async (tx) => {
-      const [board] = await tx
-        .insert(kanbanBoards)
-        .values({ teamId })
-        .returning({
-          boardId: kanbanBoards.boardId,
-          teamId: kanbanBoards.teamId,
-        });
+      const [board] = await tx.insert(kanbanBoards).values({ teamId }).returning({
+        boardId: kanbanBoards.boardId,
+        teamId: kanbanBoards.teamId,
+      });
       await tx.insert(kanbanColumns).values(
         DEFAULT_COLUMNS.map((c) => ({
           boardId: board.boardId,
@@ -297,17 +267,9 @@ export class KanbanService {
         createdAt: kanbanCards.createdAt,
       })
       .from(kanbanCards)
-      .innerJoin(
-        kanbanColumns,
-        eq(kanbanColumns.columnId, kanbanCards.columnId),
-      )
+      .innerJoin(kanbanColumns, eq(kanbanColumns.columnId, kanbanCards.columnId))
       .leftJoin(users, eq(users.userId, kanbanCards.assignedTo))
-      .where(
-        and(
-          eq(kanbanColumns.boardId, board.boardId),
-          isNull(kanbanCards.deletedAt),
-        ),
-      )
+      .where(and(eq(kanbanColumns.boardId, board.boardId), isNull(kanbanCards.deletedAt)))
       .orderBy(asc(kanbanCards.position));
 
     const cardsByColumn = new Map<string, CardDto[]>();
@@ -332,11 +294,7 @@ export class KanbanService {
   /* ── Cards ──────────────────────────────────────────────── */
 
   /** POST /teams/:teamId/kanban/cards */
-  async createCard(
-    teamId: string,
-    userId: string,
-    input: CreateCardInput,
-  ): Promise<CardDto> {
+  async createCard(teamId: string, userId: string, input: CreateCardInput): Promise<CardDto> {
     await this.assertTeamMember(teamId, userId);
 
     const board = await this.ensureBoard(teamId);
@@ -345,10 +303,7 @@ export class KanbanService {
       .select({ columnId: kanbanColumns.columnId })
       .from(kanbanColumns)
       .where(
-        and(
-          eq(kanbanColumns.columnId, input.columnId),
-          eq(kanbanColumns.boardId, board.boardId),
-        ),
+        and(eq(kanbanColumns.columnId, input.columnId), eq(kanbanColumns.boardId, board.boardId)),
       )
       .limit(1);
     if (!column) {
@@ -360,12 +315,7 @@ export class KanbanService {
         maxPos: sql<number>`coalesce(max(${kanbanCards.position}), -1)`,
       })
       .from(kanbanCards)
-      .where(
-        and(
-          eq(kanbanCards.columnId, input.columnId),
-          isNull(kanbanCards.deletedAt),
-        ),
-      );
+      .where(and(eq(kanbanCards.columnId, input.columnId), isNull(kanbanCards.deletedAt)));
 
     const [created] = await this.db
       .insert(kanbanCards)
@@ -387,11 +337,7 @@ export class KanbanService {
   }
 
   /** PATCH /kanban/cards/:cardId */
-  async updateCard(
-    cardId: string,
-    userId: string,
-    input: UpdateCardInput,
-  ): Promise<CardDto> {
+  async updateCard(cardId: string, userId: string, input: UpdateCardInput): Promise<CardDto> {
     const prev = await this.teamForCard(cardId);
     await this.assertTeamMember(prev.teamId, userId);
 
@@ -400,10 +346,7 @@ export class KanbanService {
         .select({ columnId: kanbanColumns.columnId })
         .from(kanbanColumns)
         .where(
-          and(
-            eq(kanbanColumns.columnId, input.columnId),
-            eq(kanbanColumns.boardId, prev.boardId),
-          ),
+          and(eq(kanbanColumns.columnId, input.columnId), eq(kanbanColumns.boardId, prev.boardId)),
         )
         .limit(1);
       if (!target) {
@@ -415,8 +358,7 @@ export class KanbanService {
       await this.assertAssigneeIsMember(prev.teamId, input.assignedTo);
     }
 
-    const movingColumn =
-      input.columnId !== undefined && input.columnId !== prev.columnId;
+    const movingColumn = input.columnId !== undefined && input.columnId !== prev.columnId;
     let resolvedPosition = input.position;
     if (movingColumn && input.position === undefined) {
       const [{ maxPos }] = await this.db
@@ -425,10 +367,7 @@ export class KanbanService {
         })
         .from(kanbanCards)
         .where(
-          and(
-            eq(kanbanCards.columnId, input.columnId as string),
-            isNull(kanbanCards.deletedAt),
-          ),
+          and(eq(kanbanCards.columnId, input.columnId as string), isNull(kanbanCards.deletedAt)),
         );
       resolvedPosition = Number(maxPos) + 1;
     }
@@ -442,10 +381,7 @@ export class KanbanService {
     if (resolvedPosition !== undefined) patch.position = resolvedPosition;
     if (input.assignedTo !== undefined) patch.assignedTo = input.assignedTo;
 
-    await this.db
-      .update(kanbanCards)
-      .set(patch)
-      .where(eq(kanbanCards.cardId, cardId));
+    await this.db.update(kanbanCards).set(patch).where(eq(kanbanCards.cardId, cardId));
 
     const card = await this.loadCard(cardId);
 
@@ -474,10 +410,7 @@ export class KanbanService {
   }
 
   /** DELETE /kanban/cards/:cardId */
-  async deleteCard(
-    cardId: string,
-    userId: string,
-  ): Promise<{ success: true }> {
+  async deleteCard(cardId: string, userId: string): Promise<{ success: true }> {
     const { teamId, boardId } = await this.teamForCard(cardId);
     await this.assertTeamMember(teamId, userId);
 
@@ -496,11 +429,7 @@ export class KanbanService {
   /* ── Columns ────────────────────────────────────────────── */
 
   /** POST /teams/:teamId/kanban/columns */
-  async createColumn(
-    teamId: string,
-    userId: string,
-    input: CreateColumnInput,
-  ): Promise<ColumnDto> {
+  async createColumn(teamId: string, userId: string, input: CreateColumnInput): Promise<ColumnDto> {
     await this.assertTeamMember(teamId, userId);
     const board = await this.ensureBoard(teamId);
 
@@ -569,12 +498,7 @@ export class KanbanService {
       })
       .from(kanbanCards)
       .leftJoin(users, eq(users.userId, kanbanCards.assignedTo))
-      .where(
-        and(
-          eq(kanbanCards.columnId, columnId),
-          isNull(kanbanCards.deletedAt),
-        ),
-      )
+      .where(and(eq(kanbanCards.columnId, columnId), isNull(kanbanCards.deletedAt)))
       .orderBy(asc(kanbanCards.position));
 
     const col: ColumnDto = {
@@ -613,12 +537,7 @@ export class KanbanService {
     const activeCards = await this.db
       .select({ cardId: kanbanCards.cardId })
       .from(kanbanCards)
-      .where(
-        and(
-          eq(kanbanCards.columnId, columnId),
-          isNull(kanbanCards.deletedAt),
-        ),
-      )
+      .where(and(eq(kanbanCards.columnId, columnId), isNull(kanbanCards.deletedAt)))
       .orderBy(asc(kanbanCards.position));
 
     let movedCards = 0;
@@ -628,12 +547,7 @@ export class KanbanService {
           maxPos: sql<number>`coalesce(max(${kanbanCards.position}), -1)`,
         })
         .from(kanbanCards)
-        .where(
-          and(
-            eq(kanbanCards.columnId, target.columnId),
-            isNull(kanbanCards.deletedAt),
-          ),
-        );
+        .where(and(eq(kanbanCards.columnId, target.columnId), isNull(kanbanCards.deletedAt)));
 
       let pos = Number(maxPos) + 1;
       for (const card of activeCards) {
@@ -650,9 +564,7 @@ export class KanbanService {
       movedCards = activeCards.length;
     }
 
-    await this.db
-      .delete(kanbanColumns)
-      .where(eq(kanbanColumns.columnId, columnId));
+    await this.db.delete(kanbanColumns).where(eq(kanbanColumns.columnId, columnId));
 
     this.realtime.emitKanbanUpdate(boardId, {
       type: "column:deleted",
@@ -679,9 +591,7 @@ export class KanbanService {
     const boardColIds = new Set(existingCols.map((c) => c.columnId));
     for (const entry of input.columns) {
       if (!boardColIds.has(entry.columnId)) {
-        throw new NotFoundException(
-          `Column ${entry.columnId} not found on this board`,
-        );
+        throw new NotFoundException(`Column ${entry.columnId} not found on this board`);
       }
     }
 
@@ -718,12 +628,7 @@ export class KanbanService {
       .from(kanbanCards)
       .innerJoin(kanbanColumns, eq(kanbanColumns.columnId, kanbanCards.columnId))
       .leftJoin(users, eq(users.userId, kanbanCards.assignedTo))
-      .where(
-        and(
-          eq(kanbanColumns.boardId, board.boardId),
-          isNull(kanbanCards.deletedAt),
-        ),
-      )
+      .where(and(eq(kanbanColumns.boardId, board.boardId), isNull(kanbanCards.deletedAt)))
       .orderBy(asc(kanbanCards.position));
 
     const cardsByColumn = new Map<string, CardDto[]>();

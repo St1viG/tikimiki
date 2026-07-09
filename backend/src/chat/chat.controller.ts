@@ -271,12 +271,7 @@ export class ChatController {
     @Body(new ZodValidationPipe(createConversationSchema))
     body: CreateConversationInput,
   ) {
-    return this.chat.createConversation(
-      userId,
-      body.memberIds,
-      body.name,
-      body.icon,
-    );
+    return this.chat.createConversation(userId, body.memberIds, body.name, body.icon);
   }
 
   @Patch("conversations/:conversationId")

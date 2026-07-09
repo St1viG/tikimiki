@@ -9,12 +9,7 @@
  * seed on server and client. No hard pattern — pure smooth Midnight Voltage glow.
  */
 
-import {
-  makeRng,
-  accentFor,
-  tileFor,
-  type AvatarArtProps,
-} from "@/lib/avatars/core";
+import { makeRng, accentFor, tileFor, type AvatarArtProps } from "@/lib/avatars/core";
 
 /** Sanitize a seed into a collision-safe id fragment for SVG defs. */
 function idHash(seed: string): string {
@@ -82,14 +77,7 @@ export function GradientAvatar({ seed, size = 64, className }: AvatarArtProps) {
     >
       <defs>
         {/* Base sweep: dark venue into the dominant accent. */}
-        <linearGradient
-          id={baseId}
-          x1={x1}
-          y1={y1}
-          x2={cx}
-          y2={cy}
-          gradientUnits="userSpaceOnUse"
-        >
+        <linearGradient id={baseId} x1={x1} y1={y1} x2={cx} y2={cy} gradientUnits="userSpaceOnUse">
           <stop offset="0" stopColor={tile} />
           <stop offset={softStop.toFixed(3)} stopColor={accent.soft} />
           <stop offset={coreStop.toFixed(3)} stopColor={accent.core} />
@@ -98,11 +86,7 @@ export function GradientAvatar({ seed, size = 64, className }: AvatarArtProps) {
         {/* Soft light blobs in the brighter accent shade — the "aurora". */}
         <radialGradient id={blobAId} cx="0.5" cy="0.5" r="0.5">
           <stop offset="0" stopColor={accent.light} stopOpacity={aOpacity} />
-          <stop
-            offset="0.55"
-            stopColor={accent.core}
-            stopOpacity={aOpacity * 0.45}
-          />
+          <stop offset="0.55" stopColor={accent.core} stopOpacity={aOpacity * 0.45} />
           <stop offset="1" stopColor={accent.core} stopOpacity="0" />
         </radialGradient>
 

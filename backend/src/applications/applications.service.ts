@@ -33,11 +33,7 @@ import type {
   WithdrawApplicationInput,
 } from "./dto";
 
-export type QuestionType =
-  | "short_text"
-  | "long_text"
-  | "single_choice"
-  | "multi_choice";
+export type QuestionType = "short_text" | "long_text" | "single_choice" | "multi_choice";
 
 /** A custom question on a hackathon's application form. */
 export interface ApplicationQuestionDto {
@@ -59,12 +55,7 @@ export interface ApplicationAnswerDto {
   answer: string;
 }
 
-export type ApplicationStatus =
-  | "pending"
-  | "approved"
-  | "rejected"
-  | "waitlisted"
-  | "withdrawn";
+export type ApplicationStatus = "pending" | "approved" | "rejected" | "waitlisted" | "withdrawn";
 
 /** Returned to the applicant (their own application). */
 export interface ApplicationDto {
@@ -108,10 +99,7 @@ export class ApplicationsService {
     private readonly authz: AuthzService,
   ) {}
 
-  async create(
-    userId: string,
-    input: CreateApplicationInput,
-  ): Promise<ApplicationDto> {
+  async create(userId: string, input: CreateApplicationInput): Promise<ApplicationDto> {
     // Caller must be a member.
     const [member] = await this.db
       .select({ userId: members.userId })
@@ -140,9 +128,7 @@ export class ApplicationsService {
     }
 
     if (hackathon.status !== "upcoming") {
-      throw new BadRequestException(
-        "Registration is closed — hackathon is no longer upcoming",
-      );
+      throw new BadRequestException("Registration is closed — hackathon is no longer upcoming");
     }
 
     if (new Date() > hackathon.registrationDeadline) {
@@ -163,9 +149,7 @@ export class ApplicationsService {
           ),
         );
       if (Number(approvedCount) >= hackathon.maxParticipants) {
-        throw new BadRequestException(
-          "Hackathon is full — no more spots available",
-        );
+        throw new BadRequestException("Hackathon is full — no more spots available");
       }
     }
 
@@ -182,9 +166,7 @@ export class ApplicationsService {
       )
       .limit(1);
     if (existing) {
-      throw new ConflictException(
-        "You already have an active application for this hackathon",
-      );
+      throw new ConflictException("You already have an active application for this hackathon");
     }
 
     const applicationId = await this.db.transaction(async (tx) => {
@@ -232,10 +214,7 @@ export class ApplicationsService {
    * Members who already have a non-deleted application for this hackathon are
    * silently skipped. Returns the newly created ApplicationDtos.
    */
-  async createTeam(
-    callerId: string,
-    input: CreateTeamApplicationInput,
-  ): Promise<ApplicationDto[]> {
+  async createTeam(callerId: string, input: CreateTeamApplicationInput): Promise<ApplicationDto[]> {
     // Caller must be a member.
     const [member] = await this.db
       .select({ userId: members.userId })
@@ -278,9 +257,7 @@ export class ApplicationsService {
     if (!hackathon) throw new NotFoundException("Hackathon not found");
 
     if (hackathon.status !== "upcoming") {
-      throw new BadRequestException(
-        "Registration is closed — hackathon is no longer upcoming",
-      );
+      throw new BadRequestException("Registration is closed — hackathon is no longer upcoming");
     }
     if (new Date() > hackathon.registrationDeadline) {
       throw new BadRequestException("Registration deadline has passed");
@@ -302,12 +279,7 @@ export class ApplicationsService {
     const existing = await this.db
       .select({ userId: applications.userId })
       .from(applications)
-      .where(
-        and(
-          eq(applications.hackathonId, input.hackathonId),
-          isNull(applications.deletedAt),
-        ),
-      );
+      .where(and(eq(applications.hackathonId, input.hackathonId), isNull(applications.deletedAt)));
     const alreadyApplied = new Set(existing.map((r) => r.userId));
 
     const toApply = memberUserIds.filter((uid) => !alreadyApplied.has(uid));
@@ -401,8 +373,7 @@ export class ApplicationsService {
       .limit(1);
     if (!hackathon) throw new NotFoundException("Hackathon not found");
 
-    const isChoice =
-      input.type === "single_choice" || input.type === "multi_choice";
+    const isChoice = input.type === "single_choice" || input.type === "multi_choice";
     const [row] = await this.db
       .insert(applicationQuestions)
       .values({
@@ -453,8 +424,7 @@ export class ApplicationsService {
     await this.authz.assertHackathonOwnerOrAdmin(existing.hackathonId, userId);
 
     const effectiveType = (input.type ?? existing.type) as QuestionType;
-    const isChoice =
-      effectiveType === "single_choice" || effectiveType === "multi_choice";
+    const isChoice = effectiveType === "single_choice" || effectiveType === "multi_choice";
 
     // Effective options after the merge: provided > existing.
     const providedOptions = input.options;
@@ -464,9 +434,7 @@ export class ApplicationsService {
     if (isChoice) {
       const options = providedOptions ?? existingOptions;
       if (!options || options.length === 0) {
-        throw new BadRequestException(
-          "Choice questions require a non-empty options array",
-        );
+        throw new BadRequestException("Choice questions require a non-empty options array");
       }
       nextOptions = options;
     } else {
@@ -482,11 +450,7 @@ export class ApplicationsService {
     if (input.position !== undefined) patch.position = input.position;
     // options is always recomputed when type or options touched, or when the
     // effective type is text (to clear stale options).
-    if (
-      input.options !== undefined ||
-      input.type !== undefined ||
-      !isChoice
-    ) {
+    if (input.options !== undefined || input.type !== undefined || !isChoice) {
       patch.options = nextOptions;
     }
     // allowOther only applies to choice types; clear it when text, else honour
@@ -520,10 +484,7 @@ export class ApplicationsService {
    * `question_answers.question_id` FK is ON DELETE CASCADE, so any existing
    * answers to this question are removed automatically by the database.
    */
-  async deleteQuestion(
-    questionId: string,
-    userId: string,
-  ): Promise<{ success: true }> {
+  async deleteQuestion(questionId: string, userId: string): Promise<{ success: true }> {
     const [existing] = await this.db
       .select({ hackathonId: applicationQuestions.hackathonId })
       .from(applicationQuestions)
@@ -539,10 +500,7 @@ export class ApplicationsService {
     return { success: true };
   }
 
-  async getAnswers(
-    applicationId: string,
-    userId: string,
-  ): Promise<ApplicationAnswerDto[]> {
+  async getAnswers(applicationId: string, userId: string): Promise<ApplicationAnswerDto[]> {
     const [app] = await this.db
       .select({ hackathonId: applications.hackathonId })
       .from(applications)
@@ -588,14 +546,9 @@ export class ApplicationsService {
         createdAt: applications.createdAt,
       })
       .from(applications)
-      .innerJoin(
-        hackathons,
-        eq(hackathons.hackathonId, applications.hackathonId),
-      )
+      .innerJoin(hackathons, eq(hackathons.hackathonId, applications.hackathonId))
       .leftJoin(teams, eq(teams.teamId, applications.teamId))
-      .where(
-        and(eq(applications.userId, userId), isNull(applications.deletedAt)),
-      )
+      .where(and(eq(applications.userId, userId), isNull(applications.deletedAt)))
       .orderBy(desc(applications.createdAt));
 
     return rows.map((r) => ({
@@ -610,10 +563,7 @@ export class ApplicationsService {
     }));
   }
 
-  async listForHackathon(
-    hackathonId: string,
-    userId: string,
-  ): Promise<ApplicantDto[]> {
+  async listForHackathon(hackathonId: string, userId: string): Promise<ApplicantDto[]> {
     await this.authz.assertHackathonOwnerOrAdmin(hackathonId, userId);
     const rows = await this.db
       .select({
@@ -630,12 +580,7 @@ export class ApplicationsService {
       .from(applications)
       .innerJoin(users, eq(users.userId, applications.userId))
       .leftJoin(teams, eq(teams.teamId, applications.teamId))
-      .where(
-        and(
-          eq(applications.hackathonId, hackathonId),
-          isNull(applications.deletedAt),
-        ),
-      )
+      .where(and(eq(applications.hackathonId, hackathonId), isNull(applications.deletedAt)))
       .orderBy(desc(applications.createdAt));
 
     return rows.map((r) => ({
@@ -651,10 +596,7 @@ export class ApplicationsService {
     }));
   }
 
-  async statsForHackathon(
-    hackathonId: string,
-    userId: string,
-  ): Promise<ApplicationStatsDto> {
+  async statsForHackathon(hackathonId: string, userId: string): Promise<ApplicationStatsDto> {
     await this.authz.assertHackathonOwnerOrAdmin(hackathonId, userId);
     const [hackathon] = await this.db
       .select({ maxParticipants: hackathons.maxParticipants })
@@ -674,12 +616,7 @@ export class ApplicationsService {
         waitlisted: sql<number>`count(*) filter (where ${applications.status} = 'waitlisted')::int`,
       })
       .from(applications)
-      .where(
-        and(
-          eq(applications.hackathonId, hackathonId),
-          isNull(applications.deletedAt),
-        ),
-      );
+      .where(and(eq(applications.hackathonId, hackathonId), isNull(applications.deletedAt)));
 
     return {
       total: stats?.total ?? 0,
@@ -691,10 +628,7 @@ export class ApplicationsService {
     };
   }
 
-  async approve(
-    applicationId: string,
-    reviewerId: string,
-  ): Promise<ApplicationDto> {
+  async approve(applicationId: string, reviewerId: string): Promise<ApplicationDto> {
     const [existing] = await this.db
       .select({
         applicationId: applications.applicationId,
@@ -702,21 +636,13 @@ export class ApplicationsService {
         hackathonId: applications.hackathonId,
       })
       .from(applications)
-      .where(
-        and(
-          eq(applications.applicationId, applicationId),
-          isNull(applications.deletedAt),
-        ),
-      )
+      .where(and(eq(applications.applicationId, applicationId), isNull(applications.deletedAt)))
       .limit(1);
     if (!existing) {
       throw new NotFoundException("Application not found");
     }
 
-    await this.authz.assertHackathonOwnerOrAdmin(
-      existing.hackathonId,
-      reviewerId,
-    );
+    await this.authz.assertHackathonOwnerOrAdmin(existing.hackathonId, reviewerId);
 
     await this.db
       .update(applications)
@@ -741,10 +667,7 @@ export class ApplicationsService {
    * server access follows acceptance. No-op when the hackathon has no server or
    * the user is not a platform member. Best-effort — never blocks approval.
    */
-  private async grantServerMembership(
-    hackathonId: string,
-    userId: string,
-  ): Promise<void> {
+  private async grantServerMembership(hackathonId: string, userId: string): Promise<void> {
     try {
       const [server] = await this.db
         .select({ serverId: servers.serverId })
@@ -763,12 +686,7 @@ export class ApplicationsService {
       let [role] = await this.db
         .select({ serverRoleId: serverRoles.serverRoleId })
         .from(serverRoles)
-        .where(
-          and(
-            eq(serverRoles.serverId, server.serverId),
-            eq(serverRoles.name, "Participant"),
-          ),
-        )
+        .where(and(eq(serverRoles.serverId, server.serverId), eq(serverRoles.name, "Participant")))
         .limit(1);
       if (!role) {
         [role] = await this.db
@@ -801,12 +719,8 @@ export class ApplicationsService {
     const title = hk?.title ?? "hakaton";
     await this.notifications.create({
       userId,
-      type:
-        decision === "approved"
-          ? "application_approved"
-          : "application_rejected",
-      title:
-        decision === "approved" ? "Prijava odobrena" : "Prijava odbijena",
+      type: decision === "approved" ? "application_approved" : "application_rejected",
+      title: decision === "approved" ? "Prijava odobrena" : "Prijava odbijena",
       body:
         decision === "approved"
           ? `Tvoja prijava za ${title} je odobrena. 🎉`
@@ -828,21 +742,13 @@ export class ApplicationsService {
         hackathonId: applications.hackathonId,
       })
       .from(applications)
-      .where(
-        and(
-          eq(applications.applicationId, applicationId),
-          isNull(applications.deletedAt),
-        ),
-      )
+      .where(and(eq(applications.applicationId, applicationId), isNull(applications.deletedAt)))
       .limit(1);
     if (!existing) {
       throw new NotFoundException("Application not found");
     }
 
-    await this.authz.assertHackathonOwnerOrAdmin(
-      existing.hackathonId,
-      reviewerId,
-    );
+    await this.authz.assertHackathonOwnerOrAdmin(existing.hackathonId, reviewerId);
 
     await this.db
       .update(applications)
@@ -855,12 +761,7 @@ export class ApplicationsService {
       })
       .where(eq(applications.applicationId, applicationId));
 
-    await this.notifyDecision(
-      existing.userId,
-      existing.hackathonId,
-      "rejected",
-      input.reason,
-    );
+    await this.notifyDecision(existing.userId, existing.hackathonId, "rejected", input.reason);
     return this.getOwnApplication(applicationId);
   }
 
@@ -902,9 +803,7 @@ export class ApplicationsService {
   }
 
   /** Loads a single application in the applicant-facing ApplicationDto shape. */
-  private async getOwnApplication(
-    applicationId: string,
-  ): Promise<ApplicationDto> {
+  private async getOwnApplication(applicationId: string): Promise<ApplicationDto> {
     const [row] = await this.db
       .select({
         applicationId: applications.applicationId,
@@ -917,10 +816,7 @@ export class ApplicationsService {
         createdAt: applications.createdAt,
       })
       .from(applications)
-      .innerJoin(
-        hackathons,
-        eq(hackathons.hackathonId, applications.hackathonId),
-      )
+      .innerJoin(hackathons, eq(hackathons.hackathonId, applications.hackathonId))
       .leftJoin(teams, eq(teams.teamId, applications.teamId))
       .where(eq(applications.applicationId, applicationId))
       .limit(1);

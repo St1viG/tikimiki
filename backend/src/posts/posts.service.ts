@@ -1,9 +1,4 @@
-import {
-  ForbiddenException,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from "@nestjs/common";
+import { ForbiddenException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import type { FeedPost } from "@tikimiki/types";
 import { LIKE } from "../common/constants";
@@ -101,9 +96,7 @@ export class PostsService {
   ) {}
 
   /** Ordered attachments for a set of posts, grouped by post id (no N+1). */
-  private async attachmentsByPost(
-    ids: string[],
-  ): Promise<Map<string, PostAttachment[]>> {
+  private async attachmentsByPost(ids: string[]): Promise<Map<string, PostAttachment[]>> {
     const map = new Map<string, PostAttachment[]>();
     if (ids.length === 0) return map;
     const rows = await this.db
@@ -136,10 +129,7 @@ export class PostsService {
     content: string,
     attachmentUrls: string[] = [],
   ): Promise<FeedPostWithDisplayName> {
-    const [row] = await this.db
-      .insert(posts)
-      .values({ userId, content })
-      .returning();
+    const [row] = await this.db.insert(posts).values({ userId, content }).returning();
 
     let attachments: PostAttachment[] = [];
     if (attachmentUrls.length > 0) {
@@ -190,10 +180,7 @@ export class PostsService {
   }
 
   /** Public single-post fetch (powers the shareable post permalink). */
-  async getOne(
-    postId: string,
-    userId: string | null,
-  ): Promise<FeedPostWithDisplayName> {
+  async getOne(postId: string, userId: string | null): Promise<FeedPostWithDisplayName> {
     const post = await this.getById(postId, userId);
     if (!post) throw new NotFoundException("Post not found");
     return post;
@@ -233,18 +220,13 @@ export class PostsService {
     }
 
     await this.db.transaction(async (tx) => {
-      await tx
-        .update(posts)
-        .set({ content, editedAt: new Date() })
-        .where(eq(posts.postId, postId));
+      await tx.update(posts).set({ content, editedAt: new Date() }).where(eq(posts.postId, postId));
       // Replace attachments wholesale so reordering / removal is supported.
-      await tx
-        .delete(postAttachments)
-        .where(eq(postAttachments.postId, postId));
+      await tx.delete(postAttachments).where(eq(postAttachments.postId, postId));
       if (attachmentUrls.length > 0) {
-        await tx.insert(postAttachments).values(
-          attachmentUrls.map((url, i) => ({ postId, url, position: i })),
-        );
+        await tx
+          .insert(postAttachments)
+          .values(attachmentUrls.map((url, i) => ({ postId, url, position: i })));
       }
     });
 
@@ -265,10 +247,7 @@ export class PostsService {
       throw new ForbiddenException("You can only delete your own post");
     }
 
-    await this.db
-      .update(posts)
-      .set({ deletedAt: new Date() })
-      .where(eq(posts.postId, postId));
+    await this.db.update(posts).set({ deletedAt: new Date() }).where(eq(posts.postId, postId));
 
     return { success: true };
   }

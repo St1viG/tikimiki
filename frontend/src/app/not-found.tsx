@@ -32,12 +32,7 @@ export default function NotFound() {
       <div className="nf-stack">
         <h1 className="nf-num" aria-label={t("srTitle")}>
           <span aria-hidden="true">4</span>
-          <svg
-            className="nf-mascot"
-            viewBox="0 0 64 64"
-            fill="none"
-            aria-hidden="true"
-          >
+          <svg className="nf-mascot" viewBox="0 0 64 64" fill="none" aria-hidden="true">
             <circle cx="32" cy="32" r="30" fill="#1A1133" stroke="#3D2E6B" strokeWidth="1.5" />
             <ellipse cx="18" cy="16" rx="5" ry="7" fill="#2D1A55" />
             <ellipse cx="18" cy="16" rx="3" ry="4.5" fill="#7C5CBF" opacity=".6" />
@@ -49,7 +44,13 @@ export default function NotFound() {
             <circle cx="27" cy="29" r="1.5" fill="#C9B8FF" />
             <circle cx="39" cy="29" r="1.5" fill="#C9B8FF" />
             <ellipse cx="32" cy="36" rx="3" ry="2" fill="#7C5CBF" />
-            <path d="M28 40 Q32 44 36 40" stroke="#7C5CBF" strokeWidth="1.5" strokeLinecap="round" fill="none" />
+            <path
+              d="M28 40 Q32 44 36 40"
+              stroke="#7C5CBF"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              fill="none"
+            />
             <line x1="14" y1="36" x2="26" y2="37" stroke="#7C5CBF" strokeWidth=".8" opacity=".7" />
             <line x1="14" y1="39" x2="26" y2="39" stroke="#7C5CBF" strokeWidth=".8" opacity=".7" />
             <line x1="38" y1="37" x2="50" y2="36" stroke="#7C5CBF" strokeWidth=".8" opacity=".7" />

@@ -154,10 +154,7 @@ export class StoreService {
         obtainedAt: userCosmetics.obtainedAt,
       })
       .from(userCosmetics)
-      .innerJoin(
-        cosmeticItems,
-        eq(userCosmetics.cosmeticId, cosmeticItems.cosmeticId),
-      )
+      .innerJoin(cosmeticItems, eq(userCosmetics.cosmeticId, cosmeticItems.cosmeticId))
       .where(eq(userCosmetics.userId, userId))
       .orderBy(asc(cosmeticItems.name));
 
@@ -173,10 +170,7 @@ export class StoreService {
   }
 
   /* ── POST /store/cosmetics/:cosmeticId/buy (auth) ───────── */
-  async buyCosmetic(
-    userId: string,
-    cosmeticId: string,
-  ): Promise<BuyCosmeticResponse> {
+  async buyCosmetic(userId: string, cosmeticId: string): Promise<BuyCosmeticResponse> {
     return this.db.transaction(async (tx) => {
       const [cosmetic] = await tx
         .select({
@@ -194,12 +188,7 @@ export class StoreService {
       const [existing] = await tx
         .select({ cosmeticId: userCosmetics.cosmeticId })
         .from(userCosmetics)
-        .where(
-          and(
-            eq(userCosmetics.userId, userId),
-            eq(userCosmetics.cosmeticId, cosmeticId),
-          ),
-        )
+        .where(and(eq(userCosmetics.userId, userId), eq(userCosmetics.cosmeticId, cosmeticId)))
         .limit(1);
 
       if (existing) {
@@ -261,10 +250,7 @@ export class StoreService {
           })
           .from(merchVariants)
           .where(
-            and(
-              eq(merchVariants.variantId, body.variantId),
-              eq(merchVariants.merchId, merchId),
-            ),
+            and(eq(merchVariants.variantId, body.variantId), eq(merchVariants.merchId, merchId)),
           )
           .limit(1);
 

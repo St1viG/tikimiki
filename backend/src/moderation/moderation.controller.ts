@@ -100,12 +100,7 @@ export class ModerationController {
     @Param("roleId", new ParseUUIDPipe()) roleId: string,
     @Param("userId", new ParseUUIDPipe()) targetUserId: string,
   ) {
-    return this.moderation.removeRoleMember(
-      serverId,
-      roleId,
-      userId,
-      targetUserId,
-    );
+    return this.moderation.removeRoleMember(serverId, roleId, userId, targetUserId);
   }
 
   /* ── Kick ───────────────────────────────────────────────── */

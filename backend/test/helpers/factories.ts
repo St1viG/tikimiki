@@ -54,9 +54,7 @@ export async function registerMember(app: INestApplication): Promise<TestUser> {
 }
 
 /** Register an organization account through the real API; returns its token. */
-export async function registerOrganization(
-  app: INestApplication,
-): Promise<TestUser> {
+export async function registerOrganization(app: INestApplication): Promise<TestUser> {
   const username = uniqueId("o");
   const email = `${username}@test.dev`;
   const password = "password123";
@@ -80,14 +78,8 @@ export async function registerOrganization(
 }
 
 /** Promote a user to platform admin (insert the `administrators` row). */
-export async function makeAdmin(
-  app: INestApplication,
-  user: TestUser,
-): Promise<void> {
-  await dbOf(app)
-    .insert(administrators)
-    .values({ userId: user.userId })
-    .onConflictDoNothing();
+export async function makeAdmin(app: INestApplication, user: TestUser): Promise<void> {
+  await dbOf(app).insert(administrators).values({ userId: user.userId }).onConflictDoNothing();
 }
 
 /** Place an active ban on `target`, attributed to admin `bannedBy`. */
@@ -127,19 +119,12 @@ export function hackathonBody(overrides: HackathonOverrides = {}) {
     startsAt: overrides.startsAt ?? new Date(now + 7 * DAY_MS).toISOString(),
     endsAt: overrides.endsAt ?? new Date(now + 9 * DAY_MS).toISOString(),
     registrationDeadline:
-      overrides.registrationDeadline ??
-      new Date(now + 3 * DAY_MS).toISOString(),
+      overrides.registrationDeadline ?? new Date(now + 3 * DAY_MS).toISOString(),
     minTeamSize: overrides.minTeamSize ?? 1,
     maxTeamSize: overrides.maxTeamSize ?? 4,
-    ...(overrides.location !== undefined
-      ? { location: overrides.location }
-      : {}),
-    ...(overrides.latitude !== undefined
-      ? { latitude: overrides.latitude }
-      : {}),
-    ...(overrides.longitude !== undefined
-      ? { longitude: overrides.longitude }
-      : {}),
+    ...(overrides.location !== undefined ? { location: overrides.location } : {}),
+    ...(overrides.latitude !== undefined ? { latitude: overrides.latitude } : {}),
+    ...(overrides.longitude !== undefined ? { longitude: overrides.longitude } : {}),
   };
 }
 

@@ -9,10 +9,13 @@ import { useT } from "@/components/i18n/LanguageProvider";
  */
 
 const M = {
-  title:      { en: "Remove content",                                                                                                                sr: "Ukloni sadržaj" },
-  body:       { en: "The content will be permanently removed from the channel. The author will be notified that the content was removed for violating community guidelines.", sr: "Sadržaj će biti trajno uklonjen iz kanala. Autor će biti obavešten da je sadržaj uklonjen zbog kršenja pravila zajednice." },
-  cancelBtn:  { en: "Cancel",                                                                                                                        sr: "Otkaži" },
-  confirmBtn: { en: "Confirm removal",                                                                                                               sr: "Potvrdi uklanjanje" },
+  title: { en: "Remove content", sr: "Ukloni sadržaj" },
+  body: {
+    en: "The content will be permanently removed from the channel. The author will be notified that the content was removed for violating community guidelines.",
+    sr: "Sadržaj će biti trajno uklonjen iz kanala. Autor će biti obavešten da je sadržaj uklonjen zbog kršenja pravila zajednice.",
+  },
+  cancelBtn: { en: "Cancel", sr: "Otkaži" },
+  confirmBtn: { en: "Confirm removal", sr: "Potvrdi uklanjanje" },
 } as const;
 
 export function ModeratorRemoveModal({
@@ -33,17 +36,19 @@ export function ModeratorRemoveModal({
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-remove-title"
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
       <div className="modal-box">
         <div className="modal-title danger" id="modal-remove-title">
           <Icon name="x" /> {t("title")}
         </div>
-        <div className="modal-body">
-          {t("body")}
-        </div>
+        <div className="modal-body">{t("body")}</div>
         <div className="modal-actions">
-          <button className="btn btn-ghost" onClick={onClose}>{t("cancelBtn")}</button>
+          <button className="btn btn-ghost" onClick={onClose}>
+            {t("cancelBtn")}
+          </button>
           <button
             className="btn btn-primary modal-confirm"
             style={{ background: "var(--red)", color: "#fff" }}

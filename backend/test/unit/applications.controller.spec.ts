@@ -17,9 +17,7 @@ describe("ApplicationsController (unit)", () => {
       reject: vi.fn().mockReturnValue({ status: "rejected" }),
       withdraw: vi.fn().mockReturnValue({ status: "withdrawn" }),
     };
-    controller = new ApplicationsController(
-      svc as unknown as ApplicationsService,
-    );
+    controller = new ApplicationsController(svc as unknown as ApplicationsService);
   });
 
   it("create forwards userId and the body", () => {

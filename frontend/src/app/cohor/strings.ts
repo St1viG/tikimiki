@@ -5,11 +5,20 @@ export const M = {
   chOpsteDesc: { en: "General discussion and announcements", sr: "Opšti razgovori i najave" },
   chNajaveDesc: { en: "Organizer notifications", sr: "Obaveštenja organizatora" },
   chResursiDesc: { en: "Useful links and materials", sr: "Korisni linkovi i materijali" },
-  chBountiesDesc: { en: "Sponsor challenges: apply for special prizes", sr: "Sponzorski izazovi: prijavite se za posebne nagrade" },
-  chTimDigitalciDesc: { en: "Private channel of team digitalci", sr: "Privatni kanal tima digitalci" },
+  chBountiesDesc: {
+    en: "Sponsor challenges: apply for special prizes",
+    sr: "Sponzorski izazovi: prijavite se za posebne nagrade",
+  },
+  chTimDigitalciDesc: {
+    en: "Private channel of team digitalci",
+    sr: "Privatni kanal tima digitalci",
+  },
   chBoardDesc: { en: "Kanban board of team digitalci", sr: "Kanban tabla tima digitalci" },
   chGlasanjeDesc: { en: "Vote for projects", sr: "Glasajte za projekte" },
-  chPredajaDesc: { en: "Submit the final project and video presentation", sr: "Predaja finalnog projekta i video prezentacije" },
+  chPredajaDesc: {
+    en: "Submit the final project and video presentation",
+    sr: "Predaja finalnog projekta i video prezentacije",
+  },
   chRezultatiDesc: { en: "Official hackathon results", sr: "Zvanični rezultati hakathona" },
   msgPrefix: { en: "Message #", sr: "Poruka #" },
   msgPrefixDm: { en: "Message ", sr: "Poruka " },
@@ -36,7 +45,10 @@ export const M = {
   navPastHacks: { en: "Past hackathons", sr: "Prošli hakatoni" },
   navYourHacks: { en: "Your hackathons", sr: "Tvoji hakatoni" },
   navNoServers: { en: "No hackathon servers yet.", sr: "Još nema hakaton servera." },
-  etfServerAria: { en: "ETF HackWeek 2026: active server", sr: "ETF HackWeek 2026: aktivan server" },
+  etfServerAria: {
+    en: "ETF HackWeek 2026: active server",
+    sr: "ETF HackWeek 2026: aktivan server",
+  },
   etfServerTooltip: { en: "ETF HackWeek 2026 · active", sr: "ETF HackWeek 2026 · aktivan" },
   noServerAccessTitle: { en: "No server access", sr: "Nemate pristup serveru" },
   noServerAccessSub: {
@@ -82,25 +94,37 @@ export const M = {
 
   // Channel sidebar
   editHackathon: { en: "Edit hackathon", sr: "Uredi hakathon" },
-  editHackathonAlert: { en: "Edit hackathon – edit details", sr: "Uredi hakathon – izmena detalja" },
+  editHackathonAlert: {
+    en: "Edit hackathon – edit details",
+    sr: "Uredi hakathon – izmena detalja",
+  },
   moderators: { en: "Moderators", sr: "Moderatori" },
   manageModsAlert: { en: "Manage moderators", sr: "Upravljanje moderatorima" },
   contentReports: { en: "Content reports", sr: "Prijave sadržaja" },
   createChannel: { en: "Create channel", sr: "Kreiraj kanal" },
-  createChannelAlert: { en: "Create channel – enter name and visibility", sr: "Kreiraj kanal – unos naziva i vidljivosti" },
+  createChannelAlert: {
+    en: "Create channel – enter name and visibility",
+    sr: "Kreiraj kanal – unos naziva i vidljivosti",
+  },
   secGeneral: { en: "General", sr: "Opšte" },
   secBounty: { en: "Bounty", sr: "Bounty" },
   secTeams: { en: "Teams", sr: "Timovi" },
   secKanban: { en: "Kanban", sr: "Kanban" },
   secVoting: { en: "Voting & Submission", sr: "Glasanje & Predaja" },
-  rezLockedTitleHint: { en: "Available after the hackathon ends", sr: "Dostupno nakon završetka hakathona" },
+  rezLockedTitleHint: {
+    en: "Available after the hackathon ends",
+    sr: "Dostupno nakon završetka hakathona",
+  },
 
   // DM sidebar
   dmSidebarTitle: { en: "Direct messages", sr: "Direktne poruke" },
   newMessage: { en: "New message", sr: "Nova poruka" },
   newMessageAlert: { en: "New message – search users", sr: "Nova poruka – pretraga korisnika" },
   group: { en: "Group", sr: "Grupa" },
-  newGroupAlert: { en: "New group chat – create a group", sr: "Novo grupno ćaskanje – kreiranje grupe" },
+  newGroupAlert: {
+    en: "New group chat – create a group",
+    sr: "Novo grupno ćaskanje – kreiranje grupe",
+  },
   groupModalTitle: { en: "New group chat", sr: "Novo grupno ćaskanje" },
   groupModalEmpty: { en: "No members available.", sr: "Nema dostupnih članova." },
   groupCreate: { en: "Create", sr: "Kreiraj" },
@@ -135,31 +159,58 @@ export const M = {
   toggleParticipants: { en: "Show/hide participants", sr: "Prikaži/sakrij učesnike" },
 
   // Predaja panel
-  predajaBriefTitle: { en: "Instructions for submitting the video presentation", sr: "Uputstvo za predaju video prezentacije" },
-  predajaBriefText: { en: "Each team is required to upload the final video presentation of its solution before the deadline. The video remains visible even after the hackathon ends as part of the team's portfolio.", sr: "Svaki tim je dužan da otpremi finalnu video prezentaciju svog rešenja pre isteka roka. Video ostaje vidljiv i nakon završetka hakathona kao deo portfolija tima." },
+  predajaBriefTitle: {
+    en: "Instructions for submitting the video presentation",
+    sr: "Uputstvo za predaju video prezentacije",
+  },
+  predajaBriefText: {
+    en: "Each team is required to upload the final video presentation of its solution before the deadline. The video remains visible even after the hackathon ends as part of the team's portfolio.",
+    sr: "Svaki tim je dužan da otpremi finalnu video prezentaciju svog rešenja pre isteka roka. Video ostaje vidljiv i nakon završetka hakathona kao deo portfolija tima.",
+  },
   specDuration: { en: "Duration", sr: "Trajanje" },
   specDurationVal: { en: "3 – 5 minutes", sr: "3 – 5 minuta" },
   specMaxSize: { en: "Max. size", sr: "Maks. veličina" },
   specFormats: { en: "Formats", sr: "Formati" },
   specDeadline: { en: "Submission deadline", sr: "Rok za predaju" },
   specDeadlineVal: { en: "April 12, 10:00", sr: "12. april, 10:00" },
-  predajaNotePre: { en: "The video must contain: a solution demo, the technical stack and key challenges. The presentation before the jury is ", sr: "Video mora sadržati: demonstraciju rešenja, tehnički stack i ključne izazove. Prezentacija pred žirijem je " },
+  predajaNotePre: {
+    en: "The video must contain: a solution demo, the technical stack and key challenges. The presentation before the jury is ",
+    sr: "Video mora sadržati: demonstraciju rešenja, tehnički stack i ključne izazove. Prezentacija pred žirijem je ",
+  },
   predajaNoteStrong: { en: "separate", sr: "odvojena" },
   predajaNotePost: { en: " from the video submission.", sr: " od video predaje." },
   videoLabel: { en: "Video presentation", sr: "Video prezentacija" },
-  videoDropTitle: { en: "The team has not uploaded a video yet", sr: "Tim još nije otpremio video" },
-  videoDropSub: { en: "Click here or drag a video file (MP4, MOV, AVI · max. 500 MB)", sr: "Klikni ovde ili prevuci video fajl (MP4, MOV, AVI · maks. 500 MB)" },
+  videoDropTitle: {
+    en: "The team has not uploaded a video yet",
+    sr: "Tim još nije otpremio video",
+  },
+  videoDropSub: {
+    en: "Click here or drag a video file (MP4, MOV, AVI · max. 500 MB)",
+    sr: "Klikni ovde ili prevuci video fajl (MP4, MOV, AVI · maks. 500 MB)",
+  },
   videoUpload: { en: "Upload video", sr: "Otpremi video" },
   videoReplace: { en: "Replace", sr: "Zameni" },
   videoRemove: { en: "Remove", sr: "Ukloni" },
-  videoNoHtml5: { en: "Your browser does not support HTML5 video.", sr: "Vaš pregledač ne podržava HTML5 video." },
-  videoErrFormat: { en: "File format is not supported. Use MP4, MOV or AVI.", sr: "Format fajla nije podržan. Koristite MP4, MOV ili AVI." },
-  videoErrSize: { en: "File is too large. The maximum allowed size is 500 MB.", sr: "Fajl je prevelik. Maksimalna dozvoljena veličina je 500 MB." },
+  videoNoHtml5: {
+    en: "Your browser does not support HTML5 video.",
+    sr: "Vaš pregledač ne podržava HTML5 video.",
+  },
+  videoErrFormat: {
+    en: "File format is not supported. Use MP4, MOV or AVI.",
+    sr: "Format fajla nije podržan. Koristite MP4, MOV ili AVI.",
+  },
+  videoErrSize: {
+    en: "File is too large. The maximum allowed size is 500 MB.",
+    sr: "Fajl je prevelik. Maksimalna dozvoljena veličina je 500 MB.",
+  },
   videoMetaSuffix: { en: " MB · uploaded just now", sr: " MB · otpremljeno upravo" },
   githubLabel: { en: "GitHub repository", sr: "GitHub repozitorijum" },
   edit: { en: "Edit", sr: "Uredi" },
   save: { en: "Save", sr: "Sačuvaj" },
-  githubError: { en: "Enter a valid GitHub URL (e.g. https://github.com/user/repo)", sr: "Unesite ispravan GitHub URL (npr. https://github.com/user/repo)" },
+  githubError: {
+    en: "Enter a valid GitHub URL (e.g. https://github.com/user/repo)",
+    sr: "Unesite ispravan GitHub URL (npr. https://github.com/user/repo)",
+  },
   statusTitle: { en: "Submission status", sr: "Status predaje" },
   statusVideoName: { en: "Video presentation", sr: "Video prezentacija" },
   statusUploaded: { en: "Uploaded", sr: "Otpremljeno" },
@@ -170,24 +221,54 @@ export const M = {
 
   // Bounties panel
   bountyOrgName: { en: "Sponsor Bounty Challenges", sr: "Sponzorski Bounty Izazovi" },
-  bountyOrgDesc: { en: "Apply your team for special challenges. Every solution is automatically considered for a prize on submission.", sr: "Prijavi tim za posebne izazove. Svako rešenje se automatski razmatra za nagradu pri predaji." },
-  bountyBannerPre: { en: "By applying for a bounty, your final solution will be ", sr: "Prijavom na bounty, vaše finalno rešenje biće " },
+  bountyOrgDesc: {
+    en: "Apply your team for special challenges. Every solution is automatically considered for a prize on submission.",
+    sr: "Prijavi tim za posebne izazove. Svako rešenje se automatski razmatra za nagradu pri predaji.",
+  },
+  bountyBannerPre: {
+    en: "By applying for a bounty, your final solution will be ",
+    sr: "Prijavom na bounty, vaše finalno rešenje biće ",
+  },
   bountyBannerStrong: { en: "automatically considered", sr: "automatski razmatrano" },
-  bountyBannerPost: { en: " for that prize. A team can be applied to multiple bounties at the same time. Applying is available as long as the hackathon lasts.", sr: " za tu nagradu. Tim može biti prijavljen na više bounty-a istovremeno. Prijava je dostupna sve dok hakathon traje." },
+  bountyBannerPost: {
+    en: " for that prize. A team can be applied to multiple bounties at the same time. Applying is available as long as the hackathon lasts.",
+    sr: " za tu nagradu. Tim može biti prijavljen na više bounty-a istovremeno. Prijava je dostupna sve dok hakathon traje.",
+  },
   bountyPrizeLogitech: { en: "$500 · Gaming Gear bundle", sr: "$500 · Gaming Gear paket" },
   bountyTitleLogitech: { en: "Best user interface & UX", sr: "Najbolji korisnički interfejs & UX" },
-  bountyDescLogitech: { en: "Logitech rewards the team that pays special attention to the quality of the user experience. We are looking for intuitive interactions, carefully designed navigation and accessibility. The solution does not have to use peripherals. The focus is on software UX that would feel natural for an everyday user.", sr: "Logitech nagrađuje tim koji posveti posebnu pažnju kvalitetu korisničkog iskustva. Tražimo intuitivne interakcije, pažljivo osmišljenu navigaciju i dostupnost (accessibility). Rešenje ne mora koristiti periferije. Fokus je na softverskom UX-u koji bi bio prirodan za svakodnevnog korisnika." },
-  bountyPrizeAnthropic: { en: "$1000 · Claude API credits (1 yr.)", sr: "$1000 · Claude API krediti (1 god.)" },
+  bountyDescLogitech: {
+    en: "Logitech rewards the team that pays special attention to the quality of the user experience. We are looking for intuitive interactions, carefully designed navigation and accessibility. The solution does not have to use peripherals. The focus is on software UX that would feel natural for an everyday user.",
+    sr: "Logitech nagrađuje tim koji posveti posebnu pažnju kvalitetu korisničkog iskustva. Tražimo intuitivne interakcije, pažljivo osmišljenu navigaciju i dostupnost (accessibility). Rešenje ne mora koristiti periferije. Fokus je na softverskom UX-u koji bi bio prirodan za svakodnevnog korisnika.",
+  },
+  bountyPrizeAnthropic: {
+    en: "$1000 · Claude API credits (1 yr.)",
+    sr: "$1000 · Claude API krediti (1 god.)",
+  },
   bountyTitleAnthropic: { en: "Most responsible use of AI", sr: "Najodgovornija primena AI-a" },
-  bountyDescAnthropic: { en: "Anthropic awards the prize to the project that integrates AI into its solution in the most mature and responsible way. Especially valued are: transparency toward the user (explanation of AI decisions), privacy protection, abuse prevention and graceful degradation when AI does not work correctly. Solutions that blindly forward user input without any checks will not be considered.", sr: "Anthropic dodeljuje nagradu projektu koji na najzreliji i najodgovorniji način integriše AI u svoje rešenje. Posebno se vrednuju: transparentnost prema korisniku (objašnjenje AI odluka), zaštita privatnosti, prevencija zloupotrebe i graceful degradation kada AI ne funkcioniše ispravno. Rešenja koja slepo prosleđuju korisnički unos bez ikakvih provera neće biti razmatrana." },
-  bountyPrizeJetbrains: { en: "$2000 · JetBrains All Products Pack (1 yr.)", sr: "$2000 · JetBrains All Products Pack (1 god.)" },
-  bountyTitleJetbrains: { en: "Cleanest and most maintainable code", sr: "Najčistiji i najodrživiji kod" },
-  bountyDescJetbrains: { en: "JetBrains values the quality of the code itself, not just the end result. Criteria include: readability and consistent project structure, test coverage (unit or integration), clear documentation and architectural decisions that scale well. Projects that use static analysis or linting tools have an advantage. The GitHub repository must be publicly available at the moment of submission.", sr: "JetBrains vrednuje kvalitet samog koda, ne samo krajnji rezultat. Kriterijumi uključuju: čitljivost i konzistentnu strukturu projekta, pokrivenost testovima (unit ili integration), jasnu dokumentaciju i arhitekturalne odluke koje se dobro skaliraju. Prednost imaju projekti koji koriste statičku analizu ili linting alate. GitHub repozitorijum mora biti javno dostupan u trenutku predaje." },
+  bountyDescAnthropic: {
+    en: "Anthropic awards the prize to the project that integrates AI into its solution in the most mature and responsible way. Especially valued are: transparency toward the user (explanation of AI decisions), privacy protection, abuse prevention and graceful degradation when AI does not work correctly. Solutions that blindly forward user input without any checks will not be considered.",
+    sr: "Anthropic dodeljuje nagradu projektu koji na najzreliji i najodgovorniji način integriše AI u svoje rešenje. Posebno se vrednuju: transparentnost prema korisniku (objašnjenje AI odluka), zaštita privatnosti, prevencija zloupotrebe i graceful degradation kada AI ne funkcioniše ispravno. Rešenja koja slepo prosleđuju korisnički unos bez ikakvih provera neće biti razmatrana.",
+  },
+  bountyPrizeJetbrains: {
+    en: "$2000 · JetBrains All Products Pack (1 yr.)",
+    sr: "$2000 · JetBrains All Products Pack (1 god.)",
+  },
+  bountyTitleJetbrains: {
+    en: "Cleanest and most maintainable code",
+    sr: "Najčistiji i najodrživiji kod",
+  },
+  bountyDescJetbrains: {
+    en: "JetBrains values the quality of the code itself, not just the end result. Criteria include: readability and consistent project structure, test coverage (unit or integration), clear documentation and architectural decisions that scale well. Projects that use static analysis or linting tools have an advantage. The GitHub repository must be publicly available at the moment of submission.",
+    sr: "JetBrains vrednuje kvalitet samog koda, ne samo krajnji rezultat. Kriterijumi uključuju: čitljivost i konzistentnu strukturu projekta, pokrivenost testovima (unit ili integration), jasnu dokumentaciju i arhitekturalne odluke koje se dobro skaliraju. Prednost imaju projekti koji koriste statičku analizu ili linting alate. GitHub repozitorijum mora biti javno dostupan u trenutku predaje.",
+  },
   bountyApplicantsSuffix: { en: " teams applied", sr: " timova prijavljeno" },
   bountyApplyBtn: { en: "Apply team", sr: "Prijavi tim" },
   bountyAppliedBtn: { en: "✓ Applied, Withdraw", sr: "✓ Prijavljen, Odjavi se" },
   bountyEmptyTitle: { en: "No bounties yet", sr: "Još nema bounty izazova" },
-  bountyEmptySub: { en: "Sponsors have not posted any bounty challenges for this hackathon.", sr: "Sponzori još nisu objavili bounty izazove za ovaj hakaton." },
+  bountyEmptySub: {
+    en: "Sponsors have not posted any bounty challenges for this hackathon.",
+    sr: "Sponzori još nisu objavili bounty izazove za ovaj hakaton.",
+  },
 
   // Bounty toasts
   bountyAppliedToastPre: { en: "Team ", sr: "Tim " },
@@ -203,11 +284,20 @@ export const M = {
 
   // Glasanje panel
   glasanjeOrgMeta: { en: "organizer · today 09:58", sr: "organizator · danas 09:58" },
-  glasanjeSayPre: { en: "Audience voting will be open in the ", sr: "Glasanje publike biće otvoreno u " },
+  glasanjeSayPre: {
+    en: "Audience voting will be open in the ",
+    sr: "Glasanje publike biće otvoreno u ",
+  },
   glasanjeSayStrong: { en: "last 2h", sr: "poslednjih 2h" },
-  glasanjeSayPost: { en: " of the hackathon. Each participant may vote for one project they liked the most.", sr: " hakathona. Svaki učesnik može da glasa za jedan projekat koji mu se najviše dopao." },
+  glasanjeSayPost: {
+    en: " of the hackathon. Each participant may vote for one project they liked the most.",
+    sr: " hakathona. Svaki učesnik može da glasa za jedan projekat koji mu se najviše dopao.",
+  },
   votingLockedTitle: { en: "Voting has not started yet", sr: "Glasanje još nije počelo" },
-  votingLockedSub: { en: "The organizer opens voting in the last 2h of the hackathon. You can browse the projects, but voting is not available yet.", sr: "Organizator otvara glasanje u poslednjih 2h hakathona. Možete pregledati projekte, ali glasanje još uvek nije dostupno." },
+  votingLockedSub: {
+    en: "The organizer opens voting in the last 2h of the hackathon. You can browse the projects, but voting is not available yet.",
+    sr: "Organizator otvara glasanje u poslednjih 2h hakathona. Možete pregledati projekte, ali glasanje još uvek nije dostupno.",
+  },
   votingOpensAtLabel: { en: "Opens at ", sr: "Otvara se u " },
   projectsLabelPre: { en: "Projects: ", sr: "Projekti: " },
   projectsLabelPost: { en: " teams", sr: " timova" },
@@ -220,10 +310,22 @@ export const M = {
 
   // Rezultati panel
   rezLockedTitle: { en: "Results are not available yet", sr: "Rezultati još nisu dostupni" },
-  rezLockedSub: { en: "The organizer can enter the official results only after the hackathon has ended. The channel unlocks automatically.", sr: "Organizator može uneti zvanične rezultate tek nakon što hakathon bude završen. Kanal se otključava automatski." },
-  rezBriefPre: { en: "The hackathon has ended! The organizer enters the official results: ", sr: "Hakathon je završen! Organizator unosi zvanične rezultate: " },
-  rezBriefStrong: { en: "team rankings, audience prize and sponsor prizes", sr: "plasman timova, nagradu publike i sponzorske nagrade" },
-  rezBriefPost: { en: ". After publishing, all participants will be notified and profiles will be updated automatically.", sr: ". Nakon objave, svi učesnici će biti obavešteni i profili će biti automatski ažurirani." },
+  rezLockedSub: {
+    en: "The organizer can enter the official results only after the hackathon has ended. The channel unlocks automatically.",
+    sr: "Organizator može uneti zvanične rezultate tek nakon što hakathon bude završen. Kanal se otključava automatski.",
+  },
+  rezBriefPre: {
+    en: "The hackathon has ended! The organizer enters the official results: ",
+    sr: "Hakathon je završen! Organizator unosi zvanične rezultate: ",
+  },
+  rezBriefStrong: {
+    en: "team rankings, audience prize and sponsor prizes",
+    sr: "plasman timova, nagradu publike i sponzorske nagrade",
+  },
+  rezBriefPost: {
+    en: ". After publishing, all participants will be notified and profiles will be updated automatically.",
+    sr: ". Nakon objave, svi učesnici će biti obavešteni i profili će biti automatski ažurirani.",
+  },
   rezFormLabel: { en: "Enter results: organizer", sr: "Unos rezultata: organizator" },
   rezGroupRanking: { en: "Team rankings", sr: "Plasman timova" },
   rezPlace1: { en: "1st place", sr: "1. mesto" },
@@ -234,21 +336,45 @@ export const M = {
   rezBadge3: { en: "★ 3rd place", sr: "★ 3. mesto" },
   rezGroupAudience: { en: "Audience prize", sr: "Nagrada publike" },
   rezAudienceLabel: { en: "Audience prize", sr: "Nagrada publike" },
-  rezAudienceRowLabel: { en: "Team with the most audience votes", sr: "Tim sa najviše glasova publike" },
+  rezAudienceRowLabel: {
+    en: "Team with the most audience votes",
+    sr: "Tim sa najviše glasova publike",
+  },
   rezGroupSponsor: { en: "Sponsor prizes", sr: "Sponzorske nagrade" },
-  rezSponLogitechSub: { en: "Best user interface & UX · 7 teams applied", sr: "Najbolji korisnički interfejs & UX · 7 prijavljenih timova" },
+  rezSponLogitechSub: {
+    en: "Best user interface & UX · 7 teams applied",
+    sr: "Najbolji korisnički interfejs & UX · 7 prijavljenih timova",
+  },
   rezWinnerLogitech: { en: "Logitech winner", sr: "Pobednik Logitech" },
-  rezSponAnthropicSub: { en: "Most responsible use of AI · 12 teams applied", sr: "Najodgovornija primena AI-a · 12 prijavljenih timova" },
+  rezSponAnthropicSub: {
+    en: "Most responsible use of AI · 12 teams applied",
+    sr: "Najodgovornija primena AI-a · 12 prijavljenih timova",
+  },
   rezWinnerAnthropic: { en: "Anthropic winner", sr: "Pobednik Anthropic" },
-  rezSponJetbrainsSub: { en: "Cleanest and most maintainable code · 9 teams applied", sr: "Najčistiji i najodrživiji kod · 9 prijavljenih timova" },
+  rezSponJetbrainsSub: {
+    en: "Cleanest and most maintainable code · 9 teams applied",
+    sr: "Najčistiji i najodrživiji kod · 9 prijavljenih timova",
+  },
   rezWinnerJetbrains: { en: "JetBrains winner", sr: "Pobednik JetBrains" },
   selectWinner: { en: "Select a winner", sr: "Izaberi pobednika" },
   selectTeam: { en: "Select a team", sr: "Izaberi tim" },
-  rezErrAllFields: { en: "Please select all teams, the audience prize and the winners of all sponsor challenges.", sr: "Molimo izaberite sve timove, nagradu publike i pobednike svih sponzorskih izazova." },
-  rezErrFallback: { en: "Please select all teams and the audience prize.", sr: "Molimo izaberite sve timove i nagradu publike." },
-  rezErrDuplicate: { en: "The same team cannot be in multiple places. Check your input.", sr: "Isti tim ne može biti na više mesta. Proverite unos." },
+  rezErrAllFields: {
+    en: "Please select all teams, the audience prize and the winners of all sponsor challenges.",
+    sr: "Molimo izaberite sve timove, nagradu publike i pobednike svih sponzorskih izazova.",
+  },
+  rezErrFallback: {
+    en: "Please select all teams and the audience prize.",
+    sr: "Molimo izaberite sve timove i nagradu publike.",
+  },
+  rezErrDuplicate: {
+    en: "The same team cannot be in multiple places. Check your input.",
+    sr: "Isti tim ne može biti na više mesta. Proverite unos.",
+  },
   rezSubmit: { en: "Submit results", sr: "Podnesi rezultate" },
-  rezForbidden: { en: "Only the organizer can publish results", sr: "Samo organizator može objaviti rezultate" },
+  rezForbidden: {
+    en: "Only the organizer can publish results",
+    sr: "Samo organizator može objaviti rezultate",
+  },
   rezUpdate: { en: "Update results", sr: "Ažuriraj rezultate" },
   rezOfficial: { en: "Official results", sr: "Zvanični rezultati" },
   rezEditResults: { en: "Edit results", sr: "Izmeni rezultate" },
@@ -258,10 +384,16 @@ export const M = {
   rezPodiumPubSub: { en: "Audience prize", sr: "Nagrada publike" },
   rezSponPublishedHead: { en: "Sponsor challenge winners", sr: "Pobednici sponzorskih izazova" },
   rezSponRowLogitech: { en: "Logitech · Best UX", sr: "Logitech · Najbolji UX" },
-  rezSponRowAnthropic: { en: "Anthropic · Most responsible use of AI", sr: "Anthropic · Najodgovornija primena AI-a" },
+  rezSponRowAnthropic: {
+    en: "Anthropic · Most responsible use of AI",
+    sr: "Anthropic · Najodgovornija primena AI-a",
+  },
   rezSponRowJetbrains: { en: "JetBrains · Cleanest code", sr: "JetBrains · Najčistiji kod" },
   rezPublishedTitle: { en: "Results are published", sr: "Rezultati su objavljeni" },
-  rezTimestampDefault: { en: "Participant profiles have been updated. Everyone has been notified.", sr: "Profili učesnika su ažurirani. Svi su obavešteni." },
+  rezTimestampDefault: {
+    en: "Participant profiles have been updated. Everyone has been notified.",
+    sr: "Profili učesnika su ažurirani. Svi su obavešteni.",
+  },
   rezPublishedAt: { en: "Published ", sr: "Objavljeno " },
   rezPublishedAtMid: { en: " at ", sr: " u " },
   rezPublishedAtPost: { en: " · Profiles updated", sr: " · Profili ažurirani" },
@@ -272,7 +404,10 @@ export const M = {
   kanbanTitlePrefix: { en: "Kanban board: ", sr: "Kanban tabla: " },
   kanbanSub: { en: "ETF HackWeek 2026 · 4 members", sr: "ETF HackWeek 2026 · 4 člana" },
   kanbanSettings: { en: "Settings", sr: "Podešavanja" },
-  kanbanSettingsAlert: { en: "Board settings: add/rename/delete columns", sr: "Podešavanja table: dodaj/preimenuj/obriši kolone" },
+  kanbanSettingsAlert: {
+    en: "Board settings: add/rename/delete columns",
+    sr: "Podešavanja table: dodaj/preimenuj/obriši kolone",
+  },
   kanbanColTodo: { en: "To do", sr: "Za uraditi" },
   kanbanColDoing: { en: "In progress", sr: "U toku" },
   kanbanColDone: { en: "Done", sr: "Završeno" },
@@ -282,10 +417,19 @@ export const M = {
   kanbanCardDescPh: { en: "Description (optional)", sr: "Opis (opciono)" },
   kanbanCreate: { en: "Add", sr: "Dodaj" },
   kanbanCancel: { en: "Cancel", sr: "Otkaži" },
-  kanbanEmpty: { en: "No board yet — join a team to start one.", sr: "Još nema table — pridruži se timu da je započneš." },
+  kanbanEmpty: {
+    en: "No board yet — join a team to start one.",
+    sr: "Još nema table — pridruži se timu da je započneš.",
+  },
   kanbanRemoveCard: { en: "Delete task", sr: "Obriši zadatak" },
-  kanbanAddTodoAlert: { en: "Add task to the To do column", sr: "Dodaj zadatak u kolonu Za uraditi" },
-  kanbanAddDoingAlert: { en: "Add task to the In progress column", sr: "Dodaj zadatak u kolonu U toku" },
+  kanbanAddTodoAlert: {
+    en: "Add task to the To do column",
+    sr: "Dodaj zadatak u kolonu Za uraditi",
+  },
+  kanbanAddDoingAlert: {
+    en: "Add task to the In progress column",
+    sr: "Dodaj zadatak u kolonu U toku",
+  },
   kanbanAddDoneAlert: { en: "Add task to the Done column", sr: "Dodaj zadatak u kolonu Završeno" },
   tagDesign: { en: "design", sr: "dizajn" },
   tagResearch: { en: "research", sr: "istraživanje" },
@@ -296,7 +440,10 @@ export const M = {
   typingSuffix: { en: " is typing…", sr: " kuca…" },
   addAttachment: { en: "Add attachment", sr: "Dodaj prilog" },
   writeMessage: { en: "Write a message", sr: "Napiši poruku" },
-  announcementReadOnly: { en: "Only organizers can post in announcements", sr: "Samo organizatori mogu objavljivati u najavama" },
+  announcementReadOnly: {
+    en: "Only organizers can post in announcements",
+    sr: "Samo organizatori mogu objavljivati u najavama",
+  },
   addImage: { en: "Add image", sr: "Dodaj sliku" },
   attachFile: { en: "Attach file", sr: "Priloži fajl" },
   sendMessage: { en: "Send message", sr: "Pošalji poruku" },
@@ -318,9 +465,15 @@ export const M = {
   teamsStat: { en: "Teams", sr: "Timovi" },
   prizeStat: { en: "Prize", sr: "Nagrada" },
   signUp: { en: "Sign up", sr: "Prijavi se" },
-  signUpAlert: { en: "Sign up: individual hackathon registration", sr: "Prijavi se: individualna prijava na hakathon" },
+  signUpAlert: {
+    en: "Sign up: individual hackathon registration",
+    sr: "Prijavi se: individualna prijava na hakathon",
+  },
   signUpTeam: { en: "Sign up with a team", sr: "Prijava sa timom" },
-  signUpTeamAlert: { en: "Signing up with a team: add team members", sr: "Prijavljujem se sa timom: dodaj članove tima" },
+  signUpTeamAlert: {
+    en: "Signing up with a team: add team members",
+    sr: "Prijavljujem se sa timom: dodaj članove tima",
+  },
   membersOrganizers: { en: "Organizers", sr: "Organizatori" },
   roleOrganizer: { en: "Organizer", sr: "Organizator" },
   roleCoOrganizer: { en: "Co-organizer", sr: "Co-organizator" },
@@ -360,7 +513,10 @@ export const M = {
   viewProfile: { en: "View profile", sr: "Pogledaj profil" },
 
   // DM stream / profile
-  dmConvStartPre: { en: "This is the start of your conversation with ", sr: "Ovo je početak razgovora sa " },
+  dmConvStartPre: {
+    en: "This is the start of your conversation with ",
+    sr: "Ovo je početak razgovora sa ",
+  },
   dmConvStartPost: { en: ".", sr: "." },
   today: { en: "Today", sr: "Danas" },
   dmCall: { en: "Call", sr: "Pozovi" },
@@ -497,7 +653,10 @@ export const M = {
   ctxForwardChannels: { en: "Channels", sr: "Kanali" },
   ctxForwardDms: { en: "Direct messages", sr: "Direktne poruke" },
   ctxEditFailed: { en: "Could not edit message", sr: "Izmena poruke nije uspela" },
-  ctxEditForbidden: { en: "You can only edit your own messages", sr: "Možeš izmeniti samo svoje poruke" },
+  ctxEditForbidden: {
+    en: "You can only edit your own messages",
+    sr: "Možeš izmeniti samo svoje poruke",
+  },
   ctxDelete: { en: "Delete", sr: "Obriši" },
   ctxDeleteConfirm: { en: "Delete message?", sr: "Obriši poruku?" },
   ctxDeleteFailed: { en: "Could not delete message", sr: "Brisanje poruke nije uspelo" },
@@ -511,7 +670,10 @@ export const M = {
   chTypeGeneral: { en: "General", sr: "Opšte" },
   chTypeAnnouncements: { en: "Announcements", sr: "Najave" },
   chTypePrivate: { en: "Private", sr: "Privatno" },
-  chNameTaken: { en: "A channel with that name already exists", sr: "Kanal sa tim nazivom već postoji" },
+  chNameTaken: {
+    en: "A channel with that name already exists",
+    sr: "Kanal sa tim nazivom već postoji",
+  },
   chCreate: { en: "Create", sr: "Kreiraj" },
   chCancel: { en: "Cancel", sr: "Otkaži" },
   chCreateGroup: { en: "Create group", sr: "Kreiraj grupu" },
@@ -550,7 +712,10 @@ export const M = {
   srvUploadFailed: { en: "Image upload failed", sr: "Otpremanje slike nije uspelo" },
 
   // Roles tab
-  srvRolesEmpty: { en: "No roles yet. Create one to grant moderation powers.", sr: "Još nema rola. Kreiraj jednu da dodeliš moderatorska ovlašćenja." },
+  srvRolesEmpty: {
+    en: "No roles yet. Create one to grant moderation powers.",
+    sr: "Još nema rola. Kreiraj jednu da dodeliš moderatorska ovlašćenja.",
+  },
   srvRoleMembersSuffix: { en: " members", sr: " članova" },
   srvRoleMemberOne: { en: " member", sr: " član" },
   srvRoleNoPerms: { en: "No permissions", sr: "Bez ovlašćenja" },
@@ -562,11 +727,17 @@ export const M = {
   srvRoleSave: { en: "Save", sr: "Sačuvaj" },
   srvRoleEdit: { en: "Edit", sr: "Izmeni" },
   srvRoleDelete: { en: "Delete", sr: "Obriši" },
-  srvRoleDeleteConfirm: { en: "Delete this role? Members lose its permissions.", sr: "Obriši ovu rolu? Članovi gube njena ovlašćenja." },
+  srvRoleDeleteConfirm: {
+    en: "Delete this role? Members lose its permissions.",
+    sr: "Obriši ovu rolu? Članovi gube njena ovlašćenja.",
+  },
   srvRoleManageMembers: { en: "Members with this role", sr: "Članovi sa ovom rolom" },
   srvRoleAddMember: { en: "Add a member…", sr: "Dodaj člana…" },
   srvRoleRemoveAria: { en: "Remove from role", sr: "Ukloni iz role" },
-  srvRoleNameTaken: { en: "A role with that name already exists", sr: "Rola sa tim nazivom već postoji" },
+  srvRoleNameTaken: {
+    en: "A role with that name already exists",
+    sr: "Rola sa tim nazivom već postoji",
+  },
   srvRoleCancel: { en: "Cancel", sr: "Otkaži" },
 
   // Members tab

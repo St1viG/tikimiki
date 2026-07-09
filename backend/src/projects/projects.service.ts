@@ -71,20 +71,11 @@ export class ProjectsService {
   }
 
   /** Throw 403 unless `userId` is an active member of `teamId`. */
-  private async assertTeamMember(
-    teamId: string,
-    userId: string,
-  ): Promise<void> {
+  private async assertTeamMember(teamId: string, userId: string): Promise<void> {
     const [row] = await this.db
       .select({ userId: teamMembers.userId })
       .from(teamMembers)
-      .where(
-        and(
-          eq(teamMembers.teamId, teamId),
-          eq(teamMembers.userId, userId),
-          activeTeamMember,
-        ),
-      )
+      .where(and(eq(teamMembers.teamId, teamId), eq(teamMembers.userId, userId), activeTeamMember))
       .limit(1);
     if (!row) {
       throw new ForbiddenException("Not an active member of this team");
@@ -147,10 +138,7 @@ export class ProjectsService {
   /* ── team-scoped ──────────────────────────────────────────── */
 
   /** The caller's team's project (or null), team-member only. */
-  async getTeamProject(
-    teamId: string,
-    userId: string,
-  ): Promise<ProjectDto | null> {
+  async getTeamProject(teamId: string, userId: string): Promise<ProjectDto | null> {
     await this.assertTeamMember(teamId, userId);
     const [row] = await this.db
       .select(this.projectColumns())
@@ -205,14 +193,10 @@ export class ProjectsService {
    * judging); a draft is visible only to its own team members (otherwise 404,
    * so a draft's existence isn't leaked).
    */
-  async getProject(
-    projectId: string,
-    viewerId: string | null,
-  ): Promise<ProjectDto> {
+  async getProject(projectId: string, viewerId: string | null): Promise<ProjectDto> {
     const row = await this.loadProject(projectId);
     if (row.status === "draft") {
-      const isMember =
-        viewerId != null && (await this.isTeamMember(row.teamId, viewerId));
+      const isMember = viewerId != null && (await this.isTeamMember(row.teamId, viewerId));
       if (!isMember) throw new NotFoundException("Project not found");
     }
     return this.toDto(row);
@@ -222,13 +206,7 @@ export class ProjectsService {
     const [row] = await this.db
       .select({ userId: teamMembers.userId })
       .from(teamMembers)
-      .where(
-        and(
-          eq(teamMembers.teamId, teamId),
-          eq(teamMembers.userId, userId),
-          activeTeamMember,
-        ),
-      )
+      .where(and(eq(teamMembers.teamId, teamId), eq(teamMembers.userId, userId), activeTeamMember))
       .limit(1);
     return Boolean(row);
   }
@@ -250,14 +228,10 @@ export class ProjectsService {
     };
     if (input.title !== undefined) patch.title = input.title;
     if (input.description !== undefined) patch.description = input.description;
-    if (input.repositoryUrl !== undefined)
-      patch.repositoryUrl = input.repositoryUrl;
+    if (input.repositoryUrl !== undefined) patch.repositoryUrl = input.repositoryUrl;
     if (input.videoUrl !== undefined) patch.videoUrl = input.videoUrl;
 
-    await this.db
-      .update(projects)
-      .set(patch)
-      .where(eq(projects.projectId, projectId));
+    await this.db.update(projects).set(patch).where(eq(projects.projectId, projectId));
 
     return this.toDto(await this.loadProject(projectId));
   }
@@ -280,9 +254,7 @@ export class ProjectsService {
       );
     }
     if (Date.now() > row.endsAt.getTime()) {
-      throw new BadRequestException(
-        "The submission period for this hackathon has ended",
-      );
+      throw new BadRequestException("The submission period for this hackathon has ended");
     }
 
     await this.db
@@ -297,10 +269,7 @@ export class ProjectsService {
    * Withdraw a submission back to draft (submitted → draft, clears
    * `submittedAt`). Team-member only; not allowed once judging has begun.
    */
-  async withdrawProject(
-    projectId: string,
-    userId: string,
-  ): Promise<ProjectDto> {
+  async withdrawProject(projectId: string, userId: string): Promise<ProjectDto> {
     const row = await this.loadProject(projectId);
     await this.assertTeamMember(row.teamId, userId);
 
@@ -308,9 +277,7 @@ export class ProjectsService {
       return this.toDto(row);
     }
     if (row.status !== "submitted") {
-      throw new BadRequestException(
-        "This project is being judged and can no longer be withdrawn",
-      );
+      throw new BadRequestException("This project is being judged and can no longer be withdrawn");
     }
 
     await this.db
@@ -341,8 +308,6 @@ export class ProjectsService {
       )
       .orderBy(asc(projects.submittedAt));
 
-    return rows
-      .filter((r) => r.status !== "draft")
-      .map((r) => this.toDto(r as ProjectRow));
+    return rows.filter((r) => r.status !== "draft").map((r) => this.toDto(r as ProjectRow));
   }
 }

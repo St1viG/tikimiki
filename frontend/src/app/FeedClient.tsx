@@ -25,12 +25,7 @@ import {
 } from "@/lib/api";
 import { relTime } from "@/lib/format";
 import { personName } from "@/lib/displayName";
-import {
-  ASPECTS,
-  ASPECT_ORDER,
-  snapAspectKey,
-  type AspectKey,
-} from "@/lib/aspect";
+import { ASPECTS, ASPECT_ORDER, snapAspectKey, type AspectKey } from "@/lib/aspect";
 import { cropImageToRatio } from "@/lib/cropImage";
 import { coverStyle } from "@/lib/coverCrop";
 import { PostCard } from "@/components/PostCard";
@@ -56,56 +51,62 @@ import { useMentionAutocomplete } from "@/components/mentions/useMentionAutocomp
  */
 
 const M = {
-  feedLabel:      { en: "Feed source",                     sr: "Izvor feeda" },
-  tabExplore:     { en: "Explore",                         sr: "Istraži" },
-  tabFollowing:   { en: "Following",                       sr: "Pratim" },
-  composerPlaceholder: { en: "Share something…",            sr: "Podeli nešto…" },
-  addMedia:       { en: "Media",                           sr: "Mediji" },
-  removeMedia:    { en: "Remove",                          sr: "Ukloni" },
-  cropImage:      { en: "Crop & position",                 sr: "Iseci i pomeri" },
-  aspectRatio:    { en: "Aspect ratio",                    sr: "Format slike" },
-  ratioPortrait:  { en: "Portrait",                        sr: "Uspravno" },
-  ratioSquare:    { en: "Square",                          sr: "Kvadrat" },
-  ratioLandscape: { en: "Landscape",                       sr: "Položeno" },
-  cropHint:       { en: "Drag the image to reposition",    sr: "Prevuci sliku da je pomeriš" },
-  cropDone:       { en: "Done",                            sr: "Gotovo" },
-  mdBold:         { en: "Bold",                            sr: "Podebljano" },
-  mdItalic:       { en: "Italic",                          sr: "Kurziv" },
-  mdH1:           { en: "Large heading",                   sr: "Veliki naslov" },
-  mdH2:           { en: "Medium heading",                  sr: "Srednji naslov" },
-  mdH3:           { en: "Small heading",                   sr: "Mali naslov" },
-  mdList:         { en: "Bulleted list",                   sr: "Lista" },
-  mdQuote:        { en: "Quote",                           sr: "Citat" },
-  mdCode:         { en: "Code",                            sr: "Kôd" },
-  mdLink:         { en: "Link",                            sr: "Link" },
-  preview:        { en: "Preview",                         sr: "Pregled" },
-  editPost:       { en: "Edit",                            sr: "Izmeni" },
-  nothingToPreview: { en: "Nothing to preview yet — start writing.", sr: "Još nema šta da se pregleda — počni da pišeš." },
-  post:           { en: "Post",                            sr: "Objavi" },
-  posting:        { en: "Posting…",                        sr: "Objavljivanje…" },
-  loading:        { en: "Loading…",                        sr: "Učitavanje…" },
-  like:           { en: "Like",                           sr: "Sviđa mi se" },
-  follow:         { en: "Follow",                         sr: "Zaprati" },
-  followingBtn:   { en: "Following",                      sr: "Pratiš" },
-  close:          { en: "Close",                          sr: "Zatvori" },
-  postDetail:     { en: "Post",                           sr: "Objava" },
-  openPost:       { en: "Open post",                      sr: "Otvori objavu" },
-  commentPlaceholder: { en: "Write a comment…",           sr: "Napiši komentar…" },
-  reply:          { en: "Reply",                          sr: "Odgovori" },
-  replyBtn:       { en: "Reply",                          sr: "Odgovori" },
-  replyingTo:     { en: "Replying to",                   sr: "Odgovaraš na" },
-  cancelReply:    { en: "Cancel reply",                  sr: "Otkaži odgovor" },
-  noComments:     { en: "No comments yet.",               sr: "Još nema komentara." },
-  cmtOptions:     { en: "Comment options",               sr: "Opcije komentara" },
-  editCmt:        { en: "Edit",                           sr: "Izmeni" },
-  deleteCmt:      { en: "Delete",                         sr: "Obriši" },
-  saveCmt:        { en: "Save",                           sr: "Sačuvaj" },
-  savingCmt:      { en: "Saving…",                        sr: "Čuvanje…" },
-  cancelCmt:      { en: "Cancel",                         sr: "Otkaži" },
-  editedLabel:    { en: "(Edited)",                       sr: "(Izmenjeno)" },
-  deleteCmtTitle: { en: "Delete comment?",               sr: "Obrisati komentar?" },
-  deleteCmtDesc:  { en: "This comment will be permanently removed. This action can't be undone.", sr: "Komentar će biti trajno uklonjen. Ova radnja se ne može poništiti." },
-  deletingCmt:    { en: "Deleting…",                      sr: "Brisanje…" },
+  feedLabel: { en: "Feed source", sr: "Izvor feeda" },
+  tabExplore: { en: "Explore", sr: "Istraži" },
+  tabFollowing: { en: "Following", sr: "Pratim" },
+  composerPlaceholder: { en: "Share something…", sr: "Podeli nešto…" },
+  addMedia: { en: "Media", sr: "Mediji" },
+  removeMedia: { en: "Remove", sr: "Ukloni" },
+  cropImage: { en: "Crop & position", sr: "Iseci i pomeri" },
+  aspectRatio: { en: "Aspect ratio", sr: "Format slike" },
+  ratioPortrait: { en: "Portrait", sr: "Uspravno" },
+  ratioSquare: { en: "Square", sr: "Kvadrat" },
+  ratioLandscape: { en: "Landscape", sr: "Položeno" },
+  cropHint: { en: "Drag the image to reposition", sr: "Prevuci sliku da je pomeriš" },
+  cropDone: { en: "Done", sr: "Gotovo" },
+  mdBold: { en: "Bold", sr: "Podebljano" },
+  mdItalic: { en: "Italic", sr: "Kurziv" },
+  mdH1: { en: "Large heading", sr: "Veliki naslov" },
+  mdH2: { en: "Medium heading", sr: "Srednji naslov" },
+  mdH3: { en: "Small heading", sr: "Mali naslov" },
+  mdList: { en: "Bulleted list", sr: "Lista" },
+  mdQuote: { en: "Quote", sr: "Citat" },
+  mdCode: { en: "Code", sr: "Kôd" },
+  mdLink: { en: "Link", sr: "Link" },
+  preview: { en: "Preview", sr: "Pregled" },
+  editPost: { en: "Edit", sr: "Izmeni" },
+  nothingToPreview: {
+    en: "Nothing to preview yet — start writing.",
+    sr: "Još nema šta da se pregleda — počni da pišeš.",
+  },
+  post: { en: "Post", sr: "Objavi" },
+  posting: { en: "Posting…", sr: "Objavljivanje…" },
+  loading: { en: "Loading…", sr: "Učitavanje…" },
+  like: { en: "Like", sr: "Sviđa mi se" },
+  follow: { en: "Follow", sr: "Zaprati" },
+  followingBtn: { en: "Following", sr: "Pratiš" },
+  close: { en: "Close", sr: "Zatvori" },
+  postDetail: { en: "Post", sr: "Objava" },
+  openPost: { en: "Open post", sr: "Otvori objavu" },
+  commentPlaceholder: { en: "Write a comment…", sr: "Napiši komentar…" },
+  reply: { en: "Reply", sr: "Odgovori" },
+  replyBtn: { en: "Reply", sr: "Odgovori" },
+  replyingTo: { en: "Replying to", sr: "Odgovaraš na" },
+  cancelReply: { en: "Cancel reply", sr: "Otkaži odgovor" },
+  noComments: { en: "No comments yet.", sr: "Još nema komentara." },
+  cmtOptions: { en: "Comment options", sr: "Opcije komentara" },
+  editCmt: { en: "Edit", sr: "Izmeni" },
+  deleteCmt: { en: "Delete", sr: "Obriši" },
+  saveCmt: { en: "Save", sr: "Sačuvaj" },
+  savingCmt: { en: "Saving…", sr: "Čuvanje…" },
+  cancelCmt: { en: "Cancel", sr: "Otkaži" },
+  editedLabel: { en: "(Edited)", sr: "(Izmenjeno)" },
+  deleteCmtTitle: { en: "Delete comment?", sr: "Obrisati komentar?" },
+  deleteCmtDesc: {
+    en: "This comment will be permanently removed. This action can't be undone.",
+    sr: "Komentar će biti trajno uklonjen. Ova radnja se ne može poništiti.",
+  },
+  deletingCmt: { en: "Deleting…", sr: "Brisanje…" },
 } as const;
 
 type Tab = "explore" | "following";
@@ -127,10 +128,7 @@ type MediaDraft = {
 const MAX_MEDIA = 10;
 const MAX_LEN = 5000; // matches the backend content limit
 
-const ratioLabelKey: Record<
-  AspectKey,
-  "ratioPortrait" | "ratioSquare" | "ratioLandscape"
-> = {
+const ratioLabelKey: Record<AspectKey, "ratioPortrait" | "ratioSquare" | "ratioLandscape"> = {
   portrait: "ratioPortrait",
   square: "ratioSquare",
   landscape: "ratioLandscape",
@@ -211,7 +209,7 @@ export function FeedClient() {
   const commentInputRef = useRef<HTMLInputElement>(null);
   const commentMention = useMentionAutocomplete({
     inputRef: commentInputRef,
-    value: openPostId ? commentDrafts[openPostId] ?? "" : "",
+    value: openPostId ? (commentDrafts[openPostId] ?? "") : "",
     setValue: (v) => {
       if (openPostId) setCommentDrafts((d) => ({ ...d, [openPostId]: v }));
     },
@@ -275,9 +273,7 @@ export function FeedClient() {
   // Reconcile a post in the list after a PostCard edits or deletes it (the same
   // `posts` array backs both the list and the detail modal).
   const onPostEdited = (updated: FeedPost) =>
-    setPosts(
-      (prev) => prev?.map((p) => (p.postId === updated.postId ? updated : p)) ?? prev,
-    );
+    setPosts((prev) => prev?.map((p) => (p.postId === updated.postId ? updated : p)) ?? prev);
   const onPostDeleted = (postId: string) => {
     setPosts((prev) => prev?.filter((p) => p.postId !== postId) ?? prev);
     setOpenPostId((id) => (id === postId ? null : id));
@@ -323,9 +319,7 @@ export function FeedClient() {
       .then((p) => {
         if (!cancelled)
           setPosts((cur) =>
-            cur && cur.some((x) => x.postId === p.postId)
-              ? cur
-              : [p, ...(cur ?? [])],
+            cur && cur.some((x) => x.postId === p.postId) ? cur : [p, ...(cur ?? [])],
           );
       })
       .catch(() => {});
@@ -350,10 +344,10 @@ export function FeedClient() {
         result.liked ? next.add(id) : next.delete(id);
         return next;
       });
-      setPosts((prev) =>
-        prev?.map((p) =>
-          p.postId === id ? { ...p, reactionCount: result.reactionCount } : p,
-        ) ?? prev,
+      setPosts(
+        (prev) =>
+          prev?.map((p) => (p.postId === id ? { ...p, reactionCount: result.reactionCount } : p)) ??
+          prev,
       );
     } catch (err) {
       console.error(err);
@@ -376,10 +370,10 @@ export function FeedClient() {
         // Reconcile the post's badge with the authoritative thread (server
         // returns non-deleted comments, replies included) so it can't drift from
         // the optimistic ±1 math done on create/delete.
-        setPosts((prev) =>
-          prev?.map((p) =>
-            p.postId === postId ? { ...p, commentCount: list.length } : p,
-          ) ?? prev,
+        setPosts(
+          (prev) =>
+            prev?.map((p) => (p.postId === postId ? { ...p, commentCount: list.length } : p)) ??
+            prev,
         );
         setLikedComments((prev) => {
           const next = new Set(prev);
@@ -444,10 +438,11 @@ export function FeedClient() {
       setComments((c) => ({ ...c, [postId]: [...(c[postId] ?? []), created] }));
       setCommentDrafts((d) => ({ ...d, [postId]: "" }));
       setReplyToComment(null);
-      setPosts((prev) =>
-        prev?.map((p) =>
-          p.postId === postId ? { ...p, commentCount: p.commentCount + 1 } : p,
-        ) ?? prev,
+      setPosts(
+        (prev) =>
+          prev?.map((p) =>
+            p.postId === postId ? { ...p, commentCount: p.commentCount + 1 } : p,
+          ) ?? prev,
       );
     } catch (err) {
       console.error(err);
@@ -489,9 +484,7 @@ export function FeedClient() {
       setComments((c) => ({
         ...c,
         [postId]: (c[postId] ?? []).map((cm) =>
-          cm.commentId === commentId
-            ? { ...cm, reactionCount: r.reactionCount }
-            : cm,
+          cm.commentId === commentId ? { ...cm, reactionCount: r.reactionCount } : cm,
         ),
       }));
       setLikedComments((prev) => {
@@ -555,7 +548,7 @@ export function FeedClient() {
         const thread = c[postId] ?? [];
         // Collect the deleted comment + every descendant reply.
         const removed = new Set<string>([commentId]);
-        for (let grew = true; grew; ) {
+        for (let grew = true; grew;) {
           grew = false;
           for (const cm of thread) {
             if (
@@ -572,12 +565,13 @@ export function FeedClient() {
       });
       setConfirmDeleteComment(null);
       if (editingComment === commentId) cancelCommentEdit();
-      setPosts((prev) =>
-        prev?.map((p) =>
-          p.postId === postId
-            ? { ...p, commentCount: Math.max(0, p.commentCount - deletedCount) }
-            : p,
-        ) ?? prev,
+      setPosts(
+        (prev) =>
+          prev?.map((p) =>
+            p.postId === postId
+              ? { ...p, commentCount: Math.max(0, p.commentCount - deletedCount) }
+              : p,
+          ) ?? prev,
       );
     } catch (err) {
       console.error(err);
@@ -599,9 +593,7 @@ export function FeedClient() {
     const startEmpty = media.length === 0;
     files.slice(0, Math.max(0, room)).forEach((file, i) => {
       const id = `${Date.now()}-${Math.round(performance.now())}-${i}-${file.name}`;
-      const type: "image" | "video" = file.type.startsWith("video/")
-        ? "video"
-        : "image";
+      const type: "image" | "video" = file.type.startsWith("video/") ? "video" : "image";
       const previewUrl = URL.createObjectURL(file);
       setMedia((prev) => [
         ...prev,
@@ -611,9 +603,7 @@ export function FeedClient() {
         const img = new window.Image();
         img.onload = () => {
           const r = img.naturalWidth / img.naturalHeight;
-          setMedia((prev) =>
-            prev.map((m) => (m.id === id ? { ...m, ratio: r } : m)),
-          );
+          setMedia((prev) => prev.map((m) => (m.id === id ? { ...m, ratio: r } : m)));
           // Default the post's frame to the first image's nearest allowed ratio.
           if (startEmpty && i === 0) setPostRatio(snapAspectKey(r));
         };
@@ -672,8 +662,7 @@ export function FeedClient() {
       caretEnd = caretStart + selected.length;
     } else if (opts.linePrefix) {
       const lineStart = value.lastIndexOf("\n", start - 1) + 1;
-      next =
-        value.slice(0, lineStart) + opts.linePrefix + value.slice(lineStart);
+      next = value.slice(0, lineStart) + opts.linePrefix + value.slice(lineStart);
       caretStart = caretEnd = start + opts.linePrefix.length;
     }
 
@@ -704,7 +693,11 @@ export function FeedClient() {
     [
       { key: "mdList", label: <Icon name="list" />, opts: { linePrefix: "- " } },
       { key: "mdQuote", label: <Icon name="quote" />, opts: { linePrefix: "> " } },
-      { key: "mdCode", label: <span className="md-code">{"</>"}</span>, opts: { wrap: ["`", "`"] } },
+      {
+        key: "mdCode",
+        label: <span className="md-code">{"</>"}</span>,
+        opts: { wrap: ["`", "`"] },
+      },
       { key: "mdLink", label: <Icon name="link" />, opts: { wrap: ["[", "](url)"] } },
     ],
   ] as const;
@@ -721,17 +714,9 @@ export function FeedClient() {
       const urls: string[] = [];
       for (const m of media) {
         if (m.type === "image") {
-          const blob = await cropImageToRatio(
-            m.file,
-            ratioVal,
-            m.focalX,
-            m.focalY,
-            m.zoom,
-          );
+          const blob = await cropImageToRatio(m.file, ratioVal, m.focalX, m.focalY, m.zoom);
           const name = m.file.name.replace(/\.[^.]+$/, "") + ".jpg";
-          const { url } = await uploadMedia(
-            new File([blob], name, { type: "image/jpeg" }),
-          );
+          const { url } = await uploadMedia(new File([blob], name, { type: "image/jpeg" }));
           urls.push(url);
         } else {
           const { url } = await uploadMedia(m.file);
@@ -800,16 +785,15 @@ export function FeedClient() {
       const isEditing = editingComment === c.commentId;
       const isBusy = commentBusy === c.commentId;
       return (
-        <div
-          className="post-head"
-          key={c.commentId}
-          style={{ alignItems: "flex-start" }}
-        >
+        <div className="post-head" key={c.commentId} style={{ alignItems: "flex-start" }}>
           <span
             className="post-av-link"
             role="button"
             tabIndex={0}
-            aria-label={personName({ displayName: c.authorDisplayName, username: c.authorUsername })}
+            aria-label={personName({
+              displayName: c.authorDisplayName,
+              username: c.authorUsername,
+            })}
             onClick={() => setPopupUser(c.authorUsername)}
             onKeyDown={(e) => onProfileKey(e, c.authorUsername)}
           >
@@ -854,9 +838,7 @@ export function FeedClient() {
                   className="act comment-reply-btn"
                   aria-label={t("replyBtn")}
                   aria-pressed={isTargeted || undefined}
-                  onClick={() =>
-                    isTargeted ? cancelReply(p.postId) : startReply(p.postId, c)
-                  }
+                  onClick={() => (isTargeted ? cancelReply(p.postId) : startReply(p.postId, c))}
                   style={{ padding: 0, color: isTargeted ? "var(--violet-light)" : undefined }}
                 >
                   ↩ {t("replyBtn")}
@@ -872,9 +854,7 @@ export function FeedClient() {
                     aria-expanded={commentMenuOpen === c.commentId}
                     disabled={isBusy}
                     onClick={() =>
-                      setCommentMenuOpen((o) =>
-                        o === c.commentId ? null : c.commentId,
-                      )
+                      setCommentMenuOpen((o) => (o === c.commentId ? null : c.commentId))
                     }
                     style={{ width: 26, height: 26 }}
                   >
@@ -949,107 +929,113 @@ export function FeedClient() {
 
     return (
       <>
-      <div className="post-comments">
-        {thread == null && (
-          <p className="time" style={{ padding: "10px 4px" }}>{t("loading")}</p>
-        )}
-        {thread != null && thread.length === 0 && (
-          <p className="time" style={{ padding: "10px 4px" }}>{t("noComments")}</p>
-        )}
+        <div className="post-comments">
+          {thread == null && (
+            <p className="time" style={{ padding: "10px 4px" }}>
+              {t("loading")}
+            </p>
+          )}
+          {thread != null && thread.length === 0 && (
+            <p className="time" style={{ padding: "10px 4px" }}>
+              {t("noComments")}
+            </p>
+          )}
 
-        {roots.map((c) => (
-          <div key={c.commentId}>
-            {renderCommentRow(c, false)}
-            {repliesByRoot[c.commentId]?.length > 0 && (
-              <div className="comment-replies">
-                {repliesByRoot[c.commentId].map((r) => renderCommentRow(r, true))}
-              </div>
-            )}
-          </div>
-        ))}
+          {roots.map((c) => (
+            <div key={c.commentId}>
+              {renderCommentRow(c, false)}
+              {repliesByRoot[c.commentId]?.length > 0 && (
+                <div className="comment-replies">
+                  {repliesByRoot[c.commentId].map((r) => renderCommentRow(r, true))}
+                </div>
+              )}
+            </div>
+          ))}
 
-        {user && (
-          <div className="composer" style={{ flexDirection: "column", alignItems: "stretch", gap: 8 }}>
-            <div style={{ display: "flex", gap: 8, alignItems: "center", position: "relative" }}>
-              {commentMention.menu}
-              <span className="avatar brand is-orb" aria-hidden="true">
-                <OrbArt url={user.avatarUrl} seed={user.username ?? "tikimiki"} />
-              </span>
-              <input
-                ref={commentInputRef}
-                className="field"
-                placeholder={t("commentPlaceholder")}
-                value={commentDrafts[p.postId] ?? ""}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  setCommentDrafts((d) => ({ ...d, [p.postId]: v }));
-                  // Deleting the leading @tag cancels the reply (back to a
-                  // top-level comment).
-                  if (replyToComment && !v.startsWith(`@${replyToComment.username}`)) {
-                    setReplyToComment(null);
+          {user && (
+            <div
+              className="composer"
+              style={{ flexDirection: "column", alignItems: "stretch", gap: 8 }}
+            >
+              <div style={{ display: "flex", gap: 8, alignItems: "center", position: "relative" }}>
+                {commentMention.menu}
+                <span className="avatar brand is-orb" aria-hidden="true">
+                  <OrbArt url={user.avatarUrl} seed={user.username ?? "tikimiki"} />
+                </span>
+                <input
+                  ref={commentInputRef}
+                  className="field"
+                  placeholder={t("commentPlaceholder")}
+                  value={commentDrafts[p.postId] ?? ""}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setCommentDrafts((d) => ({ ...d, [p.postId]: v }));
+                    // Deleting the leading @tag cancels the reply (back to a
+                    // top-level comment).
+                    if (replyToComment && !v.startsWith(`@${replyToComment.username}`)) {
+                      setReplyToComment(null);
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (commentMention.onKeyDown(e)) return;
+                    if (e.key === "Enter") handleComment(p.postId);
+                  }}
+                  disabled={commentingOn === p.postId}
+                />
+                <button
+                  className="btn btn-violet"
+                  onClick={() => handleComment(p.postId)}
+                  disabled={
+                    commentingOn === p.postId || (commentDrafts[p.postId] ?? "").trim() === ""
                   }
-                }}
-                onKeyDown={(e) => {
-                  if (commentMention.onKeyDown(e)) return;
-                  if (e.key === "Enter") handleComment(p.postId);
-                }}
-                disabled={commentingOn === p.postId}
-              />
-              <button
-                className="btn btn-violet"
-                onClick={() => handleComment(p.postId)}
-                disabled={
-                  commentingOn === p.postId ||
-                  (commentDrafts[p.postId] ?? "").trim() === ""
-                }
-              >
-                {commentingOn === p.postId ? t("posting") : t("reply")}
-              </button>
+                >
+                  {commentingOn === p.postId ? t("posting") : t("reply")}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {confirmDeleteComment != null && (
+          <div
+            className="confirm-overlay"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="confirm-del-comment"
+            onClick={(e) => {
+              if (e.target === e.currentTarget && commentBusy == null)
+                setConfirmDeleteComment(null);
+            }}
+          >
+            <div className="confirm-box">
+              <div className="confirm-ic" aria-hidden="true">
+                <Icon name="trash" />
+              </div>
+              <h2 className="confirm-title" id="confirm-del-comment">
+                {t("deleteCmtTitle")}
+              </h2>
+              <p className="confirm-desc">{t("deleteCmtDesc")}</p>
+              <div className="confirm-actions">
+                <button
+                  type="button"
+                  className="btn btn-ghost"
+                  onClick={() => setConfirmDeleteComment(null)}
+                  disabled={commentBusy != null}
+                >
+                  {t("cancelCmt")}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={() => deleteCommentFn(p.postId, confirmDeleteComment)}
+                  disabled={commentBusy != null}
+                >
+                  {commentBusy != null ? t("deletingCmt") : t("deleteCmt")}
+                </button>
+              </div>
             </div>
           </div>
         )}
-      </div>
-
-      {confirmDeleteComment != null && (
-        <div
-          className="confirm-overlay"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="confirm-del-comment"
-          onClick={(e) => {
-            if (e.target === e.currentTarget && commentBusy == null)
-              setConfirmDeleteComment(null);
-          }}
-        >
-          <div className="confirm-box">
-            <div className="confirm-ic" aria-hidden="true">
-              <Icon name="trash" />
-            </div>
-            <h2 className="confirm-title" id="confirm-del-comment">
-              {t("deleteCmtTitle")}
-            </h2>
-            <p className="confirm-desc">{t("deleteCmtDesc")}</p>
-            <div className="confirm-actions">
-              <button
-                type="button"
-                className="btn btn-ghost"
-                onClick={() => setConfirmDeleteComment(null)}
-                disabled={commentBusy != null}
-              >
-                {t("cancelCmt")}
-              </button>
-              <button
-                type="button"
-                className="btn btn-danger"
-                onClick={() => deleteCommentFn(p.postId, confirmDeleteComment)}
-                disabled={commentBusy != null}
-              >
-                {commentBusy != null ? t("deletingCmt") : t("deleteCmt")}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
       </>
     );
   };
@@ -1059,441 +1045,425 @@ export function FeedClient() {
   // Explore shows every post; Following shows only posts from accounts the
   // viewer follows (reflecting live follow/unfollow toggles via followedAuthors).
   const visiblePosts =
-    tab === "following"
-      ? (posts ?? []).filter((p) => followedAuthors.has(p.authorId))
-      : posts;
+    tab === "following" ? (posts ?? []).filter((p) => followedAuthors.has(p.authorId)) : posts;
 
   return (
     <MentionClickContext.Provider value={setPopupUser}>
-    <main className="feed" id="feed">
-      <h1 className="sr-only">Feed</h1>
+      <main className="feed" id="feed">
+        <h1 className="sr-only">Feed</h1>
 
-      <div className="feed-switch" role="tablist" aria-label={t("feedLabel")}>
-        <button
-          className="feed-tab"
-          role="tab"
-          aria-selected={tab === "explore"}
-          onClick={() => setTab("explore")}
-        >
-          {t("tabExplore")}
-        </button>
-        <button
-          className="feed-tab"
-          role="tab"
-          aria-selected={tab === "following"}
-          onClick={() => setTab("following")}
-        >
-          {t("tabFollowing")}
-        </button>
-      </div>
-
-      <div
-        className="composer composer-rich reveal"
-        style={{ "--i": 0 } as React.CSSProperties}
-        onBlur={(e) => {
-          // The OS file dialog steals focus while media is being attached —
-          // consume that one blur instead of collapsing mid-pick.
-          if (pickingMediaRef.current) return;
-          // Collapse if focus leaves the entire composer area with an empty draft.
-          if (
-            !e.currentTarget.contains(e.relatedTarget as Node | null) &&
-            !draft.trim() &&
-            media.length === 0 &&
-            !preview
-          ) {
-            setComposerOpen(false);
-          }
-        }}
-      >
-        <div className="composer-row" style={{ position: "relative" }}>
-          {composerMention.menu}
-          <span className="avatar brand is-orb" aria-hidden="true">
-            <OrbArt url={user?.avatarUrl} seed={user?.username ?? "tikimiki"} />
-          </span>
-          {preview ? (
-            <div className="field composer-text composer-preview">
-              {draft.trim() ? (
-                <MarkdownContent>{draft}</MarkdownContent>
-              ) : (
-                <span className="composer-preview-empty">
-                  {t("nothingToPreview")}
-                </span>
-              )}
-            </div>
-          ) : (
-            <textarea
-              ref={composerTextRef}
-              className="field composer-text"
-              placeholder={t("composerPlaceholder")}
-              value={draft}
-              maxLength={MAX_LEN}
-              onChange={(e) => {
-                setDraft(e.target.value);
-                // Grow to fit the content (capped by max-height in CSS).
-                e.target.style.height = "auto";
-                e.target.style.height = `${Math.min(e.target.scrollHeight, 340)}px`;
-              }}
-              onKeyDown={(e) => {
-                if (composerMention.onKeyDown(e)) return;
-                if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) handlePost();
-              }}
-              onFocus={() => setComposerOpen(true)}
-              disabled={!user || posting}
-              rows={1}
-            />
-          )}
+        <div className="feed-switch" role="tablist" aria-label={t("feedLabel")}>
+          <button
+            className="feed-tab"
+            role="tab"
+            aria-selected={tab === "explore"}
+            onClick={() => setTab("explore")}
+          >
+            {t("tabExplore")}
+          </button>
+          <button
+            className="feed-tab"
+            role="tab"
+            aria-selected={tab === "following"}
+            onClick={() => setTab("following")}
+          >
+            {t("tabFollowing")}
+          </button>
         </div>
 
-        {/* Advanced controls — always in the DOM, animated via grid-template-rows.
-            grid 0fr→1fr avoids animating height directly (layout-safe). */}
-        <div className={`composer-advanced${composerOpen ? " is-open" : ""}`}>
-          <div className="composer-advanced-inner">
-            {user && (
-              <div className="composer-toolbar">
-                <div className="md-tools">
-                  {mdGroups.map((group, gi) => (
-                    <Fragment key={gi}>
-                      {gi > 0 && <span className="md-sep" aria-hidden="true" />}
-                      {group.map((tool) => (
-                        <button
-                          key={tool.key}
-                          type="button"
-                          className="md-btn"
-                          title={t(tool.key)}
-                          aria-label={t(tool.key)}
-                          disabled={preview || posting}
-                          // Keep the textarea selection while clicking the toolbar.
-                          onMouseDown={(e) => e.preventDefault()}
-                          onClick={() => applyMd(tool.opts)}
-                        >
-                          {tool.label}
-                        </button>
-                      ))}
-                    </Fragment>
-                  ))}
-                </div>
-                <button
-                  type="button"
-                  className={`md-btn md-preview${preview ? " is-on" : ""}`}
-                  onClick={() => setPreview((p) => !p)}
-                >
-                  <Icon name={preview ? "edit" : "eye"} />
-                  {preview ? t("editPost") : t("preview")}
-                </button>
+        <div
+          className="composer composer-rich reveal"
+          style={{ "--i": 0 } as React.CSSProperties}
+          onBlur={(e) => {
+            // The OS file dialog steals focus while media is being attached —
+            // consume that one blur instead of collapsing mid-pick.
+            if (pickingMediaRef.current) return;
+            // Collapse if focus leaves the entire composer area with an empty draft.
+            if (
+              !e.currentTarget.contains(e.relatedTarget as Node | null) &&
+              !draft.trim() &&
+              media.length === 0 &&
+              !preview
+            ) {
+              setComposerOpen(false);
+            }
+          }}
+        >
+          <div className="composer-row" style={{ position: "relative" }}>
+            {composerMention.menu}
+            <span className="avatar brand is-orb" aria-hidden="true">
+              <OrbArt url={user?.avatarUrl} seed={user?.username ?? "tikimiki"} />
+            </span>
+            {preview ? (
+              <div className="field composer-text composer-preview">
+                {draft.trim() ? (
+                  <MarkdownContent>{draft}</MarkdownContent>
+                ) : (
+                  <span className="composer-preview-empty">{t("nothingToPreview")}</span>
+                )}
               </div>
+            ) : (
+              <textarea
+                ref={composerTextRef}
+                className="field composer-text"
+                placeholder={t("composerPlaceholder")}
+                value={draft}
+                maxLength={MAX_LEN}
+                onChange={(e) => {
+                  setDraft(e.target.value);
+                  // Grow to fit the content (capped by max-height in CSS).
+                  e.target.style.height = "auto";
+                  e.target.style.height = `${Math.min(e.target.scrollHeight, 340)}px`;
+                }}
+                onKeyDown={(e) => {
+                  if (composerMention.onKeyDown(e)) return;
+                  if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) handlePost();
+                }}
+                onFocus={() => setComposerOpen(true)}
+                disabled={!user || posting}
+                rows={1}
+              />
             )}
+          </div>
 
-            {media.length > 0 && (
-              <>
-                <div className="composer-ratios" role="group" aria-label={t("aspectRatio")}>
-                  {ASPECT_ORDER.map((key) => (
-                    <button
-                      key={key}
-                      type="button"
-                      className={`ratio-btn${postRatio === key ? " is-on" : ""}`}
-                      onClick={() => setPostRatio(key)}
-                    >
-                      <span
-                        className="ratio-ico"
-                        style={{ aspectRatio: String(ASPECTS[key]) }}
-                        aria-hidden="true"
-                      />
-                      {t(ratioLabelKey[key])}
-                    </button>
-                  ))}
-                </div>
-                <div className="composer-media">
-                  {media.map((m) => (
-                    <div
-                      className="cm-thumb"
-                      key={m.id}
-                      style={{ aspectRatio: String(ASPECTS[postRatio]) }}
-                    >
-                      {m.type === "video" ? (
-                        <video
-                          className="cm-thumb-el"
-                          src={m.previewUrl}
-                          muted
-                          style={{ objectPosition: `${m.focalX * 100}% ${m.focalY * 100}%` }}
-                        />
-                      ) : (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          className="cm-thumb-el"
-                          src={m.previewUrl}
-                          alt=""
-                          draggable={false}
-                          style={coverStyle(
-                            m.ratio,
-                            ASPECTS[postRatio],
-                            m.focalX,
-                            m.focalY,
-                            m.zoom,
-                          )}
-                          onClick={() => setCropId(m.id)}
-                        />
-                      )}
-                      {m.type === "image" && (
-                        <button
-                          type="button"
-                          className="cm-crop"
-                          aria-label={t("cropImage")}
-                          title={t("cropImage")}
-                          onClick={() => setCropId(m.id)}
-                        >
-                          <Icon name="crop" />
-                        </button>
-                      )}
-                      {m.type === "video" && (
-                        <span className="cm-vid-badge" aria-hidden="true">
-                          ▶
-                        </span>
-                      )}
-                      <button
-                        type="button"
-                        className="cm-remove"
-                        aria-label={t("removeMedia")}
-                        onClick={() => removeMedia(m.id)}
-                      >
-                        <Icon name="x" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-
-            <div className="composer-bar">
+          {/* Advanced controls — always in the DOM, animated via grid-template-rows.
+            grid 0fr→1fr avoids animating height directly (layout-safe). */}
+          <div className={`composer-advanced${composerOpen ? " is-open" : ""}`}>
+            <div className="composer-advanced-inner">
               {user && (
-                <>
-                  <input
-                    ref={mediaInputRef}
-                    type="file"
-                    accept="image/*,video/*"
-                    multiple
-                    hidden
-                    onChange={onPickMedia}
-                  />
+                <div className="composer-toolbar">
+                  <div className="md-tools">
+                    {mdGroups.map((group, gi) => (
+                      <Fragment key={gi}>
+                        {gi > 0 && <span className="md-sep" aria-hidden="true" />}
+                        {group.map((tool) => (
+                          <button
+                            key={tool.key}
+                            type="button"
+                            className="md-btn"
+                            title={t(tool.key)}
+                            aria-label={t(tool.key)}
+                            disabled={preview || posting}
+                            // Keep the textarea selection while clicking the toolbar.
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={() => applyMd(tool.opts)}
+                          >
+                            {tool.label}
+                          </button>
+                        ))}
+                      </Fragment>
+                    ))}
+                  </div>
                   <button
                     type="button"
-                    className="composer-add"
-                    onClick={() => {
-                      pickingMediaRef.current = true;
-                      // Dialog closed without picking (cancel) → drop the flag
-                      // when the window gets focus back.
-                      window.addEventListener(
-                        "focus",
-                        () => {
-                          pickingMediaRef.current = false;
-                        },
-                        { once: true },
-                      );
-                      mediaInputRef.current?.click();
-                    }}
-                    disabled={posting || media.length >= MAX_MEDIA}
+                    className={`md-btn md-preview${preview ? " is-on" : ""}`}
+                    onClick={() => setPreview((p) => !p)}
                   >
-                    <Icon name="image" /> {t("addMedia")}
-                    {media.length >= 8 && (
-                      <span className="composer-add-count">
-                        {media.length}/{MAX_MEDIA}
-                      </span>
-                    )}
+                    <Icon name={preview ? "edit" : "eye"} />
+                    {preview ? t("editPost") : t("preview")}
                   </button>
+                </div>
+              )}
+
+              {media.length > 0 && (
+                <>
+                  <div className="composer-ratios" role="group" aria-label={t("aspectRatio")}>
+                    {ASPECT_ORDER.map((key) => (
+                      <button
+                        key={key}
+                        type="button"
+                        className={`ratio-btn${postRatio === key ? " is-on" : ""}`}
+                        onClick={() => setPostRatio(key)}
+                      >
+                        <span
+                          className="ratio-ico"
+                          style={{ aspectRatio: String(ASPECTS[key]) }}
+                          aria-hidden="true"
+                        />
+                        {t(ratioLabelKey[key])}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="composer-media">
+                    {media.map((m) => (
+                      <div
+                        className="cm-thumb"
+                        key={m.id}
+                        style={{ aspectRatio: String(ASPECTS[postRatio]) }}
+                      >
+                        {m.type === "video" ? (
+                          <video
+                            className="cm-thumb-el"
+                            src={m.previewUrl}
+                            muted
+                            style={{ objectPosition: `${m.focalX * 100}% ${m.focalY * 100}%` }}
+                          />
+                        ) : (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            className="cm-thumb-el"
+                            src={m.previewUrl}
+                            alt=""
+                            draggable={false}
+                            style={coverStyle(
+                              m.ratio,
+                              ASPECTS[postRatio],
+                              m.focalX,
+                              m.focalY,
+                              m.zoom,
+                            )}
+                            onClick={() => setCropId(m.id)}
+                          />
+                        )}
+                        {m.type === "image" && (
+                          <button
+                            type="button"
+                            className="cm-crop"
+                            aria-label={t("cropImage")}
+                            title={t("cropImage")}
+                            onClick={() => setCropId(m.id)}
+                          >
+                            <Icon name="crop" />
+                          </button>
+                        )}
+                        {m.type === "video" && (
+                          <span className="cm-vid-badge" aria-hidden="true">
+                            ▶
+                          </span>
+                        )}
+                        <button
+                          type="button"
+                          className="cm-remove"
+                          aria-label={t("removeMedia")}
+                          onClick={() => removeMedia(m.id)}
+                        >
+                          <Icon name="x" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </>
               )}
-              {user && draft.length > MAX_LEN - 500 && (
-                <span
-                  className={`composer-count${
-                    draft.length > MAX_LEN - 50 ? " is-warn" : ""
-                  }`}
-                >
-                  {MAX_LEN - draft.length}
-                </span>
-              )}
-              {user ? (
-                <button
-                  className="btn btn-violet composer-post"
-                  onClick={handlePost}
-                  disabled={
-                    posting || (draft.trim() === "" && media.length === 0)
-                  }
-                >
-                  {posting ? t("posting") : t("post")}
-                </button>
-              ) : (
-                <Link
-                  className="btn btn-violet composer-post composer-post-solo"
-                  href="/login"
-                >
-                  {t("post")}
-                </Link>
-              )}
+
+              <div className="composer-bar">
+                {user && (
+                  <>
+                    <input
+                      ref={mediaInputRef}
+                      type="file"
+                      accept="image/*,video/*"
+                      multiple
+                      hidden
+                      onChange={onPickMedia}
+                    />
+                    <button
+                      type="button"
+                      className="composer-add"
+                      onClick={() => {
+                        pickingMediaRef.current = true;
+                        // Dialog closed without picking (cancel) → drop the flag
+                        // when the window gets focus back.
+                        window.addEventListener(
+                          "focus",
+                          () => {
+                            pickingMediaRef.current = false;
+                          },
+                          { once: true },
+                        );
+                        mediaInputRef.current?.click();
+                      }}
+                      disabled={posting || media.length >= MAX_MEDIA}
+                    >
+                      <Icon name="image" /> {t("addMedia")}
+                      {media.length >= 8 && (
+                        <span className="composer-add-count">
+                          {media.length}/{MAX_MEDIA}
+                        </span>
+                      )}
+                    </button>
+                  </>
+                )}
+                {user && draft.length > MAX_LEN - 500 && (
+                  <span
+                    className={`composer-count${draft.length > MAX_LEN - 50 ? " is-warn" : ""}`}
+                  >
+                    {MAX_LEN - draft.length}
+                  </span>
+                )}
+                {user ? (
+                  <button
+                    className="btn btn-violet composer-post"
+                    onClick={handlePost}
+                    disabled={posting || (draft.trim() === "" && media.length === 0)}
+                  >
+                    {posting ? t("posting") : t("post")}
+                  </button>
+                ) : (
+                  <Link className="btn btn-violet composer-post composer-post-solo" href="/login">
+                    {t("post")}
+                  </Link>
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {cropId &&
-        (() => {
-          const m = media.find((x) => x.id === cropId);
-          if (!m) return null;
-          return (
-            <ImageCropper
-              src={m.previewUrl}
-              imgRatio={m.ratio}
-              ratioKey={postRatio}
-              onRatioKey={setPostRatio}
-              focalX={m.focalX}
-              focalY={m.focalY}
-              zoom={m.zoom}
-              onChange={(fx, fy, z) =>
-                setMedia((prev) =>
-                  prev.map((x) =>
-                    x.id === cropId
-                      ? { ...x, focalX: fx, focalY: fy, zoom: z }
-                      : x,
-                  ),
-                )
-              }
-              onClose={() => setCropId(null)}
-              hint={t("cropHint")}
-              done={t("cropDone")}
-            />
-          );
-        })()}
-
-      {/* User posts — data-driven */}
-      {posts === null &&
-        ["a", "b", "c"].map((k) => (
-          <article className="post" key={`post-skel-${k}`} aria-busy="true">
-            <div className="post-head">
-              <span
-                className="avatar v is-orb skel skel-circle"
-                aria-hidden="true"
-              />
-              <span className="who who-inline">
-                <span
-                  className="skel skel-line"
-                  style={{ width: "30%" } as React.CSSProperties}
-                  aria-hidden="true"
-                />
-                <span
-                  className="skel skel-line"
-                  style={{ width: "18%", marginTop: 7 } as React.CSSProperties}
-                  aria-hidden="true"
-                />
-              </span>
-            </div>
-            <div className="post-body">
-              <span
-                className="skel skel-line"
-                style={{ width: "92%" } as React.CSSProperties}
-                aria-hidden="true"
-              />
-              <span
-                className="skel skel-line"
-                style={{ width: "60%", marginTop: 8 } as React.CSSProperties}
-                aria-hidden="true"
-              />
-            </div>
-            <div className="post-actions">
-              {[0, 1, 2].map((a) => (
-                <span
-                  key={a}
-                  className="skel"
-                  style={
-                    {
-                      width: 44,
-                      height: 33,
-                      borderRadius: 9,
-                    } as React.CSSProperties
-                  }
-                  aria-hidden="true"
-                />
-              ))}
-            </div>
-          </article>
-        ))}
-      {visiblePosts?.map((p, idx) => (
-        <PostCard
-          key={p.postId}
-          post={p}
-          liked={likedSet.has(p.postId)}
-          onToggleLike={toggleLike}
-          onOpenProfile={setPopupUser}
-          onEdited={onPostEdited}
-          onDeleted={onPostDeleted}
-          clickable
-          onOpenDetail={openPostModal}
-          onComment={openPostModal}
-          onShare={sharePost}
-          className="reveal"
-          style={{ "--i": idx + 3 } as React.CSSProperties}
-          headExtra={
-            user && p.authorId !== user.userId ? (
-              <button
-                className={
-                  followedAuthors.has(p.authorId)
-                    ? "btn btn-ghost follow-btn"
-                    : "btn btn-violet follow-btn"
+        {cropId &&
+          (() => {
+            const m = media.find((x) => x.id === cropId);
+            if (!m) return null;
+            return (
+              <ImageCropper
+                src={m.previewUrl}
+                imgRatio={m.ratio}
+                ratioKey={postRatio}
+                onRatioKey={setPostRatio}
+                focalX={m.focalX}
+                focalY={m.focalY}
+                zoom={m.zoom}
+                onChange={(fx, fy, z) =>
+                  setMedia((prev) =>
+                    prev.map((x) =>
+                      x.id === cropId ? { ...x, focalX: fx, focalY: fy, zoom: z } : x,
+                    ),
+                  )
                 }
-                style={{ padding: "4px 12px", fontSize: "0.8rem" }}
-                disabled={followBusy.has(p.authorId)}
-                onClick={() => toggleFollowAuthor(p.authorId)}
-              >
-                {followedAuthors.has(p.authorId) ? t("followingBtn") : t("follow")}
-              </button>
-            ) : undefined
-          }
-        />
-      ))}
-    </main>
-    {openPost && (
-      <div
-        className="pm-overlay"
-        role="dialog"
-        aria-modal="true"
-        aria-label={t("postDetail")}
-        onClick={(e) => {
-          if (e.target === e.currentTarget) setOpenPostId(null);
-        }}
-      >
-        <div className="pm-modal">
-          <button
-            className="pm-close"
-            onClick={() => setOpenPostId(null)}
-            aria-label={t("close")}
-          >
-            <Icon name="x" />
-          </button>
-          <div className="pm-scroll">
-            <PostCard
-              post={openPost}
-              liked={likedSet.has(openPost.postId)}
-              onToggleLike={toggleLike}
-              onOpenProfile={setPopupUser}
-              onEdited={onPostEdited}
-              onDeleted={onPostDeleted}
-              stackedAuthor
-              onShare={sharePost}
-              mediaLightbox
-              mediaMaxHeight="60vh"
-            />
-            {renderComments(openPost)}
+                onClose={() => setCropId(null)}
+                hint={t("cropHint")}
+                done={t("cropDone")}
+              />
+            );
+          })()}
+
+        {/* User posts — data-driven */}
+        {posts === null &&
+          ["a", "b", "c"].map((k) => (
+            <article className="post" key={`post-skel-${k}`} aria-busy="true">
+              <div className="post-head">
+                <span className="avatar v is-orb skel skel-circle" aria-hidden="true" />
+                <span className="who who-inline">
+                  <span
+                    className="skel skel-line"
+                    style={{ width: "30%" } as React.CSSProperties}
+                    aria-hidden="true"
+                  />
+                  <span
+                    className="skel skel-line"
+                    style={{ width: "18%", marginTop: 7 } as React.CSSProperties}
+                    aria-hidden="true"
+                  />
+                </span>
+              </div>
+              <div className="post-body">
+                <span
+                  className="skel skel-line"
+                  style={{ width: "92%" } as React.CSSProperties}
+                  aria-hidden="true"
+                />
+                <span
+                  className="skel skel-line"
+                  style={{ width: "60%", marginTop: 8 } as React.CSSProperties}
+                  aria-hidden="true"
+                />
+              </div>
+              <div className="post-actions">
+                {[0, 1, 2].map((a) => (
+                  <span
+                    key={a}
+                    className="skel"
+                    style={
+                      {
+                        width: 44,
+                        height: 33,
+                        borderRadius: 9,
+                      } as React.CSSProperties
+                    }
+                    aria-hidden="true"
+                  />
+                ))}
+              </div>
+            </article>
+          ))}
+        {visiblePosts?.map((p, idx) => (
+          <PostCard
+            key={p.postId}
+            post={p}
+            liked={likedSet.has(p.postId)}
+            onToggleLike={toggleLike}
+            onOpenProfile={setPopupUser}
+            onEdited={onPostEdited}
+            onDeleted={onPostDeleted}
+            clickable
+            onOpenDetail={openPostModal}
+            onComment={openPostModal}
+            onShare={sharePost}
+            className="reveal"
+            style={{ "--i": idx + 3 } as React.CSSProperties}
+            headExtra={
+              user && p.authorId !== user.userId ? (
+                <button
+                  className={
+                    followedAuthors.has(p.authorId)
+                      ? "btn btn-ghost follow-btn"
+                      : "btn btn-violet follow-btn"
+                  }
+                  style={{ padding: "4px 12px", fontSize: "0.8rem" }}
+                  disabled={followBusy.has(p.authorId)}
+                  onClick={() => toggleFollowAuthor(p.authorId)}
+                >
+                  {followedAuthors.has(p.authorId) ? t("followingBtn") : t("follow")}
+                </button>
+              ) : undefined
+            }
+          />
+        ))}
+      </main>
+      {openPost && (
+        <div
+          className="pm-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label={t("postDetail")}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setOpenPostId(null);
+          }}
+        >
+          <div className="pm-modal">
+            <button
+              className="pm-close"
+              onClick={() => setOpenPostId(null)}
+              aria-label={t("close")}
+            >
+              <Icon name="x" />
+            </button>
+            <div className="pm-scroll">
+              <PostCard
+                post={openPost}
+                liked={likedSet.has(openPost.postId)}
+                onToggleLike={toggleLike}
+                onOpenProfile={setPopupUser}
+                onEdited={onPostEdited}
+                onDeleted={onPostDeleted}
+                stackedAuthor
+                onShare={sharePost}
+                mediaLightbox
+                mediaMaxHeight="60vh"
+              />
+              {renderComments(openPost)}
+            </div>
           </div>
         </div>
-      </div>
-    )}
-    <ProfilePopup
-      open={popupUser !== null}
-      username={popupUser}
-      onClose={() => setPopupUser(null)}
-    />
-    <SharePopup
-      post={shareTarget}
-      open={shareTarget !== null}
-      onClose={() => setShareTarget(null)}
-    />
+      )}
+      <ProfilePopup
+        open={popupUser !== null}
+        username={popupUser}
+        onClose={() => setPopupUser(null)}
+      />
+      <SharePopup
+        post={shareTarget}
+        open={shareTarget !== null}
+        onClose={() => setShareTarget(null)}
+      />
     </MentionClickContext.Provider>
   );
 }

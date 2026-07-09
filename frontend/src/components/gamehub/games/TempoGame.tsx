@@ -10,13 +10,7 @@
  * Implements GameModalProps from "@/lib/gamehub/types".
  */
 
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Icon } from "@/components/Icon";
 import { GenerativeAvatar } from "@/components/ui/GenerativeAvatar";
@@ -307,18 +301,17 @@ export function TempoGame({ open, onClose, onComplete }: GameModalProps) {
 
   /* derived display values */
   const displayTime = fmtTime(elapsedMs);
-  const wpm = phase === "done" && finalMs !== null ? calcWpm(target, finalMs) : calcWpm(typed, elapsedMs);
+  const wpm =
+    phase === "done" && finalMs !== null ? calcWpm(target, finalMs) : calcWpm(typed, elapsedMs);
   const accuracy = calcAccuracy(target, typed);
   const charMap = buildCharMap(target, typed);
 
   /* leaderboard (friends + you if done) */
   const leaderboard = useMemo((): LeaderEntry[] => {
-    const friendEntries: LeaderEntry[] = FRIEND_PLAYS["tempo"].map(
-      (fp: FriendPlay) => ({
-        ...fp,
-        isYou: false,
-      }),
-    );
+    const friendEntries: LeaderEntry[] = FRIEND_PLAYS["tempo"].map((fp: FriendPlay) => ({
+      ...fp,
+      isYou: false,
+    }));
 
     if (phase === "done" && finalMs !== null) {
       const elapsedSec = Math.round(finalMs / 1000);
@@ -329,14 +322,10 @@ export function TempoGame({ open, onClose, onComplete }: GameModalProps) {
         playedAt: t("justNow"),
         isYou: true,
       };
-      return [...friendEntries, youEntry].sort(
-        (a, b) => (a.result.raw ?? 0) - (b.result.raw ?? 0),
-      );
+      return [...friendEntries, youEntry].sort((a, b) => (a.result.raw ?? 0) - (b.result.raw ?? 0));
     }
 
-    return friendEntries.sort(
-      (a, b) => (a.result.raw ?? 0) - (b.result.raw ?? 0),
-    );
+    return friendEntries.sort((a, b) => (a.result.raw ?? 0) - (b.result.raw ?? 0));
   }, [phase, finalMs, t]);
 
   /* streak info */
@@ -351,7 +340,12 @@ export function TempoGame({ open, onClose, onComplete }: GameModalProps) {
 
   return (
     <div className="gm-overlay tg-overlay" onClick={handleOverlayClick}>
-      <div className="gm-dialog tg-dialog" role="dialog" aria-modal="true" aria-label={t("dialogAria")}>
+      <div
+        className="gm-dialog tg-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-label={t("dialogAria")}
+      >
         {/* accent bar via gm-dialog::before */}
 
         {/* close */}
@@ -401,9 +395,7 @@ export function TempoGame({ open, onClose, onComplete }: GameModalProps) {
                     {ci.char === "\n" ? (
                       <>
                         <br />
-                        {ci.state === "cursor" && (
-                          <span className="tg-cursor-line" />
-                        )}
+                        {ci.state === "cursor" && <span className="tg-cursor-line" />}
                       </>
                     ) : (
                       ci.char
@@ -453,7 +445,9 @@ export function TempoGame({ open, onClose, onComplete }: GameModalProps) {
                 <div className="tg-result-meta">
                   <span className="u-mono tnum">{wpm} WPM</span>
                   <span className="tg-result-dot" />
-                  <span className="u-mono tnum">{accuracy}% {t("accuracy")}</span>
+                  <span className="u-mono tnum">
+                    {accuracy}% {t("accuracy")}
+                  </span>
                 </div>
               </div>
               {streak.current > 0 && (
@@ -473,13 +467,8 @@ export function TempoGame({ open, onClose, onComplete }: GameModalProps) {
                     key={entry.handle}
                     className={`tg-lb-row${entry.isYou ? " tg-lb-row--you" : ""}`}
                   >
-                    <span className="tg-lb-rank u-mono tnum">
-                      {idx + 1}
-                    </span>
-                    <span
-                      className="tg-lb-av"
-                      aria-hidden="true"
-                    >
+                    <span className="tg-lb-rank u-mono tnum">{idx + 1}</span>
+                    <span className="tg-lb-av" aria-hidden="true">
                       <GenerativeAvatar
                         seed={entry.isYou ? "you-tikimiki" : entry.handle}
                         variant="orbit"
@@ -488,13 +477,9 @@ export function TempoGame({ open, onClose, onComplete }: GameModalProps) {
                     </span>
                     <span className="tg-lb-name">
                       {entry.name}
-                      {entry.isYou && (
-                        <span className="tg-lb-you-badge">{t("youBadge")}</span>
-                      )}
+                      {entry.isYou && <span className="tg-lb-you-badge">{t("youBadge")}</span>}
                     </span>
-                    <span className="tg-lb-time u-mono tnum">
-                      {entry.result.display}
-                    </span>
+                    <span className="tg-lb-time u-mono tnum">{entry.result.display}</span>
                     <span className="tg-lb-at">{entry.playedAt}</span>
                   </li>
                 ))}

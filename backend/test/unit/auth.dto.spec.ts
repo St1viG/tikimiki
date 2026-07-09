@@ -15,21 +15,15 @@ describe("registerSchema", () => {
   });
 
   it("rejects passwords shorter than 8 characters", () => {
-    expect(registerSchema.safeParse({ ...base, password: "short1" }).success).toBe(
-      false,
-    );
+    expect(registerSchema.safeParse({ ...base, password: "short1" }).success).toBe(false);
   });
 
   it("rejects usernames with illegal characters", () => {
-    expect(
-      registerSchema.safeParse({ ...base, username: "bad name!" }).success,
-    ).toBe(false);
+    expect(registerSchema.safeParse({ ...base, username: "bad name!" }).success).toBe(false);
   });
 
   it("rejects usernames shorter than 3 characters", () => {
-    expect(registerSchema.safeParse({ ...base, username: "ab" }).success).toBe(
-      false,
-    );
+    expect(registerSchema.safeParse({ ...base, username: "ab" }).success).toBe(false);
   });
 
   it("requires organizationName for organization accounts", () => {
@@ -50,23 +44,17 @@ describe("registerSchema", () => {
   });
 
   it("rejects a malformed email", () => {
-    expect(
-      registerSchema.safeParse({ ...base, email: "not-an-email" }).success,
-    ).toBe(false);
+    expect(registerSchema.safeParse({ ...base, email: "not-an-email" }).success).toBe(false);
   });
 });
 
 describe("loginSchema", () => {
   it("accepts an email and a non-empty password", () => {
-    expect(
-      loginSchema.safeParse({ email: "a@example.com", password: "x" }).success,
-    ).toBe(true);
+    expect(loginSchema.safeParse({ email: "a@example.com", password: "x" }).success).toBe(true);
   });
 
   it("rejects an empty password", () => {
-    expect(
-      loginSchema.safeParse({ email: "a@example.com", password: "" }).success,
-    ).toBe(false);
+    expect(loginSchema.safeParse({ email: "a@example.com", password: "" }).success).toBe(false);
   });
 
   it("rejects a missing email", () => {

@@ -1,9 +1,4 @@
-import {
-  ForbiddenException,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from "@nestjs/common";
+import { ForbiddenException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { and, eq, isNull } from "drizzle-orm";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import {
@@ -80,10 +75,7 @@ export class AuthzService {
    * Allow the hackathon's organizing user or any admin. Throws 404 if the
    * hackathon does not exist, 403 if the caller is neither owner nor admin.
    */
-  async assertHackathonOwnerOrAdmin(
-    hackathonId: string,
-    userId: string,
-  ): Promise<void> {
+  async assertHackathonOwnerOrAdmin(hackathonId: string, userId: string): Promise<void> {
     const [hk] = await this.db
       .select({ organizationId: hackathons.organizationId })
       .from(hackathons)
@@ -94,9 +86,7 @@ export class AuthzService {
     }
     if (hk.organizationId === userId) return;
     if (await this.isAdmin(userId)) return;
-    throw new ForbiddenException(
-      "Only the organizing team can manage this hackathon",
-    );
+    throw new ForbiddenException("Only the organizing team can manage this hackathon");
   }
 
   /* ── Server moderation permissions ───────────────────────── */
@@ -105,10 +95,7 @@ export class AuthzService {
    * True iff the user is the organizing account of the server's hackathon.
    * Organizers (and platform admins) implicitly hold every server permission.
    */
-  private async isServerOrganizer(
-    serverId: string,
-    userId: string,
-  ): Promise<boolean> {
+  private async isServerOrganizer(serverId: string, userId: string): Promise<boolean> {
     const [row] = await this.db
       .select({ orgId: hackathons.organizationId })
       .from(servers)
@@ -120,9 +107,7 @@ export class AuthzService {
 
   /** All permission names defined in the catalog (the implicit organizer set). */
   private async allPermissionNames(): Promise<Set<string>> {
-    const rows = await this.db
-      .select({ name: permissions.name })
-      .from(permissions);
+    const rows = await this.db.select({ name: permissions.name }).from(permissions);
     return new Set(rows.map((r) => r.name));
   }
 
@@ -134,35 +119,21 @@ export class AuthzService {
    * super-users: they receive the FULL permission catalog. A user who holds no
    * role on the server (and is neither organizer nor admin) gets an empty set.
    */
-  async getServerPermissions(
-    serverId: string,
-    userId: string,
-  ): Promise<Set<string>> {
-    if (
-      (await this.isServerOrganizer(serverId, userId)) ||
-      (await this.isAdmin(userId))
-    ) {
+  async getServerPermissions(serverId: string, userId: string): Promise<Set<string>> {
+    if ((await this.isServerOrganizer(serverId, userId)) || (await this.isAdmin(userId))) {
       return this.allPermissionNames();
     }
 
     const rows = await this.db
       .select({ name: permissions.name })
       .from(userRoles)
-      .innerJoin(
-        serverRoles,
-        eq(serverRoles.serverRoleId, userRoles.serverRoleId),
-      )
+      .innerJoin(serverRoles, eq(serverRoles.serverRoleId, userRoles.serverRoleId))
       .innerJoin(
         serverRolePermissions,
         eq(serverRolePermissions.serverRoleId, serverRoles.serverRoleId),
       )
-      .innerJoin(
-        permissions,
-        eq(permissions.permissionId, serverRolePermissions.permissionId),
-      )
-      .where(
-        and(eq(serverRoles.serverId, serverId), eq(userRoles.userId, userId)),
-      );
+      .innerJoin(permissions, eq(permissions.permissionId, serverRolePermissions.permissionId))
+      .where(and(eq(serverRoles.serverId, serverId), eq(userRoles.userId, userId)));
     return new Set(rows.map((r) => r.name));
   }
 
@@ -174,9 +145,7 @@ export class AuthzService {
   ): Promise<void> {
     const perms = await this.getServerPermissions(serverId, userId);
     if (!perms.has(permission)) {
-      throw new ForbiddenException(
-        `You lack the "${permission}" permission on this server`,
-      );
+      throw new ForbiddenException(`You lack the "${permission}" permission on this server`);
     }
   }
 

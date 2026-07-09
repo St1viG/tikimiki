@@ -70,10 +70,7 @@ async function main() {
         if (withOther[0]) return withOther[0].conversationId;
       }
     }
-    const [conv] = await db
-      .insert(schema.conversations)
-      .values({ createdBy: andrej })
-      .returning();
+    const [conv] = await db.insert(schema.conversations).values({ createdBy: andrej }).returning();
     await db.insert(schema.conversationMembers).values([
       { conversationId: conv.conversationId, userId: andrej },
       { conversationId: conv.conversationId, userId: other },
@@ -94,10 +91,7 @@ async function main() {
     const [last] = await db
       .select({ content: schema.messages.content })
       .from(schema.directMessages)
-      .innerJoin(
-        schema.messages,
-        eq(schema.directMessages.messageId, schema.messages.messageId),
-      )
+      .innerJoin(schema.messages, eq(schema.directMessages.messageId, schema.messages.messageId))
       .where(eq(schema.directMessages.conversationId, convId))
       .orderBy(sql`${schema.messages.sentAt} desc`)
       .limit(1);

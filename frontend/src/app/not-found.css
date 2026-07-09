@@ -87,7 +87,10 @@
     border-color 0.2s var(--ease-out, ease),
     box-shadow 0.2s var(--ease-out, ease);
 }
-.nf-btn-ic { width: 18px; height: 18px; }
+.nf-btn-ic {
+  width: 18px;
+  height: 18px;
+}
 .nf-btn-primary {
   background: var(--violet);
   color: #fff;
@@ -110,10 +113,18 @@
 }
 
 @media (max-width: 480px) {
-  .nf-actions { width: 100%; flex-direction: column; }
-  .nf-btn { width: 100%; justify-content: center; }
+  .nf-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+  .nf-btn {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .nf-btn:hover { transform: none; }
+  .nf-btn:hover {
+    transform: none;
+  }
 }

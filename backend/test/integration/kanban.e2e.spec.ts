@@ -62,10 +62,7 @@ describe("kanban (e2e)", () => {
     const { teamId, leader } = await teamWithLeader();
     const auth = { Authorization: `Bearer ${leader.token}` };
 
-    const board = await http()
-      .get(`/api/v1/teams/${teamId}/kanban`)
-      .set(auth)
-      .expect(200);
+    const board = await http().get(`/api/v1/teams/${teamId}/kanban`).set(auth).expect(200);
     const [todo, inProgress] = board.body.columns as Column[];
 
     await http()
@@ -86,13 +83,8 @@ describe("kanban (e2e)", () => {
       .expect(200);
     expect(moved.body.columnId).toBe(inProgress.columnId);
 
-    const after = await http()
-      .get(`/api/v1/teams/${teamId}/kanban`)
-      .set(auth)
-      .expect(200);
-    const target = (after.body.columns as Column[]).find(
-      (c) => c.columnId === inProgress.columnId,
-    );
+    const after = await http().get(`/api/v1/teams/${teamId}/kanban`).set(auth).expect(200);
+    const target = (after.body.columns as Column[]).find((c) => c.columnId === inProgress.columnId);
     expect(target?.cards.length).toBe(2);
   });
 
@@ -141,7 +133,9 @@ describe("kanban (e2e)", () => {
     // Manually add member to team
     const { dbOf } = await import("../helpers/app");
     const { teamMembers } = await import("../../src/db/schema");
-    await dbOf(app).insert(teamMembers).values({ teamId: team.teamId, userId: member.userId, role: "member" });
+    await dbOf(app)
+      .insert(teamMembers)
+      .values({ teamId: team.teamId, userId: member.userId, role: "member" });
 
     const auth = { Authorization: `Bearer ${leader.token}` };
     const board = await http().get(`/api/v1/teams/${team.teamId}/kanban`).set(auth).expect(200);
@@ -290,10 +284,7 @@ describe("kanban (e2e)", () => {
       await http().delete(`/api/v1/kanban/columns/${col.columnId}`).set(auth).expect(200);
     }
 
-    await http()
-      .delete(`/api/v1/kanban/columns/${cols[0].columnId}`)
-      .set(auth)
-      .expect(400);
+    await http().delete(`/api/v1/kanban/columns/${cols[0].columnId}`).set(auth).expect(400);
   });
 
   it("forbids a non-member from managing columns (403)", async () => {
@@ -317,10 +308,7 @@ describe("kanban (e2e)", () => {
       .send({ name: "Hacked" })
       .expect(403);
 
-    await http()
-      .delete(`/api/v1/kanban/columns/${col.columnId}`)
-      .set(authStranger)
-      .expect(403);
+    await http().delete(`/api/v1/kanban/columns/${col.columnId}`).set(authStranger).expect(403);
   });
 
   /* ── column reorder ─────────────────────────────────────── */
@@ -438,10 +426,7 @@ describe("kanban (e2e)", () => {
       .values({ teamId: team.teamId, userId: member.userId, role: "member" });
 
     const auth = { Authorization: `Bearer ${leader.token}` };
-    const board = await http()
-      .get(`/api/v1/teams/${team.teamId}/kanban`)
-      .set(auth)
-      .expect(200);
+    const board = await http().get(`/api/v1/teams/${team.teamId}/kanban`).set(auth).expect(200);
     const [col] = board.body.columns as Column[];
 
     const { body: card } = await http()
@@ -463,10 +448,7 @@ describe("kanban (e2e)", () => {
       .select({ type: notifications.type })
       .from(notifications)
       .where(
-        and(
-          eq(notifications.userId, member.userId),
-          eq(notifications.type, "position_assigned"),
-        ),
+        and(eq(notifications.userId, member.userId), eq(notifications.type, "position_assigned")),
       );
 
     expect(notifs).toHaveLength(1);

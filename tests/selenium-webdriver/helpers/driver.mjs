@@ -7,10 +7,7 @@ export async function buildDriver() {
   const options = new chrome.Options();
   if (HEADLESS) options.addArguments("--headless=new");
   options.addArguments("--window-size=1400,1000", "--lang=sr");
-  const driver = await new Builder()
-    .forBrowser("chrome")
-    .setChromeOptions(options)
-    .build();
+  const driver = await new Builder().forBrowser("chrome").setChromeOptions(options).build();
   await driver.manage().setTimeouts({ implicit: 3000 });
   return driver;
 }
@@ -38,10 +35,7 @@ export async function login(driver, user = USERS.member) {
   await driver.findElement(By.css('input[name="password"]')).sendKeys(user.password);
   await submitAuthWithCaptcha(driver);
   // Po uspešnoj prijavi app radi router.push("/") — čekamo da nestane /login.
-  await driver.wait(
-    async () => !(await driver.getCurrentUrl()).includes("/login"),
-    15000,
-  );
+  await driver.wait(async () => !(await driver.getCurrentUrl()).includes("/login"), 15000);
 }
 
 /**
@@ -51,13 +45,10 @@ export async function login(driver, user = USERS.member) {
 export async function submitAuthWithCaptcha(driver) {
   await driver.findElement(By.css("button.au-submit")).click();
   // Captcha se renderuje tek nakon prvog submita.
-  const captchas = await driver.wait(
-    async () => {
-      const els = await driver.findElements(By.css(".au-captcha-check"));
-      return els.length > 0 ? els : null;
-    },
-    10000,
-  );
+  const captchas = await driver.wait(async () => {
+    const els = await driver.findElements(By.css(".au-captcha-check"));
+    return els.length > 0 ? els : null;
+  }, 10000);
   await captchas[0].click();
   await driver.findElement(By.css("button.au-submit")).click();
 }
@@ -89,10 +80,7 @@ export async function setReactValue(driver, cssSelector, value) {
  */
 export async function clickSafe(driver, cssSelector) {
   const el = await driver.findElement(By.css(cssSelector));
-  await driver.executeScript(
-    "arguments[0].scrollIntoView({block:'center'});",
-    el,
-  );
+  await driver.executeScript("arguments[0].scrollIntoView({block:'center'});", el);
   try {
     await el.click();
   } catch {

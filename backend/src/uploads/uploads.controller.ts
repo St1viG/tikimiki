@@ -21,11 +21,7 @@ import { UploadsService } from "./uploads.service";
 type FileFilterCallback = (error: Error | null, acceptFile: boolean) => void;
 
 /** Reject any upload whose MIME type is not an image. */
-function imageOnlyFilter(
-  _req: unknown,
-  file: { mimetype: string },
-  cb: FileFilterCallback,
-): void {
+function imageOnlyFilter(_req: unknown, file: { mimetype: string }, cb: FileFilterCallback): void {
   if (file.mimetype.startsWith("image/")) {
     cb(null, true);
   } else {
@@ -34,11 +30,7 @@ function imageOnlyFilter(
 }
 
 /** Accept images and videos (post media). */
-function mediaFilter(
-  _req: unknown,
-  file: { mimetype: string },
-  cb: FileFilterCallback,
-): void {
+function mediaFilter(_req: unknown, file: { mimetype: string }, cb: FileFilterCallback): void {
   if (file.mimetype.startsWith("image/") || file.mimetype.startsWith("video/")) {
     cb(null, true);
   } else {
@@ -52,11 +44,7 @@ function mediaFilter(
  *
  * Autor: Stevan Gnjato (2023/0141)
  */
-function videoOnlyFilter(
-  _req: unknown,
-  file: { mimetype: string },
-  cb: FileFilterCallback,
-): void {
+function videoOnlyFilter(_req: unknown, file: { mimetype: string }, cb: FileFilterCallback): void {
   if (file.mimetype.startsWith("video/")) {
     cb(null, true);
   } else {
@@ -78,10 +66,7 @@ export class UploadsController {
       fileFilter: imageOnlyFilter,
     }),
   )
-  uploadAvatar(
-    @CurrentUser() userId: string,
-    @UploadedFile() file: UploadedImage,
-  ) {
+  uploadAvatar(@CurrentUser() userId: string, @UploadedFile() file: UploadedImage) {
     return this.uploads.setAvatar(userId, file);
   }
 
@@ -101,10 +86,7 @@ export class UploadsController {
       fileFilter: imageOnlyFilter,
     }),
   )
-  uploadBanner(
-    @CurrentUser() userId: string,
-    @UploadedFile() file: UploadedImage,
-  ) {
+  uploadBanner(@CurrentUser() userId: string, @UploadedFile() file: UploadedImage) {
     return this.uploads.setBanner(userId, file);
   }
 
@@ -129,10 +111,7 @@ export class MediaUploadController {
       fileFilter: imageOnlyFilter,
     }),
   )
-  uploadImage(
-    @CurrentUser() userId: string,
-    @UploadedFile() file: UploadedImage,
-  ) {
+  uploadImage(@CurrentUser() userId: string, @UploadedFile() file: UploadedImage) {
     return this.uploads.saveImage(userId, file);
   }
 
@@ -146,10 +125,7 @@ export class MediaUploadController {
       fileFilter: mediaFilter,
     }),
   )
-  uploadMedia(
-    @CurrentUser() userId: string,
-    @UploadedFile() file: UploadedImage,
-  ) {
+  uploadMedia(@CurrentUser() userId: string, @UploadedFile() file: UploadedImage) {
     return this.uploads.saveMedia(userId, file);
   }
 
@@ -170,10 +146,7 @@ export class MediaUploadController {
       fileFilter: videoOnlyFilter,
     }),
   )
-  uploadVideo(
-    @CurrentUser() userId: string,
-    @UploadedFile() file: UploadedImage,
-  ) {
+  uploadVideo(@CurrentUser() userId: string, @UploadedFile() file: UploadedImage) {
     return this.uploads.saveVideo(userId, file);
   }
 }

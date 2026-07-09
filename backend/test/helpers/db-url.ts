@@ -10,10 +10,7 @@
 export const TEST_DB_NAME = "tikimiki_test";
 
 function baseUrl(): string {
-  return (
-    process.env.DATABASE_URL ??
-    "postgres://tikimiki:tikimiki@localhost:5432/tikimiki"
-  );
+  return process.env.DATABASE_URL ?? "postgres://tikimiki:tikimiki@localhost:5432/tikimiki";
 }
 
 function withDatabase(name: string): string {

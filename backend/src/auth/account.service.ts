@@ -34,26 +34,18 @@ export class AccountService {
     private readonly authz: AuthzService,
   ) {}
 
-  private signToken(
-    userId: string,
-    typ: AccountTokenType,
-    ttlSeconds: number,
-  ): Promise<string> {
+  private signToken(userId: string, typ: AccountTokenType, ttlSeconds: number): Promise<string> {
     return this.jwt.signAsync(
       { sub: userId, typ },
       { secret: env.JWT_ACCESS_SECRET, expiresIn: ttlSeconds },
     );
   }
 
-  private async verifyToken(
-    token: string,
-    typ: AccountTokenType,
-  ): Promise<string> {
+  private async verifyToken(token: string, typ: AccountTokenType): Promise<string> {
     try {
-      const payload = await this.jwt.verifyAsync<{ sub: string; typ: string }>(
-        token,
-        { secret: env.JWT_ACCESS_SECRET },
-      );
+      const payload = await this.jwt.verifyAsync<{ sub: string; typ: string }>(token, {
+        secret: env.JWT_ACCESS_SECRET,
+      });
       if (payload.typ !== typ) throw new Error("wrong token type");
       return payload.sub;
     } catch {
@@ -82,11 +74,7 @@ export class AccountService {
     if (!u) throw new UnauthorizedException();
     if (u.isEmailVerified) return { alreadyVerified: true };
 
-    const token = await this.signToken(
-      userId,
-      "email_verify",
-      env.EMAIL_VERIFY_TTL,
-    );
+    const token = await this.signToken(userId, "email_verify", env.EMAIL_VERIFY_TTL);
     const link = `${env.WEB_ORIGIN}/verify-email?token=${token}`;
     return { alreadyVerified: false, devLink: this.deliver("email-verify", link) };
   }
@@ -108,19 +96,12 @@ export class AccountService {
       .limit(1);
     // Always succeed — never reveal whether an email is registered.
     if (!u) return {};
-    const token = await this.signToken(
-      u.userId,
-      "password_reset",
-      env.PASSWORD_RESET_TTL,
-    );
+    const token = await this.signToken(u.userId, "password_reset", env.PASSWORD_RESET_TTL);
     const link = `${env.WEB_ORIGIN}/reset-password?token=${token}`;
     return { devLink: this.deliver("password-reset", link) };
   }
 
-  async resetPassword(
-    token: string,
-    newPassword: string,
-  ): Promise<{ success: true }> {
+  async resetPassword(token: string, newPassword: string): Promise<{ success: true }> {
     const userId = await this.verifyToken(token, "password_reset");
     const passwordHash = await hash(newPassword);
     await this.db
@@ -146,21 +127,13 @@ export class AccountService {
       .update(users)
       .set({ email: newEmail, isEmailVerified: false, updatedAt: new Date() })
       .where(eq(users.userId, userId));
-    const token = await this.signToken(
-      userId,
-      "email_verify",
-      env.EMAIL_VERIFY_TTL,
-    );
+    const token = await this.signToken(userId, "email_verify", env.EMAIL_VERIFY_TTL);
     const link = `${env.WEB_ORIGIN}/verify-email?token=${token}`;
     return { success: true, devLink: this.deliver("email-verify", link) };
   }
 
   /** A banned user (who can't log in) submits an appeal — auth by credentials. */
-  async submitAppeal(
-    email: string,
-    password: string,
-    reason: string,
-  ): Promise<{ success: true }> {
+  async submitAppeal(email: string, password: string, reason: string): Promise<{ success: true }> {
     // Same email-or-username identifier the login endpoint accepts.
     const identifier = email.trim();
     const idMatch = identifier.includes("@")
@@ -184,9 +157,7 @@ export class AccountService {
       .limit(1);
     if (existing) throw new ConflictException("You already have a pending appeal");
 
-    await this.db
-      .insert(appeals)
-      .values({ userId: u.userId, banId: ban.banId, reason });
+    await this.db.insert(appeals).values({ userId: u.userId, banId: ban.banId, reason });
     return { success: true };
   }
 }

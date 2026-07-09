@@ -69,8 +69,7 @@ export function cosmeticToItem(c: Cosmetic): MerchItem {
 /** Classify a physical merch item into a filter category from its name. */
 export function merchCategory(name: string): FilterCat {
   const n = name.toLowerCase();
-  if (n.includes("duks") || n.includes("hoodie") || n.includes("duksev"))
-    return "duks";
+  if (n.includes("duks") || n.includes("hoodie") || n.includes("duksev")) return "duks";
   if (
     n.includes("šolj") ||
     n.includes("solj") ||
@@ -81,12 +80,7 @@ export function merchCategory(name: string): FilterCat {
     n.includes("cup")
   )
     return "solje";
-  if (
-    n.includes("majic") ||
-    n.includes("shirt") ||
-    n.includes("tee") ||
-    n.includes("t-shirt")
-  )
+  if (n.includes("majic") || n.includes("shirt") || n.includes("tee") || n.includes("t-shirt"))
     return "majice";
   return "majice";
 }

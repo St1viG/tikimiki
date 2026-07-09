@@ -1,12 +1,6 @@
 import assert from "node:assert/strict";
 import { after, before, beforeEach, describe, it } from "mocha";
-import {
-  buildDriver,
-  open,
-  submitAuthWithCaptcha,
-  By,
-  until,
-} from "../helpers/driver.mjs";
+import { buildDriver, open, submitAuthWithCaptcha, By, until } from "../helpers/driver.mjs";
 import { USERS } from "../helpers/config.mjs";
 
 /**

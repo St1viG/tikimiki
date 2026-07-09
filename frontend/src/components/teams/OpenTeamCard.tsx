@@ -72,7 +72,7 @@ export function OpenTeamCard({
         onClick={() => onRequest(team)}
       >
         {sending
-          ? labels.joining ?? labels.requestJoin
+          ? (labels.joining ?? labels.requestJoin)
           : requested
             ? labels.requested
             : labels.requestJoin}

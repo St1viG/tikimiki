@@ -19,12 +19,7 @@ import {
   servers,
   userRoles,
 } from "../db/schema";
-import type {
-  CreateRoleInput,
-  PermissionDto,
-  ServerRoleDto,
-  UpdateRoleInput,
-} from "./dto";
+import type { CreateRoleInput, PermissionDto, ServerRoleDto, UpdateRoleInput } from "./dto";
 
 /**
  * Canonical permission catalog. Bootstrapped idempotently into the (otherwise
@@ -43,8 +38,7 @@ const PERMISSION_CATALOG: { name: string; description: string }[] = [
   },
   {
     name: "manage_roles",
-    description:
-      "Create and edit roles, set their permissions, assign and remove members",
+    description: "Create and edit roles, set their permissions, assign and remove members",
   },
   { name: "manage_messages", description: "Delete any member's messages" },
   { name: "kick_members", description: "Remove members from the server" },
@@ -80,10 +74,7 @@ export class ModerationService implements OnModuleInit {
     return rows;
   }
 
-  async myPermissions(
-    serverId: string,
-    userId: string,
-  ): Promise<{ permissions: string[] }> {
+  async myPermissions(serverId: string, userId: string): Promise<{ permissions: string[] }> {
     await this.assertServerMember(serverId, userId);
     const perms = await this.authz.getServerPermissions(serverId, userId);
     return { permissions: [...perms].sort() };
@@ -113,10 +104,7 @@ export class ModerationService implements OnModuleInit {
         name: permissions.name,
       })
       .from(serverRolePermissions)
-      .innerJoin(
-        permissions,
-        eq(permissions.permissionId, serverRolePermissions.permissionId),
-      )
+      .innerJoin(permissions, eq(permissions.permissionId, serverRolePermissions.permissionId))
       .where(inArray(serverRolePermissions.serverRoleId, roleIds));
     const permsByRole = new Map<string, string[]>();
     for (const p of permRows) {
@@ -159,19 +147,14 @@ export class ModerationService implements OnModuleInit {
     const created = await this.db.transaction(async (tx) => {
       let role;
       try {
-        [role] = await tx
-          .insert(serverRoles)
-          .values({ serverId, name: input.name })
-          .returning({
-            serverRoleId: serverRoles.serverRoleId,
-            name: serverRoles.name,
-            createdAt: serverRoles.createdAt,
-          });
+        [role] = await tx.insert(serverRoles).values({ serverId, name: input.name }).returning({
+          serverRoleId: serverRoles.serverRoleId,
+          name: serverRoles.name,
+          createdAt: serverRoles.createdAt,
+        });
       } catch (err) {
         if (isUniqueViolation(err)) {
-          throw new ConflictException(
-            "A role with that name already exists on this server",
-          );
+          throw new ConflictException("A role with that name already exists on this server");
         }
         throw err;
       }
@@ -223,9 +206,7 @@ export class ModerationService implements OnModuleInit {
             .where(eq(serverRoles.serverRoleId, roleId));
         } catch (err) {
           if (isUniqueViolation(err)) {
-            throw new ConflictException(
-              "A role with that name already exists on this server",
-            );
+            throw new ConflictException("A role with that name already exists on this server");
           }
           throw err;
         }
@@ -253,17 +234,11 @@ export class ModerationService implements OnModuleInit {
     return this.getRoleDto(serverId, roleId);
   }
 
-  async deleteRole(
-    serverId: string,
-    roleId: string,
-    userId: string,
-  ): Promise<{ success: true }> {
+  async deleteRole(serverId: string, roleId: string, userId: string): Promise<{ success: true }> {
     await this.authz.assertServerPermission(serverId, userId, "manage_roles");
     await this.assertRoleInServer(serverId, roleId);
     // user_roles + server_role_permissions cascade off server_roles.
-    await this.db
-      .delete(serverRoles)
-      .where(eq(serverRoles.serverRoleId, roleId));
+    await this.db.delete(serverRoles).where(eq(serverRoles.serverRoleId, roleId));
 
     this.realtime.emitServerEvent(serverId, "rolesChanged", {
       serverId,
@@ -316,12 +291,7 @@ export class ModerationService implements OnModuleInit {
 
     await this.db
       .delete(userRoles)
-      .where(
-        and(
-          eq(userRoles.serverRoleId, roleId),
-          eq(userRoles.userId, targetUserId),
-        ),
-      );
+      .where(and(eq(userRoles.serverRoleId, roleId), eq(userRoles.userId, targetUserId)));
 
     this.realtime.emitServerEvent(serverId, "rolesChanged", {
       serverId,
@@ -347,9 +317,7 @@ export class ModerationService implements OnModuleInit {
       .limit(1);
     if (!srv) throw new NotFoundException("Server not found");
     if (srv.orgId === targetUserId) {
-      throw new BadRequestException(
-        "The organizing account cannot be kicked from the server",
-      );
+      throw new BadRequestException("The organizing account cannot be kicked from the server");
     }
 
     const roleIds = (
@@ -361,12 +329,7 @@ export class ModerationService implements OnModuleInit {
     if (roleIds.length > 0) {
       await this.db
         .delete(userRoles)
-        .where(
-          and(
-            inArray(userRoles.serverRoleId, roleIds),
-            eq(userRoles.userId, targetUserId),
-          ),
-        );
+        .where(and(inArray(userRoles.serverRoleId, roleIds), eq(userRoles.userId, targetUserId)));
     }
 
     this.realtime.emitServerEvent(serverId, "rolesChanged", {
@@ -388,21 +351,13 @@ export class ModerationService implements OnModuleInit {
   }
 
   /** Membership: holds any permission set OR is a member (organizer/role). */
-  private async assertServerMember(
-    serverId: string,
-    userId: string,
-  ): Promise<void> {
+  private async assertServerMember(serverId: string, userId: string): Promise<void> {
     await this.assertServerExists(serverId);
     const [role] = await this.db
       .select({ userId: userRoles.userId })
       .from(userRoles)
-      .innerJoin(
-        serverRoles,
-        eq(serverRoles.serverRoleId, userRoles.serverRoleId),
-      )
-      .where(
-        and(eq(serverRoles.serverId, serverId), eq(userRoles.userId, userId)),
-      )
+      .innerJoin(serverRoles, eq(serverRoles.serverRoleId, userRoles.serverRoleId))
+      .where(and(eq(serverRoles.serverId, serverId), eq(userRoles.userId, userId)))
       .limit(1);
     if (role) return;
 
@@ -417,19 +372,11 @@ export class ModerationService implements OnModuleInit {
   }
 
   /** Validate the role exists AND belongs to this server (404 otherwise). */
-  private async assertRoleInServer(
-    serverId: string,
-    roleId: string,
-  ): Promise<void> {
+  private async assertRoleInServer(serverId: string, roleId: string): Promise<void> {
     const [role] = await this.db
       .select({ serverRoleId: serverRoles.serverRoleId })
       .from(serverRoles)
-      .where(
-        and(
-          eq(serverRoles.serverRoleId, roleId),
-          eq(serverRoles.serverId, serverId),
-        ),
-      )
+      .where(and(eq(serverRoles.serverRoleId, roleId), eq(serverRoles.serverId, serverId)))
       .limit(1);
     if (!role) throw new NotFoundException("Role not found on this server");
   }
@@ -445,17 +392,12 @@ export class ModerationService implements OnModuleInit {
     const found = new Set(rows.map((r) => r.name));
     const missing = unique.filter((n) => !found.has(n));
     if (missing.length > 0) {
-      throw new BadRequestException(
-        `Unknown permission(s): ${missing.join(", ")}`,
-      );
+      throw new BadRequestException(`Unknown permission(s): ${missing.join(", ")}`);
     }
     return rows.map((r) => r.permissionId);
   }
 
-  private async getRoleDto(
-    serverId: string,
-    roleId: string,
-  ): Promise<ServerRoleDto> {
+  private async getRoleDto(serverId: string, roleId: string): Promise<ServerRoleDto> {
     const [role] = await this.db
       .select({
         serverRoleId: serverRoles.serverRoleId,
@@ -470,10 +412,7 @@ export class ModerationService implements OnModuleInit {
     const permRows = await this.db
       .select({ name: permissions.name })
       .from(serverRolePermissions)
-      .innerJoin(
-        permissions,
-        eq(permissions.permissionId, serverRolePermissions.permissionId),
-      )
+      .innerJoin(permissions, eq(permissions.permissionId, serverRolePermissions.permissionId))
       .where(eq(serverRolePermissions.serverRoleId, roleId));
 
     const [{ count }] = await this.db
@@ -498,8 +437,6 @@ function isUniqueViolation(err: unknown): boolean {
   if (code === "23505") return true;
   const cause = (err as { cause?: unknown }).cause;
   return (
-    typeof cause === "object" &&
-    cause !== null &&
-    (cause as { code?: unknown }).code === "23505"
+    typeof cause === "object" && cause !== null && (cause as { code?: unknown }).code === "23505"
   );
 }

@@ -9,8 +9,7 @@
 export const MENTION_RE = /(?<![\w@./-])@([a-zA-Z0-9_.-]{3,33})/g;
 
 export type MentionSegment =
-  | { type: "text"; value: string }
-  | { type: "mention"; username: string; raw: string };
+  { type: "text"; value: string } | { type: "mention"; username: string; raw: string };
 
 /** Split plain text into text + mention segments, trimming trailing . / - . */
 export function splitMentions(text: string): MentionSegment[] {
@@ -29,10 +28,7 @@ export function splitMentions(text: string): MentionSegment[] {
 }
 
 /** Whether `content` @-mentions `username` (case-insensitive). */
-export function isUserMentioned(
-  content: string,
-  username: string | null | undefined,
-): boolean {
+export function isUserMentioned(content: string, username: string | null | undefined): boolean {
   if (!username) return false;
   const target = username.toLowerCase();
   for (const m of content.matchAll(MENTION_RE)) {

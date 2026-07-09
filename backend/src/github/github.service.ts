@@ -1,12 +1,7 @@
 /**
  * Autor: Nenad Skoković (2023/0039)
  */
-import {
-  BadGatewayException,
-  Inject,
-  Injectable,
-  UnauthorizedException,
-} from "@nestjs/common";
+import { BadGatewayException, Inject, Injectable, UnauthorizedException } from "@nestjs/common";
 import { ilike } from "drizzle-orm";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import { memberSkills, skills } from "../db/schema";
@@ -61,10 +56,7 @@ export class GithubService {
    * `verified: true` — upserting over any existing row (e.g. a pre-existing
    * `source: "manual"` tag just gets upgraded, never duplicated).
    */
-  async deriveAndStoreSkills(
-    userId: string,
-    topLanguages: string[],
-  ): Promise<void> {
+  async deriveAndStoreSkills(userId: string, topLanguages: string[]): Promise<void> {
     for (const language of topLanguages) {
       const [existing] = await this.db
         .select({ skillId: skills.skillId })
@@ -96,10 +88,7 @@ export class GithubService {
    * /repos/:owner/:repo/languages`) for the most active repos, and a plain
    * per-repo tally of `repo.language` for the rest — then sort descending.
    */
-  private async rankLanguages(
-    repos: GithubRepo[],
-    accessToken: string,
-  ): Promise<string[]> {
+  private async rankLanguages(repos: GithubRepo[], accessToken: string): Promise<string[]> {
     const languageScore = new Map<string, number>();
 
     const detailed = repos.slice(0, TOP_REPOS_FOR_LANGUAGE_DETAIL);
@@ -151,9 +140,7 @@ export class GithubService {
       throw new BadGatewayException("Failed to reach GitHub");
     }
     if (res.status === 401) {
-      throw new UnauthorizedException(
-        "GitHub access token is invalid or expired",
-      );
+      throw new UnauthorizedException("GitHub access token is invalid or expired");
     }
     if (!res.ok) {
       throw new BadGatewayException(`GitHub request failed (${res.status})`);

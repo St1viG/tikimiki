@@ -233,10 +233,7 @@ export class ChatService {
     const roleRows = await this.db
       .selectDistinct({ userId: userRoles.userId })
       .from(userRoles)
-      .innerJoin(
-        serverRoles,
-        eq(serverRoles.serverRoleId, userRoles.serverRoleId),
-      )
+      .innerJoin(serverRoles, eq(serverRoles.serverRoleId, userRoles.serverRoleId))
       .where(eq(serverRoles.serverId, serverId));
     const [org] = await this.db
       .select({ orgId: hackathons.organizationId })
@@ -259,20 +256,12 @@ export class ChatService {
    * Membership is NOT derived from application status — it is an explicit role
    * grant (see {@link grantServerMembership}).
    */
-  private async isServerMember(
-    serverId: string,
-    userId: string,
-  ): Promise<boolean> {
+  private async isServerMember(serverId: string, userId: string): Promise<boolean> {
     const [role] = await this.db
       .select({ userId: userRoles.userId })
       .from(userRoles)
-      .innerJoin(
-        serverRoles,
-        eq(serverRoles.serverRoleId, userRoles.serverRoleId),
-      )
-      .where(
-        and(eq(serverRoles.serverId, serverId), eq(userRoles.userId, userId)),
-      )
+      .innerJoin(serverRoles, eq(serverRoles.serverRoleId, userRoles.serverRoleId))
+      .where(and(eq(serverRoles.serverId, serverId), eq(userRoles.userId, userId)))
       .limit(1);
     if (role) return true;
 
@@ -285,10 +274,7 @@ export class ChatService {
     return own?.orgId === userId;
   }
 
-  private async assertServerMember(
-    serverId: string,
-    userId: string,
-  ): Promise<void> {
+  private async assertServerMember(serverId: string, userId: string): Promise<void> {
     if (!(await this.isServerMember(serverId, userId))) {
       throw new ForbiddenException("You are not a member of this server");
     }
@@ -325,18 +311,10 @@ export class ChatService {
       const [membership] = await this.db
         .select({ userId: channelMembers.userId })
         .from(channelMembers)
-        .where(
-          and(
-            eq(channelMembers.channelId, channelId),
-            eq(channelMembers.userId, userId),
-          ),
-        )
+        .where(and(eq(channelMembers.channelId, channelId), eq(channelMembers.userId, userId)))
         .limit(1);
       if (!membership) {
-        const perms = await this.authz.getServerPermissions(
-          row.serverId,
-          userId,
-        );
+        const perms = await this.authz.getServerPermissions(row.serverId, userId);
         if (!perms.has("manage_channels")) {
           throw new ForbiddenException("You are not a member of this channel");
         }
@@ -351,10 +329,7 @@ export class ChatService {
     const roleServers = await this.db
       .selectDistinct({ serverId: serverRoles.serverId })
       .from(userRoles)
-      .innerJoin(
-        serverRoles,
-        eq(serverRoles.serverRoleId, userRoles.serverRoleId),
-      )
+      .innerJoin(serverRoles, eq(serverRoles.serverRoleId, userRoles.serverRoleId))
       .where(eq(userRoles.userId, userId));
     // … plus servers whose hackathon they organize.
     const orgServers = await this.db
@@ -364,10 +339,7 @@ export class ChatService {
       .where(eq(hackathons.organizationId, userId));
 
     const ids = [
-      ...new Set([
-        ...roleServers.map((r) => r.serverId),
-        ...orgServers.map((r) => r.serverId),
-      ]),
+      ...new Set([...roleServers.map((r) => r.serverId), ...orgServers.map((r) => r.serverId)]),
     ];
     if (ids.length === 0) return [];
 
@@ -397,10 +369,7 @@ export class ChatService {
    * Discord-style profile popout. Includes everyone holding a role plus the
    * organizing account (labelled "Organizer").
    */
-  async listServerMembers(
-    serverId: string,
-    userId: string,
-  ): Promise<ServerMemberDto[]> {
+  async listServerMembers(serverId: string, userId: string): Promise<ServerMemberDto[]> {
     await this.assertServerMember(serverId, userId);
 
     const [srv] = await this.db
@@ -430,10 +399,7 @@ export class ChatService {
         )`,
       })
       .from(userRoles)
-      .innerJoin(
-        serverRoles,
-        eq(serverRoles.serverRoleId, userRoles.serverRoleId),
-      )
+      .innerJoin(serverRoles, eq(serverRoles.serverRoleId, userRoles.serverRoleId))
       .innerJoin(users, eq(users.userId, userRoles.userId))
       .where(eq(serverRoles.serverId, serverId));
 
@@ -535,10 +501,7 @@ export class ChatService {
     }));
   }
 
-  async getServerDetail(
-    serverId: string,
-    userId: string,
-  ): Promise<ServerDetailDto> {
+  async getServerDetail(serverId: string, userId: string): Promise<ServerDetailDto> {
     await this.assertServerMember(serverId, userId);
     const [server] = await this.db
       .select({ serverId: servers.serverId, name: servers.name })
@@ -568,9 +531,7 @@ export class ChatService {
             position: channels.position,
           })
           .from(channels)
-          .where(
-            and(inArray(channels.groupId, groupIds), isNull(channels.deletedAt)),
-          )
+          .where(and(inArray(channels.groupId, groupIds), isNull(channels.deletedAt)))
           .orderBy(asc(channels.position))
       : [];
 
@@ -647,11 +608,7 @@ export class ChatService {
   }
 
   /** Create a channel group (requires `manage_channels`). */
-  async createGroup(
-    serverId: string,
-    userId: string,
-    name: string,
-  ): Promise<ServerGroupDto> {
+  async createGroup(serverId: string, userId: string, name: string): Promise<ServerGroupDto> {
     await this.authz.assertServerPermission(serverId, userId, "manage_channels");
 
     const [{ maxPos }] = await this.db
@@ -664,19 +621,14 @@ export class ChatService {
 
     let group;
     try {
-      [group] = await this.db
-        .insert(channelGroups)
-        .values({ serverId, name, position })
-        .returning({
-          groupId: channelGroups.groupId,
-          name: channelGroups.name,
-          position: channelGroups.position,
-        });
+      [group] = await this.db.insert(channelGroups).values({ serverId, name, position }).returning({
+        groupId: channelGroups.groupId,
+        name: channelGroups.name,
+        position: channelGroups.position,
+      });
     } catch (err) {
       if (isUniqueViolation(err)) {
-        throw new ConflictException(
-          "A channel group with that name already exists",
-        );
+        throw new ConflictException("A channel group with that name already exists");
       }
       throw err;
     }
@@ -705,12 +657,7 @@ export class ChatService {
     const [group] = await this.db
       .select({ groupId: channelGroups.groupId })
       .from(channelGroups)
-      .where(
-        and(
-          eq(channelGroups.groupId, input.groupId),
-          eq(channelGroups.serverId, serverId),
-        ),
-      )
+      .where(and(eq(channelGroups.groupId, input.groupId), eq(channelGroups.serverId, serverId)))
       .limit(1);
     if (!group) {
       throw new NotFoundException("Channel group not found on this server");
@@ -718,9 +665,7 @@ export class ChatService {
 
     const type = input.type ?? "general";
     if (type === "team") {
-      throw new BadRequestException(
-        "Team channels cannot be created through this endpoint",
-      );
+      throw new BadRequestException("Team channels cannot be created through this endpoint");
     }
 
     const [{ maxPos }] = await this.db
@@ -728,9 +673,7 @@ export class ChatService {
         maxPos: sql<number>`coalesce(max(${channels.position}), -1)`,
       })
       .from(channels)
-      .where(
-        and(eq(channels.groupId, input.groupId), isNull(channels.deletedAt)),
-      );
+      .where(and(eq(channels.groupId, input.groupId), isNull(channels.deletedAt)));
     const position = Number(maxPos) + 1;
 
     let channel;
@@ -739,12 +682,7 @@ export class ChatService {
         .insert(channels)
         .values({
           groupId: input.groupId,
-          type: type as
-            | "general"
-            | "announcements"
-            | "private"
-            | "project"
-            | "kanban",
+          type: type as "general" | "announcements" | "private" | "project" | "kanban",
           name: input.name,
           position,
         })
@@ -756,9 +694,7 @@ export class ChatService {
         });
     } catch (err) {
       if (isUniqueViolation(err)) {
-        throw new ConflictException(
-          "A channel with that name already exists in this group",
-        );
+        throw new ConflictException("A channel with that name already exists in this group");
       }
       throw err;
     }
@@ -777,11 +713,7 @@ export class ChatService {
   }
 
   /** Rename a channel (requires `manage_channels` on the owning server). */
-  async updateChannel(
-    channelId: string,
-    userId: string,
-    name: string,
-  ): Promise<ServerChannelDto> {
+  async updateChannel(channelId: string, userId: string, name: string): Promise<ServerChannelDto> {
     const serverId = await this.authz.serverIdForChannel(channelId);
     await this.authz.assertServerPermission(serverId, userId, "manage_channels");
 
@@ -806,9 +738,7 @@ export class ChatService {
         });
     } catch (err) {
       if (isUniqueViolation(err)) {
-        throw new ConflictException(
-          "A channel with that name already exists in this group",
-        );
+        throw new ConflictException("A channel with that name already exists in this group");
       }
       throw err;
     }
@@ -826,10 +756,7 @@ export class ChatService {
   }
 
   /** Soft-delete a channel (requires `manage_channels`). */
-  async deleteChannel(
-    channelId: string,
-    userId: string,
-  ): Promise<{ success: true }> {
+  async deleteChannel(channelId: string, userId: string): Promise<{ success: true }> {
     const serverId = await this.authz.serverIdForChannel(channelId);
     await this.authz.assertServerPermission(serverId, userId, "manage_channels");
 
@@ -854,10 +781,7 @@ export class ChatService {
 
   /* ── Pinned messages ────────────────────────────────────────── */
 
-  async listChannelPins(
-    channelId: string,
-    userId: string,
-  ): Promise<MessageDto[]> {
+  async listChannelPins(channelId: string, userId: string): Promise<MessageDto[]> {
     await this.assertChannelAccess(channelId, userId);
     const rows = await this.db
       .select({
@@ -880,9 +804,7 @@ export class ChatService {
       .innerJoin(messages, eq(channelPins.messageId, messages.messageId))
       .innerJoin(channelMessages, eq(channelMessages.messageId, messages.messageId))
       .innerJoin(users, eq(messages.senderId, users.userId))
-      .where(
-        and(eq(channelPins.channelId, channelId), isNull(messages.deletedAt)),
-      )
+      .where(and(eq(channelPins.channelId, channelId), isNull(messages.deletedAt)))
       .orderBy(desc(channelPins.pinnedAt));
     const ids = rows.map((r) => r.messageId);
     const reactionsByMsg = await this.loadReactions(ids, userId);
@@ -919,12 +841,9 @@ export class ChatService {
     if (!msg) throw new NotFoundException("Message not found in this channel");
 
     try {
-      await this.db
-        .insert(channelPins)
-        .values({ channelId, messageId, pinnedBy: userId });
+      await this.db.insert(channelPins).values({ channelId, messageId, pinnedBy: userId });
     } catch (err) {
-      if (isUniqueViolation(err))
-        throw new ConflictException("Message already pinned");
+      if (isUniqueViolation(err)) throw new ConflictException("Message already pinned");
       throw err;
     }
 
@@ -945,12 +864,7 @@ export class ChatService {
 
     const result = await this.db
       .delete(channelPins)
-      .where(
-        and(
-          eq(channelPins.channelId, channelId),
-          eq(channelPins.messageId, messageId),
-        ),
-      )
+      .where(and(eq(channelPins.channelId, channelId), eq(channelPins.messageId, messageId)))
       .returning({ messageId: channelPins.messageId });
     if (result.length === 0) throw new NotFoundException("Pin not found");
 
@@ -963,10 +877,7 @@ export class ChatService {
 
   /* ── Server mutes ───────────────────────────────────────────── */
 
-  async listServerMutes(
-    serverId: string,
-    userId: string,
-  ): Promise<ServerMuteDto[]> {
+  async listServerMutes(serverId: string, userId: string): Promise<ServerMuteDto[]> {
     await this.authz.assertServerPermission(serverId, userId, "manage_messages");
     const rows = await this.db
       .select({
@@ -1000,11 +911,7 @@ export class ChatService {
     callerId: string,
     input: { userId: string; reason?: string; expiresAt?: string },
   ): Promise<ServerMuteDto> {
-    await this.authz.assertServerPermission(
-      serverId,
-      callerId,
-      "manage_messages",
-    );
+    await this.authz.assertServerPermission(serverId, callerId, "manage_messages");
     if (input.userId === callerId) {
       throw new BadRequestException("Cannot mute yourself");
     }
@@ -1050,19 +957,10 @@ export class ChatService {
     callerId: string,
     targetUserId: string,
   ): Promise<{ success: true }> {
-    await this.authz.assertServerPermission(
-      serverId,
-      callerId,
-      "manage_messages",
-    );
+    await this.authz.assertServerPermission(serverId, callerId, "manage_messages");
     const result = await this.db
       .delete(serverMutes)
-      .where(
-        and(
-          eq(serverMutes.serverId, serverId),
-          eq(serverMutes.mutedUserId, targetUserId),
-        ),
-      )
+      .where(and(eq(serverMutes.serverId, serverId), eq(serverMutes.mutedUserId, targetUserId)))
       .returning({ muteId: serverMutes.muteId });
     if (result.length === 0) throw new NotFoundException("Mute not found");
     return { success: true };
@@ -1070,10 +968,7 @@ export class ChatService {
 
   /* ── Private channel members ────────────────────────────────── */
 
-  async listChannelMembers(
-    channelId: string,
-    userId: string,
-  ): Promise<ChannelMemberDto[]> {
+  async listChannelMembers(channelId: string, userId: string): Promise<ChannelMemberDto[]> {
     const serverId = await this.authz.serverIdForChannel(channelId);
     await this.authz.assertServerPermission(serverId, userId, "manage_channels");
     const rows = await this.db
@@ -1105,11 +1000,7 @@ export class ChatService {
     targetUserId: string,
   ): Promise<{ success: true }> {
     const serverId = await this.authz.serverIdForChannel(channelId);
-    await this.authz.assertServerPermission(
-      serverId,
-      callerId,
-      "manage_channels",
-    );
+    await this.authz.assertServerPermission(serverId, callerId, "manage_channels");
     if (!(await this.isServerMember(serverId, targetUserId))) {
       throw new BadRequestException("Target user is not a member of this server");
     }
@@ -1135,22 +1026,12 @@ export class ChatService {
     targetUserId: string,
   ): Promise<{ success: true }> {
     const serverId = await this.authz.serverIdForChannel(channelId);
-    await this.authz.assertServerPermission(
-      serverId,
-      callerId,
-      "manage_channels",
-    );
+    await this.authz.assertServerPermission(serverId, callerId, "manage_channels");
     const result = await this.db
       .delete(channelMembers)
-      .where(
-        and(
-          eq(channelMembers.channelId, channelId),
-          eq(channelMembers.userId, targetUserId),
-        ),
-      )
+      .where(and(eq(channelMembers.channelId, channelId), eq(channelMembers.userId, targetUserId)))
       .returning({ userId: channelMembers.userId });
-    if (result.length === 0)
-      throw new NotFoundException("User is not a member of this channel");
+    if (result.length === 0) throw new NotFoundException("User is not a member of this channel");
     this.realtime.emitChannelEvent(channelId, "channelMemberRemoved", {
       channelId,
       userId: targetUserId,
@@ -1163,10 +1044,7 @@ export class ChatService {
    * message must be a channel message and the caller needs `manage_messages` on
    * the owning server (DM messages: author only).
    */
-  async deleteMessage(
-    messageId: string,
-    userId: string,
-  ): Promise<{ success: true }> {
+  async deleteMessage(messageId: string, userId: string): Promise<{ success: true }> {
     const [msg] = await this.db
       .select({ senderId: messages.senderId })
       .from(messages)
@@ -1193,15 +1071,9 @@ export class ChatService {
     if (!isAuthor) {
       if (chan) {
         const serverId = await this.authz.serverIdForChannel(chan.channelId);
-        await this.authz.assertServerPermission(
-          serverId,
-          userId,
-          "manage_messages",
-        );
+        await this.authz.assertServerPermission(serverId, userId, "manage_messages");
       } else {
-        throw new ForbiddenException(
-          "You can only delete your own direct messages",
-        );
+        throw new ForbiddenException("You can only delete your own direct messages");
       }
     }
 
@@ -1226,10 +1098,7 @@ export class ChatService {
 
   /* ── Channel messages ───────────────────────────────────── */
 
-  async listChannelMessages(
-    channelId: string,
-    viewerId: string,
-  ): Promise<MessageDto[]> {
+  async listChannelMessages(channelId: string, viewerId: string): Promise<MessageDto[]> {
     await this.assertChannelAccess(channelId, viewerId);
     const rows = await this.db
       .select({
@@ -1251,12 +1120,7 @@ export class ChatService {
       .from(channelMessages)
       .innerJoin(messages, eq(channelMessages.messageId, messages.messageId))
       .innerJoin(users, eq(messages.senderId, users.userId))
-      .where(
-        and(
-          eq(channelMessages.channelId, channelId),
-          isNull(messages.deletedAt),
-        ),
-      )
+      .where(and(eq(channelMessages.channelId, channelId), isNull(messages.deletedAt)))
       .orderBy(asc(messages.sentAt))
       .limit(100);
     const ids = rows.map((r) => r.messageId);
@@ -1295,18 +1159,11 @@ export class ChatService {
     const [mute] = await this.db
       .select({ muteId: serverMutes.muteId, expiresAt: serverMutes.expiresAt })
       .from(serverMutes)
-      .where(
-        and(
-          eq(serverMutes.serverId, serverId),
-          eq(serverMutes.mutedUserId, userId),
-        ),
-      )
+      .where(and(eq(serverMutes.serverId, serverId), eq(serverMutes.mutedUserId, userId)))
       .limit(1);
     if (mute) {
       if (mute.expiresAt && mute.expiresAt < new Date()) {
-        await this.db
-          .delete(serverMutes)
-          .where(eq(serverMutes.muteId, mute.muteId));
+        await this.db.delete(serverMutes).where(eq(serverMutes.muteId, mute.muteId));
       } else {
         throw new ForbiddenException("You are muted on this server");
       }
@@ -1317,9 +1174,7 @@ export class ChatService {
         .insert(messages)
         .values({ senderId: userId, content, replyToId: replyToId ?? null })
         .returning();
-      await tx
-        .insert(channelMessages)
-        .values({ messageId: msg.messageId, channelId });
+      await tx.insert(channelMessages).values({ messageId: msg.messageId, channelId });
       if (attachmentUrls.length > 0) {
         await tx.insert(messageAttachments).values(
           attachmentUrls.map((url, i) => ({
@@ -1415,21 +1270,14 @@ export class ChatService {
         );
       reacted = false;
     } else {
-      await this.db
-        .insert(messageReactions)
-        .values({ messageId, userId, symbol });
+      await this.db.insert(messageReactions).values({ messageId, userId, symbol });
       reacted = true;
     }
 
     const [{ symbolCount }] = await this.db
       .select({ symbolCount: sql<number>`count(*)::int` })
       .from(messageReactions)
-      .where(
-        and(
-          eq(messageReactions.messageId, messageId),
-          eq(messageReactions.symbol, symbol),
-        ),
-      );
+      .where(and(eq(messageReactions.messageId, messageId), eq(messageReactions.symbol, symbol)));
 
     const count = Number(symbolCount);
     const payload = { messageId, symbol, count };
@@ -1507,12 +1355,7 @@ export class ChatService {
     const membershipRows = await this.db
       .select({ conversationId: conversationMembers.conversationId })
       .from(conversationMembers)
-      .where(
-        and(
-          eq(conversationMembers.userId, userId),
-          isNull(conversationMembers.leftAt),
-        ),
-      );
+      .where(and(eq(conversationMembers.userId, userId), isNull(conversationMembers.leftAt)));
     const conversationIds = membershipRows.map((m) => m.conversationId);
     if (conversationIds.length === 0) return [];
 
@@ -1574,10 +1417,7 @@ export class ChatService {
       .innerJoin(messages, eq(directMessages.messageId, messages.messageId))
       .innerJoin(users, eq(messages.senderId, users.userId))
       .where(
-        and(
-          inArray(directMessages.conversationId, conversationIds),
-          isNull(messages.deletedAt),
-        ),
+        and(inArray(directMessages.conversationId, conversationIds), isNull(messages.deletedAt)),
       )
       .orderBy(desc(messages.sentAt));
 
@@ -1705,12 +1545,7 @@ export class ChatService {
       .from(directMessages)
       .innerJoin(messages, eq(directMessages.messageId, messages.messageId))
       .innerJoin(users, eq(messages.senderId, users.userId))
-      .where(
-        and(
-          eq(directMessages.conversationId, conversationId),
-          isNull(messages.deletedAt),
-        ),
-      )
+      .where(and(eq(directMessages.conversationId, conversationId), isNull(messages.deletedAt)))
       .orderBy(desc(messages.sentAt))
       .limit(1);
 
@@ -1723,10 +1558,7 @@ export class ChatService {
         .innerJoin(
           conversationMembers,
           and(
-            eq(
-              conversationMembers.conversationId,
-              directMessages.conversationId,
-            ),
+            eq(conversationMembers.conversationId, directMessages.conversationId),
             eq(conversationMembers.userId, forUserId),
           ),
         )
@@ -1793,20 +1625,14 @@ export class ChatService {
         .insert(conversationMembers)
         .values({ conversationId, userId: uid })
         .onConflictDoUpdate({
-          target: [
-            conversationMembers.conversationId,
-            conversationMembers.userId,
-          ],
+          target: [conversationMembers.conversationId, conversationMembers.userId],
           set: { leftAt: null },
         });
     }
     return this.buildConversationDto(conversationId, userId);
   }
 
-  async listConversationMessages(
-    userId: string,
-    conversationId: string,
-  ): Promise<MessageDto[]> {
+  async listConversationMessages(userId: string, conversationId: string): Promise<MessageDto[]> {
     await this.assertConversationMember(userId, conversationId);
 
     const rows = await this.db
@@ -1829,12 +1655,7 @@ export class ChatService {
       .from(directMessages)
       .innerJoin(messages, eq(directMessages.messageId, messages.messageId))
       .innerJoin(users, eq(messages.senderId, users.userId))
-      .where(
-        and(
-          eq(directMessages.conversationId, conversationId),
-          isNull(messages.deletedAt),
-        ),
-      )
+      .where(and(eq(directMessages.conversationId, conversationId), isNull(messages.deletedAt)))
       .orderBy(asc(messages.sentAt));
     const ids = rows.map((r) => r.messageId);
     const reactionsByMsg = await this.loadReactions(ids, userId);
@@ -1862,9 +1683,7 @@ export class ChatService {
         .insert(messages)
         .values({ senderId: userId, content, replyToId: replyToId ?? null })
         .returning();
-      await tx
-        .insert(directMessages)
-        .values({ messageId: msg.messageId, conversationId });
+      await tx.insert(directMessages).values({ messageId: msg.messageId, conversationId });
       if (attachmentUrls.length > 0) {
         await tx.insert(messageAttachments).values(
           attachmentUrls.map((url, i) => ({
@@ -1954,10 +1773,7 @@ export class ChatService {
   }
 
   /** Mark a conversation read for the current user (sets lastReadAt = now). */
-  async markConversationRead(
-    userId: string,
-    conversationId: string,
-  ): Promise<{ success: true }> {
+  async markConversationRead(userId: string, conversationId: string): Promise<{ success: true }> {
     await this.assertConversationMember(userId, conversationId);
     await this.db
       .update(conversationMembers)
@@ -1986,10 +1802,7 @@ export class ChatService {
     const roleServers = await this.db
       .selectDistinct({ serverId: serverRoles.serverId })
       .from(userRoles)
-      .innerJoin(
-        serverRoles,
-        eq(serverRoles.serverRoleId, userRoles.serverRoleId),
-      )
+      .innerJoin(serverRoles, eq(serverRoles.serverRoleId, userRoles.serverRoleId))
       .where(eq(userRoles.userId, userId));
     // … plus servers whose hackathon they organize.
     const orgServers = await this.db
@@ -1999,10 +1812,7 @@ export class ChatService {
       .where(eq(hackathons.organizationId, userId));
 
     const ids = [
-      ...new Set([
-        ...roleServers.map((r) => r.serverId),
-        ...orgServers.map((r) => r.serverId),
-      ]),
+      ...new Set([...roleServers.map((r) => r.serverId), ...orgServers.map((r) => r.serverId)]),
     ];
     if (ids.length === 0) return null;
 
@@ -2015,10 +1825,7 @@ export class ChatService {
       })
       .from(servers)
       .innerJoin(hackathons, eq(hackathons.hackathonId, servers.hackathonId))
-      .innerJoin(
-        organizations,
-        eq(organizations.userId, hackathons.organizationId),
-      )
+      .innerJoin(organizations, eq(organizations.userId, hackathons.organizationId))
       .where(
         and(
           inArray(servers.serverId, ids),
@@ -2032,10 +1839,7 @@ export class ChatService {
 
   /* ── Internal helpers ───────────────────────────────────── */
 
-  private async assertConversationMember(
-    userId: string,
-    conversationId: string,
-  ): Promise<void> {
+  private async assertConversationMember(userId: string, conversationId: string): Promise<void> {
     const [membership] = await this.db
       .select({ userId: conversationMembers.userId })
       .from(conversationMembers)
@@ -2164,8 +1968,6 @@ function isUniqueViolation(err: unknown): boolean {
   if (code === "23505") return true;
   const cause = (err as { cause?: unknown }).cause;
   return (
-    typeof cause === "object" &&
-    cause !== null &&
-    (cause as { code?: unknown }).code === "23505"
+    typeof cause === "object" && cause !== null && (cause as { code?: unknown }).code === "23505"
   );
 }

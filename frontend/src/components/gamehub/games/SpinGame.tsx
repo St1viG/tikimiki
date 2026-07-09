@@ -52,24 +52,36 @@ interface Prize {
 }
 
 const PRIZES: Prize[] = [
-  { label: "+50 XP",      type: "xp"   },
-  { label: "KOHOR Skin",  type: "skin" },
-  { label: "+100 XP",     type: "xp"   },
-  { label: "Promašaj",    type: "miss" },
-  { label: "+25 XP",      type: "xp"   },
-  { label: "+200 XP",     type: "xp"   },
-  { label: "Rare Bonus",  type: "rare" },
-  { label: "+75 XP",      type: "xp"   },
+  { label: "+50 XP", type: "xp" },
+  { label: "KOHOR Skin", type: "skin" },
+  { label: "+100 XP", type: "xp" },
+  { label: "Promašaj", type: "miss" },
+  { label: "+25 XP", type: "xp" },
+  { label: "+200 XP", type: "xp" },
+  { label: "Rare Bonus", type: "rare" },
+  { label: "+75 XP", type: "xp" },
 ];
 
 /* Segment background fills and label colours (brand palette, no hardcoded tokens) */
 const SEG_COLORS = [
-  "#1A0E3D", "#2A0028", "#1C1A00", "#17172A",
-  "#1A0E3D", "#04342C", "#1C1A00", "#17172A",
+  "#1A0E3D",
+  "#2A0028",
+  "#1C1A00",
+  "#17172A",
+  "#1A0E3D",
+  "#04342C",
+  "#1C1A00",
+  "#17172A",
 ];
 const TEXT_COLORS = [
-  "#A78BFA", "#ff9ff3", "#ffe734", "#7A7690",
-  "#A78BFA", "#5DCAA5", "#ffe734", "#7A7690",
+  "#A78BFA",
+  "#ff9ff3",
+  "#ffe734",
+  "#7A7690",
+  "#A78BFA",
+  "#5DCAA5",
+  "#ffe734",
+  "#7A7690",
 ];
 
 const N = PRIZES.length;
@@ -91,11 +103,7 @@ function easeOut(t: number): number {
 
 /* Canvas draw */
 
-function drawWheel(
-  ctx: CanvasRenderingContext2D,
-  angle: number,
-  size: number,
-): void {
+function drawWheel(ctx: CanvasRenderingContext2D, angle: number, size: number): void {
   const R = size / 2;
   ctx.clearRect(0, 0, size, size);
 
@@ -232,7 +240,10 @@ export function SpinGame({ open, onClose, onComplete }: GameModalProps) {
     setCooldownSecs(secs);
     const iv = setInterval(() => {
       secs -= 1;
-      if (secs <= 0) { clearInterval(iv); return; }
+      if (secs <= 0) {
+        clearInterval(iv);
+        return;
+      }
       setCooldownSecs(secs);
     }, 1000);
     return () => clearInterval(iv);
@@ -245,7 +256,9 @@ export function SpinGame({ open, onClose, onComplete }: GameModalProps) {
     } else {
       document.body.style.overflow = "";
     }
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [open]);
 
   /* Animation loop. */
@@ -254,8 +267,7 @@ export function SpinGame({ open, onClose, onComplete }: GameModalProps) {
     const elapsed = ts - startTimeRef.current;
     const t = Math.min(elapsed / SPIN_DURATION, 1);
     const angle =
-      startAngleRef.current +
-      (targetAngleRef.current - startAngleRef.current) * easeOut(t);
+      startAngleRef.current + (targetAngleRef.current - startAngleRef.current) * easeOut(t);
     currentAngleRef.current = angle;
 
     const canvas = canvasRef.current;
@@ -292,9 +304,7 @@ export function SpinGame({ open, onClose, onComplete }: GameModalProps) {
     const extraSpins = 6 * 2 * Math.PI;
     const rawTarget = -segMid - Math.PI / 2;
     const delta =
-      ((rawTarget - currentAngleRef.current) % (2 * Math.PI) +
-        2 * Math.PI) %
-      (2 * Math.PI);
+      (((rawTarget - currentAngleRef.current) % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
 
     startAngleRef.current = currentAngleRef.current;
     targetAngleRef.current = currentAngleRef.current + extraSpins + delta;
@@ -322,21 +332,11 @@ export function SpinGame({ open, onClose, onComplete }: GameModalProps) {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div
-        className="sg-dialog"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="sg-title"
-      >
+      <div className="sg-dialog" role="dialog" aria-modal="true" aria-labelledby="sg-title">
         {/* Accent top bar (rendered via ::before in CSS) */}
 
         {/* Close */}
-        <button
-          type="button"
-          className="gm-close"
-          onClick={onClose}
-          aria-label={t("close")}
-        >
+        <button type="button" className="gm-close" onClick={onClose} aria-label={t("close")}>
           <Icon name="x" />
         </button>
 
@@ -372,11 +372,7 @@ export function SpinGame({ open, onClose, onComplete }: GameModalProps) {
 
         {/* Action area */}
         {phase === "idle" && (
-          <button
-            type="button"
-            className="sg-spin-btn btn"
-            onClick={handleSpin}
-          >
+          <button type="button" className="sg-spin-btn btn" onClick={handleSpin}>
             <Icon name="coin" />
             {t("spin")}
           </button>
@@ -395,18 +391,10 @@ export function SpinGame({ open, onClose, onComplete }: GameModalProps) {
             <div
               className={`sg-toast ${wonPrize.type === "miss" ? "sg-toast-miss" : wonPrize.type === "rare" ? "sg-toast-rare" : "sg-toast-win"}`}
             >
-              {wonPrize.type === "rare" && (
-                <Icon name="trophy" className="sg-toast-icon" />
-              )}
-              {wonPrize.type === "xp" && (
-                <Icon name="zap" className="sg-toast-icon" />
-              )}
-              {wonPrize.type === "skin" && (
-                <Icon name="star" className="sg-toast-icon" />
-              )}
-              {wonPrize.type === "miss" && (
-                <Icon name="clock" className="sg-toast-icon" />
-              )}
+              {wonPrize.type === "rare" && <Icon name="trophy" className="sg-toast-icon" />}
+              {wonPrize.type === "xp" && <Icon name="zap" className="sg-toast-icon" />}
+              {wonPrize.type === "skin" && <Icon name="star" className="sg-toast-icon" />}
+              {wonPrize.type === "miss" && <Icon name="clock" className="sg-toast-icon" />}
               <span>{prizeToastText(wonPrize, t)}</span>
             </div>
 
@@ -414,9 +402,7 @@ export function SpinGame({ open, onClose, onComplete }: GameModalProps) {
             <div className="sg-cooldown">
               <Icon name="clock" />
               <span>{t("nextSpin")}</span>
-              <span className="u-mono tnum sg-timer">
-                {formatCountdown(cooldownSecs)}
-              </span>
+              <span className="u-mono tnum sg-timer">{formatCountdown(cooldownSecs)}</span>
             </div>
 
             {/* Friends comparison */}
@@ -429,18 +415,12 @@ export function SpinGame({ open, onClose, onComplete }: GameModalProps) {
                 {friendPlays.map((fp) => (
                   <div key={fp.handle} className="sg-friend-row">
                     <div className="sg-friend-av">
-                      <GenerativeAvatar
-                        seed={fp.handle}
-                        variant="orbit"
-                        size={34}
-                      />
+                      <GenerativeAvatar seed={fp.handle} variant="orbit" size={34} />
                     </div>
                     <div className="sg-friend-info">
                       <span className="sg-friend-name">{fp.name}</span>
                       <span className="sg-friend-meta">
-                        <span className="u-mono tnum sg-friend-result">
-                          {fp.result.display}
-                        </span>
+                        <span className="u-mono tnum sg-friend-result">{fp.result.display}</span>
                         <span className="sg-friend-time">{fp.playedAt}</span>
                       </span>
                     </div>
@@ -450,11 +430,7 @@ export function SpinGame({ open, onClose, onComplete }: GameModalProps) {
             </div>
 
             {/* Done button */}
-            <button
-              type="button"
-              className="btn btn-ghost sg-done-btn"
-              onClick={onClose}
-            >
+            <button type="button" className="btn btn-ghost sg-done-btn" onClick={onClose}>
               {t("close")}
             </button>
           </div>

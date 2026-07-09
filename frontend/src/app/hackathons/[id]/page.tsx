@@ -15,10 +15,6 @@ export const metadata: Metadata = {
   description: "Hackathon details, schedule, and location.",
 };
 
-export default function HackathonDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default function HackathonDetailPage({ params }: { params: { id: string } }) {
   return <HackathonDetailClient hackathonId={params.id} />;
 }

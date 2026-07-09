@@ -53,11 +53,41 @@ async function main() {
 
   // ── Members ────────────────────────────────────────────────────────
   const memberSeed = [
-    { username: "andrej", displayName: "Andrej Čolić", email: "andrej@tikimiki.dev", points: 1240, bio: "Full-stack, voli hakatone." },
-    { username: "mohammed", displayName: "Mohammed Avdol", email: "mohammed@tikimiki.dev", points: 880, bio: "Frontend & dizajn." },
-    { username: "nenad", displayName: "Nenad Skoković", email: "nenad@tikimiki.dev", points: 410, bio: "Backend, Postgres." },
-    { username: "fenjer", displayName: "Fenjer Marić", email: "fenjer@tikimiki.dev", points: 2050, bio: "ML inženjer." },
-    { username: "mara", displayName: "Mara Jovanović", email: "mara@tikimiki.dev", points: 670, bio: "Dizajn i UX." },
+    {
+      username: "andrej",
+      displayName: "Andrej Čolić",
+      email: "andrej@tikimiki.dev",
+      points: 1240,
+      bio: "Full-stack, voli hakatone.",
+    },
+    {
+      username: "mohammed",
+      displayName: "Mohammed Avdol",
+      email: "mohammed@tikimiki.dev",
+      points: 880,
+      bio: "Frontend & dizajn.",
+    },
+    {
+      username: "nenad",
+      displayName: "Nenad Skoković",
+      email: "nenad@tikimiki.dev",
+      points: 410,
+      bio: "Backend, Postgres.",
+    },
+    {
+      username: "fenjer",
+      displayName: "Fenjer Marić",
+      email: "fenjer@tikimiki.dev",
+      points: 2050,
+      bio: "ML inženjer.",
+    },
+    {
+      username: "mara",
+      displayName: "Mara Jovanović",
+      email: "mara@tikimiki.dev",
+      points: 670,
+      bio: "Dizajn i UX.",
+    },
   ];
   const memberIds: string[] = [];
   for (const m of memberSeed) {
@@ -230,8 +260,7 @@ async function main() {
     .values({
       teamId: teamNullptr.teamId,
       title: "Segfault — AI study buddy",
-      description:
-        "Explains your compiler errors in plain language and quizzes you on the fix.",
+      description: "Explains your compiler errors in plain language and quizzes you on the fix.",
       status: "submitted",
       repositoryUrl: "https://github.com/nullptr/segfault",
       submittedAt: ago(95),
@@ -258,8 +287,7 @@ async function main() {
       { boardId: boardDig.boardId, name: "Done", position: 2 },
     ])
     .returning();
-  const colId = (name: string): string =>
-    kanbanCols.find((c) => c.name === name)!.columnId;
+  const colId = (name: string): string => kanbanCols.find((c) => c.name === name)!.columnId;
   await db.insert(schema.kanbanCards).values([
     {
       columnId: colId("To do"),
@@ -294,30 +322,30 @@ async function main() {
   const appRows = await db
     .insert(schema.applications)
     .values([
-    {
-      userId: andrej,
-      hackathonId: etf,
-      teamId: teamDigitalci.teamId,
-      status: "approved",
-      reviewedBy: orgUser.userId,
-      reviewedAt: ago(2880),
-    },
-    {
-      userId: mohammed,
-      hackathonId: etf,
-      teamId: teamDigitalci.teamId,
-      status: "approved",
-      reviewedBy: orgUser.userId,
-      reviewedAt: ago(2880),
-    },
-    {
-      userId: nenad,
-      hackathonId: etf,
-      teamId: teamNullptr.teamId,
-      status: "approved",
-      reviewedBy: orgUser.userId,
-      reviewedAt: ago(2880),
-    },
+      {
+        userId: andrej,
+        hackathonId: etf,
+        teamId: teamDigitalci.teamId,
+        status: "approved",
+        reviewedBy: orgUser.userId,
+        reviewedAt: ago(2880),
+      },
+      {
+        userId: mohammed,
+        hackathonId: etf,
+        teamId: teamDigitalci.teamId,
+        status: "approved",
+        reviewedBy: orgUser.userId,
+        reviewedAt: ago(2880),
+      },
+      {
+        userId: nenad,
+        hackathonId: etf,
+        teamId: teamNullptr.teamId,
+        status: "approved",
+        reviewedBy: orgUser.userId,
+        reviewedAt: ago(2880),
+      },
       { userId: fenjer, hackathonId: etf, status: "pending" },
       { userId: mara, hackathonId: etf, status: "waitlisted" },
     ])
@@ -351,11 +379,23 @@ async function main() {
     .returning({ questionId: schema.applicationQuestions.questionId });
 
   await db.insert(schema.questionAnswers).values([
-    { applicationId: appByUser[andrej], questionId: qWhy.questionId, answer: "Želim da izgradim nešto korisno i upoznam ekipu." },
+    {
+      applicationId: appByUser[andrej],
+      questionId: qWhy.questionId,
+      answer: "Želim da izgradim nešto korisno i upoznam ekipu.",
+    },
     { applicationId: appByUser[andrej], questionId: qRole.questionId, answer: "Backend" },
-    { applicationId: appByUser[mohammed], questionId: qWhy.questionId, answer: "Da unapredim dizajn i frontend veštine." },
+    {
+      applicationId: appByUser[mohammed],
+      questionId: qWhy.questionId,
+      answer: "Da unapredim dizajn i frontend veštine.",
+    },
     { applicationId: appByUser[mohammed], questionId: qRole.questionId, answer: "Frontend" },
-    { applicationId: appByUser[fenjer], questionId: qWhy.questionId, answer: "ML demo koji rešava realan problem." },
+    {
+      applicationId: appByUser[fenjer],
+      questionId: qWhy.questionId,
+      answer: "ML demo koji rešava realan problem.",
+    },
     { applicationId: appByUser[fenjer], questionId: qRole.questionId, answer: "ML" },
   ]);
 
@@ -407,10 +447,7 @@ async function main() {
   }
 
   // ── Direct-message conversation (andrej ↔ mohammed) ────────────────
-  const [conv] = await db
-    .insert(schema.conversations)
-    .values({ createdBy: andrej })
-    .returning();
+  const [conv] = await db.insert(schema.conversations).values({ createdBy: andrej }).returning();
   await db.insert(schema.conversationMembers).values([
     { conversationId: conv.conversationId, userId: andrej },
     { conversationId: conv.conversationId, userId: mohammed },
@@ -431,9 +468,19 @@ async function main() {
 
   // ── Daily games ────────────────────────────────────────────────────
   await db.insert(schema.games).values([
-    { slug: "spin", name: "Dnevni Spin", description: "Zavrti i osvoji poene.", maxPointsPerPlay: 100 },
+    {
+      slug: "spin",
+      name: "Dnevni Spin",
+      description: "Zavrti i osvoji poene.",
+      maxPointsPerPlay: 100,
+    },
     { slug: "quiz", name: "Kviz", description: "5 pitanja dnevno.", maxPointsPerPlay: 50 },
-    { slug: "kodword", name: "Kodword", description: "Pogodi reč iz 6 pokušaja.", maxPointsPerPlay: 60 },
+    {
+      slug: "kodword",
+      name: "Kodword",
+      description: "Pogodi reč iz 6 pokušaja.",
+      maxPointsPerPlay: 60,
+    },
     { slug: "grupe", name: "Grupe", description: "Grupiši pojmove.", maxPointsPerPlay: 40 },
     { slug: "tempo", name: "Tempo", description: "Trka sa vremenom.", maxPointsPerPlay: 70 },
   ]);
@@ -442,9 +489,24 @@ async function main() {
   const badgeRows = await db
     .insert(schema.badges)
     .values([
-      { name: "Prvi hakaton", description: "Učestvovao na prvom hakatonu.", category: "participation", iconUrl: "/badges/first.svg" },
-      { name: "Timski igrač", description: "Formirao tim.", category: "social", iconUrl: "/badges/team.svg" },
-      { name: "Pobednik", description: "Osvojio nagradu.", category: "achievement", iconUrl: "/badges/winner.svg" },
+      {
+        name: "Prvi hakaton",
+        description: "Učestvovao na prvom hakatonu.",
+        category: "participation",
+        iconUrl: "/badges/first.svg",
+      },
+      {
+        name: "Timski igrač",
+        description: "Formirao tim.",
+        category: "social",
+        iconUrl: "/badges/team.svg",
+      },
+      {
+        name: "Pobednik",
+        description: "Osvojio nagradu.",
+        category: "achievement",
+        iconUrl: "/badges/winner.svg",
+      },
     ])
     .returning();
   await db.insert(schema.userBadges).values([
@@ -455,13 +517,39 @@ async function main() {
 
   // ── Cosmetics + merch (store) ──────────────────────────────────────
   await db.insert(schema.cosmeticItems).values([
-    { type: "username_effect", name: "Neon Ime", description: "Svetleće korisničko ime.", rarity: "rare", renderData: { glow: "#A78BFA" }, pointCost: 500 },
-    { type: "avatar_decoration", name: "Zlatni okvir", description: "Zlatni prsten oko avatara.", rarity: "epic", renderData: { ring: "gold" }, pointCost: 1200 },
-    { type: "banner_effect", name: "Konfete", description: "Animirane konfete na baneru.", rarity: "legendary", renderData: { fx: "confetti" }, pointCost: 3000 },
+    {
+      type: "username_effect",
+      name: "Neon Ime",
+      description: "Svetleće korisničko ime.",
+      rarity: "rare",
+      renderData: { glow: "#A78BFA" },
+      pointCost: 500,
+    },
+    {
+      type: "avatar_decoration",
+      name: "Zlatni okvir",
+      description: "Zlatni prsten oko avatara.",
+      rarity: "epic",
+      renderData: { ring: "gold" },
+      pointCost: 1200,
+    },
+    {
+      type: "banner_effect",
+      name: "Konfete",
+      description: "Animirane konfete na baneru.",
+      rarity: "legendary",
+      renderData: { fx: "confetti" },
+      pointCost: 3000,
+    },
   ]);
   const [tshirt] = await db
     .insert(schema.merchItems)
-    .values({ name: "tikimiki majica", description: "Pamučna majica sa logom.", imageUrl: "/merch/tee.png", pointCost: 1500 })
+    .values({
+      name: "tikimiki majica",
+      description: "Pamučna majica sa logom.",
+      imageUrl: "/merch/tee.png",
+      pointCost: 1500,
+    })
     .returning();
   await db.insert(schema.merchVariants).values([
     { merchId: tshirt.merchId, label: "S", stock: 10 },
@@ -496,7 +584,11 @@ async function main() {
     .values([
       { userId: andrej, content: "Spremam se za ETF HackWeek! 🚀", createdAt: ago(240) },
       { userId: mohammed, content: "Tražim tim za frontend, javite se 👋", createdAt: ago(150) },
-      { userId: fenjer, content: "Objavio sam novi ML starter repo, link u komentarima.", createdAt: ago(60) },
+      {
+        userId: fenjer,
+        content: "Objavio sam novi ML starter repo, link u komentarima.",
+        createdAt: ago(60),
+      },
     ])
     .returning();
 

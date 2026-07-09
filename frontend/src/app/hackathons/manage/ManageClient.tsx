@@ -24,32 +24,41 @@ import {
  */
 
 const M = {
-  back:            { en: "Back",                       sr: "Nazad" },
-  pageTitle:       { en: "My hackathons",              sr: "Moji hakatoni" },
-  pageSub:         { en: "Drafts, published hackathons and applications.", sr: "Nacrti, objavljeni hakatoni i prijave." },
-  create:          { en: "Create hackathon",           sr: "Kreiraj hackathon" },
-  loading:         { en: "Loading…",                   sr: "Učitavanje…" },
-  loadFailed:      { en: "Couldn't load your hackathons.", sr: "Učitavanje nije uspelo." },
+  back: { en: "Back", sr: "Nazad" },
+  pageTitle: { en: "My hackathons", sr: "Moji hakatoni" },
+  pageSub: {
+    en: "Drafts, published hackathons and applications.",
+    sr: "Nacrti, objavljeni hakatoni i prijave.",
+  },
+  create: { en: "Create hackathon", sr: "Kreiraj hackathon" },
+  loading: { en: "Loading…", sr: "Učitavanje…" },
+  loadFailed: { en: "Couldn't load your hackathons.", sr: "Učitavanje nije uspelo." },
 
-  draftsTitle:     { en: "Drafts",                     sr: "Nacrti" },
-  draftUntitled:   { en: "Untitled draft",             sr: "Neimenovani nacrt" },
-  lastEdited:      { en: "last edited",                sr: "poslednja izmena" },
-  continueEdit:    { en: "Continue editing",           sr: "Nastavi izmene" },
-  discard:         { en: "Discard",                    sr: "Odbaci" },
-  confirmDiscard:  { en: "Discard this draft? This cannot be undone.", sr: "Odbaciti ovaj nacrt? Ovo se ne može poništiti." },
+  draftsTitle: { en: "Drafts", sr: "Nacrti" },
+  draftUntitled: { en: "Untitled draft", sr: "Neimenovani nacrt" },
+  lastEdited: { en: "last edited", sr: "poslednja izmena" },
+  continueEdit: { en: "Continue editing", sr: "Nastavi izmene" },
+  discard: { en: "Discard", sr: "Odbaci" },
+  confirmDiscard: {
+    en: "Discard this draft? This cannot be undone.",
+    sr: "Odbaciti ovaj nacrt? Ovo se ne može poništiti.",
+  },
 
-  publishedTitle:  { en: "Published",                  sr: "Objavljeni" },
-  noHackathons:    { en: "You haven't organized any hackathons yet.", sr: "Još nisi organizovao nijedan hakaton." },
-  participants:    { en: "participants",               sr: "učesnika" },
-  teams:           { en: "teams",                      sr: "timova" },
-  view:            { en: "View",                       sr: "Pogledaj" },
-  edit:            { en: "Edit",                       sr: "Izmeni" },
-  applications:    { en: "Applications",               sr: "Prijave" },
+  publishedTitle: { en: "Published", sr: "Objavljeni" },
+  noHackathons: {
+    en: "You haven't organized any hackathons yet.",
+    sr: "Još nisi organizovao nijedan hakaton.",
+  },
+  participants: { en: "participants", sr: "učesnika" },
+  teams: { en: "teams", sr: "timova" },
+  view: { en: "View", sr: "Pogledaj" },
+  edit: { en: "Edit", sr: "Izmeni" },
+  applications: { en: "Applications", sr: "Prijave" },
 
-  statusUpcoming:  { en: "Upcoming",                   sr: "Predstojeći" },
-  statusLive:      { en: "Live",                       sr: "U toku" },
-  statusFinished:  { en: "Finished",                   sr: "Završen" },
-  statusCancelled: { en: "Cancelled",                  sr: "Otkazan" },
+  statusUpcoming: { en: "Upcoming", sr: "Predstojeći" },
+  statusLive: { en: "Live", sr: "U toku" },
+  statusFinished: { en: "Finished", sr: "Završen" },
+  statusCancelled: { en: "Cancelled", sr: "Otkazan" },
 } as const;
 
 function pad(n: number): string {
@@ -80,10 +89,7 @@ export function ManageClient() {
     let cancelled = false;
     (async () => {
       try {
-        const [d, h] = await Promise.all([
-          getHackathonDrafts(),
-          getMyHackathons(),
-        ]);
+        const [d, h] = await Promise.all([getHackathonDrafts(), getMyHackathons()]);
         if (cancelled) return;
         setDrafts(d);
         setMine(h);
@@ -150,11 +156,15 @@ export function ManageClient() {
         </div>
 
         {loading ? (
-          <p className="page-sub" style={{ padding: "0 4px" }}>{t("loading")}</p>
+          <p className="page-sub" style={{ padding: "0 4px" }}>
+            {t("loading")}
+          </p>
         ) : (
           <>
             {error && (
-              <p className="nh-server-err" style={{ margin: "0 4px 12px" }}>{error}</p>
+              <p className="nh-server-err" style={{ margin: "0 4px 12px" }}>
+                {error}
+              </p>
             )}
 
             {/* DRAFTS */}
@@ -172,9 +182,7 @@ export function ManageClient() {
                         <Icon name="clock" aria-hidden="true" /> {t("draftsTitle")}
                       </div>
                       <div className="hk-apply-info">
-                        <div className="hk-apply-name">
-                          {draftTitle(d) || t("draftUntitled")}
-                        </div>
+                        <div className="hk-apply-name">{draftTitle(d) || t("draftUntitled")}</div>
                         <div className="hk-apply-meta">
                           {t("lastEdited")} {fmtDate(d.updatedAt)}
                         </div>
@@ -205,7 +213,9 @@ export function ManageClient() {
                 </div>
               </div>
               {mine.length === 0 ? (
-                <p className="page-sub" style={{ padding: "4px" }}>{t("noHackathons")}</p>
+                <p className="page-sub" style={{ padding: "4px" }}>
+                  {t("noHackathons")}
+                </p>
               ) : (
                 <div className="hk-apply-list">
                   {mine.map((h) => (
@@ -226,10 +236,7 @@ export function ManageClient() {
                       >
                         {t("view")}
                       </Link>
-                      <Link
-                        className="btn btn-ghost hk-btn-sm"
-                        href="/applications"
-                      >
+                      <Link className="btn btn-ghost hk-btn-sm" href="/applications">
                         {t("applications")}
                       </Link>
                       <Link

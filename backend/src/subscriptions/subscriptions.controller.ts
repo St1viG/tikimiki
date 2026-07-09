@@ -2,10 +2,7 @@ import { Body, Controller, Get, Post, UseGuards } from "@nestjs/common";
 import { ZodValidationPipe } from "../common/zod.pipe";
 import { CurrentUser } from "../auth/current-user.decorator";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
-import {
-  activateSubscriptionSchema,
-  type ActivateSubscriptionInput,
-} from "./dto";
+import { activateSubscriptionSchema, type ActivateSubscriptionInput } from "./dto";
 import { SubscriptionsService } from "./subscriptions.service";
 
 @Controller("subscriptions")

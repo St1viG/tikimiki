@@ -9,7 +9,8 @@ import { CohorClient } from "./CohorClient";
    cohor-page.css above. */
 export const metadata: Metadata = {
   title: "tikimiki: Cohor",
-  description: "Discord-style chat for hackathon teams: channels, DMs, bounties, audience voting, kanban, and results.",
+  description:
+    "Discord-style chat for hackathon teams: channels, DMs, bounties, audience voting, kanban, and results.",
 };
 
 export default function CohorPage() {

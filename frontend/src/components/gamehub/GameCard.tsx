@@ -3,11 +3,7 @@
 import { Icon } from "@/components/Icon";
 import { GenerativeAvatar } from "@/components/ui/GenerativeAvatar";
 import type { GameId, GameMeta, GameResult } from "@/lib/gamehub/types";
-import {
-  FRIEND_PLAYS,
-  STREAKS,
-  TODAY_RESULTS,
-} from "@/lib/gamehub/mock";
+import { FRIEND_PLAYS, STREAKS, TODAY_RESULTS } from "@/lib/gamehub/mock";
 import { useT } from "@/components/i18n/LanguageProvider";
 
 /* UI chrome strings. */
@@ -124,10 +120,7 @@ export function GameCard({
   const played = Boolean(today);
 
   return (
-    <article
-      className={`gc gc-${game.accent}`}
-      data-played={played ? "true" : undefined}
-    >
+    <article className={`gc gc-${game.accent}`} data-played={played ? "true" : undefined}>
       {/* Header: icon tile + title/tagline + streak chip */}
       <header className="gc-head">
         <span className="gc-tile" aria-hidden="true">
@@ -169,9 +162,7 @@ export function GameCard({
             {t("play")}
           </button>
         )}
-        <span className="gc-metric">
-          {t(METRIC_KEY[game.metricLabel] ?? "metricRezultat")}
-        </span>
+        <span className="gc-metric">{t(METRIC_KEY[game.metricLabel] ?? "metricRezultat")}</span>
       </div>
 
       {/* Friends comparison strip (LinkedIn-style) */}

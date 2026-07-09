@@ -35,9 +35,8 @@ export function dbOf(app: INestApplication): DrizzleDB {
 export async function closeTestApp(app: INestApplication): Promise<void> {
   const db = dbOf(app);
   await app.close();
-  const client = (
-    db as unknown as { $client?: { end?: (opts?: unknown) => Promise<void> } }
-  ).$client;
+  const client = (db as unknown as { $client?: { end?: (opts?: unknown) => Promise<void> } })
+    .$client;
   if (client?.end) {
     await client.end({ timeout: 5 });
   }

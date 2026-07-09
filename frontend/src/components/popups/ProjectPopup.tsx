@@ -17,34 +17,46 @@ import type { Project } from "@/lib/api";
  */
 
 const M = {
-  title:          { en: "Team project",                       sr: "Projekat tima" },
-  close:          { en: "Close",                              sr: "Zatvori" },
-  loading:        { en: "Loading…",                           sr: "Učitavanje…" },
-  forTeam:        { en: "For",                                sr: "Za" },
-  titleLabel:     { en: "Project title",                      sr: "Naziv projekta" },
-  titlePh:        { en: "e.g. Aurora — flood early-warning",  sr: "npr. Aurora — rano upozorenje na poplave" },
-  descLabel:      { en: "Description",                         sr: "Opis" },
-  descPh:         { en: "What it does, how it works, the stack…", sr: "Šta radi, kako radi, koji stack…" },
-  repoLabel:      { en: "Repository URL",                     sr: "Link repozitorijuma" },
-  videoLabel:     { en: "Demo video URL",                     sr: "Link demo videa" },
-  videoUpload:    { en: "Upload video",                       sr: "Otpremi video" },
-  videoUploading: { en: "Uploading…",                         sr: "Otpremam…" },
-  videoEmpty:     { en: "No video yet.",                      sr: "Nema video snimka." },
-  statusDraft:    { en: "Draft",                              sr: "Nacrt" },
-  statusSubmitted:{ en: "Submitted",                          sr: "Predato" },
-  statusReview:   { en: "Under review",                       sr: "U pregledu" },
-  statusJudged:   { en: "Judged",                             sr: "Ocenjeno" },
-  draftNote:      { en: "Save your draft anytime, then submit before the hackathon ends to enter judging and audience voting.", sr: "Sačuvaj nacrt kad god želiš, pa ga predaj pre kraja hakatona da uđe u ocenjivanje i glasanje publike." },
-  submittedNote:  { en: "Submitted on",                       sr: "Predato" },
-  judgedNote:     { en: "Judging has begun — this project can no longer be edited.", sr: "Ocenjivanje je počelo — projekat se više ne može menjati." },
-  createDraft:    { en: "Create draft",                       sr: "Napravi nacrt" },
-  saveChanges:    { en: "Save changes",                       sr: "Sačuvaj izmene" },
-  saving:         { en: "Saving…",                            sr: "Čuvam…" },
-  submit:         { en: "Submit project",                     sr: "Predaj projekat" },
-  submitting:     { en: "Submitting…",                        sr: "Predajem…" },
-  withdraw:       { en: "Withdraw to draft",                  sr: "Vrati u nacrt" },
-  withdrawing:    { en: "Withdrawing…",                        sr: "Vraćam…" },
-  genericError:   { en: "Something went wrong. Try again.",   sr: "Nešto je pošlo po zlu. Pokušaj ponovo." },
+  title: { en: "Team project", sr: "Projekat tima" },
+  close: { en: "Close", sr: "Zatvori" },
+  loading: { en: "Loading…", sr: "Učitavanje…" },
+  forTeam: { en: "For", sr: "Za" },
+  titleLabel: { en: "Project title", sr: "Naziv projekta" },
+  titlePh: {
+    en: "e.g. Aurora — flood early-warning",
+    sr: "npr. Aurora — rano upozorenje na poplave",
+  },
+  descLabel: { en: "Description", sr: "Opis" },
+  descPh: { en: "What it does, how it works, the stack…", sr: "Šta radi, kako radi, koji stack…" },
+  repoLabel: { en: "Repository URL", sr: "Link repozitorijuma" },
+  videoLabel: { en: "Demo video URL", sr: "Link demo videa" },
+  videoUpload: { en: "Upload video", sr: "Otpremi video" },
+  videoUploading: { en: "Uploading…", sr: "Otpremam…" },
+  videoEmpty: { en: "No video yet.", sr: "Nema video snimka." },
+  statusDraft: { en: "Draft", sr: "Nacrt" },
+  statusSubmitted: { en: "Submitted", sr: "Predato" },
+  statusReview: { en: "Under review", sr: "U pregledu" },
+  statusJudged: { en: "Judged", sr: "Ocenjeno" },
+  draftNote: {
+    en: "Save your draft anytime, then submit before the hackathon ends to enter judging and audience voting.",
+    sr: "Sačuvaj nacrt kad god želiš, pa ga predaj pre kraja hakatona da uđe u ocenjivanje i glasanje publike.",
+  },
+  submittedNote: { en: "Submitted on", sr: "Predato" },
+  judgedNote: {
+    en: "Judging has begun — this project can no longer be edited.",
+    sr: "Ocenjivanje je počelo — projekat se više ne može menjati.",
+  },
+  createDraft: { en: "Create draft", sr: "Napravi nacrt" },
+  saveChanges: { en: "Save changes", sr: "Sačuvaj izmene" },
+  saving: { en: "Saving…", sr: "Čuvam…" },
+  submit: { en: "Submit project", sr: "Predaj projekat" },
+  submitting: { en: "Submitting…", sr: "Predajem…" },
+  withdraw: { en: "Withdraw to draft", sr: "Vrati u nacrt" },
+  withdrawing: { en: "Withdrawing…", sr: "Vraćam…" },
+  genericError: {
+    en: "Something went wrong. Try again.",
+    sr: "Nešto je pošlo po zlu. Pokušaj ponovo.",
+  },
 } as const;
 
 type Busy = "save" | "submit" | "withdraw" | null;
@@ -120,8 +132,7 @@ export function ProjectPopup({
     setVideoUrl(p?.videoUrl ?? "");
   }
 
-  const judged =
-    project?.status === "judged" || project?.status === "under_review";
+  const judged = project?.status === "judged" || project?.status === "under_review";
   const isSubmitted = project?.status === "submitted";
   const canEdit = !judged;
   const titleValid = title.trim().length > 0;
@@ -383,8 +394,7 @@ export function ProjectPopup({
 
               {isSubmitted && project?.submittedAt && (
                 <p className="am-note">
-                  {t("submittedNote")}{" "}
-                  {new Date(project.submittedAt).toLocaleString()}
+                  {t("submittedNote")} {new Date(project.submittedAt).toLocaleString()}
                 </p>
               )}
               {judged ? (
@@ -399,11 +409,7 @@ export function ProjectPopup({
 
         <div className="am-foot">
           {!loading && isSubmitted && (
-            <button
-              className="btn btn-ghost"
-              onClick={handleWithdraw}
-              disabled={busy !== null}
-            >
+            <button className="btn btn-ghost" onClick={handleWithdraw} disabled={busy !== null}>
               {busy === "withdraw" ? t("withdrawing") : t("withdraw")}
             </button>
           )}
@@ -414,11 +420,7 @@ export function ProjectPopup({
               onClick={handleSave}
               disabled={busy !== null || !titleValid}
             >
-              {busy === "save"
-                ? t("saving")
-                : project
-                  ? t("saveChanges")
-                  : t("createDraft")}
+              {busy === "save" ? t("saving") : project ? t("saveChanges") : t("createDraft")}
             </button>
           )}
 
@@ -428,8 +430,7 @@ export function ProjectPopup({
               onClick={handleSubmit}
               disabled={busy !== null || !titleValid}
             >
-              <Icon name="check" />{" "}
-              {busy === "submit" ? t("submitting") : t("submit")}
+              <Icon name="check" /> {busy === "submit" ? t("submitting") : t("submit")}
             </button>
           )}
         </div>

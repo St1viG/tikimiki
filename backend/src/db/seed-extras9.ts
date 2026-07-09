@@ -26,8 +26,7 @@ const PERMISSION_CATALOG: { name: string; description: string }[] = [
   },
   {
     name: "manage_roles",
-    description:
-      "Create and edit roles, set their permissions, assign and remove members",
+    description: "Create and edit roles, set their permissions, assign and remove members",
   },
   { name: "manage_messages", description: "Delete any member's messages" },
   { name: "kick_members", description: "Remove members from the server" },
@@ -80,12 +79,7 @@ async function main() {
   const [already] = await db
     .select({ serverRoleId: schema.serverRoles.serverRoleId })
     .from(schema.serverRoles)
-    .where(
-      and(
-        eq(schema.serverRoles.serverId, serverId),
-        eq(schema.serverRoles.name, "Moderator"),
-      ),
-    )
+    .where(and(eq(schema.serverRoles.serverId, serverId), eq(schema.serverRoles.name, "Moderator")))
     .limit(1);
   if (already) {
     console.log("↩  Moderator role already seeded — nothing to do.");

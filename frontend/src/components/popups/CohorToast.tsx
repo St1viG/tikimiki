@@ -27,11 +27,7 @@ export function CohorToast({
 }) {
   return (
     <div
-      className={clsx(
-        "cohor-toast",
-        `cohor-toast-${variant}`,
-        show && "show"
-      )}
+      className={clsx("cohor-toast", `cohor-toast-${variant}`, show && "show")}
       role="status"
       aria-live="polite"
     >

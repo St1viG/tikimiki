@@ -20,29 +20,35 @@ import { XP_REWARDS } from "@/lib/rewards";
  */
 
 const M = {
-  titleNotEnough:    { en: "Not enough XP points",                        sr: "Nedovoljno XP poena" },
-  titleConfirm:      { en: "Confirm purchase",                            sr: "Potvrdi kupovinu" },
-  confirmSub:        { en: "Are you sure you want to buy this item?",     sr: "Da li si siguran/na da želiš da kupiš ovaj artikal?" },
-  sizeLabel:         { en: "Choose size",                                 sr: "Izaberi veličinu" },
-  deliveryAddr:      { en: "Delivery address",                            sr: "Adresa dostave" },
-  deliveryAddrPh:    { en: "Street and number, city, postal code",        sr: "Ulica i broj, grad, poštanski broj" },
-  deliveryPhone:     { en: "Contact phone",                               sr: "Kontakt telefon" },
-  deficitTitle:      { en: "You are missing",                             sr: "Nedostaje ti" },
-  deficitSub1:       { en: "You have",                                    sr: "Imaš" },
-  deficitSub2:       { en: "XP · Needed",                                 sr: "XP · Potrebno" },
-  earnHeader:        { en: "How to earn XP?",                             sr: "Kako zaraditi XP?" },
-  earnDaily:         { en: "Daily Minigame",                              sr: "Daily Minigame" },
-  earnDailySuffix:   { en: "daily",                                       sr: "dnevno" },
-  earnSpin:          { en: "Daily Spin",                                  sr: "Daily Spin" },
-  earnHack:          { en: "Hackathon participation",                     sr: "Hackathon učešće" },
-  earnWin:           { en: "Hackathon win",                               sr: "Pobeda na hackathonu" },
-  earnUpTo:          { en: "up to",                                       sr: "do" },
-  priceLabel:        { en: "Price",                                       sr: "Cena" },
-  cancelBtn:         { en: "Cancel",                                      sr: "Otkaži" },
-  confirmBtn:        { en: "Confirm purchase",                            sr: "Potvrdi kupovinu" },
-  earnBtn:           { en: "Earn XP",                                     sr: "Zaradi XP" },
-  warnAddr:          { en: "Enter delivery address.",                     sr: "Unesi adresu dostave." },
-  warnPhone:         { en: "Enter contact phone.",                        sr: "Unesi kontakt telefon." },
+  titleNotEnough: { en: "Not enough XP points", sr: "Nedovoljno XP poena" },
+  titleConfirm: { en: "Confirm purchase", sr: "Potvrdi kupovinu" },
+  confirmSub: {
+    en: "Are you sure you want to buy this item?",
+    sr: "Da li si siguran/na da želiš da kupiš ovaj artikal?",
+  },
+  sizeLabel: { en: "Choose size", sr: "Izaberi veličinu" },
+  deliveryAddr: { en: "Delivery address", sr: "Adresa dostave" },
+  deliveryAddrPh: {
+    en: "Street and number, city, postal code",
+    sr: "Ulica i broj, grad, poštanski broj",
+  },
+  deliveryPhone: { en: "Contact phone", sr: "Kontakt telefon" },
+  deficitTitle: { en: "You are missing", sr: "Nedostaje ti" },
+  deficitSub1: { en: "You have", sr: "Imaš" },
+  deficitSub2: { en: "XP · Needed", sr: "XP · Potrebno" },
+  earnHeader: { en: "How to earn XP?", sr: "Kako zaraditi XP?" },
+  earnDaily: { en: "Daily Minigame", sr: "Daily Minigame" },
+  earnDailySuffix: { en: "daily", sr: "dnevno" },
+  earnSpin: { en: "Daily Spin", sr: "Daily Spin" },
+  earnHack: { en: "Hackathon participation", sr: "Hackathon učešće" },
+  earnWin: { en: "Hackathon win", sr: "Pobeda na hackathonu" },
+  earnUpTo: { en: "up to", sr: "do" },
+  priceLabel: { en: "Price", sr: "Cena" },
+  cancelBtn: { en: "Cancel", sr: "Otkaži" },
+  confirmBtn: { en: "Confirm purchase", sr: "Potvrdi kupovinu" },
+  earnBtn: { en: "Earn XP", sr: "Zaradi XP" },
+  warnAddr: { en: "Enter delivery address.", sr: "Unesi adresu dostave." },
+  warnPhone: { en: "Enter contact phone.", sr: "Unesi kontakt telefon." },
 } as const;
 
 export type ModalState =
@@ -214,12 +220,12 @@ export function BuyModal({
               </div>
               <div>
                 <div className="modal-deficit-title">
-                  {t("deficitTitle")}{" "}
-                  <span id="modal-deficit-amount">{formatXp(price - xp)}</span> XP
+                  {t("deficitTitle")} <span id="modal-deficit-amount">{formatXp(price - xp)}</span>{" "}
+                  XP
                 </div>
                 <div className="modal-deficit-sub">
-                  {t("deficitSub1")} <span id="modal-deficit-have">{formatXp(xp)}</span> {t("deficitSub2")}{" "}
-                  <span id="modal-deficit-need">{formatXp(price)}</span> XP
+                  {t("deficitSub1")} <span id="modal-deficit-have">{formatXp(xp)}</span>{" "}
+                  {t("deficitSub2")} <span id="modal-deficit-need">{formatXp(price)}</span> XP
                 </div>
               </div>
             </div>
@@ -257,8 +263,7 @@ export function BuyModal({
         <div className="modal-cost-row">
           <div className="modal-cost-label">{t("priceLabel")}</div>
           <div className="modal-cost-val" id="modal-price">
-            <Icon name="coin" />
-            {" "}{formatXp(price)} XP
+            <Icon name="coin" /> {formatXp(price)} XP
           </div>
         </div>
 

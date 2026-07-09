@@ -20,12 +20,7 @@ export type OrgVerificationStatus = (typeof ORG_VERIFICATION_STATUS)[number];
 export const HACKATHON_TYPE = tuple("physical", "virtual", "hybrid");
 export type HackathonType = (typeof HACKATHON_TYPE)[number];
 
-export const HACKATHON_STATUS = tuple(
-  "upcoming",
-  "ongoing",
-  "finished",
-  "cancelled",
-);
+export const HACKATHON_STATUS = tuple("upcoming", "ongoing", "finished", "cancelled");
 export type HackathonStatus = (typeof HACKATHON_STATUS)[number];
 
 export const TEAM_ROLE = tuple("leader", "member");
@@ -40,12 +35,7 @@ export const APPLICATION_STATUS = tuple(
 );
 export type ApplicationStatus = (typeof APPLICATION_STATUS)[number];
 
-export const PROJECT_STATUS = tuple(
-  "draft",
-  "submitted",
-  "under_review",
-  "judged",
-);
+export const PROJECT_STATUS = tuple("draft", "submitted", "under_review", "judged");
 export type ProjectStatus = (typeof PROJECT_STATUS)[number];
 
 export const CHANNEL_TYPE = tuple(
@@ -58,19 +48,10 @@ export const CHANNEL_TYPE = tuple(
 );
 export type ChannelType = (typeof CHANNEL_TYPE)[number];
 
-export const BADGE_CATEGORY = tuple(
-  "participation",
-  "achievement",
-  "social",
-  "special",
-);
+export const BADGE_CATEGORY = tuple("participation", "achievement", "social", "special");
 export type BadgeCategory = (typeof BADGE_CATEGORY)[number];
 
-export const COSMETIC_TYPE = tuple(
-  "username_effect",
-  "avatar_decoration",
-  "banner_effect",
-);
+export const COSMETIC_TYPE = tuple("username_effect", "avatar_decoration", "banner_effect");
 export type CosmeticType = (typeof COSMETIC_TYPE)[number];
 
 export const COSMETIC_RARITY = tuple("common", "rare", "epic", "legendary");
@@ -105,21 +86,10 @@ export type SubscriptionPlan = (typeof SUBSCRIPTION_PLAN)[number];
 export const SUBSCRIPTION_STATUS = tuple("active", "cancelled", "expired");
 export type SubscriptionStatus = (typeof SUBSCRIPTION_STATUS)[number];
 
-export const REPORT_TARGET_TYPE = tuple(
-  "user",
-  "post",
-  "comment",
-  "message",
-  "hackathon",
-);
+export const REPORT_TARGET_TYPE = tuple("user", "post", "comment", "message", "hackathon");
 export type ReportTargetType = (typeof REPORT_TARGET_TYPE)[number];
 
-export const REPORT_STATUS = tuple(
-  "pending",
-  "reviewed",
-  "resolved",
-  "dismissed",
-);
+export const REPORT_STATUS = tuple("pending", "reviewed", "resolved", "dismissed");
 export type ReportStatus = (typeof REPORT_STATUS)[number];
 
 export const ENTITY_TYPE = tuple(

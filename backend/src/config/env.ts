@@ -8,23 +8,15 @@ import { z } from "zod";
 // environment always win — dotenv never overwrites existing values — which
 // is what keeps the test suite pinned to tikimiki_test (vitest presets
 // DATABASE_URL before any of this runs).
-for (const candidate of [
-  resolve(process.cwd(), ".env"),
-  resolve(process.cwd(), "..", ".env"),
-]) {
+for (const candidate of [resolve(process.cwd(), ".env"), resolve(process.cwd(), "..", ".env")]) {
   if (existsSync(candidate)) loadEnvFile({ path: candidate });
 }
 
 const schema = z.object({
-  NODE_ENV: z
-    .enum(["development", "test", "production"])
-    .default("development"),
+  NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().int().positive().default(4000),
   WEB_ORIGIN: z.string().default("http://localhost:3000"),
-  DATABASE_URL: z
-    .string()
-    .url()
-    .default("postgres://tikimiki:tikimiki@localhost:5432/tikimiki"),
+  DATABASE_URL: z.string().url().default("postgres://tikimiki:tikimiki@localhost:5432/tikimiki"),
   REDIS_URL: z.string().url().default("redis://localhost:6379"),
   JWT_ACCESS_SECRET: z.string().min(1).default("change-me-access"),
   JWT_REFRESH_SECRET: z.string().min(1).default("change-me-refresh"),
@@ -48,9 +40,7 @@ const schema = z.object({
 
 // Blank values (bare `KEY=` lines in .env) behave like unset keys so the
 // schema defaults apply instead of failing enum/url validation on "".
-const definedEnv = Object.fromEntries(
-  Object.entries(process.env).filter(([, v]) => v !== ""),
-);
+const definedEnv = Object.fromEntries(Object.entries(process.env).filter(([, v]) => v !== ""));
 
 export const env = schema.parse(definedEnv);
 export type Env = z.infer<typeof schema>;

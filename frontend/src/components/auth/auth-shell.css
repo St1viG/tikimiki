@@ -10,22 +10,38 @@
    `default` reuses the global .wordmark token sizing; the page-scoped
    .auth-wordmark (tilted, login) and .auth-logo (suspended) keep their own
    styles in login.css / suspended.css and are selected via the `variant` prop. */
-.auth-wordmark-link{
-  display:inline-block;
-  font-family:var(--display); font-weight:800; font-size:30px;
-  letter-spacing:-.04em; color:var(--lemon); line-height:1; user-select:none;
+.auth-wordmark-link {
+  display: inline-block;
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 30px;
+  letter-spacing: -0.04em;
+  color: var(--lemon);
+  line-height: 1;
+  user-select: none;
 }
-.auth-wordmark-link b{ color:var(--violet-light); font-weight:800; }
+.auth-wordmark-link b {
+  color: var(--violet-light);
+  font-weight: 800;
+}
 
 /* Block-level status messages (replaces inline #ff6b6b / #7bdc8a / #a78bfa). */
-.auth-error{
-  color:var(--red); font-size:.85rem; margin-bottom:.75rem;
+.auth-error {
+  color: var(--red);
+  font-size: 0.85rem;
+  margin-bottom: 0.75rem;
 }
-.auth-success{
-  color:var(--green); font-weight:600; margin-bottom:.4rem;
+.auth-success {
+  color: var(--green);
+  font-weight: 600;
+  margin-bottom: 0.4rem;
 }
 
 /* Shared OAuth brand buttons (Google + GitHub). Mirrors the dimensions of the
    existing .google-btn / .github-btn so login keeps an identical look while the
    signup pages can opt into the same component. */
-.auth-oauth-stack{ display:flex; flex-direction:column; gap:10px; }
+.auth-oauth-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}

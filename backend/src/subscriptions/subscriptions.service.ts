@@ -1,9 +1,4 @@
-import {
-  ConflictException,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from "@nestjs/common";
+import { ConflictException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { and, desc, eq, gt, inArray } from "drizzle-orm";
 import { DAY_MS } from "../common/constants";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
@@ -139,12 +134,7 @@ export class SubscriptionsService {
         cancelledAt: subscriptions.cancelledAt,
       })
       .from(subscriptions)
-      .where(
-        and(
-          eq(subscriptions.userId, userId),
-          eq(subscriptions.status, "active"),
-        ),
-      )
+      .where(and(eq(subscriptions.userId, userId), eq(subscriptions.status, "active")))
       .orderBy(desc(subscriptions.startedAt))
       .limit(1);
 
@@ -152,19 +142,11 @@ export class SubscriptionsService {
   }
 
   /** Create an active subscription for the caller (mock payment). */
-  async activate(
-    userId: string,
-    input: ActivateSubscriptionInput,
-  ): Promise<SubscriptionView> {
+  async activate(userId: string, input: ActivateSubscriptionInput): Promise<SubscriptionView> {
     const [existing] = await this.db
       .select({ subscriptionId: subscriptions.subscriptionId })
       .from(subscriptions)
-      .where(
-        and(
-          eq(subscriptions.userId, userId),
-          eq(subscriptions.status, "active"),
-        ),
-      )
+      .where(and(eq(subscriptions.userId, userId), eq(subscriptions.status, "active")))
       .limit(1);
 
     if (existing) {
@@ -202,12 +184,7 @@ export class SubscriptionsService {
     const updated = await this.db
       .update(subscriptions)
       .set({ status: "cancelled", cancelledAt: now })
-      .where(
-        and(
-          eq(subscriptions.userId, userId),
-          eq(subscriptions.status, "active"),
-        ),
-      )
+      .where(and(eq(subscriptions.userId, userId), eq(subscriptions.status, "active")))
       .returning({ subscriptionId: subscriptions.subscriptionId });
 
     if (updated.length === 0) {

@@ -11,11 +11,7 @@ import { useT } from "@/components/i18n/LanguageProvider";
  * the edit screen can reconcile create/update/delete.
  */
 
-export type QuestionKind =
-  | "short_text"
-  | "long_text"
-  | "single_choice"
-  | "multi_choice";
+export type QuestionKind = "short_text" | "long_text" | "single_choice" | "multi_choice";
 
 export interface QuestionDraft {
   /** Stable local key for React lists (not sent to the server). */
@@ -68,12 +64,7 @@ const M = {
   empty: { en: "No questions yet.", sr: "Još nema pitanja." },
 } as const;
 
-const KIND_ORDER: QuestionKind[] = [
-  "short_text",
-  "long_text",
-  "single_choice",
-  "multi_choice",
-];
+const KIND_ORDER: QuestionKind[] = ["short_text", "long_text", "single_choice", "multi_choice"];
 
 function isChoice(t: QuestionKind): boolean {
   return t === "single_choice" || t === "multi_choice";
@@ -114,8 +105,7 @@ export function QuestionBuilder({
     patch(qi, {
       options: value[qi].options.map((o, idx) => (idx === oi ? text : o)),
     });
-  const addOption = (qi: number) =>
-    patch(qi, { options: [...value[qi].options, ""] });
+  const addOption = (qi: number) => patch(qi, { options: [...value[qi].options, ""] });
   const removeOption = (qi: number, oi: number) =>
     patch(qi, { options: value[qi].options.filter((_, idx) => idx !== oi) });
 
@@ -124,7 +114,9 @@ export function QuestionBuilder({
       <div className="qb-head">
         <div>
           <h2 className="nh-section-title">{t("title")}</h2>
-          <p className="nh-hint" style={{ marginTop: 2 }}>{t("sub")}</p>
+          <p className="nh-hint" style={{ marginTop: 2 }}>
+            {t("sub")}
+          </p>
         </div>
         <button
           type="button"

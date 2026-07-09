@@ -75,12 +75,20 @@ const CATEGORY_BANK: readonly CategorySpec[] = [
   { key: "git", label: "Git komande", members: ["commit", "push", "merge", "rebase"] },
   { key: "http", label: "HTTP metode", members: ["GET", "POST", "PUT", "PATCH"] },
   { key: "oblaci", label: "Cloud provajderi", members: ["AWS", "Azure", "GCP", "Vercel"] },
-  { key: "kontejneri", label: "DevOps alati", members: ["Docker", "Kubernetes", "Terraform", "Ansible"] },
+  {
+    key: "kontejneri",
+    label: "DevOps alati",
+    members: ["Docker", "Kubernetes", "Terraform", "Ansible"],
+  },
   { key: "status", label: "HTTP statusi", members: ["200", "301", "404", "500"] },
   { key: "tipovi", label: "Tipovi podataka", members: ["string", "boolean", "array", "object"] },
   { key: "linux", label: "Linux komande", members: ["grep", "chmod", "kill", "sudo"] },
   { key: "stilovi", label: "CSS layout", members: ["flex", "grid", "block", "inline"] },
-  { key: "metodologije", label: "Agilni pojmovi", members: ["Sprint", "Backlog", "Scrum", "Standup"] },
+  {
+    key: "metodologije",
+    label: "Agilni pojmovi",
+    members: ["Sprint", "Backlog", "Scrum", "Standup"],
+  },
 ];
 
 /* Four distinct, on-brand row tints (solved groups)
@@ -129,9 +137,7 @@ type Phase = "play" | "won" | "lost";
 
 /* Friend comparison ranking (grupe = fewer mistakes is better) */
 function rankPlays(plays: readonly FriendPlay[]): FriendPlay[] {
-  return plays
-    .slice()
-    .sort((a, b) => (a.result.raw ?? Infinity) - (b.result.raw ?? Infinity));
+  return plays.slice().sort((a, b) => (a.result.raw ?? Infinity) - (b.result.raw ?? Infinity));
 }
 
 /** Pluralization for the mistake count (Serbian: greška / greške / grešaka). */

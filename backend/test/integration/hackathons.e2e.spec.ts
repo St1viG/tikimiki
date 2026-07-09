@@ -43,10 +43,7 @@ describe("hackathons (e2e)", () => {
     // The create path must also provision a server with the default channel
     // groups + opšte/najave channels. Verify directly in the database.
     const db = dbOf(app);
-    const [server] = await db
-      .select()
-      .from(servers)
-      .where(eq(servers.hackathonId, hk.hackathonId));
+    const [server] = await db.select().from(servers).where(eq(servers.hackathonId, hk.hackathonId));
     expect(server).toBeTruthy();
 
     const groups = await db
@@ -77,9 +74,7 @@ describe("hackathons (e2e)", () => {
       latitude: 44.8125,
       longitude: 20.4612,
     });
-    const res = await http()
-      .get(`/api/v1/hackathons/${hk.hackathonId}`)
-      .expect(200);
+    const res = await http().get(`/api/v1/hackathons/${hk.hackathonId}`).expect(200);
     expect(res.body.latitude).toBeCloseTo(44.8125, 3);
     expect(res.body.longitude).toBeCloseTo(20.4612, 3);
   });
@@ -90,10 +85,7 @@ describe("hackathons (e2e)", () => {
       org = await registerOrganization(app);
     });
     const post = (body: object) =>
-      http()
-        .post("/api/v1/hackathons")
-        .set("Authorization", `Bearer ${org.token}`)
-        .send(body);
+      http().post("/api/v1/hackathons").set("Authorization", `Bearer ${org.token}`).send(body);
 
     it("rejects startsAt on/after endsAt", async () => {
       const now = Date.now();
@@ -130,9 +122,7 @@ describe("hackathons (e2e)", () => {
   });
 
   it("returns 404 for an unknown hackathon id", async () => {
-    await http()
-      .get("/api/v1/hackathons/00000000-0000-4000-8000-000000000000")
-      .expect(404);
+    await http().get("/api/v1/hackathons/00000000-0000-4000-8000-000000000000").expect(404);
   });
 
   it("returns 400 for a malformed hackathon id", async () => {

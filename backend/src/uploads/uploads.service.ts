@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from "@nestjs/common";
+import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { existsSync, mkdirSync, writeFileSync } from "fs";
 import { join, extname } from "path";
 import { eq } from "drizzle-orm";
@@ -101,19 +96,14 @@ export class UploadsService {
    * Animated GIF avatars are a Premium-only feature: a non-premium user who
    * uploads an `image/gif` is rejected (static images stay open to everyone).
    */
-  async setAvatar(
-    userId: string,
-    file: UploadedImage | undefined,
-  ): Promise<AvatarUploadDto> {
+  async setAvatar(userId: string, file: UploadedImage | undefined): Promise<AvatarUploadDto> {
     if (!file) throw new BadRequestException("No file uploaded");
     await this.assertUserExists(userId);
 
     if (file.mimetype === "image/gif") {
       const premium = await this.subscriptions.isPremium(userId);
       if (!premium) {
-        throw new BadRequestException(
-          "Animirani GIF avatar je dostupan samo Premium članovima",
-        );
+        throw new BadRequestException("Animirani GIF avatar je dostupan samo Premium članovima");
       }
     }
 
@@ -132,10 +122,7 @@ export class UploadsService {
    * The profile banner is a Premium feature — a non-premium user is rejected.
    * (When premium ends, the banner is cleared in SubscriptionsService.cancel.)
    */
-  async setBanner(
-    userId: string,
-    file: UploadedImage | undefined,
-  ): Promise<BannerUploadDto> {
+  async setBanner(userId: string, file: UploadedImage | undefined): Promise<BannerUploadDto> {
     if (!file) throw new BadRequestException("No file uploaded");
     await this.assertUserExists(userId);
 
@@ -154,10 +141,7 @@ export class UploadsService {
   }
 
   /** Save a generic image (e.g. a group-chat icon) and return its url. */
-  async saveImage(
-    userId: string,
-    file: UploadedImage | undefined,
-  ): Promise<ImageUploadDto> {
+  async saveImage(userId: string, file: UploadedImage | undefined): Promise<ImageUploadDto> {
     if (!file) throw new BadRequestException("No file uploaded");
     await this.assertUserExists(userId);
 
@@ -166,10 +150,7 @@ export class UploadsService {
   }
 
   /** Save a post media file (image or video) and return its url. */
-  async saveMedia(
-    userId: string,
-    file: UploadedImage | undefined,
-  ): Promise<ImageUploadDto> {
+  async saveMedia(userId: string, file: UploadedImage | undefined): Promise<ImageUploadDto> {
     if (!file) throw new BadRequestException("No file uploaded");
     await this.assertUserExists(userId);
 
@@ -184,10 +165,7 @@ export class UploadsService {
    *
    * Autor: Stevan Gnjato (2023/0141)
    */
-  async saveVideo(
-    userId: string,
-    file: UploadedImage | undefined,
-  ): Promise<VideoUploadResult> {
+  async saveVideo(userId: string, file: UploadedImage | undefined): Promise<VideoUploadResult> {
     if (!file) throw new BadRequestException("No file uploaded");
     await this.assertUserExists(userId);
 

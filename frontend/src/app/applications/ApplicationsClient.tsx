@@ -49,109 +49,142 @@ function toSeed(handle: string): string {
  */
 
 const M = {
-  backLabel:         { en: "Back",                                                  sr: "Nazad" },
-  pageTitle:         { en: "Application management",                                sr: "Upravljanje prijavama" },
-  pageSub:           { en: "Review, approve and reject hackathon applications.",    sr: "Pregledaj, odobri i odbij prijave za hackathon." },
-  pageSubMember:     { en: "Track the hackathons you have applied to.",             sr: "Prati hakatone na koje si se prijavio." },
+  backLabel: { en: "Back", sr: "Nazad" },
+  pageTitle: { en: "Application management", sr: "Upravljanje prijavama" },
+  pageSub: {
+    en: "Review, approve and reject hackathon applications.",
+    sr: "Pregledaj, odobri i odbij prijave za hackathon.",
+  },
+  pageSubMember: {
+    en: "Track the hackathons you have applied to.",
+    sr: "Prati hakatone na koje si se prijavio.",
+  },
 
   // Hackathon picker
-  pickLabel:         { en: "Hackathon",                                             sr: "Hackathon" },
-  pickAria:          { en: "Select hackathon to manage",                            sr: "Izaberi hackathon za upravljanje" },
-  noHackathons:      { en: "You don't manage any hackathons yet.",                  sr: "Još ne upravljaš nijednim hackathonom." },
-  noHackathonsCta:   { en: "Create a hackathon",                                    sr: "Napravi hackathon" },
+  pickLabel: { en: "Hackathon", sr: "Hackathon" },
+  pickAria: { en: "Select hackathon to manage", sr: "Izaberi hackathon za upravljanje" },
+  noHackathons: {
+    en: "You don't manage any hackathons yet.",
+    sr: "Još ne upravljaš nijednim hackathonom.",
+  },
+  noHackathonsCta: { en: "Create a hackathon", sr: "Napravi hackathon" },
 
   // Organizer view tabs
-  viewApplicants:    { en: "Applicants",                                            sr: "Prijave" },
-  viewForm:          { en: "Application form",                                       sr: "Forma za prijavu" },
+  viewApplicants: { en: "Applicants", sr: "Prijave" },
+  viewForm: { en: "Application form", sr: "Forma za prijavu" },
 
   // Stats
-  statTotal:         { en: "Total applications",                                    sr: "Ukupno prijava" },
-  statPending:       { en: "Pending",                                               sr: "Na čekanju" },
-  statApproved:      { en: "Approved",                                              sr: "Odobreno" },
-  statRejected:      { en: "Rejected",                                              sr: "Odbijeno" },
-  capLabel:          { en: "Hackathon capacity",                                    sr: "Kapacitet hackathona" },
-  capSpots:          { en: "approved spots",                                        sr: "odobrenih mesta" },
+  statTotal: { en: "Total applications", sr: "Ukupno prijava" },
+  statPending: { en: "Pending", sr: "Na čekanju" },
+  statApproved: { en: "Approved", sr: "Odobreno" },
+  statRejected: { en: "Rejected", sr: "Odbijeno" },
+  capLabel: { en: "Hackathon capacity", sr: "Kapacitet hackathona" },
+  capSpots: { en: "approved spots", sr: "odobrenih mesta" },
 
   // Filter tabs
-  tabFilterLabel:    { en: "Filter by status",                                      sr: "Filter po statusu" },
-  tabPending:        { en: "Pending",                                               sr: "Na čekanju" },
-  tabApproved:       { en: "Approved",                                              sr: "Odobrene" },
-  tabRejected:       { en: "Rejected",                                              sr: "Odbijene" },
-  tabAll:            { en: "All",                                                   sr: "Sve" },
-  approveAllBtn:     { en: "Approve all",                                           sr: "Odobri sve" },
+  tabFilterLabel: { en: "Filter by status", sr: "Filter po statusu" },
+  tabPending: { en: "Pending", sr: "Na čekanju" },
+  tabApproved: { en: "Approved", sr: "Odobrene" },
+  tabRejected: { en: "Rejected", sr: "Odbijene" },
+  tabAll: { en: "All", sr: "Sve" },
+  approveAllBtn: { en: "Approve all", sr: "Odobri sve" },
 
-  openCardAria:      { en: "Open application",                                      sr: "Otvori prijavu" },
-  quickActionsTitle: { en: "Quick actions",                                         sr: "Brze akcije" },
-  approveAllPending: { en: "Approve all pending",                                   sr: "Odobri sve na čekanju" },
-  pendingCountHint:  { en: "applications waiting",                                  sr: "prijave čekaju" },
-  searchLabel:       { en: "Search",                                                sr: "Pretraži" },
-  searchPh:          { en: "Search…",                                               sr: "Pretraži…" },
+  openCardAria: { en: "Open application", sr: "Otvori prijavu" },
+  quickActionsTitle: { en: "Quick actions", sr: "Brze akcije" },
+  approveAllPending: { en: "Approve all pending", sr: "Odobri sve na čekanju" },
+  pendingCountHint: { en: "applications waiting", sr: "prijave čekaju" },
+  searchLabel: { en: "Search", sr: "Pretraži" },
+  searchPh: { en: "Search…", sr: "Pretraži…" },
 
-  toastApproved:     { en: "Application approved",                                  sr: "Prijava odobrena" },
-  toastRejected:     { en: "Application rejected",                                  sr: "Prijava odbijena" },
-  toastNoPending:    { en: "No pending applications",                               sr: "Nema prijava na čekanju" },
-  toastAllApproved:  { en: "All pending applications approved",                     sr: "Sve prijave na čekanju su odobrene" },
-  toastActionFailed: { en: "Action failed — reverted",                              sr: "Akcija nije uspela — vraćeno" },
+  toastApproved: { en: "Application approved", sr: "Prijava odobrena" },
+  toastRejected: { en: "Application rejected", sr: "Prijava odbijena" },
+  toastNoPending: { en: "No pending applications", sr: "Nema prijava na čekanju" },
+  toastAllApproved: {
+    en: "All pending applications approved",
+    sr: "Sve prijave na čekanju su odobrene",
+  },
+  toastActionFailed: { en: "Action failed — reverted", sr: "Akcija nije uspela — vraćeno" },
 
-  pillPending:       { en: "Pending",                                               sr: "Na čekanju" },
-  pillApproved:      { en: "Approved",                                              sr: "Odobrena" },
-  pillRejected:      { en: "Rejected",                                              sr: "Odbijen" },
+  pillPending: { en: "Pending", sr: "Na čekanju" },
+  pillApproved: { en: "Approved", sr: "Odobrena" },
+  pillRejected: { en: "Rejected", sr: "Odbijen" },
 
-  loadingApps:       { en: "Loading applications…",                                 sr: "Učitavanje prijava…" },
-  emptyApps:         { en: "No applications yet.",                                  sr: "Još nema prijava." },
-  aboutUs:           { en: "About us",                                              sr: "O nama" },
-  accessibility:     { en: "Accessibility",                                         sr: "Pristupačnost" },
-  privacy:           { en: "Privacy",                                               sr: "Privatnost" },
-  hintApproved:      { en: "Approved just now",                                     sr: "Odobreno upravo" },
-  hintRejected:      { en: "Rejected just now",                                     sr: "Odbijeno upravo" },
-  showAnswers:       { en: "Show application answers",                              sr: "Prikaži odgovore na prijavu" },
-  hideAnswers:       { en: "Hide answers",                                          sr: "Sakrij odgovore" },
-  answersLoading:    { en: "Loading…",                                              sr: "Učitavanje…" },
-  answersEmpty:      { en: "No answers for this application.",                       sr: "Nema odgovora na ovu prijavu." },
-  teamPrefix:        { en: "team:",                                                 sr: "tim:" },
+  loadingApps: { en: "Loading applications…", sr: "Učitavanje prijava…" },
+  emptyApps: { en: "No applications yet.", sr: "Još nema prijava." },
+  aboutUs: { en: "About us", sr: "O nama" },
+  accessibility: { en: "Accessibility", sr: "Pristupačnost" },
+  privacy: { en: "Privacy", sr: "Privatnost" },
+  hintApproved: { en: "Approved just now", sr: "Odobreno upravo" },
+  hintRejected: { en: "Rejected just now", sr: "Odbijeno upravo" },
+  showAnswers: { en: "Show application answers", sr: "Prikaži odgovore na prijavu" },
+  hideAnswers: { en: "Hide answers", sr: "Sakrij odgovore" },
+  answersLoading: { en: "Loading…", sr: "Učitavanje…" },
+  answersEmpty: { en: "No answers for this application.", sr: "Nema odgovora na ovu prijavu." },
+  teamPrefix: { en: "team:", sr: "tim:" },
 
   // Member view
-  myAppsTitle:       { en: "My applications",                                       sr: "Moje prijave" },
-  myAppsEmpty:       { en: "You haven't applied to any hackathons yet.",            sr: "Još se nisi prijavio ni na jedan hackathon." },
-  browseHackathons:  { en: "Browse hackathons",                                     sr: "Pregledaj hackathone" },
-  appliedOn:         { en: "Applied",                                               sr: "Prijavljen" },
-  rejReasonLabel:    { en: "Reason:",                                               sr: "Razlog:" },
+  myAppsTitle: { en: "My applications", sr: "Moje prijave" },
+  myAppsEmpty: {
+    en: "You haven't applied to any hackathons yet.",
+    sr: "Još se nisi prijavio ni na jedan hackathon.",
+  },
+  browseHackathons: { en: "Browse hackathons", sr: "Pregledaj hackathone" },
+  appliedOn: { en: "Applied", sr: "Prijavljen" },
+  rejReasonLabel: { en: "Reason:", sr: "Razlog:" },
 
   // Form builder
-  fbHeading:         { en: "Application form",                                       sr: "Forma za prijavu" },
-  fbSub:             { en: "Questions applicants answer when applying to this hackathon.", sr: "Pitanja koja kandidati odgovaraju pri prijavi na ovaj hackathon." },
-  fbLoading:         { en: "Loading questions…",                                     sr: "Učitavanje pitanja…" },
-  fbEmpty:           { en: "No questions yet. Applicants will apply without extra fields.", sr: "Još nema pitanja. Kandidati će se prijaviti bez dodatnih polja." },
-  fbAddBtn:          { en: "Add question",                                           sr: "Dodaj pitanje" },
-  fbReqShort:        { en: "required",                                              sr: "obavezno" },
-  fbOptShort:        { en: "optional",                                              sr: "opciono" },
-  fbPromptLabel:     { en: "Question",                                              sr: "Pitanje" },
-  fbPromptPh:        { en: "e.g. What's your motivation?",                          sr: "npr. Koja je tvoja motivacija?" },
-  fbTypeLabel:       { en: "Type",                                                  sr: "Tip" },
-  fbTypeShort:       { en: "Short text",                                            sr: "Kratak tekst" },
-  fbTypeLong:        { en: "Long text",                                             sr: "Dug tekst" },
-  fbTypeSingle:      { en: "Single choice",                                         sr: "Jedan izbor" },
-  fbTypeMulti:       { en: "Multiple choice",                                       sr: "Više izbora" },
-  fbRequiredLabel:   { en: "Required",                                              sr: "Obavezno" },
-  fbOptionsLabel:    { en: "Options",                                               sr: "Opcije" },
-  fbOptionPh:        { en: "Option",                                                sr: "Opcija" },
-  fbAddOption:       { en: "Add option",                                            sr: "Dodaj opciju" },
-  fbRemoveOption:    { en: "Remove option",                                         sr: "Ukloni opciju" },
-  fbSave:            { en: "Save",                                                  sr: "Sačuvaj" },
-  fbSaving:          { en: "Saving…",                                               sr: "Čuvanje…" },
-  fbCancel:          { en: "Cancel",                                                sr: "Otkaži" },
-  fbEdit:            { en: "Edit",                                                  sr: "Izmeni" },
-  fbDelete:          { en: "Delete",                                                sr: "Obriši" },
-  fbDeleting:        { en: "Deleting…",                                             sr: "Brisanje…" },
-  fbConfirmDelete:   { en: "Confirm delete",                                        sr: "Potvrdi brisanje" },
-  fbDeleteWarn:      { en: "Submitted answers to this question will be permanently deleted.", sr: "Predati odgovori na ovo pitanje će biti trajno obrisani." },
-  fbErrNoPrompt:     { en: "Enter a question prompt.",                              sr: "Unesi tekst pitanja." },
-  fbErrNoOptions:    { en: "Choice questions need at least one option.",            sr: "Pitanja sa izborom moraju imati bar jednu opciju." },
-  fbErrGeneric:      { en: "Couldn't save the question. Try again.",                sr: "Nije moguće sačuvati pitanje. Pokušaj ponovo." },
-  fbErrDelete:       { en: "Couldn't delete the question. Try again.",              sr: "Nije moguće obrisati pitanje. Pokušaj ponovo." },
-  fbToastAdded:      { en: "Question added",                                        sr: "Pitanje dodato" },
-  fbToastUpdated:    { en: "Question updated",                                      sr: "Pitanje izmenjeno" },
-  fbToastDeleted:    { en: "Question deleted",                                      sr: "Pitanje obrisano" },
+  fbHeading: { en: "Application form", sr: "Forma za prijavu" },
+  fbSub: {
+    en: "Questions applicants answer when applying to this hackathon.",
+    sr: "Pitanja koja kandidati odgovaraju pri prijavi na ovaj hackathon.",
+  },
+  fbLoading: { en: "Loading questions…", sr: "Učitavanje pitanja…" },
+  fbEmpty: {
+    en: "No questions yet. Applicants will apply without extra fields.",
+    sr: "Još nema pitanja. Kandidati će se prijaviti bez dodatnih polja.",
+  },
+  fbAddBtn: { en: "Add question", sr: "Dodaj pitanje" },
+  fbReqShort: { en: "required", sr: "obavezno" },
+  fbOptShort: { en: "optional", sr: "opciono" },
+  fbPromptLabel: { en: "Question", sr: "Pitanje" },
+  fbPromptPh: { en: "e.g. What's your motivation?", sr: "npr. Koja je tvoja motivacija?" },
+  fbTypeLabel: { en: "Type", sr: "Tip" },
+  fbTypeShort: { en: "Short text", sr: "Kratak tekst" },
+  fbTypeLong: { en: "Long text", sr: "Dug tekst" },
+  fbTypeSingle: { en: "Single choice", sr: "Jedan izbor" },
+  fbTypeMulti: { en: "Multiple choice", sr: "Više izbora" },
+  fbRequiredLabel: { en: "Required", sr: "Obavezno" },
+  fbOptionsLabel: { en: "Options", sr: "Opcije" },
+  fbOptionPh: { en: "Option", sr: "Opcija" },
+  fbAddOption: { en: "Add option", sr: "Dodaj opciju" },
+  fbRemoveOption: { en: "Remove option", sr: "Ukloni opciju" },
+  fbSave: { en: "Save", sr: "Sačuvaj" },
+  fbSaving: { en: "Saving…", sr: "Čuvanje…" },
+  fbCancel: { en: "Cancel", sr: "Otkaži" },
+  fbEdit: { en: "Edit", sr: "Izmeni" },
+  fbDelete: { en: "Delete", sr: "Obriši" },
+  fbDeleting: { en: "Deleting…", sr: "Brisanje…" },
+  fbConfirmDelete: { en: "Confirm delete", sr: "Potvrdi brisanje" },
+  fbDeleteWarn: {
+    en: "Submitted answers to this question will be permanently deleted.",
+    sr: "Predati odgovori na ovo pitanje će biti trajno obrisani.",
+  },
+  fbErrNoPrompt: { en: "Enter a question prompt.", sr: "Unesi tekst pitanja." },
+  fbErrNoOptions: {
+    en: "Choice questions need at least one option.",
+    sr: "Pitanja sa izborom moraju imati bar jednu opciju.",
+  },
+  fbErrGeneric: {
+    en: "Couldn't save the question. Try again.",
+    sr: "Nije moguće sačuvati pitanje. Pokušaj ponovo.",
+  },
+  fbErrDelete: {
+    en: "Couldn't delete the question. Try again.",
+    sr: "Nije moguće obrisati pitanje. Pokušaj ponovo.",
+  },
+  fbToastAdded: { en: "Question added", sr: "Pitanje dodato" },
+  fbToastUpdated: { en: "Question updated", sr: "Pitanje izmenjeno" },
+  fbToastDeleted: { en: "Question deleted", sr: "Pitanje obrisano" },
 } as const;
 
 type AppCard = Candidate & {
@@ -257,13 +290,7 @@ export function ApplicationsClient() {
 /*
  * MEMBER SURFACE — the signed-in member's own applications (read-only).
  * */
-function MemberSurface({
-  locale,
-  t,
-}: {
-  locale: Locale;
-  t: (k: keyof typeof M) => string;
-}) {
+function MemberSurface({ locale, t }: { locale: Locale; t: (k: keyof typeof M) => string }) {
   const [apps, setApps] = useState<Application[] | null>(null);
 
   useEffect(() => {
@@ -314,15 +341,9 @@ function MemberSurface({
               <div className="app-header" aria-hidden="true">
                 <div className="app-meta">
                   <span className="skel skel-line" style={{ width: "55%" }} />
-                  <span
-                    className="skel skel-line"
-                    style={{ width: "35%", marginTop: 7 }}
-                  />
+                  <span className="skel skel-line" style={{ width: "35%", marginTop: 7 }} />
                 </div>
-                <span
-                  className="skel"
-                  style={{ width: 76, height: 24, borderRadius: 999 }}
-                />
+                <span className="skel" style={{ width: 76, height: 24, borderRadius: 999 }} />
               </div>
             </div>
           ))}
@@ -352,9 +373,7 @@ function MemberSurface({
                     {a.teamName ? (
                       <>
                         {t("teamPrefix")}{" "}
-                        <strong style={{ color: "var(--violet-light)" }}>
-                          {a.teamName}
-                        </strong>{" "}
+                        <strong style={{ color: "var(--violet-light)" }}>{a.teamName}</strong>{" "}
                         ·{" "}
                       </>
                     ) : null}
@@ -366,9 +385,7 @@ function MemberSurface({
               {status === "rejected" && a.rejectionReason ? (
                 <div className="app-answers" style={{ padding: "0 16px 14px" }}>
                   <div className="reject-reason-box">
-                    <strong style={{ color: "var(--red)" }}>
-                      {t("rejReasonLabel")}
-                    </strong>{" "}
+                    <strong style={{ color: "var(--red)" }}>{t("rejReasonLabel")}</strong>{" "}
                     {a.rejectionReason}
                   </div>
                 </div>
@@ -408,9 +425,7 @@ function OrganizerSurface({
       .getHackathons()
       .then((all) => {
         if (cancelled) return;
-        const mine = isAdmin
-          ? all
-          : all.filter((h) => h.organizationId === userId);
+        const mine = isAdmin ? all : all.filter((h) => h.organizationId === userId);
         setHackathons(mine);
         setSelectedId((cur) => cur ?? mine[0]?.hackathonId ?? null);
       })
@@ -431,11 +446,7 @@ function OrganizerSurface({
     <>
       <main id="apps">
         <div className="page-head">
-          <Link
-            className="col-back"
-            href="/hackathons/manage"
-            aria-label={t("backLabel")}
-          >
+          <Link className="col-back" href="/hackathons/manage" aria-label={t("backLabel")}>
             <Icon name="arrow-left" />
           </Link>
           <div className="col-titles">
@@ -544,9 +555,7 @@ function ApplicantsReview({
   const [searchQ, setSearchQ] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
   const [openAnswers, setOpenAnswers] = useState<Set<string>>(new Set());
-  const [answers, setAnswers] = useState<
-    Record<string, ApplicationAnswer[] | null>
-  >({});
+  const [answers, setAnswers] = useState<Record<string, ApplicationAnswer[] | null>>({});
   const [rejectOpen, setRejectOpen] = useState(false);
 
   /* Lazily load an applicant's answers to the hackathon's custom questions. */
@@ -647,17 +656,10 @@ function ApplicantsReview({
 
   const showApproveAll = activeTab === "pending" || activeTab === "all";
 
-  const setStatus = (
-    id: string,
-    status: CandidateStatus,
-    patch: Partial<AppCard> = {},
-  ) =>
-    setCards((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, status, ...patch } : c)),
-    );
+  const setStatus = (id: string, status: CandidateStatus, patch: Partial<AppCard> = {}) =>
+    setCards((prev) => prev.map((c) => (c.id === id ? { ...c, status, ...patch } : c)));
 
-  const snapshot = (id: string): AppCard | undefined =>
-    cards.find((c) => c.id === id);
+  const snapshot = (id: string): AppCard | undefined => cards.find((c) => c.id === id);
 
   const applyApprove = (id: string) => {
     const prev = snapshot(id);
@@ -693,20 +695,14 @@ function ApplicantsReview({
       showToast(t("toastNoPending"), "red");
       return;
     }
-    const pendingIds = cards
-      .filter((c) => c.status === "pending")
-      .map((c) => c.id);
+    const pendingIds = cards.filter((c) => c.status === "pending").map((c) => c.id);
     setCards((prev) =>
       prev.map((c) =>
-        c.status === "pending"
-          ? { ...c, status: "approved", actionHint: t("hintApproved") }
-          : c,
+        c.status === "pending" ? { ...c, status: "approved", actionHint: t("hintApproved") } : c,
       ),
     );
     showToast(t("toastAllApproved"), "green");
-    void Promise.allSettled(
-      pendingIds.map((id) => api.approveApplication(id)),
-    ).then((results) => {
+    void Promise.allSettled(pendingIds.map((id) => api.approveApplication(id))).then((results) => {
       let anyFailed = false;
       results.forEach((res, i) => {
         if (res.status === "rejected") {
@@ -788,13 +784,7 @@ function ApplicantsReview({
       <div className="app-tabs" role="tablist" aria-label={t("tabFilterLabel")}>
         {(["pending", "approved", "rejected", "all"] as TabKey[]).map((tab) => {
           const badge =
-            tab === "pending"
-              ? pe
-              : tab === "approved"
-                ? ap
-                : tab === "rejected"
-                  ? rj
-                  : null;
+            tab === "pending" ? pe : tab === "approved" ? ap : tab === "rejected" ? rj : null;
           const badgeClass =
             tab === "pending"
               ? "pending-badge"
@@ -818,9 +808,7 @@ function ApplicantsReview({
               onClick={() => setActiveTab(tab)}
             >
               {label}
-              {badge !== null && (
-                <span className={`app-tab-badge ${badgeClass}`}>{badge}</span>
-              )}
+              {badge !== null && <span className={`app-tab-badge ${badgeClass}`}>{badge}</span>}
             </button>
           );
         })}
@@ -856,21 +844,13 @@ function ApplicantsReview({
                 />
                 <div className="app-meta">
                   <span className="skel skel-line" style={{ width: "60%" }} />
-                  <span
-                    className="skel skel-line"
-                    style={{ width: "40%", marginTop: 7 }}
-                  />
+                  <span className="skel skel-line" style={{ width: "40%", marginTop: 7 }} />
                 </div>
-                <span
-                  className="skel"
-                  style={{ width: 76, height: 24, borderRadius: 999 }}
-                />
+                <span className="skel" style={{ width: 76, height: 24, borderRadius: 999 }} />
               </div>
             </div>
           ))}
-        {!loading && cards.length === 0 && (
-          <p className="page-sub">{t("emptyApps")}</p>
-        )}
+        {!loading && cards.length === 0 && <p className="page-sub">{t("emptyApps")}</p>}
         {!loading &&
           cards.map((c) => (
             <div key={c.id} className={cardClass(c)} data-status={c.status}>
@@ -893,10 +873,8 @@ function ApplicantsReview({
                       <>
                         {" "}
                         · {t("teamPrefix")}{" "}
-                        <strong style={{ color: "var(--violet-light)" }}>
-                          {c.team}
-                        </strong>{" "}
-                        · {c.time}
+                        <strong style={{ color: "var(--violet-light)" }}>{c.team}</strong> ·{" "}
+                        {c.time}
                       </>
                     ) : (
                       <> · {c.time}</>
@@ -922,18 +900,13 @@ function ApplicantsReview({
                   className="app-answers"
                   style={{ padding: "0 14px 14px", display: "grid", gap: 10 }}
                 >
-                  {answers[c.id] === null && (
-                    <p className="app-sub">{t("answersLoading")}</p>
-                  )}
+                  {answers[c.id] === null && <p className="app-sub">{t("answersLoading")}</p>}
                   {answers[c.id] != null && answers[c.id]!.length === 0 && (
                     <p className="app-sub">{t("answersEmpty")}</p>
                   )}
                   {answers[c.id]?.map((ans) => (
                     <div key={ans.questionId}>
-                      <div
-                        className="app-sub"
-                        style={{ fontWeight: 600, color: "var(--text)" }}
-                      >
+                      <div className="app-sub" style={{ fontWeight: 600, color: "var(--text)" }}>
                         {ans.prompt}
                       </div>
                       <div className="app-sub">{ans.answer || "—"}</div>
@@ -1042,8 +1015,7 @@ function FormBuilder({
     api
       .getApplicationQuestions(hackathonId)
       .then((list) => {
-        if (!cancelled)
-          setQuestions([...list].sort((a, b) => a.position - b.position));
+        if (!cancelled) setQuestions([...list].sort((a, b) => a.position - b.position));
       })
       .catch(() => {
         if (!cancelled) setQuestions([]);
@@ -1054,9 +1026,7 @@ function FormBuilder({
   }, [hackathonId]);
 
   const nextPosition = () =>
-    questions && questions.length
-      ? Math.max(...questions.map((q) => q.position)) + 1
-      : 0;
+    questions && questions.length ? Math.max(...questions.map((q) => q.position)) + 1 : 0;
 
   const handleCreate = async (draft: DraftState): Promise<boolean> => {
     try {
@@ -1065,13 +1035,9 @@ function FormBuilder({
         type: draft.type,
         required: draft.required,
         position: nextPosition(),
-        ...(CHOICE_TYPES.has(draft.type)
-          ? { options: draft.options }
-          : {}),
+        ...(CHOICE_TYPES.has(draft.type) ? { options: draft.options } : {}),
       });
-      setQuestions((prev) =>
-        [...(prev ?? []), created].sort((a, b) => a.position - b.position),
-      );
+      setQuestions((prev) => [...(prev ?? []), created].sort((a, b) => a.position - b.position));
       setAdding(false);
       showToast(t("fbToastAdded"), "green");
       return true;
@@ -1095,8 +1061,7 @@ function FormBuilder({
     if (CHOICE_TYPES.has(draft.type)) {
       const origOpts = original.options ?? [];
       const changed =
-        draft.options.length !== origOpts.length ||
-        draft.options.some((o, i) => o !== origOpts[i]);
+        draft.options.length !== origOpts.length || draft.options.some((o, i) => o !== origOpts[i]);
       // Always send options when converting TO a choice type (backend 400s
       // otherwise), or when they actually changed.
       if (!CHOICE_TYPES.has(original.type) || changed) {
@@ -1111,10 +1076,7 @@ function FormBuilder({
     }
 
     try {
-      const updated = await api.updateApplicationQuestion(
-        original.questionId,
-        patch,
-      );
+      const updated = await api.updateApplicationQuestion(original.questionId, patch);
       setQuestions((prev) =>
         (prev ?? [])
           .map((q) => (q.questionId === updated.questionId ? updated : q))
@@ -1133,9 +1095,7 @@ function FormBuilder({
     setBusyId(questionId);
     try {
       await api.deleteApplicationQuestion(questionId);
-      setQuestions((prev) =>
-        (prev ?? []).filter((q) => q.questionId !== questionId),
-      );
+      setQuestions((prev) => (prev ?? []).filter((q) => q.questionId !== questionId));
       setConfirmDeleteId(null);
       showToast(t("fbToastDeleted"), "green");
     } catch (err) {
@@ -1180,10 +1140,7 @@ function FormBuilder({
           {[0, 1].map((i) => (
             <div className="fb-card" key={`skel-${i}`} aria-busy="true">
               <span className="skel skel-line" style={{ width: "55%" }} />
-              <span
-                className="skel skel-line"
-                style={{ width: "30%", marginTop: 9 }}
-              />
+              <span className="skel skel-line" style={{ width: "30%", marginTop: 9 }} />
             </div>
           ))}
         </div>
@@ -1218,11 +1175,7 @@ function FormBuilder({
                     <div className="fb-prompt">{q.prompt}</div>
                     <div className="fb-meta">
                       <span className="fb-type-tag">{typeLabel(q.type, t)}</span>
-                      <span
-                        className={
-                          q.required ? "fb-req-tag is-on" : "fb-req-tag"
-                        }
-                      >
+                      <span className={q.required ? "fb-req-tag is-on" : "fb-req-tag"}>
                         {q.required ? t("fbReqShort") : t("fbOptShort")}
                       </span>
                     </div>
@@ -1252,9 +1205,7 @@ function FormBuilder({
                       className="fb-icon-btn fb-icon-danger"
                       aria-label={t("fbDelete")}
                       onClick={() =>
-                        setConfirmDeleteId((cur) =>
-                          cur === q.questionId ? null : q.questionId,
-                        )
+                        setConfirmDeleteId((cur) => (cur === q.questionId ? null : q.questionId))
                       }
                     >
                       <Icon name="trash" />
@@ -1268,10 +1219,7 @@ function FormBuilder({
                       <Icon name="flag" /> {t("fbDeleteWarn")}
                     </p>
                     <div className="fb-confirm-actions">
-                      <button
-                        className="btn btn-ghost"
-                        onClick={() => setConfirmDeleteId(null)}
-                      >
+                      <button className="btn btn-ghost" onClick={() => setConfirmDeleteId(null)}>
                         {t("fbCancel")}
                       </button>
                       <button
@@ -1280,9 +1228,7 @@ function FormBuilder({
                         onClick={() => handleDelete(q.questionId)}
                       >
                         <Icon name="trash" />{" "}
-                        {busyId === q.questionId
-                          ? t("fbDeleting")
-                          : t("fbConfirmDelete")}
+                        {busyId === q.questionId ? t("fbDeleting") : t("fbConfirmDelete")}
                       </button>
                     </div>
                   </div>
@@ -1324,9 +1270,7 @@ function QuestionEditor({
   const [prompt, setPrompt] = useState(initial.prompt);
   const [type, setType] = useState<QuestionType>(initial.type);
   const [required, setRequired] = useState(initial.required);
-  const [options, setOptions] = useState<string[]>(
-    initial.options.length ? initial.options : [""],
-  );
+  const [options, setOptions] = useState<string[]>(initial.options.length ? initial.options : [""]);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -1336,9 +1280,7 @@ function QuestionEditor({
     setOptions((prev) => prev.map((o, i) => (i === idx ? value : o)));
   const addOption = () => setOptions((prev) => [...prev, ""]);
   const removeOption = (idx: number) =>
-    setOptions((prev) =>
-      prev.length > 1 ? prev.filter((_, i) => i !== idx) : prev,
-    );
+    setOptions((prev) => (prev.length > 1 ? prev.filter((_, i) => i !== idx) : prev));
 
   const save = async () => {
     setError(null);

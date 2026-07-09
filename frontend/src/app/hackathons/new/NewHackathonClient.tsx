@@ -48,91 +48,133 @@ import {
  */
 
 const M = {
-  back:            { en: "Back",                          sr: "Nazad" },
-  pageTitle:       { en: "Organize a hackathon",          sr: "Organizuj hackathon" },
-  pageSub:         { en: "Create and publish a new hackathon.", sr: "Kreiraj i objavi novi hackathon." },
+  back: { en: "Back", sr: "Nazad" },
+  pageTitle: { en: "Organize a hackathon", sr: "Organizuj hackathon" },
+  pageSub: { en: "Create and publish a new hackathon.", sr: "Kreiraj i objavi novi hackathon." },
 
   // Gate (non-organization)
-  gateTitle:       { en: "Organization accounts only",    sr: "Samo za organizacijske naloge" },
-  gateBody:        { en: "Only verified organization accounts can create hackathons. Sign in with an organization account to organize one.", sr: "Samo verifikovani organizacijski nalozi mogu kreirati hackathone. Prijavi se kao organizacija da bi organizovao." },
-  gateBodyAnon:    { en: "Only organization accounts can create hackathons. Sign in to continue.", sr: "Samo organizacijski nalozi mogu kreirati hackathone. Prijavi se da nastaviš." },
-  gateLogin:       { en: "Sign in",                       sr: "Prijava" },
-  gateBrowse:      { en: "Browse hackathons",             sr: "Pregledaj hackathone" },
+  gateTitle: { en: "Organization accounts only", sr: "Samo za organizacijske naloge" },
+  gateBody: {
+    en: "Only verified organization accounts can create hackathons. Sign in with an organization account to organize one.",
+    sr: "Samo verifikovani organizacijski nalozi mogu kreirati hackathone. Prijavi se kao organizacija da bi organizovao.",
+  },
+  gateBodyAnon: {
+    en: "Only organization accounts can create hackathons. Sign in to continue.",
+    sr: "Samo organizacijski nalozi mogu kreirati hackathone. Prijavi se da nastaviš.",
+  },
+  gateLogin: { en: "Sign in", sr: "Prijava" },
+  gateBrowse: { en: "Browse hackathons", sr: "Pregledaj hackathone" },
 
   // Sections
-  secBasics:       { en: "Basics",                        sr: "Osnovno" },
-  secSchedule:     { en: "Schedule",                      sr: "Raspored" },
-  secFormat:       { en: "Format & location",             sr: "Format i lokacija" },
-  secTeams:        { en: "Teams & capacity",              sr: "Timovi i kapacitet" },
-  secMedia:        { en: "Media",                         sr: "Mediji" },
+  secBasics: { en: "Basics", sr: "Osnovno" },
+  secSchedule: { en: "Schedule", sr: "Raspored" },
+  secFormat: { en: "Format & location", sr: "Format i lokacija" },
+  secTeams: { en: "Teams & capacity", sr: "Timovi i kapacitet" },
+  secMedia: { en: "Media", sr: "Mediji" },
 
   // Fields
-  fTitle:          { en: "Title",                         sr: "Naziv" },
-  fTitlePh:        { en: "e.g. ETF Hackathon 2026",       sr: "npr. ETF Hackathon 2026" },
-  fDescription:    { en: "Description",                   sr: "Opis" },
-  fDescriptionPh:  { en: "What is this hackathon about?",  sr: "O čemu je ovaj hackathon?" },
-  fTheme:          { en: "Theme",                         sr: "Tema" },
-  fThemeOpt:       { en: "optional",                      sr: "opciono" },
-  fThemePh:        { en: "e.g. AI tools for students",    sr: "npr. AI alati za studente" },
-  fType:           { en: "Type",                          sr: "Tip" },
-  typePhysical:    { en: "Physical",                      sr: "Fizički" },
-  typeVirtual:     { en: "Virtual",                       sr: "Virtuelni" },
-  typeHybrid:      { en: "Hybrid",                        sr: "Hibridni" },
-  fStartsAt:       { en: "Starts",                        sr: "Počinje" },
-  fEndsAt:         { en: "Ends",                          sr: "Završava se" },
-  fRegDeadline:    { en: "Registration deadline",         sr: "Rok za prijavu" },
-  fLocation:       { en: "Location",                      sr: "Lokacija" },
-  fLocationPh:     { en: "e.g. Belgrade, ETF",            sr: "npr. Beograd, ETF" },
-  fLatitude:       { en: "Latitude",                      sr: "Geografska širina" },
-  fLongitude:      { en: "Longitude",                     sr: "Geografska dužina" },
-  fMaxParticipants:{ en: "Max participants",              sr: "Maks. učesnika" },
-  fMaxPartPh:      { en: "No limit",                      sr: "Bez ograničenja" },
-  fMinTeamSize:    { en: "Min team size",                 sr: "Min. veličina tima" },
-  fMaxTeamSize:    { en: "Max team size",                 sr: "Maks. veličina tima" },
-  fLogo:           { en: "Logo",                          sr: "Logo" },
-  fBanner:         { en: "Banner",                        sr: "Baner" },
-  upload:          { en: "Upload image",                  sr: "Otpremi sliku" },
-  uploading:       { en: "Uploading…",                    sr: "Otpremanje…" },
-  remove:          { en: "Remove",                        sr: "Ukloni" },
-  locationHint:    { en: "Physical and hybrid hackathons need a location with coordinates.", sr: "Fizički i hibridni hackathoni zahtevaju lokaciju sa koordinatama." },
+  fTitle: { en: "Title", sr: "Naziv" },
+  fTitlePh: { en: "e.g. ETF Hackathon 2026", sr: "npr. ETF Hackathon 2026" },
+  fDescription: { en: "Description", sr: "Opis" },
+  fDescriptionPh: { en: "What is this hackathon about?", sr: "O čemu je ovaj hackathon?" },
+  fTheme: { en: "Theme", sr: "Tema" },
+  fThemeOpt: { en: "optional", sr: "opciono" },
+  fThemePh: { en: "e.g. AI tools for students", sr: "npr. AI alati za studente" },
+  fType: { en: "Type", sr: "Tip" },
+  typePhysical: { en: "Physical", sr: "Fizički" },
+  typeVirtual: { en: "Virtual", sr: "Virtuelni" },
+  typeHybrid: { en: "Hybrid", sr: "Hibridni" },
+  fStartsAt: { en: "Starts", sr: "Počinje" },
+  fEndsAt: { en: "Ends", sr: "Završava se" },
+  fRegDeadline: { en: "Registration deadline", sr: "Rok za prijavu" },
+  fLocation: { en: "Location", sr: "Lokacija" },
+  fLocationPh: { en: "e.g. Belgrade, ETF", sr: "npr. Beograd, ETF" },
+  fLatitude: { en: "Latitude", sr: "Geografska širina" },
+  fLongitude: { en: "Longitude", sr: "Geografska dužina" },
+  fMaxParticipants: { en: "Max participants", sr: "Maks. učesnika" },
+  fMaxPartPh: { en: "No limit", sr: "Bez ograničenja" },
+  fMinTeamSize: { en: "Min team size", sr: "Min. veličina tima" },
+  fMaxTeamSize: { en: "Max team size", sr: "Maks. veličina tima" },
+  fLogo: { en: "Logo", sr: "Logo" },
+  fBanner: { en: "Banner", sr: "Baner" },
+  upload: { en: "Upload image", sr: "Otpremi sliku" },
+  uploading: { en: "Uploading…", sr: "Otpremanje…" },
+  remove: { en: "Remove", sr: "Ukloni" },
+  locationHint: {
+    en: "Physical and hybrid hackathons need a location with coordinates.",
+    sr: "Fizički i hibridni hackathoni zahtevaju lokaciju sa koordinatama.",
+  },
 
   // Validation
-  errTitle:        { en: "Add a title.",                  sr: "Dodaj naziv." },
-  errDescription:  { en: "Add a description.",            sr: "Dodaj opis." },
-  errStartsAt:     { en: "Set a start date.",             sr: "Postavi datum početka." },
-  errEndsAt:       { en: "Set an end date.",              sr: "Postavi datum završetka." },
-  errRegDeadline:  { en: "Set a registration deadline.",  sr: "Postavi rok za prijavu." },
-  errEndBeforeStart:{ en: "End must be after the start.",  sr: "Završetak mora biti posle početka." },
-  errDeadlineAfterStart:{ en: "The deadline must be before the start.", sr: "Rok mora biti pre početka." },
-  errMaxParticipants:{ en: "Max participants must be greater than 0.", sr: "Maks. učesnika mora biti veće od 0." },
-  errMinTeamSize:  { en: "Min team size must be at least 1.", sr: "Min. veličina tima mora biti bar 1." },
-  errMaxTeamSize:  { en: "Max team size must be at least the min.", sr: "Maks. veličina tima mora biti bar koliko i min." },
-  errLocation:     { en: "Location is required for this type.", sr: "Lokacija je obavezna za ovaj tip." },
-  errLatLng:       { en: "Latitude and longitude are required for this type.", sr: "Širina i dužina su obavezne za ovaj tip." },
+  errTitle: { en: "Add a title.", sr: "Dodaj naziv." },
+  errDescription: { en: "Add a description.", sr: "Dodaj opis." },
+  errStartsAt: { en: "Set a start date.", sr: "Postavi datum početka." },
+  errEndsAt: { en: "Set an end date.", sr: "Postavi datum završetka." },
+  errRegDeadline: { en: "Set a registration deadline.", sr: "Postavi rok za prijavu." },
+  errEndBeforeStart: {
+    en: "End must be after the start.",
+    sr: "Završetak mora biti posle početka.",
+  },
+  errDeadlineAfterStart: {
+    en: "The deadline must be before the start.",
+    sr: "Rok mora biti pre početka.",
+  },
+  errMaxParticipants: {
+    en: "Max participants must be greater than 0.",
+    sr: "Maks. učesnika mora biti veće od 0.",
+  },
+  errMinTeamSize: {
+    en: "Min team size must be at least 1.",
+    sr: "Min. veličina tima mora biti bar 1.",
+  },
+  errMaxTeamSize: {
+    en: "Max team size must be at least the min.",
+    sr: "Maks. veličina tima mora biti bar koliko i min.",
+  },
+  errLocation: {
+    en: "Location is required for this type.",
+    sr: "Lokacija je obavezna za ovaj tip.",
+  },
+  errLatLng: {
+    en: "Latitude and longitude are required for this type.",
+    sr: "Širina i dužina su obavezne za ovaj tip.",
+  },
   errLatLngPaired: { en: "Set both latitude and longitude.", sr: "Postavi i širinu i dužinu." },
-  errLatRange:     { en: "Latitude must be between -90 and 90.", sr: "Širina mora biti između -90 i 90." },
-  errLngRange:     { en: "Longitude must be between -180 and 180.", sr: "Dužina mora biti između -180 i 180." },
-  uploadFailed:    { en: "Couldn't upload the image.",    sr: "Otpremanje slike nije uspelo." },
+  errLatRange: {
+    en: "Latitude must be between -90 and 90.",
+    sr: "Širina mora biti između -90 i 90.",
+  },
+  errLngRange: {
+    en: "Longitude must be between -180 and 180.",
+    sr: "Dužina mora biti između -180 i 180.",
+  },
+  uploadFailed: { en: "Couldn't upload the image.", sr: "Otpremanje slike nije uspelo." },
 
   // Submit
-  submit:          { en: "Publish hackathon",             sr: "Objavi hackathon" },
-  submitting:      { en: "Publishing…",                   sr: "Objavljivanje…" },
-  cancel:          { en: "Cancel",                        sr: "Otkaži" },
+  submit: { en: "Publish hackathon", sr: "Objavi hackathon" },
+  submitting: { en: "Publishing…", sr: "Objavljivanje…" },
+  cancel: { en: "Cancel", sr: "Otkaži" },
 
   // Edit mode
-  editTitle:       { en: "Edit hackathon",                sr: "Izmeni hackathon" },
-  editSub:         { en: "Update your hackathon's details and application form.", sr: "Ažuriraj detalje hackathona i formular za prijavu." },
-  saveChanges:     { en: "Save changes",                  sr: "Sačuvaj izmene" },
-  saving:          { en: "Saving…",                       sr: "Čuvanje…" },
-  loading:         { en: "Loading…",                      sr: "Učitavanje…" },
+  editTitle: { en: "Edit hackathon", sr: "Izmeni hackathon" },
+  editSub: {
+    en: "Update your hackathon's details and application form.",
+    sr: "Ažuriraj detalje hackathona i formular za prijavu.",
+  },
+  saveChanges: { en: "Save changes", sr: "Sačuvaj izmene" },
+  saving: { en: "Saving…", sr: "Čuvanje…" },
+  loading: { en: "Loading…", sr: "Učitavanje…" },
 
   // Draft (server-side)
-  draftSaving:     { en: "Saving draft…",                 sr: "Čuvanje nacrta…" },
-  draftSaved:      { en: "Draft saved",                   sr: "Nacrt sačuvan" },
-  resumeTitle:     { en: "Continue where you left off?",  sr: "Nastavi gde si stao?" },
-  resumeBody:      { en: "You have an unpublished hackathon draft.", sr: "Imaš nezavršen nacrt hackathona." },
-  resumeContinue:  { en: "Continue draft",                sr: "Nastavi nacrt" },
-  resumeDiscard:   { en: "Discard",                       sr: "Odbaci" },
+  draftSaving: { en: "Saving draft…", sr: "Čuvanje nacrta…" },
+  draftSaved: { en: "Draft saved", sr: "Nacrt sačuvan" },
+  resumeTitle: { en: "Continue where you left off?", sr: "Nastavi gde si stao?" },
+  resumeBody: {
+    en: "You have an unpublished hackathon draft.",
+    sr: "Imaš nezavršen nacrt hackathona.",
+  },
+  resumeContinue: { en: "Continue draft", sr: "Nastavi nacrt" },
+  resumeDiscard: { en: "Discard", sr: "Odbaci" },
 } as const;
 
 /** Local form state — kept as strings to mirror the raw inputs. */
@@ -195,14 +237,11 @@ function toPublishQuestions(questions: QuestionDraft[]): PublishQuestion[] {
   return questions
     .filter((q) => q.prompt.trim() !== "")
     .map((q) => {
-      const isChoice =
-        q.type === "single_choice" || q.type === "multi_choice";
+      const isChoice = q.type === "single_choice" || q.type === "multi_choice";
       return {
         prompt: q.prompt.trim(),
         type: q.type,
-        options: isChoice
-          ? q.options.map((o) => o.trim()).filter(Boolean)
-          : undefined,
+        options: isChoice ? q.options.map((o) => o.trim()).filter(Boolean) : undefined,
         required: q.required,
         allowOther: isChoice ? q.allowOther : false,
       };
@@ -244,9 +283,7 @@ export function NewHackathonClient({
 
   // Server-side draft (create mode only): autosave + resume.
   const [draftId, setDraftId] = useState<string | null>(null);
-  const [draftStatus, setDraftStatus] = useState<"idle" | "saving" | "saved">(
-    "idle",
-  );
+  const [draftStatus, setDraftStatus] = useState<"idle" | "saving" | "saved">("idle");
   const [resumeOffer, setResumeOffer] = useState<HackathonDraft | null>(null);
   // Question ids present at load (edit mode) — to reconcile deletes on save.
   const initialQuestionIds = useRef<string[]>([]);
@@ -303,8 +340,7 @@ export function NewHackathonClient({
           location: h.location ?? "",
           latitude: h.latitude != null ? String(h.latitude) : "",
           longitude: h.longitude != null ? String(h.longitude) : "",
-          maxParticipants:
-            h.maxParticipants != null ? String(h.maxParticipants) : "",
+          maxParticipants: h.maxParticipants != null ? String(h.maxParticipants) : "",
           minTeamSize: String(h.minTeamSize),
           maxTeamSize: String(h.maxTeamSize),
           logoUrl: h.logoUrl ?? "",
@@ -362,9 +398,7 @@ export function NewHackathonClient({
   useEffect(() => {
     if (isEdit || !isOrg || !hydrated.current || resumeOffer) return;
     const meaningful =
-      form.title.trim() !== "" ||
-      form.description.trim() !== "" ||
-      questions.length > 0;
+      form.title.trim() !== "" || form.description.trim() !== "" || questions.length > 0;
     if (!meaningful && !draftId) return;
 
     setDraftStatus("saving");
@@ -484,8 +518,7 @@ export function NewHackathonClient({
       if (!hasLng) e.longitude = t("errLatLngPaired");
     }
 
-    if (hasLat && (!Number.isFinite(lat) || lat < -90 || lat > 90))
-      e.latitude = t("errLatRange");
+    if (hasLat && (!Number.isFinite(lat) || lat < -90 || lat > 90)) e.latitude = t("errLatRange");
     if (hasLng && (!Number.isFinite(lng) || lng < -180 || lng > 180))
       e.longitude = t("errLngRange");
 
@@ -513,10 +546,7 @@ export function NewHackathonClient({
           startsAt: toIso(form.startsAt),
           endsAt: toIso(form.endsAt),
           registrationDeadline: toIso(form.registrationDeadline),
-          maxParticipants:
-            form.maxParticipants.trim() !== ""
-              ? Number(form.maxParticipants)
-              : null,
+          maxParticipants: form.maxParticipants.trim() !== "" ? Number(form.maxParticipants) : null,
           minTeamSize: Number(form.minTeamSize),
           maxTeamSize: Number(form.maxTeamSize),
           location: needsLocation ? form.location.trim() : null,
@@ -537,14 +567,10 @@ export function NewHackathonClient({
           endsAt: toIso(form.endsAt),
           registrationDeadline: toIso(form.registrationDeadline),
           maxParticipants:
-            form.maxParticipants.trim() !== ""
-              ? Number(form.maxParticipants)
-              : undefined,
+            form.maxParticipants.trim() !== "" ? Number(form.maxParticipants) : undefined,
           minTeamSize: Number(form.minTeamSize),
           maxTeamSize: Number(form.maxTeamSize),
-          location: needsLocation
-            ? form.location.trim()
-            : form.location.trim() || undefined,
+          location: needsLocation ? form.location.trim() : form.location.trim() || undefined,
           latitude: hasLat ? Number(form.latitude) : undefined,
           longitude: hasLng ? Number(form.longitude) : undefined,
           logoUrl: form.logoUrl || undefined,
@@ -555,11 +581,7 @@ export function NewHackathonClient({
         router.push("/hackathons");
       }
     } catch (err) {
-      setServerError(
-        err instanceof ApiError || err instanceof Error
-          ? err.message
-          : "Error",
-      );
+      setServerError(err instanceof ApiError || err instanceof Error ? err.message : "Error");
       setSubmitting(false);
     }
   }
@@ -571,24 +593,17 @@ export function NewHackathonClient({
    */
   async function reconcileQuestions(id: string) {
     const kept = questions.filter((q) => q.prompt.trim() !== "");
-    const keptIds = new Set(
-      kept.map((q) => q.questionId).filter((x): x is string => !!x),
-    );
-    for (const gone of initialQuestionIds.current.filter(
-      (qid) => !keptIds.has(qid),
-    )) {
+    const keptIds = new Set(kept.map((q) => q.questionId).filter((x): x is string => !!x));
+    for (const gone of initialQuestionIds.current.filter((qid) => !keptIds.has(qid))) {
       await deleteApplicationQuestion(gone);
     }
     for (let i = 0; i < kept.length; i++) {
       const q = kept[i];
-      const isChoice =
-        q.type === "single_choice" || q.type === "multi_choice";
+      const isChoice = q.type === "single_choice" || q.type === "multi_choice";
       const body = {
         prompt: q.prompt.trim(),
         type: q.type,
-        options: isChoice
-          ? q.options.map((o) => o.trim()).filter(Boolean)
-          : undefined,
+        options: isChoice ? q.options.map((o) => o.trim()).filter(Boolean) : undefined,
         required: q.required,
         allowOther: isChoice ? q.allowOther : false,
         position: i,
@@ -599,15 +614,10 @@ export function NewHackathonClient({
         await createApplicationQuestion(id, body);
       }
     }
-    initialQuestionIds.current = kept
-      .map((q) => q.questionId)
-      .filter((x): x is string => !!x);
+    initialQuestionIds.current = kept.map((q) => q.questionId).filter((x): x is string => !!x);
   }
 
-  async function onPickImage(
-    kind: "logo" | "banner",
-    ev: React.ChangeEvent<HTMLInputElement>,
-  ) {
+  async function onPickImage(kind: "logo" | "banner", ev: React.ChangeEvent<HTMLInputElement>) {
     const file = ev.target.files?.[0];
     ev.target.value = ""; // allow re-picking the same file
     if (!file) return;
@@ -642,365 +652,391 @@ export function NewHackathonClient({
         </header>
 
         {isEdit && loadingData ? (
-          <p className="nh-hint" style={{ padding: "8px 4px" }}>{t("loading")}</p>
+          <p className="nh-hint" style={{ padding: "8px 4px" }}>
+            {t("loading")}
+          </p>
         ) : (
-        <form className="nh-form" onSubmit={onSubmit} noValidate>
-          {resumeOffer && (
-            <div className="nh-resume" role="alert">
-              <div className="nh-resume-text">
-                <strong>{t("resumeTitle")}</strong>
-                <span>{t("resumeBody")}</span>
-              </div>
-              <div className="nh-resume-actions">
-                <button type="button" className="btn btn-ghost hk-btn-sm" onClick={discardDraft}>
-                  {t("resumeDiscard")}
-                </button>
-                <button type="button" className="btn btn-violet hk-btn-sm" onClick={continueDraft}>
-                  <Icon name="check" /> {t("resumeContinue")}
-                </button>
-              </div>
-            </div>
-          )}
-          {/* BASICS */}
-          <section className="nh-section">
-            <h2 className="nh-section-title">{t("secBasics")}</h2>
-
-            <div className="nh-field">
-              <label className="nh-label" htmlFor="nh-title">{t("fTitle")}</label>
-              <input
-                id="nh-title"
-                className={`nh-input${errors.title ? " nh-input-err" : ""}`}
-                value={form.title}
-                placeholder={t("fTitlePh")}
-                onChange={(e) => set("title", e.target.value)}
-                aria-invalid={!!errors.title}
-              />
-              {errors.title && <p className="nh-err">{errors.title}</p>}
-            </div>
-
-            <div className="nh-field">
-              <label className="nh-label" htmlFor="nh-desc">{t("fDescription")}</label>
-              <textarea
-                id="nh-desc"
-                className={`nh-textarea${errors.description ? " nh-input-err" : ""}`}
-                rows={4}
-                value={form.description}
-                placeholder={t("fDescriptionPh")}
-                onChange={(e) => set("description", e.target.value)}
-                aria-invalid={!!errors.description}
-              />
-              {errors.description && <p className="nh-err">{errors.description}</p>}
-            </div>
-
-            <div className="nh-field">
-              <label className="nh-label" htmlFor="nh-theme">
-                {t("fTheme")} <span className="nh-opt">{t("fThemeOpt")}</span>
-              </label>
-              <input
-                id="nh-theme"
-                className="nh-input"
-                value={form.theme}
-                placeholder={t("fThemePh")}
-                onChange={(e) => set("theme", e.target.value)}
-              />
-            </div>
-          </section>
-
-          {/* FORMAT & LOCATION */}
-          <section className="nh-section">
-            <h2 className="nh-section-title">{t("secFormat")}</h2>
-
-            <div className="nh-field">
-              <span className="nh-label">{t("fType")}</span>
-              <div className="nh-type-row" role="radiogroup" aria-label={t("fType")}>
-                {HACKATHON_TYPE.map((ty) => (
+          <form className="nh-form" onSubmit={onSubmit} noValidate>
+            {resumeOffer && (
+              <div className="nh-resume" role="alert">
+                <div className="nh-resume-text">
+                  <strong>{t("resumeTitle")}</strong>
+                  <span>{t("resumeBody")}</span>
+                </div>
+                <div className="nh-resume-actions">
+                  <button type="button" className="btn btn-ghost hk-btn-sm" onClick={discardDraft}>
+                    {t("resumeDiscard")}
+                  </button>
                   <button
                     type="button"
-                    key={ty}
-                    className={`nh-type${form.type === ty ? " nh-type-on" : ""}`}
-                    role="radio"
-                    aria-checked={form.type === ty}
-                    onClick={() => set("type", ty)}
+                    className="btn btn-violet hk-btn-sm"
+                    onClick={continueDraft}
                   >
-                    {typeLabel(ty)}
+                    <Icon name="check" /> {t("resumeContinue")}
                   </button>
-                ))}
+                </div>
               </div>
-            </div>
-
-            {needsLocation && (
-              <>
-                <p className="nh-hint">{t("locationHint")}</p>
-                <div className="nh-field">
-                  <label className="nh-label" htmlFor="nh-loc">{t("fLocation")}</label>
-                  <input
-                    id="nh-loc"
-                    className={`nh-input${errors.location ? " nh-input-err" : ""}`}
-                    value={form.location}
-                    placeholder={t("fLocationPh")}
-                    onChange={(e) => set("location", e.target.value)}
-                    aria-invalid={!!errors.location}
-                  />
-                  {errors.location && <p className="nh-err">{errors.location}</p>}
-                </div>
-                <div className="nh-grid-2">
-                  <div className="nh-field">
-                    <label className="nh-label" htmlFor="nh-lat">{t("fLatitude")}</label>
-                    <input
-                      id="nh-lat"
-                      className={`nh-input${errors.latitude ? " nh-input-err" : ""}`}
-                      type="number"
-                      step="any"
-                      inputMode="decimal"
-                      value={form.latitude}
-                      onChange={(e) => set("latitude", e.target.value)}
-                      aria-invalid={!!errors.latitude}
-                    />
-                    {errors.latitude && <p className="nh-err">{errors.latitude}</p>}
-                  </div>
-                  <div className="nh-field">
-                    <label className="nh-label" htmlFor="nh-lng">{t("fLongitude")}</label>
-                    <input
-                      id="nh-lng"
-                      className={`nh-input${errors.longitude ? " nh-input-err" : ""}`}
-                      type="number"
-                      step="any"
-                      inputMode="decimal"
-                      value={form.longitude}
-                      onChange={(e) => set("longitude", e.target.value)}
-                      aria-invalid={!!errors.longitude}
-                    />
-                    {errors.longitude && <p className="nh-err">{errors.longitude}</p>}
-                  </div>
-                </div>
-              </>
             )}
-          </section>
+            {/* BASICS */}
+            <section className="nh-section">
+              <h2 className="nh-section-title">{t("secBasics")}</h2>
 
-          {/* SCHEDULE */}
-          <section className="nh-section">
-            <h2 className="nh-section-title">{t("secSchedule")}</h2>
-            <div className="nh-grid-2">
               <div className="nh-field">
-                <label className="nh-label" htmlFor="nh-start">{t("fStartsAt")}</label>
+                <label className="nh-label" htmlFor="nh-title">
+                  {t("fTitle")}
+                </label>
                 <input
-                  id="nh-start"
-                  className={`nh-input${errors.startsAt ? " nh-input-err" : ""}`}
-                  type="datetime-local"
-                  value={form.startsAt}
-                  onChange={(e) => set("startsAt", e.target.value)}
-                  aria-invalid={!!errors.startsAt}
+                  id="nh-title"
+                  className={`nh-input${errors.title ? " nh-input-err" : ""}`}
+                  value={form.title}
+                  placeholder={t("fTitlePh")}
+                  onChange={(e) => set("title", e.target.value)}
+                  aria-invalid={!!errors.title}
                 />
-                {errors.startsAt && <p className="nh-err">{errors.startsAt}</p>}
+                {errors.title && <p className="nh-err">{errors.title}</p>}
               </div>
+
               <div className="nh-field">
-                <label className="nh-label" htmlFor="nh-end">{t("fEndsAt")}</label>
-                <input
-                  id="nh-end"
-                  className={`nh-input${errors.endsAt ? " nh-input-err" : ""}`}
-                  type="datetime-local"
-                  value={form.endsAt}
-                  onChange={(e) => set("endsAt", e.target.value)}
-                  aria-invalid={!!errors.endsAt}
+                <label className="nh-label" htmlFor="nh-desc">
+                  {t("fDescription")}
+                </label>
+                <textarea
+                  id="nh-desc"
+                  className={`nh-textarea${errors.description ? " nh-input-err" : ""}`}
+                  rows={4}
+                  value={form.description}
+                  placeholder={t("fDescriptionPh")}
+                  onChange={(e) => set("description", e.target.value)}
+                  aria-invalid={!!errors.description}
                 />
-                {errors.endsAt && <p className="nh-err">{errors.endsAt}</p>}
+                {errors.description && <p className="nh-err">{errors.description}</p>}
               </div>
-            </div>
-            <div className="nh-field">
-              <label className="nh-label" htmlFor="nh-reg">{t("fRegDeadline")}</label>
-              <input
-                id="nh-reg"
-                className={`nh-input${errors.registrationDeadline ? " nh-input-err" : ""}`}
-                type="datetime-local"
-                value={form.registrationDeadline}
-                onChange={(e) => set("registrationDeadline", e.target.value)}
-                aria-invalid={!!errors.registrationDeadline}
-              />
-              {errors.registrationDeadline && (
-                <p className="nh-err">{errors.registrationDeadline}</p>
+
+              <div className="nh-field">
+                <label className="nh-label" htmlFor="nh-theme">
+                  {t("fTheme")} <span className="nh-opt">{t("fThemeOpt")}</span>
+                </label>
+                <input
+                  id="nh-theme"
+                  className="nh-input"
+                  value={form.theme}
+                  placeholder={t("fThemePh")}
+                  onChange={(e) => set("theme", e.target.value)}
+                />
+              </div>
+            </section>
+
+            {/* FORMAT & LOCATION */}
+            <section className="nh-section">
+              <h2 className="nh-section-title">{t("secFormat")}</h2>
+
+              <div className="nh-field">
+                <span className="nh-label">{t("fType")}</span>
+                <div className="nh-type-row" role="radiogroup" aria-label={t("fType")}>
+                  {HACKATHON_TYPE.map((ty) => (
+                    <button
+                      type="button"
+                      key={ty}
+                      className={`nh-type${form.type === ty ? " nh-type-on" : ""}`}
+                      role="radio"
+                      aria-checked={form.type === ty}
+                      onClick={() => set("type", ty)}
+                    >
+                      {typeLabel(ty)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {needsLocation && (
+                <>
+                  <p className="nh-hint">{t("locationHint")}</p>
+                  <div className="nh-field">
+                    <label className="nh-label" htmlFor="nh-loc">
+                      {t("fLocation")}
+                    </label>
+                    <input
+                      id="nh-loc"
+                      className={`nh-input${errors.location ? " nh-input-err" : ""}`}
+                      value={form.location}
+                      placeholder={t("fLocationPh")}
+                      onChange={(e) => set("location", e.target.value)}
+                      aria-invalid={!!errors.location}
+                    />
+                    {errors.location && <p className="nh-err">{errors.location}</p>}
+                  </div>
+                  <div className="nh-grid-2">
+                    <div className="nh-field">
+                      <label className="nh-label" htmlFor="nh-lat">
+                        {t("fLatitude")}
+                      </label>
+                      <input
+                        id="nh-lat"
+                        className={`nh-input${errors.latitude ? " nh-input-err" : ""}`}
+                        type="number"
+                        step="any"
+                        inputMode="decimal"
+                        value={form.latitude}
+                        onChange={(e) => set("latitude", e.target.value)}
+                        aria-invalid={!!errors.latitude}
+                      />
+                      {errors.latitude && <p className="nh-err">{errors.latitude}</p>}
+                    </div>
+                    <div className="nh-field">
+                      <label className="nh-label" htmlFor="nh-lng">
+                        {t("fLongitude")}
+                      </label>
+                      <input
+                        id="nh-lng"
+                        className={`nh-input${errors.longitude ? " nh-input-err" : ""}`}
+                        type="number"
+                        step="any"
+                        inputMode="decimal"
+                        value={form.longitude}
+                        onChange={(e) => set("longitude", e.target.value)}
+                        aria-invalid={!!errors.longitude}
+                      />
+                      {errors.longitude && <p className="nh-err">{errors.longitude}</p>}
+                    </div>
+                  </div>
+                </>
               )}
-            </div>
-          </section>
+            </section>
 
-          {/* TEAMS & CAPACITY */}
-          <section className="nh-section">
-            <h2 className="nh-section-title">{t("secTeams")}</h2>
-            <div className="nh-grid-2">
+            {/* SCHEDULE */}
+            <section className="nh-section">
+              <h2 className="nh-section-title">{t("secSchedule")}</h2>
+              <div className="nh-grid-2">
+                <div className="nh-field">
+                  <label className="nh-label" htmlFor="nh-start">
+                    {t("fStartsAt")}
+                  </label>
+                  <input
+                    id="nh-start"
+                    className={`nh-input${errors.startsAt ? " nh-input-err" : ""}`}
+                    type="datetime-local"
+                    value={form.startsAt}
+                    onChange={(e) => set("startsAt", e.target.value)}
+                    aria-invalid={!!errors.startsAt}
+                  />
+                  {errors.startsAt && <p className="nh-err">{errors.startsAt}</p>}
+                </div>
+                <div className="nh-field">
+                  <label className="nh-label" htmlFor="nh-end">
+                    {t("fEndsAt")}
+                  </label>
+                  <input
+                    id="nh-end"
+                    className={`nh-input${errors.endsAt ? " nh-input-err" : ""}`}
+                    type="datetime-local"
+                    value={form.endsAt}
+                    onChange={(e) => set("endsAt", e.target.value)}
+                    aria-invalid={!!errors.endsAt}
+                  />
+                  {errors.endsAt && <p className="nh-err">{errors.endsAt}</p>}
+                </div>
+              </div>
               <div className="nh-field">
-                <label className="nh-label" htmlFor="nh-min">{t("fMinTeamSize")}</label>
+                <label className="nh-label" htmlFor="nh-reg">
+                  {t("fRegDeadline")}
+                </label>
                 <input
-                  id="nh-min"
-                  className={`nh-input${errors.minTeamSize ? " nh-input-err" : ""}`}
+                  id="nh-reg"
+                  className={`nh-input${errors.registrationDeadline ? " nh-input-err" : ""}`}
+                  type="datetime-local"
+                  value={form.registrationDeadline}
+                  onChange={(e) => set("registrationDeadline", e.target.value)}
+                  aria-invalid={!!errors.registrationDeadline}
+                />
+                {errors.registrationDeadline && (
+                  <p className="nh-err">{errors.registrationDeadline}</p>
+                )}
+              </div>
+            </section>
+
+            {/* TEAMS & CAPACITY */}
+            <section className="nh-section">
+              <h2 className="nh-section-title">{t("secTeams")}</h2>
+              <div className="nh-grid-2">
+                <div className="nh-field">
+                  <label className="nh-label" htmlFor="nh-min">
+                    {t("fMinTeamSize")}
+                  </label>
+                  <input
+                    id="nh-min"
+                    className={`nh-input${errors.minTeamSize ? " nh-input-err" : ""}`}
+                    type="number"
+                    min={1}
+                    step={1}
+                    inputMode="numeric"
+                    value={form.minTeamSize}
+                    onChange={(e) => set("minTeamSize", e.target.value)}
+                    aria-invalid={!!errors.minTeamSize}
+                  />
+                  {errors.minTeamSize && <p className="nh-err">{errors.minTeamSize}</p>}
+                </div>
+                <div className="nh-field">
+                  <label className="nh-label" htmlFor="nh-max">
+                    {t("fMaxTeamSize")}
+                  </label>
+                  <input
+                    id="nh-max"
+                    className={`nh-input${errors.maxTeamSize ? " nh-input-err" : ""}`}
+                    type="number"
+                    min={1}
+                    step={1}
+                    inputMode="numeric"
+                    value={form.maxTeamSize}
+                    onChange={(e) => set("maxTeamSize", e.target.value)}
+                    aria-invalid={!!errors.maxTeamSize}
+                  />
+                  {errors.maxTeamSize && <p className="nh-err">{errors.maxTeamSize}</p>}
+                </div>
+              </div>
+              <div className="nh-field">
+                <label className="nh-label" htmlFor="nh-cap">
+                  {t("fMaxParticipants")} <span className="nh-opt">{t("fThemeOpt")}</span>
+                </label>
+                <input
+                  id="nh-cap"
+                  className={`nh-input${errors.maxParticipants ? " nh-input-err" : ""}`}
                   type="number"
                   min={1}
                   step={1}
                   inputMode="numeric"
-                  value={form.minTeamSize}
-                  onChange={(e) => set("minTeamSize", e.target.value)}
-                  aria-invalid={!!errors.minTeamSize}
+                  value={form.maxParticipants}
+                  placeholder={t("fMaxPartPh")}
+                  onChange={(e) => set("maxParticipants", e.target.value)}
+                  aria-invalid={!!errors.maxParticipants}
                 />
-                {errors.minTeamSize && <p className="nh-err">{errors.minTeamSize}</p>}
+                {errors.maxParticipants && <p className="nh-err">{errors.maxParticipants}</p>}
               </div>
-              <div className="nh-field">
-                <label className="nh-label" htmlFor="nh-max">{t("fMaxTeamSize")}</label>
-                <input
-                  id="nh-max"
-                  className={`nh-input${errors.maxTeamSize ? " nh-input-err" : ""}`}
-                  type="number"
-                  min={1}
-                  step={1}
-                  inputMode="numeric"
-                  value={form.maxTeamSize}
-                  onChange={(e) => set("maxTeamSize", e.target.value)}
-                  aria-invalid={!!errors.maxTeamSize}
-                />
-                {errors.maxTeamSize && <p className="nh-err">{errors.maxTeamSize}</p>}
-              </div>
-            </div>
-            <div className="nh-field">
-              <label className="nh-label" htmlFor="nh-cap">
-                {t("fMaxParticipants")} <span className="nh-opt">{t("fThemeOpt")}</span>
-              </label>
-              <input
-                id="nh-cap"
-                className={`nh-input${errors.maxParticipants ? " nh-input-err" : ""}`}
-                type="number"
-                min={1}
-                step={1}
-                inputMode="numeric"
-                value={form.maxParticipants}
-                placeholder={t("fMaxPartPh")}
-                onChange={(e) => set("maxParticipants", e.target.value)}
-                aria-invalid={!!errors.maxParticipants}
-              />
-              {errors.maxParticipants && <p className="nh-err">{errors.maxParticipants}</p>}
-            </div>
-          </section>
+            </section>
 
-          {/* MEDIA */}
-          <section className="nh-section">
-            <h2 className="nh-section-title">{t("secMedia")}</h2>
-            <div className="nh-grid-2">
-              <div className="nh-field">
-                <span className="nh-label">
-                  {t("fLogo")} <span className="nh-opt">{t("fThemeOpt")}</span>
-                </span>
-                <div className="nh-media">
-                  {form.logoUrl ? (
-                    <div className="nh-media-preview nh-media-logo">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={form.logoUrl} alt="" loading="lazy" />
-                    </div>
-                  ) : (
-                    <div className="nh-media-empty nh-media-logo" aria-hidden="true">
-                      <Icon name="image" />
-                    </div>
-                  )}
-                  <div className="nh-media-actions">
-                    <button
-                      type="button"
-                      className="btn btn-ghost hk-btn-sm"
-                      onClick={() => logoInputRef.current?.click()}
-                      disabled={uploading === "logo"}
-                    >
-                      {uploading === "logo" ? t("uploading") : t("upload")}
-                    </button>
-                    {form.logoUrl && (
+            {/* MEDIA */}
+            <section className="nh-section">
+              <h2 className="nh-section-title">{t("secMedia")}</h2>
+              <div className="nh-grid-2">
+                <div className="nh-field">
+                  <span className="nh-label">
+                    {t("fLogo")} <span className="nh-opt">{t("fThemeOpt")}</span>
+                  </span>
+                  <div className="nh-media">
+                    {form.logoUrl ? (
+                      <div className="nh-media-preview nh-media-logo">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={form.logoUrl} alt="" loading="lazy" />
+                      </div>
+                    ) : (
+                      <div className="nh-media-empty nh-media-logo" aria-hidden="true">
+                        <Icon name="image" />
+                      </div>
+                    )}
+                    <div className="nh-media-actions">
                       <button
                         type="button"
-                        className="nh-media-remove"
-                        onClick={() => set("logoUrl", "")}
+                        className="btn btn-ghost hk-btn-sm"
+                        onClick={() => logoInputRef.current?.click()}
+                        disabled={uploading === "logo"}
                       >
-                        {t("remove")}
+                        {uploading === "logo" ? t("uploading") : t("upload")}
                       </button>
-                    )}
+                      {form.logoUrl && (
+                        <button
+                          type="button"
+                          className="nh-media-remove"
+                          onClick={() => set("logoUrl", "")}
+                        >
+                          {t("remove")}
+                        </button>
+                      )}
+                    </div>
+                    <input
+                      ref={logoInputRef}
+                      type="file"
+                      accept="image/*"
+                      hidden
+                      onChange={(e) => onPickImage("logo", e)}
+                    />
                   </div>
-                  <input
-                    ref={logoInputRef}
-                    type="file"
-                    accept="image/*"
-                    hidden
-                    onChange={(e) => onPickImage("logo", e)}
-                  />
                 </div>
-              </div>
 
-              <div className="nh-field">
-                <span className="nh-label">
-                  {t("fBanner")} <span className="nh-opt">{t("fThemeOpt")}</span>
-                </span>
-                <div className="nh-media">
-                  {form.bannerUrl ? (
-                    <div className="nh-media-preview nh-media-banner">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={form.bannerUrl} alt="" loading="lazy" />
-                    </div>
-                  ) : (
-                    <div className="nh-media-empty nh-media-banner" aria-hidden="true">
-                      <Icon name="image" />
-                    </div>
-                  )}
-                  <div className="nh-media-actions">
-                    <button
-                      type="button"
-                      className="btn btn-ghost hk-btn-sm"
-                      onClick={() => bannerInputRef.current?.click()}
-                      disabled={uploading === "banner"}
-                    >
-                      {uploading === "banner" ? t("uploading") : t("upload")}
-                    </button>
-                    {form.bannerUrl && (
+                <div className="nh-field">
+                  <span className="nh-label">
+                    {t("fBanner")} <span className="nh-opt">{t("fThemeOpt")}</span>
+                  </span>
+                  <div className="nh-media">
+                    {form.bannerUrl ? (
+                      <div className="nh-media-preview nh-media-banner">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={form.bannerUrl} alt="" loading="lazy" />
+                      </div>
+                    ) : (
+                      <div className="nh-media-empty nh-media-banner" aria-hidden="true">
+                        <Icon name="image" />
+                      </div>
+                    )}
+                    <div className="nh-media-actions">
                       <button
                         type="button"
-                        className="nh-media-remove"
-                        onClick={() => set("bannerUrl", "")}
+                        className="btn btn-ghost hk-btn-sm"
+                        onClick={() => bannerInputRef.current?.click()}
+                        disabled={uploading === "banner"}
                       >
-                        {t("remove")}
+                        {uploading === "banner" ? t("uploading") : t("upload")}
                       </button>
-                    )}
+                      {form.bannerUrl && (
+                        <button
+                          type="button"
+                          className="nh-media-remove"
+                          onClick={() => set("bannerUrl", "")}
+                        >
+                          {t("remove")}
+                        </button>
+                      )}
+                    </div>
+                    <input
+                      ref={bannerInputRef}
+                      type="file"
+                      accept="image/*"
+                      hidden
+                      onChange={(e) => onPickImage("banner", e)}
+                    />
                   </div>
-                  <input
-                    ref={bannerInputRef}
-                    type="file"
-                    accept="image/*"
-                    hidden
-                    onChange={(e) => onPickImage("banner", e)}
-                  />
                 </div>
               </div>
+            </section>
+
+            {/* APPLICATION FORM (questions) */}
+            <QuestionBuilder value={questions} onChange={setQuestions} />
+
+            {serverError && <p className="nh-server-err">{serverError}</p>}
+
+            <div className="nh-foot">
+              {!isEdit && draftStatus !== "idle" && (
+                <span className="nh-draft-status">
+                  <Icon name={draftStatus === "saving" ? "clock" : "check"} />{" "}
+                  {draftStatus === "saving" ? t("draftSaving") : t("draftSaved")}
+                </span>
+              )}
+              <Link
+                className="btn btn-ghost"
+                href={isEdit && hackathonId ? `/hackathons/${hackathonId}` : "/hackathons"}
+              >
+                {t("cancel")}
+              </Link>
+              <button className="btn btn-primary nh-submit" type="submit" disabled={submitting}>
+                <Icon name="check" />{" "}
+                {submitting
+                  ? isEdit
+                    ? t("saving")
+                    : t("submitting")
+                  : isEdit
+                    ? t("saveChanges")
+                    : t("submit")}
+              </button>
             </div>
-          </section>
-
-          {/* APPLICATION FORM (questions) */}
-          <QuestionBuilder value={questions} onChange={setQuestions} />
-
-          {serverError && <p className="nh-server-err">{serverError}</p>}
-
-          <div className="nh-foot">
-            {!isEdit && draftStatus !== "idle" && (
-              <span className="nh-draft-status">
-                <Icon name={draftStatus === "saving" ? "clock" : "check"} />{" "}
-                {draftStatus === "saving" ? t("draftSaving") : t("draftSaved")}
-              </span>
-            )}
-            <Link
-              className="btn btn-ghost"
-              href={isEdit && hackathonId ? `/hackathons/${hackathonId}` : "/hackathons"}
-            >
-              {t("cancel")}
-            </Link>
-            <button className="btn btn-primary nh-submit" type="submit" disabled={submitting}>
-              <Icon name="check" />{" "}
-              {submitting
-                ? isEdit
-                  ? t("saving")
-                  : t("submitting")
-                : isEdit
-                  ? t("saveChanges")
-                  : t("submit")}
-            </button>
-          </div>
-        </form>
+          </form>
         )}
       </main>
     </AppShell>

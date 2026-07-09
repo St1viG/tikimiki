@@ -1,8 +1,4 @@
-import {
-  Inject,
-  Injectable,
-  NotFoundException,
-} from "@nestjs/common";
+import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import { notifications, users } from "../db/schema";
@@ -168,9 +164,7 @@ export class NotificationsService {
       .from(users)
       .where(inArray(sql`lower(${users.username})`, handles));
 
-    const restrict = opts.restrictToUserIds
-      ? new Set(opts.restrictToUserIds)
-      : null;
+    const restrict = opts.restrictToUserIds ? new Set(opts.restrictToUserIds) : null;
 
     for (const r of rows) {
       if (r.userId === opts.actorId) continue;
@@ -187,10 +181,7 @@ export class NotificationsService {
   }
 
   /** List the caller's notifications, optionally only unread, newest first. */
-  async list(
-    userId: string,
-    filter: "all" | "unread",
-  ): Promise<NotificationDto[]> {
+  async list(userId: string, filter: "all" | "unread"): Promise<NotificationDto[]> {
     const where =
       filter === "unread"
         ? and(eq(notifications.userId, userId), isNull(notifications.readAt))
@@ -211,9 +202,7 @@ export class NotificationsService {
     const [row] = await this.db
       .select({ value: sql<number>`count(*)::int` })
       .from(notifications)
-      .where(
-        and(eq(notifications.userId, userId), isNull(notifications.readAt)),
-      );
+      .where(and(eq(notifications.userId, userId), isNull(notifications.readAt)));
     return { count: row?.value ?? 0 };
   }
 
@@ -223,10 +212,7 @@ export class NotificationsService {
       .select(selection)
       .from(notifications)
       .where(
-        and(
-          eq(notifications.notificationId, notificationId),
-          eq(notifications.userId, userId),
-        ),
+        and(eq(notifications.notificationId, notificationId), eq(notifications.userId, userId)),
       )
       .limit(1);
 
@@ -259,9 +245,7 @@ export class NotificationsService {
     const updated = await this.db
       .update(notifications)
       .set({ readAt: new Date() })
-      .where(
-        and(eq(notifications.userId, userId), isNull(notifications.readAt)),
-      )
+      .where(and(eq(notifications.userId, userId), isNull(notifications.readAt)))
       .returning({ notificationId: notifications.notificationId });
 
     return { markedCount: updated.length };

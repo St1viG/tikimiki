@@ -25,10 +25,7 @@ import {
 } from "../db/schema";
 import { NotificationsService } from "../notifications/notifications.service";
 
-type TeamNotifType =
-  | "team_invitation_received"
-  | "team_request_received"
-  | "team_request_accepted";
+type TeamNotifType = "team_invitation_received" | "team_request_received" | "team_request_accepted";
 import type { CreateTeamInput, InviteInput, JoinRequestInput } from "./dto";
 
 /* ── response shapes ──────────────────────────────────────── */
@@ -134,9 +131,7 @@ export class TeamsService {
   ) {}
 
   /** Loads active members (with points + username) for the given team ids. */
-  private async loadActiveMembers(
-    teamIds: string[],
-  ): Promise<Map<string, ActiveMemberRow[]>> {
+  private async loadActiveMembers(teamIds: string[]): Promise<Map<string, ActiveMemberRow[]>> {
     const map = new Map<string, ActiveMemberRow[]>();
     if (teamIds.length === 0) return map;
 
@@ -152,9 +147,7 @@ export class TeamsService {
       .from(teamMembers)
       .innerJoin(users, eq(teamMembers.userId, users.userId))
       .innerJoin(members, eq(teamMembers.userId, members.userId))
-      .where(
-        and(inArray(teamMembers.teamId, teamIds), activeTeamMember),
-      )
+      .where(and(inArray(teamMembers.teamId, teamIds), activeTeamMember))
       .orderBy(asc(teamMembers.joinedAt));
 
     for (const r of rows) {
@@ -227,9 +220,7 @@ export class TeamsService {
       .where(and(inArray(teams.teamId, teamIds), isNull(teams.deletedAt)))
       .orderBy(desc(teams.createdAt));
 
-    const memberMap = await this.loadActiveMembers(
-      teamRows.map((t) => t.teamId),
-    );
+    const memberMap = await this.loadActiveMembers(teamRows.map((t) => t.teamId));
 
     return teamRows.map((t) => {
       const active = memberMap.get(t.teamId) ?? [];
@@ -415,12 +406,7 @@ export class TeamsService {
     const [hackathon] = await this.db
       .select({ hackathonId: hackathons.hackathonId })
       .from(hackathons)
-      .where(
-        and(
-          eq(hackathons.hackathonId, input.hackathonId),
-          isNull(hackathons.deletedAt),
-        ),
-      )
+      .where(and(eq(hackathons.hackathonId, input.hackathonId), isNull(hackathons.deletedAt)))
       .limit(1);
     if (!hackathon) throw new NotFoundException("Hackathon not found");
 
@@ -474,9 +460,7 @@ export class TeamsService {
       const [{ maxPos }] = await this.db
         .select({ maxPos: sql<number>`coalesce(max(${channels.position}), -1)` })
         .from(channels)
-        .where(
-          and(eq(channels.groupId, targetGroup.groupId), isNull(channels.deletedAt)),
-        );
+        .where(and(eq(channels.groupId, targetGroup.groupId), isNull(channels.deletedAt)));
 
       const position = Number(maxPos) + 1;
 
@@ -533,9 +517,7 @@ export class TeamsService {
         deletedAt: teamMembers.deletedAt,
       })
       .from(teamMembers)
-      .where(
-        and(eq(teamMembers.teamId, teamId), eq(teamMembers.userId, userId)),
-      )
+      .where(and(eq(teamMembers.teamId, teamId), eq(teamMembers.userId, userId)))
       .limit(1);
     if (existing && existing.leftAt === null && existing.deletedAt === null) {
       throw new ConflictException("Already a member of this team");
@@ -559,9 +541,7 @@ export class TeamsService {
           deletedAt: null,
           joinedAt: new Date(),
         })
-        .where(
-          and(eq(teamMembers.teamId, teamId), eq(teamMembers.userId, userId)),
-        );
+        .where(and(eq(teamMembers.teamId, teamId), eq(teamMembers.userId, userId)));
     } else {
       await this.db.insert(teamMembers).values({
         teamId,
@@ -612,20 +592,11 @@ export class TeamsService {
     }
   }
 
-  private async isActiveMember(
-    teamId: string,
-    userId: string,
-  ): Promise<boolean> {
+  private async isActiveMember(teamId: string, userId: string): Promise<boolean> {
     const [row] = await this.db
       .select({ userId: teamMembers.userId })
       .from(teamMembers)
-      .where(
-        and(
-          eq(teamMembers.teamId, teamId),
-          eq(teamMembers.userId, userId),
-          activeTeamMember,
-        ),
-      )
+      .where(and(eq(teamMembers.teamId, teamId), eq(teamMembers.userId, userId), activeTeamMember))
       .limit(1);
     return Boolean(row);
   }
@@ -682,13 +653,7 @@ export class TeamsService {
       .select({ leaderId: teamMembers.userId, teamName: teams.name })
       .from(teamMembers)
       .innerJoin(teams, eq(teams.teamId, teamMembers.teamId))
-      .where(
-        and(
-          eq(teamMembers.teamId, teamId),
-          eq(teamMembers.role, "leader"),
-          activeTeamMember,
-        ),
-      )
+      .where(and(eq(teamMembers.teamId, teamId), eq(teamMembers.role, "leader"), activeTeamMember))
       .limit(1);
     if (lead) {
       await this.notifyTeam(
@@ -713,10 +678,7 @@ export class TeamsService {
   }
 
   /** GET /teams/:teamId/join-requests — leader sees pending requests. */
-  async listJoinRequests(
-    teamId: string,
-    callerId: string,
-  ): Promise<JoinRequestDto[]> {
+  async listJoinRequests(teamId: string, callerId: string): Promise<JoinRequestDto[]> {
     await this.assertLeader(teamId, callerId);
     const rows = await this.db
       .select({
@@ -731,12 +693,7 @@ export class TeamsService {
       })
       .from(teamJoinRequests)
       .innerJoin(users, eq(users.userId, teamJoinRequests.userId))
-      .where(
-        and(
-          eq(teamJoinRequests.teamId, teamId),
-          eq(teamJoinRequests.status, "pending"),
-        ),
-      )
+      .where(and(eq(teamJoinRequests.teamId, teamId), eq(teamJoinRequests.status, "pending")))
       .orderBy(desc(teamJoinRequests.createdAt));
 
     return rows.map((r) => ({
@@ -803,11 +760,7 @@ export class TeamsService {
   }
 
   /** POST /teams/:teamId/invitations — leader invites a member. */
-  async invite(
-    teamId: string,
-    callerId: string,
-    input: InviteInput,
-  ): Promise<InvitationDto> {
+  async invite(teamId: string, callerId: string, input: InviteInput): Promise<InvitationDto> {
     await this.assertLeader(teamId, callerId);
 
     const [member] = await this.db
@@ -860,12 +813,7 @@ export class TeamsService {
     const rows = await this.db
       .select({ invitationId: teamInvitations.invitationId })
       .from(teamInvitations)
-      .where(
-        and(
-          eq(teamInvitations.userId, userId),
-          eq(teamInvitations.status, "pending"),
-        ),
-      )
+      .where(and(eq(teamInvitations.userId, userId), eq(teamInvitations.status, "pending")))
       .orderBy(desc(teamInvitations.createdAt));
 
     return Promise.all(rows.map((r) => this.buildInvitationDto(r.invitationId)));
@@ -876,12 +824,7 @@ export class TeamsService {
     const [row] = await this.db
       .select({ value: sql<number>`count(*)::int` })
       .from(teamInvitations)
-      .where(
-        and(
-          eq(teamInvitations.userId, userId),
-          eq(teamInvitations.status, "pending"),
-        ),
-      );
+      .where(and(eq(teamInvitations.userId, userId), eq(teamInvitations.status, "pending")));
     return { count: Number(row?.value ?? 0) };
   }
 
@@ -960,8 +903,6 @@ function isUniqueViolation(err: unknown): boolean {
   if (code === "23505") return true;
   const cause = (err as { cause?: unknown }).cause;
   return (
-    typeof cause === "object" &&
-    cause !== null &&
-    (cause as { code?: unknown }).code === "23505"
+    typeof cause === "object" && cause !== null && (cause as { code?: unknown }).code === "23505"
   );
 }

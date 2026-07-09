@@ -5,10 +5,7 @@
  */
 
 /** The primary label to show for a user: display name if present, else username. */
-export function personName(u: {
-  displayName?: string | null;
-  username: string;
-}): string {
+export function personName(u: { displayName?: string | null; username: string }): string {
   const d = u.displayName?.trim();
   return d ? d : u.username;
 }

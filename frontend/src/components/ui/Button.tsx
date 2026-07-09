@@ -1,18 +1,9 @@
 import clsx from "clsx";
 import Link from "next/link";
-import type {
-  AnchorHTMLAttributes,
-  ButtonHTMLAttributes,
-  ReactNode,
-} from "react";
+import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from "react";
 
 /* Button — wrapper over .btn + .btn-<variant>. Renders <Link> when href is set, else <button>. */
-export type ButtonVariant =
-  | "primary"
-  | "secondary"
-  | "violet"
-  | "ghost"
-  | "danger";
+export type ButtonVariant = "primary" | "secondary" | "violet" | "ghost" | "danger";
 
 type BaseProps = {
   variant?: ButtonVariant;

@@ -103,9 +103,7 @@ export function GamehubClient() {
   // Results the user earns this session, keyed by game id. We keep just-played
   // results in local state for a nice UX: a finished game's card immediately
   // shows its result + bumps its streak chip even before the today refresh lands.
-  const [freshResults, setFreshResults] = useState<
-    Partial<Record<GameId, GameResult>>
-  >({});
+  const [freshResults, setFreshResults] = useState<Partial<Record<GameId, GameResult>>>({});
 
   // Live backend data: the game catalog and the current user's per-game state today.
   const [games, setGames] = useState<Game[]>([]);
@@ -118,10 +116,7 @@ export function GamehubClient() {
     (async () => {
       setLoading(true);
       try {
-        const [gameList, todayState] = await Promise.all([
-          api.getGames(),
-          api.getGamesToday(),
-        ]);
+        const [gameList, todayState] = await Promise.all([api.getGames(), api.getGamesToday()]);
         if (cancelled) return;
         setGames(gameList);
         setToday(todayState);
@@ -237,19 +232,13 @@ export function GamehubClient() {
                     />
                     <div className="gc-titles" aria-hidden="true">
                       <span className="skel skel-line" style={{ width: "65%" }} />
-                      <span
-                        className="skel skel-line"
-                        style={{ width: "40%", marginTop: 6 }}
-                      />
+                      <span className="skel skel-line" style={{ width: "40%", marginTop: 6 }} />
                     </div>
                   </header>
 
                   {/* Your today state: play button + metric */}
                   <div className="gc-today" aria-hidden="true">
-                    <span
-                      className="skel"
-                      style={{ width: 92, height: 36, borderRadius: 11 }}
-                    />
+                    <span className="skel" style={{ width: 92, height: 36, borderRadius: 11 }} />
                     <span className="skel skel-line" style={{ width: "18%" }} />
                   </div>
                 </article>

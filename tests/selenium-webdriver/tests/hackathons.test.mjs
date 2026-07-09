@@ -48,11 +48,7 @@ describe("Kreiranje hakatona (Selenium WebDriver)", function () {
     // popunjavamo lokaciju + koordinate (obavezne za taj tip).
     const stamp = Date.now();
     await setReactValue(driver, "#nh-title", `Test Hakaton ${stamp}`);
-    await setReactValue(
-      driver,
-      "#nh-desc",
-      "Automatski kreiran hakaton (Selenium WebDriver).",
-    );
+    await setReactValue(driver, "#nh-desc", "Automatski kreiran hakaton (Selenium WebDriver).");
     await setReactValue(driver, "#nh-loc", "Beograd");
     await setReactValue(driver, "#nh-lat", "44.8125");
     await setReactValue(driver, "#nh-lng", "20.4612");

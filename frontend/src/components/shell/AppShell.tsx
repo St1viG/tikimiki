@@ -20,11 +20,7 @@ export function AppShell({
   const showRight = variant === "default";
   return (
     <div
-      className={clsx(
-        "shell",
-        variant === "no-right" && "no-right",
-        variant === "wide" && "wide"
-      )}
+      className={clsx("shell", variant === "no-right" && "no-right", variant === "wide" && "wide")}
     >
       <RailLeft />
       {children}

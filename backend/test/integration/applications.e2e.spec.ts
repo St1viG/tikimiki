@@ -75,22 +75,14 @@ describe("applications lifecycle (e2e)", () => {
     const [role] = await db
       .select({ serverRoleId: serverRoles.serverRoleId })
       .from(serverRoles)
-      .where(
-        and(
-          eq(serverRoles.serverId, server.serverId),
-          eq(serverRoles.name, "Participant"),
-        ),
-      );
+      .where(and(eq(serverRoles.serverId, server.serverId), eq(serverRoles.name, "Participant")));
     expect(role).toBeTruthy();
 
     const [grant] = await db
       .select({ userId: userRoles.userId })
       .from(userRoles)
       .where(
-        and(
-          eq(userRoles.serverRoleId, role.serverRoleId),
-          eq(userRoles.userId, applicant.userId),
-        ),
+        and(eq(userRoles.serverRoleId, role.serverRoleId), eq(userRoles.userId, applicant.userId)),
       );
     expect(grant).toBeTruthy();
   });
@@ -116,9 +108,7 @@ describe("applications lifecycle (e2e)", () => {
 
   it("rejects an application for a non-existent hackathon (404)", async () => {
     const applicant = await registerMember(app);
-    await apply(applicant.token, "00000000-0000-4000-8000-000000000000").expect(
-      404,
-    );
+    await apply(applicant.token, "00000000-0000-4000-8000-000000000000").expect(404);
   });
 
   // ── SSU-10: apply validations ────────────────────────────────────────────
@@ -305,14 +295,8 @@ describe("applications lifecycle (e2e)", () => {
         .expect(201);
 
       expect(res.body).toHaveLength(2);
-      expect(
-        (res.body as { status: string }[]).every((a) => a.status === "pending"),
-      ).toBe(true);
-      expect(
-        (res.body as { teamId: string }[]).every(
-          (a) => a.teamId === team.teamId,
-        ),
-      ).toBe(true);
+      expect((res.body as { status: string }[]).every((a) => a.status === "pending")).toBe(true);
+      expect((res.body as { teamId: string }[]).every((a) => a.teamId === team.teamId)).toBe(true);
     });
 
     it("skips members who already have an active application", async () => {
@@ -337,9 +321,7 @@ describe("applications lifecycle (e2e)", () => {
         .expect(201);
 
       expect(res.body).toHaveLength(1);
-      expect(
-        (res.body as { hackathonId: string }[])[0].hackathonId,
-      ).toBe(hk.hackathonId);
+      expect((res.body as { hackathonId: string }[])[0].hackathonId).toBe(hk.hackathonId);
     });
 
     it("returns empty array when all members already applied", async () => {
@@ -399,9 +381,7 @@ describe("applications lifecycle (e2e)", () => {
       const org = await registerOrganization(app);
       const hk = await createHackathon(app, org);
 
-      const res = await http()
-        .get(`/api/v1/hackathons/${hk.hackathonId}/calendar.ics`)
-        .expect(200);
+      const res = await http().get(`/api/v1/hackathons/${hk.hackathonId}/calendar.ics`).expect(200);
 
       expect(res.headers["content-type"]).toMatch(/text\/calendar/);
       expect(res.text).toContain("BEGIN:VCALENDAR");
@@ -435,10 +415,7 @@ describe("applications lifecycle (e2e)", () => {
         .select({ type: notifications.type })
         .from(notifications)
         .where(
-          and(
-            eq(notifications.userId, org.userId),
-            eq(notifications.type, "new_application"),
-          ),
+          and(eq(notifications.userId, org.userId), eq(notifications.type, "new_application")),
         );
 
       expect(notifs.length).toBeGreaterThan(0);
@@ -463,10 +440,7 @@ describe("applications lifecycle (e2e)", () => {
         .select({ type: notifications.type })
         .from(notifications)
         .where(
-          and(
-            eq(notifications.userId, org.userId),
-            eq(notifications.type, "new_application"),
-          ),
+          and(eq(notifications.userId, org.userId), eq(notifications.type, "new_application")),
         );
 
       expect(notifs.length).toBeGreaterThan(0);

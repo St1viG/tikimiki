@@ -13,12 +13,7 @@ import { useT } from "@/components/i18n/LanguageProvider";
 import { useRequireAuth } from "@/components/auth/AuthProvider";
 import * as api from "@/lib/api";
 import { formatXp } from "@/lib/format";
-import {
-  cosmeticToItem,
-  merchToItem,
-  type FilterCat,
-  type MerchItem,
-} from "@/lib/store";
+import { cosmeticToItem, merchToItem, type FilterCat, type MerchItem } from "@/lib/store";
 
 /* StoreClient — interactive store page.
  *
@@ -37,25 +32,34 @@ import {
  */
 
 const M = {
-  backLabel:         { en: "Back",                                                sr: "Nazad" },
-  pageTitle:         { en: "tikimiki Store",                                      sr: "tikimiki Prodavnica" },
-  pageSub:           { en: "Official merch. Pay with XP points earned at hackathons and mini-games.", sr: "Zvanični merch. Plaća se XP poenima osvojenim na hackathonima i mini igricama." },
-  walletLabel:       { en: "Your XP balance",                                     sr: "Tvoj XP balans" },
-  earnHint:          { en: "Earn more XP",                                        sr: "Zaradi više XP" },
-  filterLabel:       { en: "Filter products",                                     sr: "Filtriraj proizvode" },
-  filterAll:         { en: "All",                                                 sr: "Sve" },
-  filterTshirts:     { en: "T-Shirts",                                            sr: "Majice" },
-  filterHoodies:     { en: "Hoodies",                                             sr: "Duksevi" },
-  filterMugs:        { en: "Mugs",                                                sr: "Šolje" },
-  filterPremium:     { en: "Premium",                                             sr: "Premium" },
-  buyLabel:          { en: "Buy",                                                 sr: "Kupi" },
-  exchangeLabel:     { en: "Exchange",                                            sr: "Razmeni" },
-  notEnoughXP:       { en: "Not enough XP",                                       sr: "Nedovoljno XP" },
-  orderedToast:      { en: "ordered! Check your email for details.",              sr: "naručena! Provjeri email za detalje." },
-  boughtToast:       { en: "unlocked! Check your inventory.",                     sr: "otključano! Provjeri svoj inventar." },
-  loadingLabel:      { en: "Loading products…",                                  sr: "Učitavanje proizvoda…" },
-  emptyLabel:        { en: "No products available right now.",                    sr: "Trenutno nema dostupnih proizvoda." },
-  purchaseError:     { en: "Purchase failed. Please try again.",                  sr: "Kupovina nije uspela. Pokušaj ponovo." },
+  backLabel: { en: "Back", sr: "Nazad" },
+  pageTitle: { en: "tikimiki Store", sr: "tikimiki Prodavnica" },
+  pageSub: {
+    en: "Official merch. Pay with XP points earned at hackathons and mini-games.",
+    sr: "Zvanični merch. Plaća se XP poenima osvojenim na hackathonima i mini igricama.",
+  },
+  walletLabel: { en: "Your XP balance", sr: "Tvoj XP balans" },
+  earnHint: { en: "Earn more XP", sr: "Zaradi više XP" },
+  filterLabel: { en: "Filter products", sr: "Filtriraj proizvode" },
+  filterAll: { en: "All", sr: "Sve" },
+  filterTshirts: { en: "T-Shirts", sr: "Majice" },
+  filterHoodies: { en: "Hoodies", sr: "Duksevi" },
+  filterMugs: { en: "Mugs", sr: "Šolje" },
+  filterPremium: { en: "Premium", sr: "Premium" },
+  buyLabel: { en: "Buy", sr: "Kupi" },
+  exchangeLabel: { en: "Exchange", sr: "Razmeni" },
+  notEnoughXP: { en: "Not enough XP", sr: "Nedovoljno XP" },
+  orderedToast: {
+    en: "ordered! Check your email for details.",
+    sr: "naručena! Provjeri email za detalje.",
+  },
+  boughtToast: { en: "unlocked! Check your inventory.", sr: "otključano! Provjeri svoj inventar." },
+  loadingLabel: { en: "Loading products…", sr: "Učitavanje proizvoda…" },
+  emptyLabel: { en: "No products available right now.", sr: "Trenutno nema dostupnih proizvoda." },
+  purchaseError: {
+    en: "Purchase failed. Please try again.",
+    sr: "Kupovina nije uspela. Pokušaj ponovo.",
+  },
 } as const;
 
 /** Opacity for the buy button when XP is insufficient. */
@@ -195,9 +199,7 @@ export function StoreClient() {
         showToast(`${name} ${t("boughtToast")}`, "ok");
       } else if (item.source === "merch" && item.merchId) {
         // Map the chosen size label back to its variant id (if any).
-        const variantId = item.variants?.find(
-          (v) => v.label === selectedSize,
-        )?.variantId;
+        const variantId = item.variants?.find((v) => v.label === selectedSize)?.variantId;
         const profile = await api.getMyProfile();
         // NOTE: the BuyModal currently collects a single free-text delivery
         // line ("street, city, postal code"), but MerchOrderBody requires
@@ -234,16 +236,14 @@ export function StoreClient() {
     showToast(msg, "warn");
   }
 
-  const visibleItems = items.filter(
-    (item) => filter === "sve" || item.cat === filter
-  );
+  const visibleItems = items.filter((item) => filter === "sve" || item.cat === filter);
 
   const FILTER_CHIPS: { cat: FilterCat; labelKey: keyof typeof M; icon: string | null }[] = [
-    { cat: "sve",     labelKey: "filterAll",      icon: null },
-    { cat: "majice",  labelKey: "filterTshirts",  icon: "image" },
-    { cat: "duks",    labelKey: "filterHoodies",  icon: "shield" },
-    { cat: "solje",   labelKey: "filterMugs",     icon: "coin" },
-    { cat: "premium", labelKey: "filterPremium",  icon: "premium" },
+    { cat: "sve", labelKey: "filterAll", icon: null },
+    { cat: "majice", labelKey: "filterTshirts", icon: "image" },
+    { cat: "duks", labelKey: "filterHoodies", icon: "shield" },
+    { cat: "solje", labelKey: "filterMugs", icon: "coin" },
+    { cat: "premium", labelKey: "filterPremium", icon: "premium" },
   ];
 
   return (
@@ -258,9 +258,7 @@ export function StoreClient() {
             <h1 className="page-title">
               <Icon name="cart" /> {t("pageTitle")}
             </h1>
-            <p className="page-sub">
-              {t("pageSub")}
-            </p>
+            <p className="page-sub">{t("pageSub")}</p>
           </div>
         </div>
 
@@ -304,11 +302,7 @@ export function StoreClient() {
         <div className="store-grid" id="store-grid">
           {loading &&
             Array.from({ length: 6 }).map((_, i) => (
-              <div
-                key={`skel-${i}`}
-                className="merch-card is-skeleton"
-                aria-busy="true"
-              >
+              <div key={`skel-${i}`} className="merch-card is-skeleton" aria-busy="true">
                 <div
                   className="merch-img skel"
                   aria-hidden="true"
@@ -321,9 +315,7 @@ export function StoreClient() {
                   />
                   <span
                     className="skel skel-line"
-                    style={
-                      { width: "40%", marginTop: 5 } as React.CSSProperties
-                    }
+                    style={{ width: "40%", marginTop: 5 } as React.CSSProperties}
                   />
                   <div className="merch-foot">
                     <span
@@ -350,64 +342,56 @@ export function StoreClient() {
                 </div>
               </div>
             ))}
-          {!loading && visibleItems.length === 0 && (
-            <p className="page-sub">{t("emptyLabel")}</p>
-          )}
-          {!loading && visibleItems.map((item) => {
-            const handleClick = item.isPremium
-              ? () => openPremiumModal(item)
-              : () => openModal(item);
+          {!loading && visibleItems.length === 0 && <p className="page-sub">{t("emptyLabel")}</p>}
+          {!loading &&
+            visibleItems.map((item) => {
+              const handleClick = item.isPremium
+                ? () => openPremiumModal(item)
+                : () => openModal(item);
 
-            return (
-              <button
-                key={item.id}
-                className={["merch-card", item.isPremium ? "is-premium" : ""]
-                  .filter(Boolean)
-                  .join(" ")}
-                data-cat={item.cat}
-                onClick={handleClick}
-                aria-label={item.ariaLabel}
-              >
-                <div className="merch-img">
-                  <Icon name={item.icon} />
-                  {item.badge && (
-                    <span
-                      className={[
-                        "merch-badge",
-                        item.badge.kind === "hot" ? "merch-badge-hot" : "",
-                        item.badge.kind === "new" ? "merch-badge-new" : "",
-                      ]
-                        .filter(Boolean)
-                        .join(" ")}
-                    >
-                      {item.badge.kind === "hot" && (
-                        <Icon name="flame" />
-                      )}
-                      {item.badge.kind === "best" && (
-                        <Icon name="flame" />
-                      )}
-                      {item.badge.label}
-                    </span>
-                  )}
-                </div>
-                <div className="merch-body">
-                  <div className="merch-name">{item.name}</div>
-                  <div className="merch-variant">{item.variant}</div>
-                  <div className="merch-foot">
-                    <div className="merch-price">
-                      <Icon name="coin" /> {formatXp(item.price)}
-                    </div>
-                    <span
-                      className="btn-buy"
-                      style={buyOpacity(item, xp)}
-                    >
-                      {buyLabel(item)}
-                    </span>
+              return (
+                <button
+                  key={item.id}
+                  className={["merch-card", item.isPremium ? "is-premium" : ""]
+                    .filter(Boolean)
+                    .join(" ")}
+                  data-cat={item.cat}
+                  onClick={handleClick}
+                  aria-label={item.ariaLabel}
+                >
+                  <div className="merch-img">
+                    <Icon name={item.icon} />
+                    {item.badge && (
+                      <span
+                        className={[
+                          "merch-badge",
+                          item.badge.kind === "hot" ? "merch-badge-hot" : "",
+                          item.badge.kind === "new" ? "merch-badge-new" : "",
+                        ]
+                          .filter(Boolean)
+                          .join(" ")}
+                      >
+                        {item.badge.kind === "hot" && <Icon name="flame" />}
+                        {item.badge.kind === "best" && <Icon name="flame" />}
+                        {item.badge.label}
+                      </span>
+                    )}
                   </div>
-                </div>
-              </button>
-            );
-          })}
+                  <div className="merch-body">
+                    <div className="merch-name">{item.name}</div>
+                    <div className="merch-variant">{item.variant}</div>
+                    <div className="merch-foot">
+                      <div className="merch-price">
+                        <Icon name="coin" /> {formatXp(item.price)}
+                      </div>
+                      <span className="btn-buy" style={buyOpacity(item, xp)}>
+                        {buyLabel(item)}
+                      </span>
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
         </div>
       </main>
 

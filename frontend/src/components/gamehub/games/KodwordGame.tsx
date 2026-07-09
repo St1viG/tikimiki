@@ -78,10 +78,38 @@ const STATE_MSG: Record<LetterState, keyof typeof M> = {
    from this list; every entry doubles as an accepted guess so the validator
    never rejects a real word from the pool. */
 const WORDS = [
-  "ARRAY", "MERGE", "ASYNC", "CACHE", "STACK", "QUEUE", "BYTES", "REGEX",
-  "LINUX", "REACT", "FETCH", "PROXY", "REDUX", "MYSQL", "REDIS", "SCALA",
-  "SWIFT", "NGINX", "MACRO", "ENUMS", "FLOAT", "TUPLE", "LAMBA", "TOKEN",
-  "MUTEX", "SHARD", "VITES", "DEBUG", "PATCH", "FLAGS", "INDEX", "MOUNT",
+  "ARRAY",
+  "MERGE",
+  "ASYNC",
+  "CACHE",
+  "STACK",
+  "QUEUE",
+  "BYTES",
+  "REGEX",
+  "LINUX",
+  "REACT",
+  "FETCH",
+  "PROXY",
+  "REDUX",
+  "MYSQL",
+  "REDIS",
+  "SCALA",
+  "SWIFT",
+  "NGINX",
+  "MACRO",
+  "ENUMS",
+  "FLOAT",
+  "TUPLE",
+  "LAMBA",
+  "TOKEN",
+  "MUTEX",
+  "SHARD",
+  "VITES",
+  "DEBUG",
+  "PATCH",
+  "FLAGS",
+  "INDEX",
+  "MOUNT",
 ] as const;
 
 const WORD_SET = new Set<string>(WORDS);
@@ -283,9 +311,7 @@ export function KodwordGame({ open, onClose, onComplete }: GameModalProps) {
 
   // Friends, ranked by tries ascending (fewer is better).
   const rankedFriends = useMemo(() => {
-    return [...FRIEND_PLAYS.kodword].sort(
-      (a, b) => (a.result.raw ?? 99) - (b.result.raw ?? 99),
-    );
+    return [...FRIEND_PLAYS.kodword].sort((a, b) => (a.result.raw ?? 99) - (b.result.raw ?? 99));
   }, []);
 
   if (!open) return null;
@@ -320,12 +346,7 @@ export function KodwordGame({ open, onClose, onComplete }: GameModalProps) {
         aria-modal="true"
         aria-label={t("dialogAria")}
       >
-        <button
-          type="button"
-          className="gm-close"
-          onClick={onClose}
-          aria-label={t("close")}
-        >
+        <button type="button" className="gm-close" onClick={onClose} aria-label={t("close")}>
           <Icon name="x" />
         </button>
 
@@ -358,11 +379,8 @@ export function KodwordGame({ open, onClose, onComplete }: GameModalProps) {
                 .replace("{cols}", String(COLS))}
             >
               {rows.map((row, r) => {
-                const isActive =
-                  !row.submitted && r === guesses.length && phase === "playing";
-                const score = row.submitted
-                  ? scoreGuess(row.letters, answer)
-                  : null;
+                const isActive = !row.submitted && r === guesses.length && phase === "playing";
+                const score = row.submitted ? scoreGuess(row.letters, answer) : null;
                 return (
                   <div
                     key={r}
@@ -418,9 +436,7 @@ export function KodwordGame({ open, onClose, onComplete }: GameModalProps) {
                         key={k}
                         type="button"
                         className={
-                          "kw-key" +
-                          (wide ? " kw-key-wide" : "") +
-                          (st ? " kw-" + st : "")
+                          "kw-key" + (wide ? " kw-key-wide" : "") + (st ? " kw-" + st : "")
                         }
                         onClick={() => onKey(k)}
                         disabled={phase !== "playing"}
@@ -479,20 +495,14 @@ function ResultScreen({
 }) {
   return (
     <div className="kw-result">
-      <span
-        className={"kw-result-icon" + (solved ? " is-win" : " is-loss")}
-        aria-hidden="true"
-      >
+      <span className={"kw-result-icon" + (solved ? " is-win" : " is-loss")} aria-hidden="true">
         <Icon name={solved ? "trophy" : "shield"} />
       </span>
-      <h3 className="kw-result-title">
-        {solved ? t("resultWin") : t("resultLose")}
-      </h3>
+      <h3 className="kw-result-title">{solved ? t("resultWin") : t("resultLose")}</h3>
       <p className="kw-result-sub">
         {solved ? (
           <>
-            {t("guessedIn")}{" "}
-            <span className="u-mono tnum kw-strong">{triesUsed}</span>/6
+            {t("guessedIn")} <span className="u-mono tnum kw-strong">{triesUsed}</span>/6
           </>
         ) : (
           <>{t("wordWas")}</>
@@ -522,9 +532,7 @@ function ResultScreen({
                 <span className="kw-friend-name">{f.name}</span>
                 <span className="kw-friend-when">{f.playedAt}</span>
               </span>
-              <span className="kw-friend-res u-mono tnum">
-                {f.result.raw}/6
-              </span>
+              <span className="kw-friend-res u-mono tnum">{f.result.raw}/6</span>
             </li>
           ))}
         </ul>

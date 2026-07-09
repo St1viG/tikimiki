@@ -65,10 +65,7 @@ export const questionAnswers = pgTable(
     createdAt: timestamp("created_at", tz).notNull().defaultNow(),
   },
   (t) => [
-    uniqueIndex("uq_question_answers_application_question").on(
-      t.applicationId,
-      t.questionId,
-    ),
+    uniqueIndex("uq_question_answers_application_question").on(t.applicationId, t.questionId),
     index("idx_question_answers_application_id").on(t.applicationId),
     index("idx_question_answers_question_id").on(t.questionId),
   ],

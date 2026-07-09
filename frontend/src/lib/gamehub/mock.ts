@@ -11,13 +11,7 @@
  *   TODAY_RESULTS[id] — the current user's own result today (if already played)
  */
 
-import type {
-  FriendPlay,
-  GameId,
-  GameMeta,
-  GameResult,
-  GameStreak,
-} from "./types";
+import type { FriendPlay, GameId, GameMeta, GameResult, GameStreak } from "./types";
 
 /** The real team + a few dev friends (handle -> display name). */
 export const FRIENDS: { handle: string; name: string }[] = [
@@ -101,36 +95,146 @@ export const TODAY_RESULTS: Partial<Record<GameId, GameResult>> = {
  */
 export const FRIEND_PLAYS: Record<GameId, FriendPlay[]> = {
   spin: [
-    { handle: "stiveng", name: "Stevan Gnjato", result: { kind: "reward", display: "Rare skin" }, playedAt: "pre 1h" },
-    { handle: "miki", name: "Miki", result: { kind: "reward", display: "+200 XP" }, playedAt: "pre 2h" },
-    { handle: "fenjer", name: "Fenjer", result: { kind: "reward", display: "+50 XP" }, playedAt: "pre 3h" },
-    { handle: "mara", name: "Mara", result: { kind: "reward", display: "Promašaj" }, playedAt: "pre 5h" },
+    {
+      handle: "stiveng",
+      name: "Stevan Gnjato",
+      result: { kind: "reward", display: "Rare skin" },
+      playedAt: "pre 1h",
+    },
+    {
+      handle: "miki",
+      name: "Miki",
+      result: { kind: "reward", display: "+200 XP" },
+      playedAt: "pre 2h",
+    },
+    {
+      handle: "fenjer",
+      name: "Fenjer",
+      result: { kind: "reward", display: "+50 XP" },
+      playedAt: "pre 3h",
+    },
+    {
+      handle: "mara",
+      name: "Mara",
+      result: { kind: "reward", display: "Promašaj" },
+      playedAt: "pre 5h",
+    },
   ],
   quiz: [
-    { handle: "nenad", name: "Nenad Skoković", result: { kind: "score", display: "5/5", raw: 5 }, playedAt: "pre 40min" },
-    { handle: "stiveng", name: "Stevan Gnjato", result: { kind: "score", display: "5/5", raw: 5 }, playedAt: "pre 1h" },
-    { handle: "dimitrije", name: "Dimitrije Pešić", result: { kind: "score", display: "4/5", raw: 4 }, playedAt: "pre 2h" },
-    { handle: "miki", name: "Miki", result: { kind: "score", display: "3/5", raw: 3 }, playedAt: "pre 3h" },
-    { handle: "moljac", name: "Moljac", result: { kind: "score", display: "2/5", raw: 2 }, playedAt: "pre 4h" },
+    {
+      handle: "nenad",
+      name: "Nenad Skoković",
+      result: { kind: "score", display: "5/5", raw: 5 },
+      playedAt: "pre 40min",
+    },
+    {
+      handle: "stiveng",
+      name: "Stevan Gnjato",
+      result: { kind: "score", display: "5/5", raw: 5 },
+      playedAt: "pre 1h",
+    },
+    {
+      handle: "dimitrije",
+      name: "Dimitrije Pešić",
+      result: { kind: "score", display: "4/5", raw: 4 },
+      playedAt: "pre 2h",
+    },
+    {
+      handle: "miki",
+      name: "Miki",
+      result: { kind: "score", display: "3/5", raw: 3 },
+      playedAt: "pre 3h",
+    },
+    {
+      handle: "moljac",
+      name: "Moljac",
+      result: { kind: "score", display: "2/5", raw: 2 },
+      playedAt: "pre 4h",
+    },
   ],
   kodword: [
-    { handle: "dimitrije", name: "Dimitrije Pešić", result: { kind: "tries", display: "2/6 pokušaja", raw: 2 }, playedAt: "pre 1h" },
-    { handle: "stiveng", name: "Stevan Gnjato", result: { kind: "tries", display: "3/6 pokušaja", raw: 3 }, playedAt: "pre 2h" },
-    { handle: "fenjer", name: "Fenjer", result: { kind: "tries", display: "4/6 pokušaja", raw: 4 }, playedAt: "pre 2h" },
-    { handle: "mara", name: "Mara", result: { kind: "tries", display: "5/6 pokušaja", raw: 5 }, playedAt: "pre 6h" },
+    {
+      handle: "dimitrije",
+      name: "Dimitrije Pešić",
+      result: { kind: "tries", display: "2/6 pokušaja", raw: 2 },
+      playedAt: "pre 1h",
+    },
+    {
+      handle: "stiveng",
+      name: "Stevan Gnjato",
+      result: { kind: "tries", display: "3/6 pokušaja", raw: 3 },
+      playedAt: "pre 2h",
+    },
+    {
+      handle: "fenjer",
+      name: "Fenjer",
+      result: { kind: "tries", display: "4/6 pokušaja", raw: 4 },
+      playedAt: "pre 2h",
+    },
+    {
+      handle: "mara",
+      name: "Mara",
+      result: { kind: "tries", display: "5/6 pokušaja", raw: 5 },
+      playedAt: "pre 6h",
+    },
   ],
   grupe: [
-    { handle: "nenad", name: "Nenad Skoković", result: { kind: "tries", display: "0 grešaka", raw: 0 }, playedAt: "pre 30min" },
-    { handle: "miki", name: "Miki", result: { kind: "tries", display: "1 greška", raw: 1 }, playedAt: "pre 2h" },
-    { handle: "stiveng", name: "Stevan Gnjato", result: { kind: "tries", display: "2 greške", raw: 2 }, playedAt: "pre 3h" },
-    { handle: "moljac", name: "Moljac", result: { kind: "tries", display: "4 greške", raw: 4 }, playedAt: "pre 5h" },
+    {
+      handle: "nenad",
+      name: "Nenad Skoković",
+      result: { kind: "tries", display: "0 grešaka", raw: 0 },
+      playedAt: "pre 30min",
+    },
+    {
+      handle: "miki",
+      name: "Miki",
+      result: { kind: "tries", display: "1 greška", raw: 1 },
+      playedAt: "pre 2h",
+    },
+    {
+      handle: "stiveng",
+      name: "Stevan Gnjato",
+      result: { kind: "tries", display: "2 greške", raw: 2 },
+      playedAt: "pre 3h",
+    },
+    {
+      handle: "moljac",
+      name: "Moljac",
+      result: { kind: "tries", display: "4 greške", raw: 4 },
+      playedAt: "pre 5h",
+    },
   ],
   tempo: [
-    { handle: "stiveng", name: "Stevan Gnjato", result: { kind: "time", display: "00:48", raw: 48 }, playedAt: "pre 1h" },
-    { handle: "dimitrije", name: "Dimitrije Pešić", result: { kind: "time", display: "01:02", raw: 62 }, playedAt: "pre 2h" },
-    { handle: "nenad", name: "Nenad Skoković", result: { kind: "time", display: "01:12", raw: 72 }, playedAt: "pre 2h" },
-    { handle: "fenjer", name: "Fenjer", result: { kind: "time", display: "01:25", raw: 85 }, playedAt: "pre 4h" },
-    { handle: "mara", name: "Mara", result: { kind: "time", display: "01:40", raw: 100 }, playedAt: "pre 5h" },
+    {
+      handle: "stiveng",
+      name: "Stevan Gnjato",
+      result: { kind: "time", display: "00:48", raw: 48 },
+      playedAt: "pre 1h",
+    },
+    {
+      handle: "dimitrije",
+      name: "Dimitrije Pešić",
+      result: { kind: "time", display: "01:02", raw: 62 },
+      playedAt: "pre 2h",
+    },
+    {
+      handle: "nenad",
+      name: "Nenad Skoković",
+      result: { kind: "time", display: "01:12", raw: 72 },
+      playedAt: "pre 2h",
+    },
+    {
+      handle: "fenjer",
+      name: "Fenjer",
+      result: { kind: "time", display: "01:25", raw: 85 },
+      playedAt: "pre 4h",
+    },
+    {
+      handle: "mara",
+      name: "Mara",
+      result: { kind: "time", display: "01:40", raw: 100 },
+      playedAt: "pre 5h",
+    },
   ],
 };
 
@@ -165,8 +269,7 @@ export const FRIENDS_TODAY: FriendToday[] = FRIENDS.map((f) => {
   const standout =
     plays
       .filter((p) => p.result.kind === "score")
-      .sort((a, b) => (b.result.raw ?? 0) - (a.result.raw ?? 0))[0]?.result ??
-    plays[0]?.result;
+      .sort((a, b) => (b.result.raw ?? 0) - (a.result.raw ?? 0))[0]?.result ?? plays[0]?.result;
   return {
     handle: f.handle,
     name: f.name,

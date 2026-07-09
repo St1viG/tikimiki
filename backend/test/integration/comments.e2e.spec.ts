@@ -58,9 +58,7 @@ describe("post comments — edit & delete (e2e)", () => {
       .get(`/api/v1/posts/${postId}/comments`)
       .set("Authorization", `Bearer ${author.token}`)
       .expect(200);
-    const edited = list.body.find(
-      (c: { commentId: string }) => c.commentId === commentId,
-    );
+    const edited = list.body.find((c: { commentId: string }) => c.commentId === commentId);
     expect(edited.content).toBe("fixed now");
   });
 
@@ -103,9 +101,7 @@ describe("post comments — edit & delete (e2e)", () => {
       .get(`/api/v1/posts/${postId}/comments`)
       .set("Authorization", `Bearer ${author.token}`)
       .expect(200);
-    expect(
-      list.body.some((c: { commentId: string }) => c.commentId === commentId),
-    ).toBe(false);
+    expect(list.body.some((c: { commentId: string }) => c.commentId === commentId)).toBe(false);
   });
 
   it("forbids deleting someone else's comment", async () => {

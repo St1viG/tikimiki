@@ -25,8 +25,8 @@ import { useT } from "@/components/i18n/LanguageProvider";
 
 const M = {
   menuLabel: { en: "Add to calendar", sr: "Dodaj u kalendar" },
-  google:    { en: "Google Calendar", sr: "Google Calendar" },
-  apple:     { en: "Apple Calendar (.ics)", sr: "Apple Calendar (.ics)" },
+  google: { en: "Google Calendar", sr: "Google Calendar" },
+  apple: { en: "Apple Calendar (.ics)", sr: "Apple Calendar (.ics)" },
 } as const;
 
 /** Details of the event the calendar links target. */
@@ -40,11 +40,17 @@ interface CalendarEvent {
 
 /** Format an ISO string or Date as a UTC calendar timestamp (yyyymmddThhmmssZ). */
 const calStamp = (value: string | Date) =>
-  new Date(value).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+  new Date(value)
+    .toISOString()
+    .replace(/[-:]/g, "")
+    .replace(/\.\d{3}/, "");
 
 /** Slugify the title for the downloaded .ics filename. */
 const slug = (s: string) =>
-  s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "event";
+  s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "") || "event";
 
 /** Build a Google Calendar "add event" URL from the event details. */
 function googleCalUrl(event: CalendarEvent): string {

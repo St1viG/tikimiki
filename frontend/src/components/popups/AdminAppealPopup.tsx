@@ -8,19 +8,37 @@ import { useT } from "@/components/i18n/LanguageProvider";
 /* AdminAppealPopup — appeal approve/reject modal. */
 
 const M = {
-  approveTitle:      { en: "Approve appeal?",                          sr: "Prihvati žalbu?" },
-  approveSub:        { en: 'Measure "{measure}" for @{user} will be lifted and the user will be notified of the decision.', sr: 'Mera "{measure}" za @{user} biće ukinuta i korisnik će biti obavešten o odluci.' },
-  approveSubDefault: { en: "The measure will be lifted and the user will be notified of the decision.", sr: "Mera će biti ukinuta i korisnik će biti obavešten o odluci." },
-  approveReasonAria: { en: "Decision justification",                   sr: "Obrazloženje odluke" },
-  approveReasonPh:   { en: "Decision justification (required)...",     sr: "Obrazloženje odluke (obavezno)..." },
-  approveConfirmBtn: { en: "Approve and lift measure",                 sr: "Prihvati i ukini meru" },
-  rejectTitle:       { en: "Reject appeal",                           sr: "Odbij žalbu" },
-  rejectSub:         { en: 'Measure "{measure}" for @{user} remains in force. The user will be notified of the rejection reason.', sr: 'Mera "{measure}" za @{user} ostaje na snazi. Korisnik će biti obavešten o razlogu odbijanja.' },
-  rejectSubDefault:  { en: "The measure remains in force. The user will be notified of the decision and rejection reason.", sr: "Mera ostaje na snazi. Korisnik će biti obavešten o odluci i razlogu odbijanja." },
-  rejectReasonAria:  { en: "Rejection justification",                  sr: "Obrazloženje odbijanja" },
-  rejectReasonPh:    { en: "Rejection justification (required)...",    sr: "Obrazloženje odbijanja (obavezno)..." },
-  rejectConfirmBtn:  { en: "Reject appeal",                           sr: "Odbij žalbu" },
-  cancelBtn:         { en: "Cancel",                                   sr: "Odustani" },
+  approveTitle: { en: "Approve appeal?", sr: "Prihvati žalbu?" },
+  approveSub: {
+    en: 'Measure "{measure}" for @{user} will be lifted and the user will be notified of the decision.',
+    sr: 'Mera "{measure}" za @{user} biće ukinuta i korisnik će biti obavešten o odluci.',
+  },
+  approveSubDefault: {
+    en: "The measure will be lifted and the user will be notified of the decision.",
+    sr: "Mera će biti ukinuta i korisnik će biti obavešten o odluci.",
+  },
+  approveReasonAria: { en: "Decision justification", sr: "Obrazloženje odluke" },
+  approveReasonPh: {
+    en: "Decision justification (required)...",
+    sr: "Obrazloženje odluke (obavezno)...",
+  },
+  approveConfirmBtn: { en: "Approve and lift measure", sr: "Prihvati i ukini meru" },
+  rejectTitle: { en: "Reject appeal", sr: "Odbij žalbu" },
+  rejectSub: {
+    en: 'Measure "{measure}" for @{user} remains in force. The user will be notified of the rejection reason.',
+    sr: 'Mera "{measure}" za @{user} ostaje na snazi. Korisnik će biti obavešten o razlogu odbijanja.',
+  },
+  rejectSubDefault: {
+    en: "The measure remains in force. The user will be notified of the decision and rejection reason.",
+    sr: "Mera ostaje na snazi. Korisnik će biti obavešten o odluci i razlogu odbijanja.",
+  },
+  rejectReasonAria: { en: "Rejection justification", sr: "Obrazloženje odbijanja" },
+  rejectReasonPh: {
+    en: "Rejection justification (required)...",
+    sr: "Obrazloženje odbijanja (obavezno)...",
+  },
+  rejectConfirmBtn: { en: "Reject appeal", sr: "Odbij žalbu" },
+  cancelBtn: { en: "Cancel", sr: "Odustani" },
 } as const;
 
 export type AppealAction = "approve" | "reject";

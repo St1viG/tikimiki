@@ -1,9 +1,4 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  UnauthorizedException,
-} from "@nestjs/common";
+import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import type { Request } from "express";
 import { env } from "../config/env";
@@ -24,10 +19,9 @@ export class JwtAuthGuard implements CanActivate {
     }
     const token = header.slice("Bearer ".length);
     try {
-      const payload = await this.jwt.verifyAsync<{ sub: string; typ: string }>(
-        token,
-        { secret: env.JWT_ACCESS_SECRET },
-      );
+      const payload = await this.jwt.verifyAsync<{ sub: string; typ: string }>(token, {
+        secret: env.JWT_ACCESS_SECRET,
+      });
       if (payload.typ !== "access") throw new Error("wrong token type");
       req.user = { userId: payload.sub };
       return true;

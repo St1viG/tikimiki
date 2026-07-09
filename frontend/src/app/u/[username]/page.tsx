@@ -6,10 +6,6 @@ export const metadata: Metadata = {
   description: "Korisnički profil, objave i konekcije.",
 };
 
-export default function UserProfilePage({
-  params,
-}: {
-  params: { username: string };
-}) {
+export default function UserProfilePage({ params }: { params: { username: string } }) {
   return <UserProfileClient username={params.username} />;
 }

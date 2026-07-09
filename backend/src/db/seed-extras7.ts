@@ -60,9 +60,7 @@ async function main() {
     added += res.length;
   }
 
-  console.log(
-    `✓  Friendships ensured for andrej (+${added} new; nenad, mara, fenjer).`,
-  );
+  console.log(`✓  Friendships ensured for andrej (+${added} new; nenad, mara, fenjer).`);
   await client.end();
 }
 

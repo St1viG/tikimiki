@@ -36,12 +36,7 @@ export const createTeamApplicationSchema = z.object({
 });
 export type CreateTeamApplicationInput = z.infer<typeof createTeamApplicationSchema>;
 
-export const questionType = z.enum([
-  "short_text",
-  "long_text",
-  "single_choice",
-  "multi_choice",
-]);
+export const questionType = z.enum(["short_text", "long_text", "single_choice", "multi_choice"]);
 
 export const createQuestionSchema = z.object({
   prompt: z.string().trim().min(1).max(500),

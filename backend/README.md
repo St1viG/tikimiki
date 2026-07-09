@@ -3,12 +3,14 @@
 TypeScript API for tikimiki. Part of the pnpm-workspaces monorepo.
 
 ## Stack
+
 - **NestJS 10** (Node 22) — REST controllers + (later) WebSocket gateways
 - **Drizzle ORM** + **postgres.js** — type-safe SQL, migrations
 - **PostgreSQL 16 + PostGIS**, **Redis 7** (via root `docker-compose.yml`)
 - **Zod** — env + request validation
 
 ## First-time setup
+
 ```bash
 # from repo root — enable pnpm once (admin shell on Windows):
 corepack enable            # or: npm i -g pnpm
@@ -22,6 +24,7 @@ pnpm --filter ./backend db:migrate    # apply it
 ```
 
 ## Run
+
 ```bash
 pnpm dev:api               # NestJS watch mode → http://localhost:4000/api/v1
 # smoke test:
@@ -29,6 +32,7 @@ curl http://localhost:4000/api/v1/health   # {"status":"ok","db":true,...}
 ```
 
 ## Layout
+
 ```
 src/
   main.ts              bootstrap (global prefix /api/v1, CORS)
@@ -46,6 +50,7 @@ drizzle.config.ts      drizzle-kit config (schema → ./drizzle migrations)
 ```
 
 ## Schema port status
+
 The full schema is **v4.3 / 59 tables** (see `docs/database_specification/`) and
 is **fully ported** to Drizzle, grouped by domain in `src/db/schema/` (identity,
 skills, hackathons, kanban, cohor, feed, gamification, commerce, platform).

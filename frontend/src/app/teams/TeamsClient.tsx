@@ -53,46 +53,49 @@ import type {
  */
 
 const M = {
-  back:            { en: "Back",                          sr: "Nazad" },
-  pageTitle:       { en: "Teams",                         sr: "Timovi" },
-  pageSub:         { en: "Teammates for the next hackathon.", sr: "Saigrači za naredni hackathon." },
-  tablistLabel:    { en: "Filter teams",                  sr: "Filter timova" },
-  tabMine:         { en: "My teams",                      sr: "Moji timovi" },
-  tabInvites:      { en: "Invites",                       sr: "Pozivi" },
-  createTeam:      { en: "Create team",                   sr: "Kreiraj tim" },
-  sectionMine:     { en: "My teams",                      sr: "Moji timovi" },
-  members:         { en: "members",                       sr: "člana" },
-  tasks:           { en: "tasks",                         sr: "taskova" },
-  openServer:      { en: "Open server",                   sr: "Otvori server" },
-  place:           { en: "place",                         sr: "mesto" },
-  sectionInvites:  { en: "Invites",                       sr: "Pozivnice" },
-  invitesHeadline: { en: "Teams inviting you to join.",   sr: "Timovi koji te pozivaju da im se pridružiš." },
-  acceptInvite:    { en: "Accept invite",                 sr: "Prihvati poziv" },
-  declineInvite:   { en: "Decline",                       sr: "Odbij" },
-  accepting:       { en: "Accepting…",                    sr: "Prihvatam…" },
-  declining:       { en: "Declining…",                    sr: "Odbijam…" },
-  emptyInvites:    { en: "No invites right now.",         sr: "Trenutno nema poziva." },
-  sectionOpen:     { en: "Open teams",                    sr: "Otvoreni timovi" },
-  openBadge:       { en: "Open",                          sr: "Otvoren" },
-  lookingFor:      { en: "Looking for",                   sr: "Traže" },
-  requestJoin:     { en: "Request to join",               sr: "Zatraži priključenje" },
-  requested:       { en: "Requested",                     sr: "Zatraženo" },
-  sectionSolo:     { en: "Free agents",                   sr: "Slobodni igrači" },
-  inviteToTeam:    { en: "Invite to team",                sr: "Pozovi u tim" },
-  invited:         { en: "Invited",                       sr: "Pozvan" },
-  inviting:        { en: "Inviting…",                     sr: "Pozivam…" },
-  sectionBoard:    { en: "Team leaderboard",              sr: "Leaderboard timova" },
-  youLabel:        { en: "you",                           sr: "ti" },
-  loading:         { en: "Loading…",                      sr: "Učitavanje…" },
-  emptyMine:       { en: "You're not in any team yet.",   sr: "Još nisi ni u jednom timu." },
-  emptyOpen:       { en: "No open teams right now.",      sr: "Trenutno nema otvorenih timova." },
-  emptySolo:       { en: "No free agents right now.",     sr: "Trenutno nema slobodnih igrača." },
-  emptyBoard:      { en: "No ranked teams yet.",          sr: "Još nema rangiranih timova." },
-  joining:         { en: "Sending…",                      sr: "Šaljem…" },
-  addProject:      { en: "Add project",                   sr: "Dodaj projekat" },
-  editDraft:       { en: "Edit draft",                    sr: "Uredi nacrt" },
-  submittedLabel:  { en: "Submitted ✓",                   sr: "Predato ✓" },
-  projectLabel:    { en: "Project",                       sr: "Projekat" },
+  back: { en: "Back", sr: "Nazad" },
+  pageTitle: { en: "Teams", sr: "Timovi" },
+  pageSub: { en: "Teammates for the next hackathon.", sr: "Saigrači za naredni hackathon." },
+  tablistLabel: { en: "Filter teams", sr: "Filter timova" },
+  tabMine: { en: "My teams", sr: "Moji timovi" },
+  tabInvites: { en: "Invites", sr: "Pozivi" },
+  createTeam: { en: "Create team", sr: "Kreiraj tim" },
+  sectionMine: { en: "My teams", sr: "Moji timovi" },
+  members: { en: "members", sr: "člana" },
+  tasks: { en: "tasks", sr: "taskova" },
+  openServer: { en: "Open server", sr: "Otvori server" },
+  place: { en: "place", sr: "mesto" },
+  sectionInvites: { en: "Invites", sr: "Pozivnice" },
+  invitesHeadline: {
+    en: "Teams inviting you to join.",
+    sr: "Timovi koji te pozivaju da im se pridružiš.",
+  },
+  acceptInvite: { en: "Accept invite", sr: "Prihvati poziv" },
+  declineInvite: { en: "Decline", sr: "Odbij" },
+  accepting: { en: "Accepting…", sr: "Prihvatam…" },
+  declining: { en: "Declining…", sr: "Odbijam…" },
+  emptyInvites: { en: "No invites right now.", sr: "Trenutno nema poziva." },
+  sectionOpen: { en: "Open teams", sr: "Otvoreni timovi" },
+  openBadge: { en: "Open", sr: "Otvoren" },
+  lookingFor: { en: "Looking for", sr: "Traže" },
+  requestJoin: { en: "Request to join", sr: "Zatraži priključenje" },
+  requested: { en: "Requested", sr: "Zatraženo" },
+  sectionSolo: { en: "Free agents", sr: "Slobodni igrači" },
+  inviteToTeam: { en: "Invite to team", sr: "Pozovi u tim" },
+  invited: { en: "Invited", sr: "Pozvan" },
+  inviting: { en: "Inviting…", sr: "Pozivam…" },
+  sectionBoard: { en: "Team leaderboard", sr: "Leaderboard timova" },
+  youLabel: { en: "you", sr: "ti" },
+  loading: { en: "Loading…", sr: "Učitavanje…" },
+  emptyMine: { en: "You're not in any team yet.", sr: "Još nisi ni u jednom timu." },
+  emptyOpen: { en: "No open teams right now.", sr: "Trenutno nema otvorenih timova." },
+  emptySolo: { en: "No free agents right now.", sr: "Trenutno nema slobodnih igrača." },
+  emptyBoard: { en: "No ranked teams yet.", sr: "Još nema rangiranih timova." },
+  joining: { en: "Sending…", sr: "Šaljem…" },
+  addProject: { en: "Add project", sr: "Dodaj projekat" },
+  editDraft: { en: "Edit draft", sr: "Uredi nacrt" },
+  submittedLabel: { en: "Submitted ✓", sr: "Predato ✓" },
+  projectLabel: { en: "Project", sr: "Projekat" },
 } as const;
 
 type Filter = "mine" | "invites" | "open" | "solo" | "board";
@@ -122,9 +125,7 @@ export function TeamsClient() {
   const [invitedUserIds, setInvitedUserIds] = useState<Set<string>>(new Set());
   const [invitationBusyId, setInvitationBusyId] = useState<string | null>(null);
   // The caller's project per team (for the card label + popup preload).
-  const [projectsByTeam, setProjectsByTeam] = useState<
-    Record<string, Project | null>
-  >({});
+  const [projectsByTeam, setProjectsByTeam] = useState<Record<string, Project | null>>({});
   // Which team's project popup is open (null = closed).
   const [projectTeam, setProjectTeam] = useState<{
     teamId: string;
@@ -209,10 +210,7 @@ export function TeamsClient() {
     setInvitationBusyId(inv.invitationId);
     try {
       await api.acceptInvitation(inv.invitationId);
-      const [invites, mine] = await Promise.all([
-        api.getMyInvitations(),
-        api.getMyTeams(),
-      ]);
+      const [invites, mine] = await Promise.all([api.getMyInvitations(), api.getMyTeams()]);
       setInvitations(invites);
       setMyTeams(mine);
     } catch (err) {
@@ -257,11 +255,7 @@ export function TeamsClient() {
   return (
     <>
       <AppShell right={<RailRight />}>
-        <main
-          className="tm-page"
-          id="main"
-          data-filter={filter}
-        >
+        <main className="tm-page" id="main" data-filter={filter}>
           {/* Page header */}
           <div className="page-head tm-headrow">
             <Link className="col-back" href="/" aria-label={t("back")}>
@@ -294,32 +288,20 @@ export function TeamsClient() {
                 aria-selected={filter === "invites"}
                 onClick={() => handleTabClick("invites")}
               >
-                {t("tabInvites")}{" "}
-                <span className="tm-tab-count">{invitations.length}</span>
+                {t("tabInvites")} <span className="tm-tab-count">{invitations.length}</span>
               </button>
             </div>
-            <button
-              className="btn btn-primary"
-              onClick={() => setCreateOpen(true)}
-            >
+            <button className="btn btn-primary" onClick={() => setCreateOpen(true)}>
               <Icon name="plus" /> {t("createTeam")}
             </button>
           </div>
 
           {/* MOJ TIM */}
-          <section
-            className="tm-section"
-            data-section="mine"
-            aria-label={t("sectionMine")}
-          >
+          <section className="tm-section" data-section="mine" aria-label={t("sectionMine")}>
             <div className="tm-mine-grid">
               {loading ? (
                 [0, 1].map((i) => (
-                  <article
-                    key={`tm-skel-${i}`}
-                    className="tm-team-card"
-                    aria-busy="true"
-                  >
+                  <article key={`tm-skel-${i}`} className="tm-team-card" aria-busy="true">
                     <div className="tm-tc-avs" aria-hidden="true">
                       {[0, 1, 2].map((j) => (
                         <div
@@ -346,7 +328,9 @@ export function TeamsClient() {
                       <div className="tm-tc-actions">
                         <span
                           className="skel"
-                          style={{ width: 116, height: 36, borderRadius: 10 } as React.CSSProperties}
+                          style={
+                            { width: 116, height: 36, borderRadius: 10 } as React.CSSProperties
+                          }
                         />
                         <span
                           className="skel"
@@ -393,10 +377,7 @@ export function TeamsClient() {
                             <Icon name="server" /> {t("openServer")}
                           </Link>
                           {/* "Kanban" → team task board. */}
-                          <Link
-                            className="btn btn-ghost"
-                            href={`/teams/${team.teamId}/kanban`}
-                          >
+                          <Link className="btn btn-ghost" href={`/teams/${team.teamId}/kanban`}>
                             <Icon name="list" /> Kanban
                           </Link>
                           {/* "Project" → create / edit / submit the team's
@@ -410,8 +391,7 @@ export function TeamsClient() {
                               })
                             }
                           >
-                            <Icon name="rocket" />{" "}
-                            {projectBtnLabel(projectsByTeam[team.teamId])}
+                            <Icon name="rocket" /> {projectBtnLabel(projectsByTeam[team.teamId])}
                           </button>
                         </div>
                       </div>
@@ -423,39 +403,26 @@ export function TeamsClient() {
           </section>
 
           {/* POZIVI / INVITES */}
-          <section
-            className="tm-section"
-            data-section="invites"
-            aria-label={t("sectionInvites")}
-          >
+          <section className="tm-section" data-section="invites" aria-label={t("sectionInvites")}>
             <div className="tm-ai-head">
               <div>
                 <div className="tm-ai-eyebrow">
                   <Icon name="teams" /> {t("sectionInvites")}
                 </div>
-                <h2 className="tm-ai-h">
-                  {t("invitesHeadline")}
-                </h2>
+                <h2 className="tm-ai-h">{t("invitesHeadline")}</h2>
               </div>
             </div>
 
             <div className="tm-sug-grid">
               {loading ? (
                 [0, 1].map((i) => (
-                  <div
-                    key={`tm-sug-skel-${i}`}
-                    className="tm-sug"
-                    aria-busy="true"
-                  >
+                  <div key={`tm-sug-skel-${i}`} className="tm-sug" aria-busy="true">
                     <div className="tm-sug-body" aria-hidden="true">
                       <span
                         className="skel skel-line"
                         style={{ width: "70%" } as React.CSSProperties}
                       />
-                      <div
-                        className="tm-sug-avs"
-                        style={{ marginTop: 9 } as React.CSSProperties}
-                      >
+                      <div className="tm-sug-avs" style={{ marginTop: 9 } as React.CSSProperties}>
                         {[0, 1, 2].map((j) => (
                           <div
                             key={j}
@@ -477,7 +444,15 @@ export function TeamsClient() {
                       />
                       <span
                         className="skel"
-                        style={{ width: 132, height: 36, borderRadius: 10, marginTop: 14, display: "block" } as React.CSSProperties}
+                        style={
+                          {
+                            width: 132,
+                            height: 36,
+                            borderRadius: 10,
+                            marginTop: 14,
+                            display: "block",
+                          } as React.CSSProperties
+                        }
                       />
                     </div>
                   </div>
@@ -508,11 +483,7 @@ export function TeamsClient() {
           </section>
 
           {/* OTVORENI TIMOVI */}
-          <section
-            className="tm-section"
-            data-section="open"
-            aria-label={t("sectionOpen")}
-          >
+          <section className="tm-section" data-section="open" aria-label={t("sectionOpen")}>
             <div className="tm-open-grid">
               {loading ? (
                 <p className="page-sub">{t("loading")}</p>
@@ -542,11 +513,7 @@ export function TeamsClient() {
           </section>
 
           {/* SLOBODNI IGRAČI */}
-          <section
-            className="tm-section"
-            data-section="solo"
-            aria-label={t("sectionSolo")}
-          >
+          <section className="tm-section" data-section="solo" aria-label={t("sectionSolo")}>
             <div className="tm-solo-grid">
               {loading ? (
                 <p className="page-sub">{t("loading")}</p>
@@ -575,11 +542,7 @@ export function TeamsClient() {
           </section>
 
           {/* LEADERBOARD */}
-          <section
-            className="tm-section"
-            data-section="board"
-            aria-label={t("sectionBoard")}
-          >
+          <section className="tm-section" data-section="board" aria-label={t("sectionBoard")}>
             <div className="tm-lb">
               {loading ? (
                 <p className="page-sub">{t("loading")}</p>
@@ -600,7 +563,6 @@ export function TeamsClient() {
               )}
             </div>
           </section>
-
         </main>
       </AppShell>
 
@@ -635,9 +597,7 @@ export function TeamsClient() {
         teamId={projectTeam?.teamId ?? null}
         teamName={projectTeam?.teamName}
         onClose={() => setProjectTeam(null)}
-        onChanged={(teamId, p) =>
-          setProjectsByTeam((prev) => ({ ...prev, [teamId]: p }))
-        }
+        onChanged={(teamId, p) => setProjectsByTeam((prev) => ({ ...prev, [teamId]: p }))}
       />
     </>
   );

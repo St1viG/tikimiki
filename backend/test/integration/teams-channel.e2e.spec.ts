@@ -4,11 +4,7 @@ import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { channelGroups, channels, servers } from "../../src/db/schema";
 import { closeTestApp, createTestApp, dbOf } from "../helpers/app";
-import {
-  createHackathon,
-  registerMember,
-  registerOrganization,
-} from "../helpers/factories";
+import { createHackathon, registerMember, registerOrganization } from "../helpers/factories";
 
 describe("SSU6 — team channel auto-creation (e2e)", () => {
   let app: INestApplication;
@@ -43,9 +39,7 @@ describe("SSU6 — team channel auto-creation (e2e)", () => {
         teamId: channels.teamId,
       })
       .from(channels)
-      .where(
-        and(eq(channels.groupId, timovi.groupId), isNull(channels.deletedAt)),
-      );
+      .where(and(eq(channels.groupId, timovi.groupId), isNull(channels.deletedAt)));
   }
 
   it("creates a team channel in TIMOVI when a team is formed via API", async () => {
@@ -91,5 +85,4 @@ describe("SSU6 — team channel auto-creation (e2e)", () => {
     expect(teamChannels.some((c) => c.teamId === r1.body.teamId)).toBe(true);
     expect(teamChannels.some((c) => c.teamId === r2.body.teamId)).toBe(true);
   });
-
 });

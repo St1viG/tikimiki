@@ -2,12 +2,7 @@ import { z } from "zod";
 
 export const hackathonType = z.enum(["physical", "virtual", "hybrid"]);
 
-export const questionType = z.enum([
-  "short_text",
-  "long_text",
-  "single_choice",
-  "multi_choice",
-]);
+export const questionType = z.enum(["short_text", "long_text", "single_choice", "multi_choice"]);
 
 /** One application question supplied at publish time (see createHackathonSchema). */
 export const publishQuestionSchema = z.object({
@@ -18,12 +13,7 @@ export const publishQuestionSchema = z.object({
   allowOther: z.boolean().default(false),
 });
 export type PublishQuestionInput = z.infer<typeof publishQuestionSchema>;
-export const hackathonStatus = z.enum([
-  "upcoming",
-  "ongoing",
-  "finished",
-  "cancelled",
-]);
+export const hackathonStatus = z.enum(["upcoming", "ongoing", "finished", "cancelled"]);
 
 export const createHackathonSchema = z.object({
   title: z.string().trim().min(1).max(200),

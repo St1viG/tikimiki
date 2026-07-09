@@ -24,9 +24,27 @@ interface MedalPalette {
 }
 
 const PALETTES: Record<1 | 2 | 3, MedalPalette> = {
-  1: { token: "--medal-gold",   ribbon: "#E87082", rim: "#C4A400", shadow: "#8A7300", highlight: "#FFF9C4" },
-  2: { token: "--medal-silver", ribbon: "#5FA8C4", rim: "#7A8A99", shadow: "#525B66", highlight: "#F2F5F8" },
-  3: { token: "--medal-bronze", ribbon: "#5DCAA5", rim: "#73401A", shadow: "#4A2A10", highlight: "#E8A26B" },
+  1: {
+    token: "--medal-gold",
+    ribbon: "#E87082",
+    rim: "#C4A400",
+    shadow: "#8A7300",
+    highlight: "#FFF9C4",
+  },
+  2: {
+    token: "--medal-silver",
+    ribbon: "#5FA8C4",
+    rim: "#7A8A99",
+    shadow: "#525B66",
+    highlight: "#F2F5F8",
+  },
+  3: {
+    token: "--medal-bronze",
+    ribbon: "#5DCAA5",
+    rim: "#73401A",
+    shadow: "#4A2A10",
+    highlight: "#E8A26B",
+  },
 };
 
 export function PixelMedal({ rank, className = "px-medal" }: PixelMedalProps) {

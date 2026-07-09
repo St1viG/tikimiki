@@ -25,12 +25,12 @@ import "./NotificationPopup.css";
  */
 
 const M = {
-  bellLabel:      { en: "Notifications",                  sr: "Notifikacije" },
-  unreadBadge:    { en: "unread",                         sr: "nepročitane" },
-  dropdownLabel:  { en: "Notifications",                  sr: "Notifikacije" },
-  dropdownTitle:  { en: "Notifications",                  sr: "Notifikacije" },
-  markAll:        { en: "Mark all",                       sr: "Označi sve" },
-  seeAll:         { en: "See all notifications",          sr: "Pogledaj sve notifikacije" },
+  bellLabel: { en: "Notifications", sr: "Notifikacije" },
+  unreadBadge: { en: "unread", sr: "nepročitane" },
+  dropdownLabel: { en: "Notifications", sr: "Notifikacije" },
+  dropdownTitle: { en: "Notifications", sr: "Notifikacije" },
+  markAll: { en: "Mark all", sr: "Označi sve" },
+  seeAll: { en: "See all notifications", sr: "Pogledaj sve notifikacije" },
 } as const;
 
 interface NotifItem {
@@ -123,12 +123,9 @@ export function NotificationPopup() {
   };
 
   const markRead = (id: string) =>
-    setNotifs((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, unread: false } : n))
-    );
+    setNotifs((prev) => prev.map((n) => (n.id === id ? { ...n, unread: false } : n)));
 
-  const markAllRead = () =>
-    setNotifs((prev) => prev.map((n) => ({ ...n, unread: false })));
+  const markAllRead = () => setNotifs((prev) => prev.map((n) => ({ ...n, unread: false })));
 
   // Close on outside click
   useEffect(() => {
@@ -196,10 +193,11 @@ export function NotificationPopup() {
                 role="menuitem"
                 onClick={() => markRead(n.id)}
               >
-                {n.unread && (
-                  <span className="notif-unread-dot" aria-hidden="true" />
-                )}
-                <span className={`avatar ${n.avatarClass}${n.avatarSeed ? " is-orb" : ""}`} aria-hidden="true">
+                {n.unread && <span className="notif-unread-dot" aria-hidden="true" />}
+                <span
+                  className={`avatar ${n.avatarClass}${n.avatarSeed ? " is-orb" : ""}`}
+                  aria-hidden="true"
+                >
                   {n.avatarSeed ? (
                     <GenerativeAvatar seed={n.avatarSeed} className="orb-art" />
                   ) : (

@@ -39,13 +39,7 @@ import * as api from "@/lib/api";
  */
 
 type PanelId =
-  | "izgled-profila"
-  | "nalog"
-  | "integracije"
-  | "privatnost"
-  | "premium"
-  | "opasno"
-  | "odjava";
+  "izgled-profila" | "nalog" | "integracije" | "privatnost" | "premium" | "opasno" | "odjava";
 
 type Plan = "mesecno" | "godisnje";
 
@@ -650,9 +644,7 @@ export function SettingsClient() {
   const [settings, setSettings] = useState<api.UserSettings | null>(null);
 
   // Integrations (api.getIntegrations)
-  const [integrations, setIntegrations] = useState<api.Integrations | null>(
-    null,
-  );
+  const [integrations, setIntegrations] = useState<api.Integrations | null>(null);
   const [intBusy, setIntBusy] = useState<Record<string, boolean>>({});
 
   // Account: change email / verify email
@@ -799,10 +791,7 @@ export function SettingsClient() {
         saveCard(cardId);
       } catch (err) {
         console.error("Failed to save profile", err);
-        showToast(
-          err instanceof api.ApiError ? err.message : t("settingsSaveFailed"),
-          "err",
-        );
+        showToast(err instanceof api.ApiError ? err.message : t("settingsSaveFailed"), "err");
       } finally {
         setSavingCard((prev) => ({ ...prev, [cardId]: false }));
       }
@@ -820,9 +809,7 @@ export function SettingsClient() {
         setAvatarUrl(url);
       } catch (err) {
         console.error("Failed to upload avatar", err);
-        setAvatarMsg(
-          err instanceof api.ApiError ? err.message : t("uploadFailed"),
-        );
+        setAvatarMsg(err instanceof api.ApiError ? err.message : t("uploadFailed"));
       } finally {
         setAvatarBusy(false);
       }
@@ -839,9 +826,7 @@ export function SettingsClient() {
         setBannerUrl(url);
       } catch (err) {
         console.error("Failed to upload banner", err);
-        setBannerMsg(
-          err instanceof api.ApiError ? err.message : t("uploadFailed"),
-        );
+        setBannerMsg(err instanceof api.ApiError ? err.message : t("uploadFailed"));
       } finally {
         setBannerBusy(false);
       }
@@ -900,9 +885,7 @@ export function SettingsClient() {
       setAvatarMsg(t("avatarRemoved"));
     } catch (err) {
       console.error("Failed to remove avatar", err);
-      setAvatarMsg(
-        err instanceof api.ApiError ? err.message : t("removeFailed"),
-      );
+      setAvatarMsg(err instanceof api.ApiError ? err.message : t("removeFailed"));
     } finally {
       setAvatarBusy(false);
     }
@@ -937,14 +920,7 @@ export function SettingsClient() {
     const maxWidth = kind === "avatar" ? 512 : 1500;
     setCropTarget(null);
     try {
-      const blob = await cropImageToRatio(
-        file,
-        ratio,
-        focalX,
-        focalY,
-        zoom,
-        maxWidth,
-      );
+      const blob = await cropImageToRatio(file, ratio, focalX, focalY, zoom, maxWidth);
       const base = file.name.replace(/\.[^.]+$/, "") || "image";
       const baked = new File([blob], `${base}.jpg`, { type: "image/jpeg" });
       if (kind === "avatar") await uploadAvatarFile(baked);
@@ -966,9 +942,7 @@ export function SettingsClient() {
       setBannerMsg(t("bannerRemoved"));
     } catch (err) {
       console.error("Failed to remove banner", err);
-      setBannerMsg(
-        err instanceof api.ApiError ? err.message : t("removeFailed"),
-      );
+      setBannerMsg(err instanceof api.ApiError ? err.message : t("removeFailed"));
     } finally {
       setBannerBusy(false);
     }
@@ -986,10 +960,7 @@ export function SettingsClient() {
       saveCard("pw");
     } catch (err) {
       console.error("Failed to change password", err);
-      showToast(
-        err instanceof api.ApiError ? err.message : t("pwShort"),
-        "err",
-      );
+      showToast(err instanceof api.ApiError ? err.message : t("pwShort"), "err");
     } finally {
       setSavingCard((prev) => ({ ...prev, pw: false }));
     }
@@ -999,10 +970,7 @@ export function SettingsClient() {
   // Optimistically applies the patch, then reconciles with the server
   // response (reverting on failure).
   const updateSetting = useCallback(
-    async <K extends keyof api.UserSettings>(
-      field: K,
-      value: api.UserSettings[K],
-    ) => {
+    async <K extends keyof api.UserSettings>(field: K, value: api.UserSettings[K]) => {
       const patch: Partial<api.UserSettings> = { [field]: value };
       setSettings((prev) => (prev ? { ...prev, ...patch } : prev));
       try {
@@ -1016,10 +984,7 @@ export function SettingsClient() {
         } catch {
           /* keep optimistic value if reload also fails */
         }
-        showToast(
-          err instanceof api.ApiError ? err.message : t("settingsSaveFailed"),
-          "err",
-        );
+        showToast(err instanceof api.ApiError ? err.message : t("settingsSaveFailed"), "err");
       }
     },
     [showToast, t],
@@ -1038,10 +1003,7 @@ export function SettingsClient() {
         setIntegrations(updated);
       } catch (err) {
         console.error("Failed to disconnect integration", err);
-        showToast(
-          err instanceof api.ApiError ? err.message : t("disconnectFailed"),
-          "err",
-        );
+        showToast(err instanceof api.ApiError ? err.message : t("disconnectFailed"), "err");
       } finally {
         setIntBusy((prev) => ({ ...prev, [provider]: false }));
       }
@@ -1057,10 +1019,7 @@ export function SettingsClient() {
       showToast(t("syncGithubSuccess"), "ok");
     } catch (err) {
       console.error("Failed to sync GitHub skills", err);
-      showToast(
-        err instanceof api.ApiError ? err.message : t("syncGithubFailed"),
-        "err",
-      );
+      showToast(err instanceof api.ApiError ? err.message : t("syncGithubFailed"), "err");
     } finally {
       setIntBusy((prev) => ({ ...prev, githubSync: false }));
     }
@@ -1082,9 +1041,7 @@ export function SettingsClient() {
       );
     } catch (err) {
       console.error("Failed to change email", err);
-      setEmailMsg(
-        err instanceof api.ApiError ? err.message : t("emailChangeFailed"),
-      );
+      setEmailMsg(err instanceof api.ApiError ? err.message : t("emailChangeFailed"));
     } finally {
       setEmailBusy(false);
     }
@@ -1106,9 +1063,7 @@ export function SettingsClient() {
       }
     } catch (err) {
       console.error("Failed to request email verification", err);
-      setVerifyMsg(
-        err instanceof api.ApiError ? err.message : t("verifyFailed"),
-      );
+      setVerifyMsg(err instanceof api.ApiError ? err.message : t("verifyFailed"));
     } finally {
       setVerifyBusy(false);
     }
@@ -1199,9 +1154,7 @@ export function SettingsClient() {
     );
     setPremiumBusy(true);
     try {
-      const sub = await api.activateSubscription(
-        selectedPlan === "mesecno" ? "monthly" : "annual",
-      );
+      const sub = await api.activateSubscription(selectedPlan === "mesecno" ? "monthly" : "annual");
       setPremiumActive(sub.status === "active");
       setActivePlanName(sub.plan);
       setAutoRenewOn(!sub.cancelledAt);
@@ -1214,10 +1167,7 @@ export function SettingsClient() {
       showToast(t("premiumActivated"), "ok");
     } catch (err) {
       console.error("Failed to activate subscription", err);
-      showToast(
-        err instanceof api.ApiError ? err.message : t("settingsSaveFailed"),
-        "err",
-      );
+      showToast(err instanceof api.ApiError ? err.message : t("settingsSaveFailed"), "err");
     } finally {
       setPremiumBusy(false);
     }
@@ -1247,26 +1197,14 @@ export function SettingsClient() {
           showToast(t("premiumRemoved"), "ok");
         } catch (err) {
           console.error("Failed to remove premium", err);
-          showToast(
-            err instanceof api.ApiError ? err.message : t("cancelRenewFailed"),
-            "err",
-          );
+          showToast(err instanceof api.ApiError ? err.message : t("cancelRenewFailed"), "err");
         }
       },
     });
   };
 
-  const SaveStatus = ({
-    id,
-    children,
-  }: {
-    id: string;
-    children: React.ReactNode;
-  }) => (
-    <span
-      className={`ep-save-status${savedCards[id] ? " visible" : ""}`}
-      id={`status-${id}`}
-    >
+  const SaveStatus = ({ id, children }: { id: string; children: React.ReactNode }) => (
+    <span className={`ep-save-status${savedCards[id] ? " visible" : ""}`} id={`status-${id}`}>
       <Icon name="check" /> {children}
     </span>
   );
@@ -1327,10 +1265,7 @@ export function SettingsClient() {
                 ) : (
                   <>
                     @{username}
-                    <span
-                      className="ppc-badge-item"
-                      title={t("badgeHackathon")}
-                    >
+                    <span className="ppc-badge-item" title={t("badgeHackathon")}>
                       <Icon name="trophy" />
                     </span>
                     <span className="ppc-badge-item" title={t("badgeGithub")}>
@@ -1359,9 +1294,7 @@ export function SettingsClient() {
                 removed rather than showing fake numbers. */}
             <div className="ppc-stats-row">
               <div className="ppc-stat">
-                <div className="ppc-stat-val">
-                  {points == null ? "—" : points.toLocaleString()}
-                </div>
+                <div className="ppc-stat-val">{points == null ? "—" : points.toLocaleString()}</div>
                 <div className="ppc-stat-lbl">{t("statXp")}</div>
               </div>
             </div>
@@ -1393,11 +1326,7 @@ export function SettingsClient() {
         </div>
 
         {/* Secondary panel navigation (moved out of the left rail) */}
-        <div
-          className="set-subnav"
-          role="tablist"
-          aria-label={t("subnavAria")}
-        >
+        <div className="set-subnav" role="tablist" aria-label={t("subnavAria")}>
           {TABS.map((tab) => (
             <button
               key={tab.id}
@@ -1419,9 +1348,7 @@ export function SettingsClient() {
         >
           <div className="ep-card">
             <div className="ep-card-header">
-              <div className="ep-card-title">
-                {t("languageTitle")}
-              </div>
+              <div className="ep-card-title">{t("languageTitle")}</div>
               <div className="ep-card-sub">{t("languageSub")}</div>
             </div>
             <div className="ep-card-body">
@@ -1431,9 +1358,7 @@ export function SettingsClient() {
 
           <div className="ep-card">
             <div className="ep-card-header">
-              <div className="ep-card-title">
-                {t("themeTitle")}
-              </div>
+              <div className="ep-card-title">{t("themeTitle")}</div>
               <div className="ep-card-sub">{t("themeSub")}</div>
             </div>
             <div className="ep-card-body">
@@ -1443,9 +1368,7 @@ export function SettingsClient() {
 
           <div className="ep-card">
             <div className="ep-card-header">
-              <div className="ep-card-title">
-                {t("avatarBannerTitle")}
-              </div>
+              <div className="ep-card-title">{t("avatarBannerTitle")}</div>
               <div className="ep-card-sub">{t("avatarBannerSub")}</div>
             </div>
             <div className="ep-card-body">
@@ -1514,10 +1437,7 @@ export function SettingsClient() {
                   </div>
                 )}
                 {isPremium && (
-                  <div
-                    className="ep-avatar-btns"
-                    style={{ marginTop: "8px" }}
-                  >
+                  <div className="ep-avatar-btns" style={{ marginTop: "8px" }}>
                     <button
                       className="btn btn-ghost ep-mini-btn"
                       type="button"
@@ -1525,11 +1445,7 @@ export function SettingsClient() {
                       onClick={() => bannerFileRef.current?.click()}
                     >
                       <Icon name="image" />{" "}
-                      {bannerBusy
-                        ? t("uploading")
-                        : bannerUrl
-                          ? t("changeBanner")
-                          : t("setBanner")}
+                      {bannerBusy ? t("uploading") : bannerUrl ? t("changeBanner") : t("setBanner")}
                     </button>
                     {bannerUrl && (
                       <button
@@ -1538,8 +1454,7 @@ export function SettingsClient() {
                         disabled={bannerBusy}
                         onClick={onRemoveBanner}
                       >
-                        <Icon name="x" />{" "}
-                        {bannerBusy ? t("removing") : t("remove")}
+                        <Icon name="x" /> {bannerBusy ? t("removing") : t("remove")}
                       </button>
                     )}
                   </div>
@@ -1612,8 +1527,7 @@ export function SettingsClient() {
                         disabled={avatarBusy}
                         onClick={onRemoveAvatar}
                       >
-                        <Icon name="x" />{" "}
-                        {avatarBusy ? t("removing") : t("remove")}
+                        <Icon name="x" /> {avatarBusy ? t("removing") : t("remove")}
                       </button>
                     )}
                   </div>
@@ -1661,10 +1575,7 @@ export function SettingsClient() {
                     syncPreview();
                   }}
                 />
-                <div
-                  className={`ep-char-count${charWarn(name, 40) ? " warn" : ""}`}
-                  id="cnt-ime"
-                >
+                <div className={`ep-char-count${charWarn(name, 40) ? " warn" : ""}`} id="cnt-ime">
                   {charCount(name, 40)}
                 </div>
               </div>
@@ -1689,9 +1600,7 @@ export function SettingsClient() {
                   />
                 </div>
                 <div
-                  className={`ep-char-count${
-                    charWarn(username, 20) ? " warn" : ""
-                  }`}
+                  className={`ep-char-count${charWarn(username, 20) ? " warn" : ""}`}
                   id="cnt-username"
                 >
                   {charCount(username, 20)}
@@ -1712,10 +1621,7 @@ export function SettingsClient() {
                   }}
                   placeholder={t("bioPlaceholder")}
                 />
-                <div
-                  className={`ep-char-count${charWarn(bio, 160) ? " warn" : ""}`}
-                  id="cnt-bio"
-                >
+                <div className={`ep-char-count${charWarn(bio, 160) ? " warn" : ""}`} id="cnt-bio">
                   {charCount(bio, 160)}
                 </div>
               </div>
@@ -1738,12 +1644,7 @@ export function SettingsClient() {
                   <label className="ep-label" htmlFor="inp-web">
                     {t("website")}
                   </label>
-                  <input
-                    className="ep-input"
-                    type="url"
-                    id="inp-web"
-                    placeholder="https://"
-                  />
+                  <input className="ep-input" type="url" id="inp-web" placeholder="https://" />
                 </div>
               </div>
             </div>
@@ -1831,11 +1732,7 @@ export function SettingsClient() {
             <div className="ep-card-body">
               <div className="ep-field">
                 <span className="ep-label">{t("availableColors")}</span>
-                <div
-                  className="ep-color-row"
-                  role="group"
-                  aria-label={t("colorGroupAria")}
-                >
+                <div className="ep-color-row" role="group" aria-label={t("colorGroupAria")}>
                   {[
                     { c: "#A78BFA", label: t("colorPurple") },
                     { c: "#5DCAA5", label: t("colorGreen") },
@@ -1848,19 +1745,13 @@ export function SettingsClient() {
                     <button
                       key={sw.c}
                       type="button"
-                      className={`ep-color-swatch${
-                        color === sw.c ? " selected" : ""
-                      }`}
+                      className={`ep-color-swatch${color === sw.c ? " selected" : ""}`}
                       style={{ background: sw.c }}
                       aria-label={sw.label}
                       onClick={() => setColor(sw.c)}
                     />
                   ))}
-                  <span
-                    className="ep-color-preview"
-                    id="color-preview"
-                    style={{ color }}
-                  >
+                  <span className="ep-color-preview" id="color-preview" style={{ color }}>
                     {name}
                   </span>
                 </div>
@@ -1879,9 +1770,7 @@ export function SettingsClient() {
 
           <div className="ep-card">
             <div className="ep-card-header">
-              <div className="ep-card-title">
-                {t("premiumPersTitle")}
-              </div>
+              <div className="ep-card-title">{t("premiumPersTitle")}</div>
               <div className="ep-card-sub">{t("premiumPersSub")}</div>
             </div>
             <div className="ep-card-body">
@@ -1917,10 +1806,7 @@ export function SettingsClient() {
                       >
                         {avatarBusy ? t("uploading") : t("uploadGifAvatar")}
                       </button>
-                      <div
-                        className="ep-banner-hint"
-                        style={{ marginTop: "6px" }}
-                      >
+                      <div className="ep-banner-hint" style={{ marginTop: "6px" }}>
                         {t("gifAvatarHint")}
                       </div>
                     </div>
@@ -1962,10 +1848,7 @@ export function SettingsClient() {
                   <span className="ep-not-saved-hint">
                     <Icon name="premium" /> {t("premiumStatusSub")}
                   </span>
-                  <button
-                    className="btn btn-primary"
-                    onClick={() => setPanel("premium")}
-                  >
+                  <button className="btn btn-primary" onClick={() => setPanel("premium")}>
                     <Icon name="premium" /> {t("tabPremium")}
                   </button>
                 </>
@@ -1975,10 +1858,7 @@ export function SettingsClient() {
         </div>
 
         {/* PANEL: NALOG */}
-        <div
-          className={`ep-panel${panel === "nalog" ? " active" : ""}`}
-          id="panel-nalog"
-        >
+        <div className={`ep-panel${panel === "nalog" ? " active" : ""}`} id="panel-nalog">
           <div className="ep-card">
             <div className="ep-card-header">
               <div className="ep-card-title">{t("displayName")}</div>
@@ -1987,8 +1867,7 @@ export function SettingsClient() {
             <div className="ep-card-body">
               <div className="ep-field">
                 <label className="ep-label" htmlFor="inp-ime-nalog">
-                  {t("displayName")}{" "}
-                  <span className="ep-label-hint">{t("displayNameHint")}</span>
+                  {t("displayName")} <span className="ep-label-hint">{t("displayNameHint")}</span>
                 </label>
                 <input
                   className="ep-input"
@@ -2001,9 +1880,7 @@ export function SettingsClient() {
                   }}
                 />
                 <div
-                  className={`ep-char-count${
-                    charWarn(name, 40) ? " warn" : ""
-                  }`}
+                  className={`ep-char-count${charWarn(name, 40) ? " warn" : ""}`}
                   id="cnt-ime-nalog"
                 >
                   {charCount(name, 40)}
@@ -2024,9 +1901,7 @@ export function SettingsClient() {
 
           <div className="ep-card">
             <div className="ep-card-header">
-              <div className="ep-card-title">
-                {t("emailTitle")}
-              </div>
+              <div className="ep-card-title">{t("emailTitle")}</div>
               <div className="ep-card-sub">{t("emailSub")}</div>
             </div>
             <div className="ep-card-body">
@@ -2057,28 +1932,18 @@ export function SettingsClient() {
                 />
               </div>
               {emailMsg && (
-                <div
-                  className="ep-toggle-sub"
-                  style={{ wordBreak: "break-all" }}
-                >
+                <div className="ep-toggle-sub" style={{ wordBreak: "break-all" }}>
                   {emailMsg}
                 </div>
               )}
               {verifyMsg && (
-                <div
-                  className="ep-toggle-sub"
-                  style={{ wordBreak: "break-all" }}
-                >
+                <div className="ep-toggle-sub" style={{ wordBreak: "break-all" }}>
                   {verifyMsg}
                 </div>
               )}
             </div>
             <div className="ep-card-footer">
-              <button
-                className="btn btn-ghost"
-                onClick={handleVerifyEmail}
-                disabled={verifyBusy}
-              >
+              <button className="btn btn-ghost" onClick={handleVerifyEmail} disabled={verifyBusy}>
                 {t("verifyEmailBtn")}
               </button>
               <button
@@ -2093,9 +1958,7 @@ export function SettingsClient() {
 
           <div className="ep-card">
             <div className="ep-card-header">
-              <div className="ep-card-title">
-                {t("passwordTitle")}
-              </div>
+              <div className="ep-card-title">{t("passwordTitle")}</div>
               <div className="ep-card-sub">{t("passwordSub")}</div>
             </div>
             <div className="ep-card-body">
@@ -2137,10 +2000,7 @@ export function SettingsClient() {
                   />
                 </div>
               </div>
-              <div
-                id="pw-hint"
-                style={{ fontSize: "12.5px", color: pwHintColor }}
-              >
+              <div id="pw-hint" style={{ fontSize: "12.5px", color: pwHintColor }}>
                 {pwHintText}
               </div>
             </div>
@@ -2148,12 +2008,7 @@ export function SettingsClient() {
               <SaveStatus id="pw">{t("passwordChanged")}</SaveStatus>
               <button
                 className="btn btn-primary"
-                disabled={
-                  savingCard.pw ||
-                  pwNew.length < 8 ||
-                  pwNew !== pwConfirm ||
-                  !pwCurrent
-                }
+                disabled={savingCard.pw || pwNew.length < 8 || pwNew !== pwConfirm || !pwCurrent}
                 onClick={handleChangePassword}
               >
                 {t("changePassword")}
@@ -2169,9 +2024,7 @@ export function SettingsClient() {
         >
           <div className="ep-card">
             <div className="ep-card-header">
-              <div className="ep-card-title">
-                {t("connectedAccountsTitle")}
-              </div>
+              <div className="ep-card-title">{t("connectedAccountsTitle")}</div>
               <div className="ep-card-sub">{t("connectedAccountsSub")}</div>
             </div>
             <div className="ep-card-body">
@@ -2181,15 +2034,12 @@ export function SettingsClient() {
                 </span>
                 <div className="ep-int-info">
                   <div className="ep-int-name">
-                    {integrations?.github.connected &&
-                    integrations.github.username
+                    {integrations?.github.connected && integrations.github.username
                       ? `GitHub · ${integrations.github.username}`
                       : "GitHub"}
                   </div>
                   <div className="ep-int-sub">
-                    {integrations?.github.connected
-                      ? t("contributions")
-                      : t("notConnected")}
+                    {integrations?.github.connected ? t("contributions") : t("notConnected")}
                   </div>
                 </div>
                 {integrations?.github.connected ? (
@@ -2226,9 +2076,7 @@ export function SettingsClient() {
                 <div className="ep-int-info">
                   <div className="ep-int-name">LinkedIn</div>
                   <div className="ep-int-sub">
-                    {integrations?.linkedin.connected
-                      ? t("connected")
-                      : t("linkedinNotConnected")}
+                    {integrations?.linkedin.connected ? t("connected") : t("linkedinNotConnected")}
                   </div>
                 </div>
                 {integrations?.linkedin.connected ? (
@@ -2240,10 +2088,7 @@ export function SettingsClient() {
                     {t("disconnect")}
                   </button>
                 ) : (
-                  <button
-                    className="btn btn-ghost ep-int-btn"
-                    disabled
-                  >
+                  <button className="btn btn-ghost ep-int-btn" disabled>
                     {t("connect")}
                   </button>
                 )}
@@ -2256,9 +2101,7 @@ export function SettingsClient() {
                 <div className="ep-int-info">
                   <div className="ep-int-name">Google</div>
                   <div className="ep-int-sub">
-                    {integrations?.google.connected
-                      ? t("googleSub")
-                      : t("notConnected")}
+                    {integrations?.google.connected ? t("googleSub") : t("notConnected")}
                   </div>
                 </div>
                 {integrations?.google.connected ? (
@@ -2297,24 +2140,15 @@ export function SettingsClient() {
                   <div className="ep-toggle-sub">{t("autoSyncSub")}</div>
                 </div>
                 <label className="ep-toggle">
-                  <input
-                    type="checkbox"
-                    defaultChecked
-                    disabled
-                    aria-label={t("autoSync")}
-                  />
+                  <input type="checkbox" defaultChecked disabled aria-label={t("autoSync")} />
                   <span className="ep-toggle-track" aria-hidden="true" />
                   <span className="ep-toggle-thumb" aria-hidden="true" />
                 </label>
               </div>
               <div className="ep-toggle-row">
                 <div className="ep-toggle-info">
-                  <div className="ep-toggle-title">
-                    {t("showGithubActivity")}
-                  </div>
-                  <div className="ep-toggle-sub">
-                    {t("showGithubActivitySub")}
-                  </div>
+                  <div className="ep-toggle-title">{t("showGithubActivity")}</div>
+                  <div className="ep-toggle-sub">{t("showGithubActivitySub")}</div>
                 </div>
                 <label className="ep-toggle">
                   <input
@@ -2335,15 +2169,10 @@ export function SettingsClient() {
         </div>
 
         {/* PANEL: PRIVATNOST */}
-        <div
-          className={`ep-panel${panel === "privatnost" ? " active" : ""}`}
-          id="panel-privatnost"
-        >
+        <div className={`ep-panel${panel === "privatnost" ? " active" : ""}`} id="panel-privatnost">
           <div className="ep-card">
             <div className="ep-card-header">
-              <div className="ep-card-title">
-                {t("visibilityTitle")}
-              </div>
+              <div className="ep-card-title">{t("visibilityTitle")}</div>
               <div className="ep-card-sub">{t("visibilitySub")}</div>
             </div>
             <div className="ep-card-body">
@@ -2370,21 +2199,15 @@ export function SettingsClient() {
               </div>
               <div className="ep-toggle-row">
                 <div className="ep-toggle-info">
-                  <div className="ep-toggle-title">
-                    {t("visibleToRecruiters")}
-                  </div>
-                  <div className="ep-toggle-sub">
-                    {t("visibleToRecruitersSub")}
-                  </div>
+                  <div className="ep-toggle-title">{t("visibleToRecruiters")}</div>
+                  <div className="ep-toggle-sub">{t("visibleToRecruitersSub")}</div>
                 </div>
                 <label className="ep-toggle">
                   <input
                     type="checkbox"
                     checked={settings?.visibleToRecruiters ?? false}
                     disabled={!settings}
-                    onChange={(e) =>
-                      updateSetting("visibleToRecruiters", e.target.checked)
-                    }
+                    onChange={(e) => updateSetting("visibleToRecruiters", e.target.checked)}
                     aria-label={t("visibleToRecruiters")}
                   />
                   <span className="ep-toggle-track" aria-hidden="true" />
@@ -2401,9 +2224,7 @@ export function SettingsClient() {
                     type="checkbox"
                     checked={settings?.showEmail ?? false}
                     disabled={!settings}
-                    onChange={(e) =>
-                      updateSetting("showEmail", e.target.checked)
-                    }
+                    onChange={(e) => updateSetting("showEmail", e.target.checked)}
                     aria-label={t("showEmail")}
                   />
                   <span className="ep-toggle-track" aria-hidden="true" />
@@ -2420,9 +2241,7 @@ export function SettingsClient() {
                     type="checkbox"
                     checked={settings?.showLocation ?? false}
                     disabled={!settings}
-                    onChange={(e) =>
-                      updateSetting("showLocation", e.target.checked)
-                    }
+                    onChange={(e) => updateSetting("showLocation", e.target.checked)}
                     aria-label={t("showLocation")}
                   />
                   <span className="ep-toggle-track" aria-hidden="true" />
@@ -2436,27 +2255,21 @@ export function SettingsClient() {
 
           <div className="ep-card">
             <div className="ep-card-header">
-              <div className="ep-card-title">
-                {t("notificationsTitle")}
-              </div>
+              <div className="ep-card-title">{t("notificationsTitle")}</div>
               <div className="ep-card-sub">{t("notificationsSub")}</div>
             </div>
             <div className="ep-card-body">
               <div className="ep-toggle-row">
                 <div className="ep-toggle-info">
                   <div className="ep-toggle-title">{t("emailNotifications")}</div>
-                  <div className="ep-toggle-sub">
-                    {t("emailNotificationsSub")}
-                  </div>
+                  <div className="ep-toggle-sub">{t("emailNotificationsSub")}</div>
                 </div>
                 <label className="ep-toggle">
                   <input
                     type="checkbox"
                     checked={settings?.emailNotifications ?? false}
                     disabled={!settings}
-                    onChange={(e) =>
-                      updateSetting("emailNotifications", e.target.checked)
-                    }
+                    onChange={(e) => updateSetting("emailNotifications", e.target.checked)}
                     aria-label={t("emailNotifications")}
                   />
                   <span className="ep-toggle-track" aria-hidden="true" />
@@ -2466,18 +2279,14 @@ export function SettingsClient() {
               <div className="ep-toggle-row">
                 <div className="ep-toggle-info">
                   <div className="ep-toggle-title">{t("pushNotifications")}</div>
-                  <div className="ep-toggle-sub">
-                    {t("pushNotificationsSub")}
-                  </div>
+                  <div className="ep-toggle-sub">{t("pushNotificationsSub")}</div>
                 </div>
                 <label className="ep-toggle">
                   <input
                     type="checkbox"
                     checked={settings?.pushNotifications ?? false}
                     disabled={!settings}
-                    onChange={(e) =>
-                      updateSetting("pushNotifications", e.target.checked)
-                    }
+                    onChange={(e) => updateSetting("pushNotifications", e.target.checked)}
                     aria-label={t("pushNotifications")}
                   />
                   <span className="ep-toggle-track" aria-hidden="true" />
@@ -2486,21 +2295,13 @@ export function SettingsClient() {
               </div>
               <div className="ep-toggle-row">
                 <div className="ep-toggle-info">
-                  <div className="ep-toggle-title">
-                    {t("dailyGameReminders")}
-                  </div>
-                  <div className="ep-toggle-sub">
-                    {t("dailyGameRemindersSub")}
-                  </div>
+                  <div className="ep-toggle-title">{t("dailyGameReminders")}</div>
+                  <div className="ep-toggle-sub">{t("dailyGameRemindersSub")}</div>
                 </div>
                 {/* No UserSettings field backs daily-game reminders, so this
                     toggle is disabled rather than silently discarding input. */}
                 <label className="ep-toggle">
-                  <input
-                    type="checkbox"
-                    disabled
-                    aria-label={t("dailyGameReminders")}
-                  />
+                  <input type="checkbox" disabled aria-label={t("dailyGameReminders")} />
                   <span className="ep-toggle-track" aria-hidden="true" />
                   <span className="ep-toggle-thumb" aria-hidden="true" />
                 </label>
@@ -2512,10 +2313,7 @@ export function SettingsClient() {
         </div>
 
         {/* PANEL: OPASNO */}
-        <div
-          className={`ep-panel${panel === "opasno" ? " active" : ""}`}
-          id="panel-opasno"
-        >
+        <div className={`ep-panel${panel === "opasno" ? " active" : ""}`} id="panel-opasno">
           <div className="ep-danger-card">
             <div className="ep-danger-header">
               <div className="ep-danger-title">
@@ -2556,9 +2354,7 @@ export function SettingsClient() {
               <div className="ep-danger-row">
                 <div className="ep-danger-info">
                   <div className="ep-toggle-title">{t("deleteAccountTitle")}</div>
-                  <div className="ep-toggle-sub ep-danger-sub-red">
-                    {t("deleteAccountSub")}
-                  </div>
+                  <div className="ep-toggle-sub ep-danger-sub-red">{t("deleteAccountSub")}</div>
                 </div>
                 <button
                   className="ep-btn-danger strong"
@@ -2572,16 +2368,11 @@ export function SettingsClient() {
         </div>
 
         {/* PANEL: PREMIUM */}
-        <div
-          className={`ep-panel${panel === "premium" ? " active" : ""}`}
-          id="panel-premium"
-        >
+        <div className={`ep-panel${panel === "premium" ? " active" : ""}`} id="panel-premium">
           {/* Features overview */}
           <div className="ep-card">
             <div className="ep-card-header">
-              <div className="ep-card-title">
-                {t("premiumStatusTitle")}
-              </div>
+              <div className="ep-card-title">{t("premiumStatusTitle")}</div>
               <div className="ep-card-sub">{t("premiumStatusSub")}</div>
             </div>
             <div className="ep-card-body">
@@ -2619,10 +2410,7 @@ export function SettingsClient() {
           </div>
 
           {/* Activation form (non-premium state) */}
-          <div
-            id="premium-form-wrap"
-            style={{ display: premiumActive ? "none" : undefined }}
-          >
+          <div id="premium-form-wrap" style={{ display: premiumActive ? "none" : undefined }}>
             <div className="ep-card">
               <div className="ep-card-header">
                 <div className="ep-card-title">{t("activatePremiumTitle")}</div>
@@ -2633,9 +2421,7 @@ export function SettingsClient() {
                 <div className="ep-plan-grid" id="plan-selector">
                   <button
                     type="button"
-                    className={`ep-plan${
-                      selectedPlan === "mesecno" ? " selected" : ""
-                    }`}
+                    className={`ep-plan${selectedPlan === "mesecno" ? " selected" : ""}`}
                     id="plan-mesecno"
                     onClick={() => setSelectedPlan("mesecno")}
                   >
@@ -2648,9 +2434,7 @@ export function SettingsClient() {
                   </button>
                   <button
                     type="button"
-                    className={`ep-plan${
-                      selectedPlan === "godisnje" ? " selected" : ""
-                    }`}
+                    className={`ep-plan${selectedPlan === "godisnje" ? " selected" : ""}`}
                     id="plan-godisnje"
                     onClick={() => setSelectedPlan("godisnje")}
                   >
@@ -2756,10 +2540,7 @@ export function SettingsClient() {
           </div>
 
           {/* Active premium state (hidden initially) */}
-          <div
-            id="premium-active-wrap"
-            style={{ display: premiumActive ? "block" : "none" }}
-          >
+          <div id="premium-active-wrap" style={{ display: premiumActive ? "block" : "none" }}>
             <div className="ep-card">
               <div className="ep-card-header">
                 <div className="ep-card-title">
@@ -2776,8 +2557,7 @@ export function SettingsClient() {
                     {activePlanName}
                   </div>
                   <div className="ep-plan-active-meta">
-                    {t("expires")}{" "}
-                    <strong id="active-plan-expiry">{activePlanExpiry}</strong> ·{" "}
+                    {t("expires")} <strong id="active-plan-expiry">{activePlanExpiry}</strong> ·{" "}
                     {t("autoRenewLabel")}{" "}
                     <strong
                       id="auto-renew-status"
@@ -2801,15 +2581,10 @@ export function SettingsClient() {
         {/* end panel-premium */}
 
         {/* PANEL: ODJAVA */}
-        <div
-          className={`ep-panel${panel === "odjava" ? " active" : ""}`}
-          id="panel-odjava"
-        >
+        <div className={`ep-panel${panel === "odjava" ? " active" : ""}`} id="panel-odjava">
           <div className="ep-card">
             <div className="ep-card-header">
-              <div className="ep-card-title">
-                {t("logoutTitle")}
-              </div>
+              <div className="ep-card-title">{t("logoutTitle")}</div>
               <div className="ep-card-sub">{t("logoutSub")}</div>
             </div>
             <div className="ep-card-body">
@@ -2895,9 +2670,7 @@ export function SettingsClient() {
 
         {/* In-app toast (replaces window.alert) */}
         <div
-          className={`set-toast${toast ? " visible" : ""}${
-            toast?.tone === "err" ? " err" : ""
-          }`}
+          className={`set-toast${toast ? " visible" : ""}${toast?.tone === "err" ? " err" : ""}`}
           role="status"
           aria-live="polite"
         >
@@ -2918,15 +2691,9 @@ export function SettingsClient() {
           focalY={cropTarget.focalY}
           zoom={cropTarget.zoom}
           lockedRatio={cropTarget.kind === "avatar" ? AVATAR_RATIO : BANNER_RATIO}
-          lockedLabel={
-            cropTarget.kind === "avatar"
-              ? t("cropAvatarLabel")
-              : t("cropBannerLabel")
-          }
+          lockedLabel={cropTarget.kind === "avatar" ? t("cropAvatarLabel") : t("cropBannerLabel")}
           onChange={(fx, fy, z) =>
-            setCropTarget((c) =>
-              c ? { ...c, focalX: fx, focalY: fy, zoom: z } : c,
-            )
+            setCropTarget((c) => (c ? { ...c, focalX: fx, focalY: fy, zoom: z } : c))
           }
           onClose={cancelCrop}
           onDone={confirmCrop}

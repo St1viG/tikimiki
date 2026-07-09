@@ -119,12 +119,8 @@ describe("project submission (e2e)", () => {
     expect(submitted.body.submittedAt).not.toBeNull();
 
     // Appears in the public submissions showcase.
-    const showcase = await http()
-      .get(`/api/v1/hackathons/${hackathonId}/submissions`)
-      .expect(200);
-    expect(showcase.body.map((p: { projectId: string }) => p.projectId)).toContain(
-      projectId,
-    );
+    const showcase = await http().get(`/api/v1/hackathons/${hackathonId}/submissions`).expect(200);
+    expect(showcase.body.map((p: { projectId: string }) => p.projectId)).toContain(projectId);
 
     // Withdraw back to draft.
     const withdrawn = await http()
@@ -135,12 +131,8 @@ describe("project submission (e2e)", () => {
     expect(withdrawn.body.submittedAt).toBeNull();
 
     // ...and disappears from the showcase.
-    const after = await http()
-      .get(`/api/v1/hackathons/${hackathonId}/submissions`)
-      .expect(200);
-    expect(
-      after.body.map((p: { projectId: string }) => p.projectId),
-    ).not.toContain(projectId);
+    const after = await http().get(`/api/v1/hackathons/${hackathonId}/submissions`).expect(200);
+    expect(after.body.map((p: { projectId: string }) => p.projectId)).not.toContain(projectId);
   });
 
   it("blocks submission after the hackathon has ended (400)", async () => {
@@ -220,8 +212,6 @@ describe("project submission (e2e)", () => {
   });
 
   it("returns 404 for an unknown project id", async () => {
-    await http()
-      .get("/api/v1/projects/00000000-0000-4000-8000-000000000000")
-      .expect(404);
+    await http().get("/api/v1/projects/00000000-0000-4000-8000-000000000000").expect(404);
   });
 });

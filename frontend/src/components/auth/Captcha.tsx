@@ -15,17 +15,11 @@ import { useT } from "@/components/i18n/LanguageProvider";
 
 const M = {
   captchaLabel: { en: "I am not a robot", sr: "Nisam robot" },
-  notARobot:    { en: "I'm not a robot",  sr: "Nisam robot" },
-  privacyTerms: { en: "Privacy · Terms",  sr: "Privatnost · Uslovi" },
+  notARobot: { en: "I'm not a robot", sr: "Nisam robot" },
+  privacyTerms: { en: "Privacy · Terms", sr: "Privatnost · Uslovi" },
 } as const;
 
-export function Captcha({
-  id,
-  variant = "signup",
-}: {
-  id: string;
-  variant?: "login" | "signup";
-}) {
+export function Captcha({ id, variant = "signup" }: { id: string; variant?: "login" | "signup" }) {
   const t = useT(M);
   const [checked, setChecked] = useState(false);
 
@@ -78,8 +72,15 @@ export function Captcha({
       </div>
       <div className="auth-captcha-logo" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 2L3 7v5c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z" fill="var(--muted)" opacity="0.3" />
-          <path d="M12 2L3 7v5c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5zm0 2.18l7 3.82v4c0 4.52-3.13 8.69-7 9.93C8.13 20.69 5 16.52 5 12V8l7-3.82z" fill="var(--muted)" />
+          <path
+            d="M12 2L3 7v5c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5z"
+            fill="var(--muted)"
+            opacity="0.3"
+          />
+          <path
+            d="M12 2L3 7v5c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5zm0 2.18l7 3.82v4c0 4.52-3.13 8.69-7 9.93C8.13 20.69 5 16.52 5 12V8l7-3.82z"
+            fill="var(--muted)"
+          />
         </svg>
         <span>Cloudflare</span>
       </div>

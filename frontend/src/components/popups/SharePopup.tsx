@@ -5,12 +5,7 @@ import type { FeedPost } from "@tikimiki/types";
 import { Icon } from "@/components/Icon";
 import { OrbArt } from "@/components/ui/OrbArt";
 import { useT } from "@/components/i18n/LanguageProvider";
-import {
-  getFriends,
-  sendDirectMessage,
-  startConversation,
-  type SocialUser,
-} from "@/lib/api";
+import { getFriends, sendDirectMessage, startConversation, type SocialUser } from "@/lib/api";
 import { personName } from "@/lib/displayName";
 import "./SharePopup.css";
 
@@ -51,8 +46,7 @@ export function SharePopup({
 
   const link = useMemo(() => {
     if (!post) return "";
-    const origin =
-      typeof window !== "undefined" ? window.location.origin : "";
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
     return `${origin}/?post=${post.postId}`;
   }, [post]);
 

@@ -61,8 +61,7 @@ export function PostMedia({
 
   const i = Math.min(idx, items.length - 1);
   const multi = items.length > 1;
-  const go = (delta: number) =>
-    setIdx((i + delta + items.length) % items.length);
+  const go = (delta: number) => setIdx((i + delta + items.length) % items.length);
 
   const setRatioAt = (j: number, raw: number) => {
     if (raw > 0) setRatios((prev) => (prev[j] === raw ? prev : { ...prev, [j]: raw }));
@@ -90,10 +89,7 @@ export function PostMedia({
   return (
     <div className="pm-wrap">
       <div className="post-photo pm-media" style={frameStyle}>
-        <div
-          className="pm-track"
-          style={{ transform: `translateX(-${i * 100}%)` }}
-        >
+        <div className="pm-track" style={{ transform: `translateX(-${i * 100}%)` }}>
           {items.map((m, j) => (
             <div className="pm-slide" key={j}>
               {m.type === "video" ? (
@@ -104,10 +100,7 @@ export function PostMedia({
                   playsInline
                   preload="metadata"
                   onLoadedMetadata={(e) =>
-                    setRatioAt(
-                      j,
-                      e.currentTarget.videoWidth / e.currentTarget.videoHeight,
-                    )
+                    setRatioAt(j, e.currentTarget.videoWidth / e.currentTarget.videoHeight)
                   }
                   onClick={(e) => e.stopPropagation()}
                 />
@@ -119,11 +112,7 @@ export function PostMedia({
                   alt=""
                   loading="lazy"
                   onLoad={(e) =>
-                    setRatioAt(
-                      j,
-                      e.currentTarget.naturalWidth /
-                        e.currentTarget.naturalHeight,
-                    )
+                    setRatioAt(j, e.currentTarget.naturalWidth / e.currentTarget.naturalHeight)
                   }
                   onClick={
                     lightbox

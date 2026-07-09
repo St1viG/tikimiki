@@ -22,9 +22,9 @@ export function passwordStrength(pw: string): StrengthLevel {
 }
 
 const M = {
-  strengthWeak:   { en: "Weak",   sr: "Slaba" },
-  strengthFair:   { en: "Fair",   sr: "Prihvatljiva" },
-  strengthGood:   { en: "Good",   sr: "Dobra" },
+  strengthWeak: { en: "Weak", sr: "Slaba" },
+  strengthFair: { en: "Fair", sr: "Prihvatljiva" },
+  strengthGood: { en: "Good", sr: "Dobra" },
   strengthStrong: { en: "Strong", sr: "Odlična" },
 } as const;
 
@@ -32,10 +32,15 @@ export function StrengthMeter({ strength }: { strength: StrengthLevel }) {
   const t = useT(M);
 
   const label =
-    strength === "weak"   ? t("strengthWeak")   :
-    strength === "fair"   ? t("strengthFair")   :
-    strength === "good"   ? t("strengthGood")   :
-    strength === "strong" ? t("strengthStrong") : "";
+    strength === "weak"
+      ? t("strengthWeak")
+      : strength === "fair"
+        ? t("strengthFair")
+        : strength === "good"
+          ? t("strengthGood")
+          : strength === "strong"
+            ? t("strengthStrong")
+            : "";
 
   return (
     <>

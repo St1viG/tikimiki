@@ -58,11 +58,7 @@ export class VotingService {
    * Voting is open only when the organizer has configured a window AND now is
    * inside it. No window (opensAt null) means voting has not been opened.
    */
-  private isWindowOpen(
-    opensAt: Date | null,
-    closesAt: Date | null,
-    now: Date,
-  ): boolean {
+  private isWindowOpen(opensAt: Date | null, closesAt: Date | null, now: Date): boolean {
     if (!opensAt) return false;
     if (now < opensAt) return false;
     if (closesAt && now > closesAt) return false;
@@ -120,10 +116,7 @@ export class VotingService {
     };
   }
 
-  async listProjects(
-    hackathonId: string,
-    viewerId: string | null,
-  ): Promise<ProjectVoteDto[]> {
+  async listProjects(hackathonId: string, viewerId: string | null): Promise<ProjectVoteDto[]> {
     const rows = await this.db
       .select(this.projectColumns(viewerId))
       .from(projects)
@@ -139,11 +132,7 @@ export class VotingService {
     return rows.map((r) => this.toProjectVoteDto(r));
   }
 
-  async castVote(
-    hackathonId: string,
-    projectId: string,
-    voterId: string,
-  ): Promise<CastVoteResult> {
+  async castVote(hackathonId: string, projectId: string, voterId: string): Promise<CastVoteResult> {
     // Caller must be a member to participate in audience voting.
     const [member] = await this.db
       .select({ userId: members.userId })
@@ -191,9 +180,7 @@ export class VotingService {
       const [existing] = await tx
         .select({ voteId: votes.voteId })
         .from(votes)
-        .where(
-          and(eq(votes.hackathonId, hackathonId), eq(votes.voterId, voterId)),
-        )
+        .where(and(eq(votes.hackathonId, hackathonId), eq(votes.voterId, voterId)))
         .limit(1);
       if (existing) {
         throw new ConflictException("Already voted in this hackathon");
@@ -210,16 +197,11 @@ export class VotingService {
     });
   }
 
-  async myVote(
-    hackathonId: string,
-    voterId: string,
-  ): Promise<MyVoteResult> {
+  async myVote(hackathonId: string, voterId: string): Promise<MyVoteResult> {
     const [row] = await this.db
       .select({ projectId: votes.projectId })
       .from(votes)
-      .where(
-        and(eq(votes.hackathonId, hackathonId), eq(votes.voterId, voterId)),
-      )
+      .where(and(eq(votes.hackathonId, hackathonId), eq(votes.voterId, voterId)))
       .limit(1);
     return { projectId: row?.projectId ?? null };
   }

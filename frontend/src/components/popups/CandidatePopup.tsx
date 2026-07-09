@@ -18,22 +18,22 @@ function slugifyName(name: string): string {
 /* CandidatePopup — the application-review popup for the /applications page. */
 
 const M = {
-  closeBtnLabel:     { en: "Close",                   sr: "Zatvori" },
-  aboutCandidate:    { en: "About the candidate",     sr: "O kandidatu" },
-  skills:            { en: "Skills",                  sr: "Veštine" },
-  teamLabel:         { en: "Team",                    sr: "Tim" },
-  rejectReason:      { en: "Rejection reason:",       sr: "Razlog odbijanja:" },
-  ghActivity:        { en: "GitHub activity",         sr: "GitHub aktivnost" },
-  ghContribs:        { en: "Contributions",           sr: "Doprinosi" },
-  ghRepos:           { en: "Repositories",            sr: "Repozitorijumi" },
-  ghTopLang:         { en: "Top language",            sr: "Top jezik" },
-  approveBtn:        { en: "Approve",                 sr: "Odobri" },
-  rejectBtn:         { en: "Reject",                  sr: "Odbij" },
-  approveTeamBtn:    { en: "Approve team",            sr: "Odobri tim" },
-  reApproveBtn:      { en: "Re-approve",              sr: "Ponovo odobri" },
-  pillPending:       { en: "Pending",                 sr: "Na čekanju" },
-  pillApproved:      { en: "Approved",                sr: "Odobren/a" },
-  pillRejected:      { en: "Rejected",                sr: "Odbijen/a" },
+  closeBtnLabel: { en: "Close", sr: "Zatvori" },
+  aboutCandidate: { en: "About the candidate", sr: "O kandidatu" },
+  skills: { en: "Skills", sr: "Veštine" },
+  teamLabel: { en: "Team", sr: "Tim" },
+  rejectReason: { en: "Rejection reason:", sr: "Razlog odbijanja:" },
+  ghActivity: { en: "GitHub activity", sr: "GitHub aktivnost" },
+  ghContribs: { en: "Contributions", sr: "Doprinosi" },
+  ghRepos: { en: "Repositories", sr: "Repozitorijumi" },
+  ghTopLang: { en: "Top language", sr: "Top jezik" },
+  approveBtn: { en: "Approve", sr: "Odobri" },
+  rejectBtn: { en: "Reject", sr: "Odbij" },
+  approveTeamBtn: { en: "Approve team", sr: "Odobri tim" },
+  reApproveBtn: { en: "Re-approve", sr: "Ponovo odobri" },
+  pillPending: { en: "Pending", sr: "Na čekanju" },
+  pillApproved: { en: "Approved", sr: "Odobren/a" },
+  pillRejected: { en: "Rejected", sr: "Odbijen/a" },
 } as const;
 
 export type CandidateStatus = "pending" | "approved" | "rejected";
@@ -81,7 +81,7 @@ export function CandidatePopup({
   const d = candidate;
 
   const STATUS_MAP: Record<CandidateStatus, [string, string]> = {
-    pending:  ["s-pending",  t("pillPending")],
+    pending: ["s-pending", t("pillPending")],
     approved: ["s-approved", t("pillApproved")],
     rejected: ["s-rejected", t("pillRejected")],
   };
@@ -157,26 +157,17 @@ export function CandidatePopup({
                 <div className="app-section-title">{t("skills")}</div>
                 <div className="skill-list" id="popup-skills">
                   {d.skillsList.map((s, i) => (
-                    <span
-                      key={`${s}-${i}`}
-                      className={`skill-tag ${d.skillsClasses[i] || "sk-v"}`}
-                    >
+                    <span key={`${s}-${i}`} className={`skill-tag ${d.skillsClasses[i] || "sk-v"}`}>
                       {s.trim()}
                     </span>
                   ))}
                 </div>
               </div>
               {d.team && (
-                <div
-                  id="popup-team-wrap"
-                  style={{ marginTop: "14px" }}
-                >
+                <div id="popup-team-wrap" style={{ marginTop: "14px" }}>
                   <div className="app-section-title">
                     {t("teamLabel")}:{" "}
-                    <span
-                      id="popup-team-name"
-                      style={{ color: "var(--violet-light)" }}
-                    >
+                    <span id="popup-team-name" style={{ color: "var(--violet-light)" }}>
                       {d.team}
                     </span>
                   </div>
@@ -280,9 +271,7 @@ export function CandidatePopup({
                 <button className="btn-reject" onClick={onReject}>
                   <Icon name="x" /> {t("rejectBtn")}
                 </button>
-                <span className="action-hint">
-                  {d.actionHint || "Odobreno od strane AČ"}
-                </span>
+                <span className="action-hint">{d.actionHint || "Odobreno od strane AČ"}</span>
               </>
             )}
             {d.status === "rejected" && (
@@ -290,9 +279,7 @@ export function CandidatePopup({
                 <button className="btn-approve" onClick={onApprove}>
                   <Icon name="check" /> {t("reApproveBtn")}
                 </button>
-                <span className="action-hint">
-                  {d.actionHint || "Odbijeno od strane AČ"}
-                </span>
+                <span className="action-hint">{d.actionHint || "Odbijeno od strane AČ"}</span>
               </>
             )}
           </div>

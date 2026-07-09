@@ -54,9 +54,17 @@ export const USER_PROFILES: Record<string, UserProfile> = {
     reports: 0,
     activity: [
       { time: "16.04.2026 10:15", action: "Prijavio se na hackathon", detail: "ETF HackWeek 2026" },
-      { time: "15.04.2026 22:30", action: "Objavio komentar", detail: "ETF HackWeek 2026 – opšti kanal" },
+      {
+        time: "15.04.2026 22:30",
+        action: "Objavio komentar",
+        detail: "ETF HackWeek 2026 – opšti kanal",
+      },
       { time: "15.04.2026 18:00", action: "Odigrao Daily Spin", detail: "Osvojio 50 XP" },
-      { time: "14.04.2026 14:22", action: "Prijavio sadržaj", detail: "@real_elon_musk – lažni identitet" },
+      {
+        time: "14.04.2026 14:22",
+        action: "Prijavio sadržaj",
+        detail: "@real_elon_musk – lažni identitet",
+      },
     ],
     measures: [],
   },
@@ -73,12 +81,29 @@ export const USER_PROFILES: Record<string, UserProfile> = {
     joined: "05.10.2023",
     reports: 1,
     activity: [
-      { time: "16.04.2026 09:00", action: "Pregledao prijave sadržaja", detail: "3 prijave zatvorene" },
-      { time: "14.04.2026 11:30", action: "Objavio komentar", detail: "ETF HackWeek 2026 – opšti kanal" },
-      { time: "12.04.2026 17:00", action: "Odigrao Daily Minigame", detail: "Rezultat 5/5, +150 XP" },
+      {
+        time: "16.04.2026 09:00",
+        action: "Pregledao prijave sadržaja",
+        detail: "3 prijave zatvorene",
+      },
+      {
+        time: "14.04.2026 11:30",
+        action: "Objavio komentar",
+        detail: "ETF HackWeek 2026 – opšti kanal",
+      },
+      {
+        time: "12.04.2026 17:00",
+        action: "Odigrao Daily Minigame",
+        detail: "Rezultat 5/5, +150 XP",
+      },
     ],
     measures: [
-      { time: "10.03.2026", type: "Upozorenje", detail: "Neprikladna komunikacija u kanalu", by: "Admin Đurić" },
+      {
+        time: "10.03.2026",
+        type: "Upozorenje",
+        detail: "Neprikladna komunikacija u kanalu",
+        by: "Admin Đurić",
+      },
     ],
   },
   xUser99: {
@@ -94,13 +119,31 @@ export const USER_PROFILES: Record<string, UserProfile> = {
     joined: "01.02.2026",
     reports: 8,
     activity: [
-      { time: "14.04.2026 13:50", action: "Poslao 14 direktnih poruka", detail: "@annap – za 2h (uznemiravanje)" },
-      { time: "13.04.2026 20:10", action: "Objavio komentar", detail: "ETF HackWeek 2026 – opšti kanal" },
+      {
+        time: "14.04.2026 13:50",
+        action: "Poslao 14 direktnih poruka",
+        detail: "@annap – za 2h (uznemiravanje)",
+      },
+      {
+        time: "13.04.2026 20:10",
+        action: "Objavio komentar",
+        detail: "ETF HackWeek 2026 – opšti kanal",
+      },
       { time: "10.04.2026 11:00", action: "Prijavio se na hackathon", detail: "ETF HackWeek 2026" },
     ],
     measures: [
-      { time: "14.04.2026", type: "Suspenzija (30 dana)", detail: "Uznemiravanje – 3 prijave", by: "Admin Đurić" },
-      { time: "16.04.2026", type: "Upozorenje", detail: "Neprimereno ponašanje u komentarima", by: "Admin Đurić" },
+      {
+        time: "14.04.2026",
+        type: "Suspenzija (30 dana)",
+        detail: "Uznemiravanje – 3 prijave",
+        by: "Admin Đurić",
+      },
+      {
+        time: "16.04.2026",
+        type: "Upozorenje",
+        detail: "Neprimereno ponašanje u komentarima",
+        by: "Admin Đurić",
+      },
     ],
   },
   crypto_bot_42: {
@@ -116,11 +159,24 @@ export const USER_PROFILES: Record<string, UserProfile> = {
     joined: "10.03.2026",
     reports: 14,
     activity: [
-      { time: "16.04.2026 10:00", action: "Poslao 11 direktnih poruka", detail: "Spam/invest sadržaj" },
-      { time: "15.04.2026 22:00", action: "Registrovao nalog", detail: "Kreiran sa tempmail adresom" },
+      {
+        time: "16.04.2026 10:00",
+        action: "Poslao 11 direktnih poruka",
+        detail: "Spam/invest sadržaj",
+      },
+      {
+        time: "15.04.2026 22:00",
+        action: "Registrovao nalog",
+        detail: "Kreiran sa tempmail adresom",
+      },
     ],
     measures: [
-      { time: "16.04.2026", type: "Suspenzija (7 dana)", detail: "Spam poruke – 11 prijava", by: "Admin Đurić" },
+      {
+        time: "16.04.2026",
+        type: "Suspenzija (7 dana)",
+        detail: "Spam poruke – 11 prijava",
+        by: "Admin Đurić",
+      },
     ],
   },
   nenads: {
@@ -136,8 +192,16 @@ export const USER_PROFILES: Record<string, UserProfile> = {
     joined: "15.09.2023",
     reports: 0,
     activity: [
-      { time: "15.04.2026 16:00", action: "Prijavio se na hackathon", detail: "Nordeus Game Jam 2026" },
-      { time: "14.04.2026 12:00", action: "Odigrao Daily Minigame", detail: "Rezultat 4/5, +120 XP" },
+      {
+        time: "15.04.2026 16:00",
+        action: "Prijavio se na hackathon",
+        detail: "Nordeus Game Jam 2026",
+      },
+      {
+        time: "14.04.2026 12:00",
+        action: "Odigrao Daily Minigame",
+        detail: "Rezultat 4/5, +120 XP",
+      },
       { time: "13.04.2026 09:30", action: "Odigrao Daily Spin", detail: "Osvojio 100 XP" },
     ],
     measures: [],
@@ -155,7 +219,11 @@ export const USER_PROFILES: Record<string, UserProfile> = {
     joined: "20.09.2023",
     reports: 2,
     activity: [
-      { time: "16.04.2026 08:00", action: "Prijavio objavu", detail: "@fakeNews – lažne informacije" },
+      {
+        time: "16.04.2026 08:00",
+        action: "Prijavio objavu",
+        detail: "@fakeNews – lažne informacije",
+      },
       { time: "15.04.2026 15:30", action: "Kreirao tim", detail: '"Hack Attack Squad"' },
       { time: "14.04.2026 10:00", action: "Prijavio se na hackathon", detail: "ETF HackWeek 2026" },
     ],
@@ -174,7 +242,11 @@ export const USER_PROFILES: Record<string, UserProfile> = {
     joined: "05.03.2026",
     reports: 4,
     activity: [
-      { time: "16.04.2026 09:30", action: "Objavio komentar", detail: "ETF HackWeek 2026 – opšti kanal (uvredljiv sadržaj)" },
+      {
+        time: "16.04.2026 09:30",
+        action: "Objavio komentar",
+        detail: "ETF HackWeek 2026 – opšti kanal (uvredljiv sadržaj)",
+      },
       { time: "10.03.2026 14:00", action: "Registrovao nalog", detail: "Bez GitHub veze" },
     ],
     measures: [],
@@ -192,8 +264,16 @@ export const USER_PROFILES: Record<string, UserProfile> = {
     joined: "13.04.2026",
     reports: 7,
     activity: [
-      { time: "13.04.2026 20:00", action: "Kreirao profil", detail: "Lažni identitet – verifikacija nije podneta" },
-      { time: "13.04.2026 20:05", action: "Objavio na feed-u", detail: "Lažne tvrdnje o identitetu" },
+      {
+        time: "13.04.2026 20:00",
+        action: "Kreirao profil",
+        detail: "Lažni identitet – verifikacija nije podneta",
+      },
+      {
+        time: "13.04.2026 20:05",
+        action: "Objavio na feed-u",
+        detail: "Lažne tvrdnje o identitetu",
+      },
     ],
     measures: [],
   },
@@ -210,7 +290,11 @@ export const USER_PROFILES: Record<string, UserProfile> = {
     joined: "01.04.2026",
     reports: 2,
     activity: [
-      { time: "16.04.2026 07:30", action: "Objavio na feed-u", detail: "Lažne informacije o HackWeek 2026 otkazivanju" },
+      {
+        time: "16.04.2026 07:30",
+        action: "Objavio na feed-u",
+        detail: "Lažne informacije o HackWeek 2026 otkazivanju",
+      },
       { time: "01.04.2026 12:00", action: "Registrovao nalog", detail: "" },
     ],
     measures: [],

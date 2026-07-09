@@ -1,28 +1,66 @@
 /* Language switcher — token-driven so it works in every theme. */
-.lang-switch{
-  display:grid;
-  grid-template-columns:repeat(2, minmax(0, 1fr));
-  gap:10px;
+.lang-switch {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
 }
-.lang-opt{
-  position:relative;
-  display:flex; align-items:center; gap:11px; text-align:left;
-  padding:12px 14px; border-radius:var(--r-md);
-  background:var(--surface-2); border:1px solid var(--line);
-  transition:border-color var(--dur-2) var(--ease-out), transform var(--dur-1) var(--ease-out), background var(--dur-2) var(--ease-out);
+.lang-opt {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  transition:
+    border-color var(--dur-2) var(--ease-out),
+    transform var(--dur-1) var(--ease-out),
+    background var(--dur-2) var(--ease-out);
 }
-.lang-opt:hover{ border-color:var(--violet-light); transform:translateY(-1px); }
-.lang-opt.active{ border-color:var(--lemon); box-shadow:0 0 0 1px var(--lemon) inset; }
-.lang-code{
-  flex-shrink:0; width:34px; height:26px; border-radius:7px;
-  display:grid; place-items:center;
-  font-family:var(--mono); font-weight:700; font-size:12px; letter-spacing:.02em;
-  color:var(--violet-light); background:color-mix(in srgb, var(--violet) 16%, transparent);
-  border:1px solid var(--line);
+.lang-opt:hover {
+  border-color: var(--violet-light);
+  transform: translateY(-1px);
 }
-.lang-name{ flex:1; min-width:0; font-weight:600; font-size:14.5px; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.lang-check{ flex-shrink:0; color:var(--lemon); display:grid; place-items:center; }
+.lang-opt.active {
+  border-color: var(--lemon);
+  box-shadow: 0 0 0 1px var(--lemon) inset;
+}
+.lang-code {
+  flex-shrink: 0;
+  width: 34px;
+  height: 26px;
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: var(--violet-light);
+  background: color-mix(in srgb, var(--violet) 16%, transparent);
+  border: 1px solid var(--line);
+}
+.lang-name {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  font-size: 14.5px;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.lang-check {
+  flex-shrink: 0;
+  color: var(--lemon);
+  display: grid;
+  place-items: center;
+}
 
-@media (max-width:560px){
-  .lang-switch{ grid-template-columns:1fr; }
+@media (max-width: 560px) {
+  .lang-switch {
+    grid-template-columns: 1fr;
+  }
 }

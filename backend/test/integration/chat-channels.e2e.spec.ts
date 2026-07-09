@@ -36,16 +36,9 @@ describe("channel types (e2e)", () => {
   }
 
   async function serverChannels(serverId: string, viewer: TestUser) {
-    const res = await http()
-      .get(`/api/v1/servers/${serverId}`)
-      .set(auth(viewer))
-      .expect(200);
-    const channels: Channel[] = res.body.groups.flatMap(
-      (g: { channels: Channel[] }) => g.channels,
-    );
-    const byName: Record<string, Channel> = Object.fromEntries(
-      channels.map((c) => [c.name, c]),
-    );
+    const res = await http().get(`/api/v1/servers/${serverId}`).set(auth(viewer)).expect(200);
+    const channels: Channel[] = res.body.groups.flatMap((g: { channels: Channel[] }) => g.channels);
+    const byName: Record<string, Channel> = Object.fromEntries(channels.map((c) => [c.name, c]));
     return { byName, firstGroupId: res.body.groups[0].groupId };
   }
 

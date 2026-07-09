@@ -1,13 +1,7 @@
 /**
  * Autor: Nenad Skoković (2023/0039)
  */
-import {
-  BadRequestException,
-  Controller,
-  Inject,
-  Post,
-  UseGuards,
-} from "@nestjs/common";
+import { BadRequestException, Controller, Inject, Post, UseGuards } from "@nestjs/common";
 import { eq } from "drizzle-orm";
 import { CurrentUser } from "../auth/current-user.decorator";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
@@ -36,9 +30,7 @@ export class GithubController {
    */
   @Post("github/sync")
   @UseGuards(JwtAuthGuard)
-  async sync(
-    @CurrentUser() userId: string,
-  ): Promise<{
+  async sync(@CurrentUser() userId: string): Promise<{
     stats: GithubProfileStats;
     verifiedSkills: VerifiedSkillDto[];
   }> {

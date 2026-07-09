@@ -8,9 +8,7 @@ import Link from "next/link";
  * handler (e.g. open a profile popup), mentions become buttons that call it;
  * with no provider they fall back to navigating to the profile route.
  */
-export const MentionClickContext = createContext<
-  ((username: string) => void) | null
->(null);
+export const MentionClickContext = createContext<((username: string) => void) | null>(null);
 
 export function MentionLink({
   username,

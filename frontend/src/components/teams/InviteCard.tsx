@@ -57,8 +57,7 @@ export function InviteCard({
     <div className={cardClass}>
       <div className="tm-sug-body">
         <div className="tm-sug-for">
-          {forIcon && <Icon name="calendar" />} {invite.hackathonTitle} ·{" "}
-          {invite.teamName}
+          {forIcon && <Icon name="calendar" />} {invite.hackathonTitle} · {invite.teamName}
         </div>
         <div className="tm-sug-avs" aria-hidden="true">
           <div className="tm-av tm-av-v tm-av-md is-orb">
@@ -76,27 +75,17 @@ export function InviteCard({
         <div className="tm-sug-names">
           {inviterName} + {labels.you}
         </div>
-        {invite.invitedByUsername && (
-          <div className="tm-handle">@{invite.invitedByUsername}</div>
-        )}
+        {invite.invitedByUsername && <div className="tm-handle">@{invite.invitedByUsername}</div>}
         <div className="tm-sug-why">
           {invite.message ?? labels.fallbackWhy ?? invite.hackathonTitle}
         </div>
         <div className="tm-sug-actions">
-          <button
-            className="btn btn-primary"
-            disabled={busy}
-            onClick={() => onAccept(invite)}
-          >
+          <button className="btn btn-primary" disabled={busy} onClick={() => onAccept(invite)}>
             <Icon name="check" />{" "}
-            {busy ? labels.accepting ?? labels.acceptInvite : labels.acceptInvite}
+            {busy ? (labels.accepting ?? labels.acceptInvite) : labels.acceptInvite}
           </button>
-          <button
-            className="btn btn-ghost"
-            disabled={busy}
-            onClick={() => onDecline(invite)}
-          >
-            {busy ? labels.declining ?? labels.decline : labels.decline}
+          <button className="btn btn-ghost" disabled={busy} onClick={() => onDecline(invite)}>
+            {busy ? (labels.declining ?? labels.decline) : labels.decline}
           </button>
         </div>
       </div>

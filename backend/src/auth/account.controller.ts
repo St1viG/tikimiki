@@ -43,9 +43,7 @@ export class AccountController {
 
   @Post("password/reset")
   @HttpCode(200)
-  reset(
-    @Body(new ZodValidationPipe(resetPasswordSchema)) body: ResetPasswordInput,
-  ) {
+  reset(@Body(new ZodValidationPipe(resetPasswordSchema)) body: ResetPasswordInput) {
     return this.account.resetPassword(body.token, body.newPassword);
   }
 

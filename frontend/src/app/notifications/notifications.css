@@ -1,47 +1,227 @@
-    .nf-head{ display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
-    /* No own vertical margin — parent .tabs-row controls spacing, so the tabs sit
+.nf-head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+/* No own vertical margin — parent .tabs-row controls spacing, so the tabs sit
        flush under the header at the same height as Hackathons/Teams. */
-    .nf-tabs{ display:flex; gap:2px; margin:0; border-bottom:1px solid var(--line-soft); }
-    /* Hierarchy (D): group labels lead with a short lemon tick */
-    .notif-group-label{ display:flex; align-items:center; gap:9px; font-size:12px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); margin:16px 4px 8px; }
-    .notif-group-label::before{ content:""; width:14px; height:2px; border-radius:2px; background:var(--lemon); box-shadow:0 0 8px -1px var(--lemon); }
-    .notif-list{ display:flex; flex-direction:column; gap:8px; }
-    .notif{ position:relative; display:flex; align-items:flex-start; gap:13px; padding:14px 16px; border-radius:14px; background:var(--surface); border:1px solid var(--line); transition:border-color .15s var(--ease-out), transform .15s var(--ease-out), box-shadow .2s var(--ease-out); }
-    .notif:hover{ border-color:var(--line); transform:translateY(-1px); box-shadow:var(--shadow-sm); }
-    .notif.unread{ background:linear-gradient(90deg, color-mix(in srgb, var(--violet) 12%, transparent), transparent 72%); }
-    /* Signature C: unread items carry a left voltage rail */
-    .notif.unread::before{ content:""; position:absolute; left:0; top:13px; bottom:13px; width:3px; border-radius:0 4px 4px 0; background:var(--lemon); box-shadow:0 0 12px -1px var(--lemon); opacity:.85; transition:opacity .35s var(--ease-out); }
-    .notif:not(.unread)::before{ opacity:0; }
-    .notif-ic{ width:42px; height:42px; border-radius:12px; flex-shrink:0; display:grid; place-items:center; transition:transform .2s var(--ease-quint); }
-    .notif:hover .notif-ic{ transform:rotate(-3deg) scale(1.05); }
-    .notif-ic .ic{ width:21px; height:21px; }
-    .ni-like{ background:color-mix(in srgb, var(--lemon) 13%, transparent); color:var(--lemon-vivid); }
-    .ni-team{ background:color-mix(in srgb, var(--violet-light) 15%, transparent); color:var(--violet-light); }
-    .ni-hack{ background:color-mix(in srgb, var(--green) 15%, transparent); color:var(--green); }
-    .ni-trophy{ background:color-mix(in srgb, var(--lemon) 14%, transparent); color:var(--lemon); }
-    .ni-comment{ background:color-mix(in srgb, var(--violet-light) 12%, transparent); color:var(--violet-light); }
-    .ni-premium{ background:var(--grad-banner); color:var(--lemon); }
-    .notif-body{ flex:1; min-width:0; }
-    .notif-text{ font-size:15px; color:var(--ink-2); line-height:1.5; }
-    .notif-text b{ color:var(--ink); font-weight:600; }
-    .notif-text .mention{ color:var(--violet-light); font-weight:600; }
-    /* Data layer (A): relative times read as the machine layer */
-    .notif-time{ font-family:var(--mono); font-variant-numeric:tabular-nums; letter-spacing:-.01em; font-size:12px; color:var(--muted); margin-top:3px; }
-    .notif-actions{ display:flex; gap:8px; margin-top:11px; }
-    .notif-actions .btn{ padding:7px 14px; font-size:13px; border-radius:9px; }
-    /* Signature B: quiet success reveal when a request is accepted/declined */
-    .notif-done{ font-size:13px; font-weight:600; color:var(--green); margin-top:9px; display:inline-flex; align-items:center; gap:6px; animation:nf-done-in .32s var(--ease-out) both; }
-    .notif-done .ic{ width:15px; height:15px; }
-    @keyframes nf-done-in{ from{ opacity:0; transform:translateY(4px); } to{ opacity:1; transform:none; } }
-    /* Signature B: marking read fades the unread dot out instead of vanishing */
-    .notif-dot{ width:9px; height:9px; border-radius:50%; background:var(--lemon); flex-shrink:0; align-self:center; box-shadow:0 0 10px -1px var(--lemon); transition:opacity .35s var(--ease-out), transform .35s var(--ease-out); }
-    .notif-dot.nf-fade{ opacity:0; transform:scale(.4); }
-    .notif[hidden]{ display:none; }
-    .nf-empty{ text-align:center; color:var(--muted); padding:40px 0; font-size:14px; }
-    /* Mobile (E): keep request actions full-width and tappable at 375px */
-    @media (max-width:480px){
-      .notif{ padding:13px 14px; gap:11px; }
-      .notif-ic{ width:38px; height:38px; }
-      .notif-actions{ flex-wrap:wrap; }
-      .notif-actions .btn{ flex:1; min-width:120px; }
-    }
+.nf-tabs {
+  display: flex;
+  gap: 2px;
+  margin: 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+/* Hierarchy (D): group labels lead with a short lemon tick */
+.notif-group-label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 16px 4px 8px;
+}
+.notif-group-label::before {
+  content: "";
+  width: 14px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--lemon);
+  box-shadow: 0 0 8px -1px var(--lemon);
+}
+.notif-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.notif {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  transition:
+    border-color 0.15s var(--ease-out),
+    transform 0.15s var(--ease-out),
+    box-shadow 0.2s var(--ease-out);
+}
+.notif:hover {
+  border-color: var(--line);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+.notif.unread {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--violet) 12%, transparent),
+    transparent 72%
+  );
+}
+/* Signature C: unread items carry a left voltage rail */
+.notif.unread::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 13px;
+  bottom: 13px;
+  width: 3px;
+  border-radius: 0 4px 4px 0;
+  background: var(--lemon);
+  box-shadow: 0 0 12px -1px var(--lemon);
+  opacity: 0.85;
+  transition: opacity 0.35s var(--ease-out);
+}
+.notif:not(.unread)::before {
+  opacity: 0;
+}
+.notif-ic {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  transition: transform 0.2s var(--ease-quint);
+}
+.notif:hover .notif-ic {
+  transform: rotate(-3deg) scale(1.05);
+}
+.notif-ic .ic {
+  width: 21px;
+  height: 21px;
+}
+.ni-like {
+  background: color-mix(in srgb, var(--lemon) 13%, transparent);
+  color: var(--lemon-vivid);
+}
+.ni-team {
+  background: color-mix(in srgb, var(--violet-light) 15%, transparent);
+  color: var(--violet-light);
+}
+.ni-hack {
+  background: color-mix(in srgb, var(--green) 15%, transparent);
+  color: var(--green);
+}
+.ni-trophy {
+  background: color-mix(in srgb, var(--lemon) 14%, transparent);
+  color: var(--lemon);
+}
+.ni-comment {
+  background: color-mix(in srgb, var(--violet-light) 12%, transparent);
+  color: var(--violet-light);
+}
+.ni-premium {
+  background: var(--grad-banner);
+  color: var(--lemon);
+}
+.notif-body {
+  flex: 1;
+  min-width: 0;
+}
+.notif-text {
+  font-size: 15px;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+.notif-text b {
+  color: var(--ink);
+  font-weight: 600;
+}
+.notif-text .mention {
+  color: var(--violet-light);
+  font-weight: 600;
+}
+/* Data layer (A): relative times read as the machine layer */
+.notif-time {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+.notif-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 11px;
+}
+.notif-actions .btn {
+  padding: 7px 14px;
+  font-size: 13px;
+  border-radius: 9px;
+}
+/* Signature B: quiet success reveal when a request is accepted/declined */
+.notif-done {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--green);
+  margin-top: 9px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  animation: nf-done-in 0.32s var(--ease-out) both;
+}
+.notif-done .ic {
+  width: 15px;
+  height: 15px;
+}
+@keyframes nf-done-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* Signature B: marking read fades the unread dot out instead of vanishing */
+.notif-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--lemon);
+  flex-shrink: 0;
+  align-self: center;
+  box-shadow: 0 0 10px -1px var(--lemon);
+  transition:
+    opacity 0.35s var(--ease-out),
+    transform 0.35s var(--ease-out);
+}
+.notif-dot.nf-fade {
+  opacity: 0;
+  transform: scale(0.4);
+}
+.notif[hidden] {
+  display: none;
+}
+.nf-empty {
+  text-align: center;
+  color: var(--muted);
+  padding: 40px 0;
+  font-size: 14px;
+}
+/* Mobile (E): keep request actions full-width and tappable at 375px */
+@media (max-width: 480px) {
+  .notif {
+    padding: 13px 14px;
+    gap: 11px;
+  }
+  .notif-ic {
+    width: 38px;
+    height: 38px;
+  }
+  .notif-actions {
+    flex-wrap: wrap;
+  }
+  .notif-actions .btn {
+    flex: 1;
+    min-width: 120px;
+  }
+}

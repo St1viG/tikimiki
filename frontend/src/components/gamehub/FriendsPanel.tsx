@@ -4,11 +4,7 @@ import { useState } from "react";
 import { Icon } from "@/components/Icon";
 import { GenerativeAvatar } from "@/components/ui/GenerativeAvatar";
 import { ProfilePopup } from "@/components/popups/ProfilePopup";
-import {
-  FRIENDS_TODAY,
-  PLAYED_TODAY,
-  TOTAL_GAMES,
-} from "@/lib/gamehub/mock";
+import { FRIENDS_TODAY, PLAYED_TODAY, TOTAL_GAMES } from "@/lib/gamehub/mock";
 import { useT } from "@/components/i18n/LanguageProvider";
 
 const M = {
@@ -116,8 +112,7 @@ export function FriendsPanel() {
                 <div className="fp-name">{f.name}</div>
                 {f.standout && (
                   <div className="fp-standout">
-                    {t("best")}{" "}
-                    <span className="u-mono">{f.standout.display}</span>
+                    {t("best")} <span className="u-mono">{f.standout.display}</span>
                   </div>
                 )}
               </div>

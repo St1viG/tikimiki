@@ -66,10 +66,7 @@ export class EngagementController {
 
   @Post("posts/:postId/like")
   @UseGuards(JwtAuthGuard)
-  togglePostLike(
-    @CurrentUser() userId: string,
-    @Param("postId", ParseUUIDPipe) postId: string,
-  ) {
+  togglePostLike(@CurrentUser() userId: string, @Param("postId", ParseUUIDPipe) postId: string) {
     return this.engagement.togglePostLike(userId, postId);
   }
 

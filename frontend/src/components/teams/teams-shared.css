@@ -8,4 +8,7 @@
  * */
 
 /* Pixel medal — fills sourced from the --medal-* tokens (globals.css). */
-.px-medal{ image-rendering:pixelated; vertical-align:middle; }
+.px-medal {
+  image-rendering: pixelated;
+  vertical-align: middle;
+}

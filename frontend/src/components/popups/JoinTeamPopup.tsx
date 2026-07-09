@@ -11,14 +11,23 @@ import { useT } from "@/components/i18n/LanguageProvider";
  */
 
 const M = {
-  close:          { en: "Close",                              sr: "Zatvori" },
-  title:          { en: "Request to join",                    sr: "Zatraži priključenje" },
-  descPre:        { en: "You are sending a join request to team", sr: "Šalješ zahtev za priključenje timu" },
-  descPost:       { en: ". The team captain will review your profile and respond.", sr: ". Kapiten tima će pregledati tvoj profil i odgovoriti." },
-  labelMsg:       { en: "Message (optional)",                 sr: "Poruka (opciono)" },
-  placeholderMsg: { en: "Briefly introduce yourself or say why you're a good fit…", sr: "Kratko se predstavi ili navedi zašto si dobar fit…" },
-  cancel:         { en: "Cancel",                             sr: "Otkaži" },
-  sendRequest:    { en: "Send request",                       sr: "Pošalji zahtev" },
+  close: { en: "Close", sr: "Zatvori" },
+  title: { en: "Request to join", sr: "Zatraži priključenje" },
+  descPre: {
+    en: "You are sending a join request to team",
+    sr: "Šalješ zahtev za priključenje timu",
+  },
+  descPost: {
+    en: ". The team captain will review your profile and respond.",
+    sr: ". Kapiten tima će pregledati tvoj profil i odgovoriti.",
+  },
+  labelMsg: { en: "Message (optional)", sr: "Poruka (opciono)" },
+  placeholderMsg: {
+    en: "Briefly introduce yourself or say why you're a good fit…",
+    sr: "Kratko se predstavi ili navedi zašto si dobar fit…",
+  },
+  cancel: { en: "Cancel", sr: "Otkaži" },
+  sendRequest: { en: "Send request", sr: "Pošalji zahtev" },
 } as const;
 
 export function JoinTeamPopup({

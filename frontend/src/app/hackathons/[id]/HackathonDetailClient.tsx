@@ -10,11 +10,7 @@ import { useT } from "@/components/i18n/LanguageProvider";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { CalendarPopup } from "@/components/popups/CalendarPopup";
 import { initials } from "@/lib/format";
-import {
-  getHackathon,
-  getMyApplications,
-  type Application,
-} from "@/lib/api";
+import { getHackathon, getMyApplications, type Application } from "@/lib/api";
 
 /**
  * HackathonDetailClient — full hackathon profile on a dedicated route.
@@ -27,54 +23,57 @@ import {
  */
 
 const M = {
-  back:            { en: "Hackathons",                  sr: "Hackathoni" },
-  pageTitle:       { en: "Hackathon",                   sr: "Hackathon" },
+  back: { en: "Hackathons", sr: "Hackathoni" },
+  pageTitle: { en: "Hackathon", sr: "Hackathon" },
 
-  notFound:        { en: "Hackathon not found.",        sr: "Hackathon nije pronađen." },
-  browse:          { en: "Browse hackathons",           sr: "Pregledaj hackathone" },
+  notFound: { en: "Hackathon not found.", sr: "Hackathon nije pronađen." },
+  browse: { en: "Browse hackathons", sr: "Pregledaj hackathone" },
 
-  by:              { en: "by",                          sr: "organizuje" },
-  verifiedOrg:     { en: "Verified organizer",          sr: "Verifikovan organizator" },
+  by: { en: "by", sr: "organizuje" },
+  verifiedOrg: { en: "Verified organizer", sr: "Verifikovan organizator" },
 
-  statusUpcoming:  { en: "Upcoming",                    sr: "Predstojeći" },
-  statusLive:      { en: "Live now",                    sr: "U toku" },
-  statusFinished:  { en: "Finished",                    sr: "Završen" },
-  statusCancelled: { en: "Cancelled",                   sr: "Otkazan" },
+  statusUpcoming: { en: "Upcoming", sr: "Predstojeći" },
+  statusLive: { en: "Live now", sr: "U toku" },
+  statusFinished: { en: "Finished", sr: "Završen" },
+  statusCancelled: { en: "Cancelled", sr: "Otkazan" },
 
   // Meta
-  metaWhen:        { en: "When",                        sr: "Kada" },
-  metaParticipants:{ en: "Participants",                sr: "Učesnici" },
-  metaTeams:       { en: "Teams",                       sr: "Timovi" },
-  metaPrize:       { en: "Main prize",                  sr: "Glavna nagrada" },
-  metaDeadline:    { en: "Apply by",                    sr: "Rok za prijavu" },
-  addToCalendar:   { en: "Add to calendar",             sr: "Dodaj u kalendar" },
+  metaWhen: { en: "When", sr: "Kada" },
+  metaParticipants: { en: "Participants", sr: "Učesnici" },
+  metaTeams: { en: "Teams", sr: "Timovi" },
+  metaPrize: { en: "Main prize", sr: "Glavna nagrada" },
+  metaDeadline: { en: "Apply by", sr: "Rok za prijavu" },
+  addToCalendar: { en: "Add to calendar", sr: "Dodaj u kalendar" },
 
   // Sections
-  aboutTitle:      { en: "About",                       sr: "O hackathonu" },
-  locationTitle:   { en: "Location",                    sr: "Lokacija" },
-  locationVirtual: { en: "This is a virtual hackathon — it takes place online.", sr: "Ovo je virtuelni hackathon — održava se online." },
-  viewOnMaps:      { en: "View on Google Maps",         sr: "Otvori u Google Maps" },
-  mapTitle:        { en: "Hackathon location map",      sr: "Mapa lokacije hackathona" },
+  aboutTitle: { en: "About", sr: "O hackathonu" },
+  locationTitle: { en: "Location", sr: "Lokacija" },
+  locationVirtual: {
+    en: "This is a virtual hackathon — it takes place online.",
+    sr: "Ovo je virtuelni hackathon — održava se online.",
+  },
+  viewOnMaps: { en: "View on Google Maps", sr: "Otvori u Google Maps" },
+  mapTitle: { en: "Hackathon location map", sr: "Mapa lokacije hackathona" },
 
   // CTA
-  ctaApply:        { en: "Apply to this hackathon",     sr: "Prijavi se na ovaj hackathon" },
-  ctaSignIn:       { en: "Sign in to apply",            sr: "Prijavi se da konkurišeš" },
-  signIn:          { en: "Sign in",                     sr: "Prijava" },
-  ctaApplied:      { en: "You've applied",              sr: "Već si se prijavio" },
-  viewApplication: { en: "View application",            sr: "Pogledaj prijavu" },
-  ctaOwn:          { en: "This is your hackathon.",     sr: "Ovo je tvoj hackathon." },
-  manageApps:      { en: "Manage applications",         sr: "Upravljaj prijavama" },
-  editHackathon:   { en: "Edit",                        sr: "Izmeni" },
-  deadlinePassed:  { en: "Applications are closed.",    sr: "Prijave su zatvorene." },
+  ctaApply: { en: "Apply to this hackathon", sr: "Prijavi se na ovaj hackathon" },
+  ctaSignIn: { en: "Sign in to apply", sr: "Prijavi se da konkurišeš" },
+  signIn: { en: "Sign in", sr: "Prijava" },
+  ctaApplied: { en: "You've applied", sr: "Već si se prijavio" },
+  viewApplication: { en: "View application", sr: "Pogledaj prijavu" },
+  ctaOwn: { en: "This is your hackathon.", sr: "Ovo je tvoj hackathon." },
+  manageApps: { en: "Manage applications", sr: "Upravljaj prijavama" },
+  editHackathon: { en: "Edit", sr: "Izmeni" },
+  deadlinePassed: { en: "Applications are closed.", sr: "Prijave su zatvorene." },
 
-  statusPending:   { en: "Pending review",              sr: "Na čekanju" },
-  statusApproved:  { en: "Approved",                    sr: "Odobreno" },
-  statusRejected:  { en: "Rejected",                    sr: "Odbijeno" },
-  statusWaitlisted:{ en: "Waitlisted",                  sr: "Lista čekanja" },
+  statusPending: { en: "Pending review", sr: "Na čekanju" },
+  statusApproved: { en: "Approved", sr: "Odobreno" },
+  statusRejected: { en: "Rejected", sr: "Odbijeno" },
+  statusWaitlisted: { en: "Waitlisted", sr: "Lista čekanja" },
 
-  typePhysical:    { en: "Physical",                    sr: "Fizički" },
-  typeVirtual:     { en: "Virtual",                     sr: "Virtuelni" },
-  typeHybrid:      { en: "Hybrid",                      sr: "Hibridni" },
+  typePhysical: { en: "Physical", sr: "Fizički" },
+  typeVirtual: { en: "Virtual", sr: "Virtuelni" },
+  typeHybrid: { en: "Hybrid", sr: "Hibridni" },
 } as const;
 
 function pad(n: number): string {
@@ -158,8 +157,14 @@ export function HackathonDetailClient({ hackathonId }: { hackathonId: string }) 
           ) : (
             <div className="hd-hero" aria-busy="true">
               <span className="skel skel-line" style={{ width: "40%", height: 14 }} />
-              <span className="skel skel-line" style={{ width: "70%", height: 28, marginTop: 12 }} />
-              <span className="skel skel-line" style={{ width: "55%", height: 13, marginTop: 14 }} />
+              <span
+                className="skel skel-line"
+                style={{ width: "70%", height: 28, marginTop: 12 }}
+              />
+              <span
+                className="skel skel-line"
+                style={{ width: "55%", height: 13, marginTop: 14 }}
+              />
             </div>
           )}
         </main>
@@ -196,8 +201,7 @@ export function HackathonDetailClient({ hackathonId }: { hackathonId: string }) 
   const isOwner = user?.userId === hack.organizationId;
   const hasCoords = hack.latitude != null && hack.longitude != null;
   const deadlinePassed = new Date(hack.registrationDeadline).getTime() < Date.now();
-  const canApply =
-    !isOwner && hack.status === "upcoming" && !deadlinePassed && !existing;
+  const canApply = !isOwner && hack.status === "upcoming" && !deadlinePassed && !existing;
 
   const mapsQuery = hasCoords
     ? `${hack.latitude},${hack.longitude}`
@@ -219,7 +223,9 @@ export function HackathonDetailClient({ hackathonId }: { hackathonId: string }) 
           )}
           <div className="hd-hero-body">
             <div className="hd-org">
-              <div className="hd-org-av" aria-hidden="true">{initials(hack.organizationName)}</div>
+              <div className="hd-org-av" aria-hidden="true">
+                {initials(hack.organizationName)}
+              </div>
               <span className="hd-org-name">
                 {t("by")} <strong>{hack.organizationName}</strong>
               </span>
@@ -273,11 +279,15 @@ export function HackathonDetailClient({ hackathonId }: { hackathonId: string }) 
         {/* Meta grid */}
         <div className="hd-meta">
           <div className="hd-meta-item">
-            <div className="hd-meta-label"><Icon name="calendar" /> {t("metaWhen")}</div>
+            <div className="hd-meta-label">
+              <Icon name="calendar" /> {t("metaWhen")}
+            </div>
             <div className="hd-meta-val">{dateRange(hack.startsAt, hack.endsAt)}</div>
           </div>
           <div className="hd-meta-item">
-            <div className="hd-meta-label"><Icon name="teams" /> {t("metaParticipants")}</div>
+            <div className="hd-meta-label">
+              <Icon name="teams" /> {t("metaParticipants")}
+            </div>
             <div className="hd-meta-val">
               {hack.participantCount}
               {hack.maxParticipants !== null && (
@@ -286,17 +296,23 @@ export function HackathonDetailClient({ hackathonId }: { hackathonId: string }) 
             </div>
           </div>
           <div className="hd-meta-item">
-            <div className="hd-meta-label"><Icon name="flag" /> {t("metaTeams")}</div>
+            <div className="hd-meta-label">
+              <Icon name="flag" /> {t("metaTeams")}
+            </div>
             <div className="hd-meta-val">{hack.teamCount}</div>
           </div>
           {hack.prizePool && (
             <div className="hd-meta-item">
-              <div className="hd-meta-label"><Icon name="trophy" /> {t("metaPrize")}</div>
+              <div className="hd-meta-label">
+                <Icon name="trophy" /> {t("metaPrize")}
+              </div>
               <div className="hd-meta-val hd-meta-prize">{hack.prizePool}</div>
             </div>
           )}
           <div className="hd-meta-item">
-            <div className="hd-meta-label"><Icon name="clock" /> {t("metaDeadline")}</div>
+            <div className="hd-meta-label">
+              <Icon name="clock" /> {t("metaDeadline")}
+            </div>
             <div className="hd-meta-val">{fmtDMY(new Date(hack.registrationDeadline))}</div>
           </div>
         </div>
@@ -350,10 +366,7 @@ export function HackathonDetailClient({ hackathonId }: { hackathonId: string }) 
           {isOwner ? (
             <div className="hd-cta-own">
               <span>{t("ctaOwn")}</span>
-              <Link
-                className="btn btn-primary"
-                href={`/hackathons/${hack.hackathonId}/edit`}
-              >
+              <Link className="btn btn-primary" href={`/hackathons/${hack.hackathonId}/edit`}>
                 <Icon name="settings" /> {t("editHackathon")}
               </Link>
               <Link className="btn btn-ghost" href="/applications">
@@ -383,7 +396,10 @@ export function HackathonDetailClient({ hackathonId }: { hackathonId: string }) 
               <Icon name="flag" /> {t("ctaSignIn")}
             </Link>
           ) : canApply ? (
-            <Link className="btn btn-primary hd-cta-btn" href={`/hackathons/${hack.hackathonId}/apply`}>
+            <Link
+              className="btn btn-primary hd-cta-btn"
+              href={`/hackathons/${hack.hackathonId}/apply`}
+            >
               <Icon name="flag" /> {t("ctaApply")}
             </Link>
           ) : (

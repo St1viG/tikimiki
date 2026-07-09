@@ -56,7 +56,7 @@ const SPRITE =
   '<symbol id="i-sparkles" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M11 3.5 12.7 8 17 9.7 12.7 11.4 11 16l-1.7-4.6L5 9.7 9.3 8z"/><path d="M18 14.5 18.8 17l2.2.8-2.2.8-.8 2.4-.8-2.4-2.2-.8 2.2-.8z"/></symbol>' +
   '<symbol id="i-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m4 4.5 16 15"/><path d="M10.4 6c.5-.1 1-.15 1.6-.15 6 0 9.5 6.15 9.5 6.15a16.6 16.6 0 0 1-2.4 3.2M6.7 7C4.1 8.7 2.5 12 2.5 12S6 18.15 12 18.15c1.4 0 2.7-.34 3.9-.9"/><path d="M9.9 10a3 3 0 0 0 4.2 4"/></symbol>' +
   '<symbol id="i-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8.2v4.3"/><path d="M12 15.7h.01"/></symbol>' +
-  '</svg>';
+  "</svg>";
 
 export function Sprite() {
   return (

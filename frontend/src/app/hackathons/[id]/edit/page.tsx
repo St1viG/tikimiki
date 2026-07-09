@@ -13,10 +13,6 @@ export const metadata: Metadata = {
   description: "Update your hackathon.",
 };
 
-export default function EditHackathonPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default function EditHackathonPage({ params }: { params: { id: string } }) {
   return <NewHackathonClient hackathonId={params.id} />;
 }

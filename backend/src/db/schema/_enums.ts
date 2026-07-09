@@ -12,11 +12,7 @@ export const orgVerificationStatus = pgEnum("org_verification_status", [
   "rejected",
 ]);
 
-export const hackathonType = pgEnum("hackathon_type", [
-  "physical",
-  "virtual",
-  "hybrid",
-]);
+export const hackathonType = pgEnum("hackathon_type", ["physical", "virtual", "hybrid"]);
 
 export const hackathonStatus = pgEnum("hackathon_status", [
   "upcoming",
@@ -64,12 +60,7 @@ export const cosmeticType = pgEnum("cosmetic_type", [
   "banner_effect",
 ]);
 
-export const cosmeticRarity = pgEnum("cosmetic_rarity", [
-  "common",
-  "rare",
-  "epic",
-  "legendary",
-]);
+export const cosmeticRarity = pgEnum("cosmetic_rarity", ["common", "rare", "epic", "legendary"]);
 
 export const merchOrderStatus = pgEnum("merch_order_status", [
   "pending",
@@ -79,10 +70,7 @@ export const merchOrderStatus = pgEnum("merch_order_status", [
   "cancelled",
 ]);
 
-export const friendshipStatus = pgEnum("friendship_status", [
-  "pending",
-  "accepted",
-]);
+export const friendshipStatus = pgEnum("friendship_status", ["pending", "accepted"]);
 
 export const pointTxnType = pgEnum("point_txn_type", [
   "game_reward",
@@ -96,11 +84,7 @@ export const pointTxnType = pgEnum("point_txn_type", [
 
 export const subscriptionPlan = pgEnum("subscription_plan", ["premium"]);
 
-export const subscriptionStatus = pgEnum("subscription_status", [
-  "active",
-  "cancelled",
-  "expired",
-]);
+export const subscriptionStatus = pgEnum("subscription_status", ["active", "cancelled", "expired"]);
 
 export const reportTargetType = pgEnum("report_target_type", [
   "user",
@@ -156,14 +140,6 @@ export const notificationType = pgEnum("notification_type", [
   "new_application",
 ]);
 
-export const appealStatus = pgEnum("appeal_status", [
-  "pending",
-  "approved",
-  "rejected",
-]);
+export const appealStatus = pgEnum("appeal_status", ["pending", "approved", "rejected"]);
 
-export const profileVisibility = pgEnum("profile_visibility", [
-  "all",
-  "members",
-  "none",
-]);
+export const profileVisibility = pgEnum("profile_visibility", ["all", "members", "none"]);
