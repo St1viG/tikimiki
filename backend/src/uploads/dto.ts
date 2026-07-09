@@ -18,3 +18,13 @@ export interface UploadedImage {
   /** Byte size of the file. */
   size: number;
 }
+
+/**
+ * Response body for `POST /uploads/video`.
+ *
+ * Autor: Stevan Gnjato (2023/0141)
+ */
+export interface VideoUploadResult {
+  /** Public "/uploads/<file>" URL of the stored video. */
+  url: string;
+}

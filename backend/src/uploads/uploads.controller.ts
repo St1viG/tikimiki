@@ -46,6 +46,24 @@ function mediaFilter(
   }
 }
 
+/**
+ * Reject any upload whose MIME type is not a video. This is only a first,
+ * cheap gate; the real content is verified by magic bytes in the service.
+ *
+ * Autor: Stevan Gnjato (2023/0141)
+ */
+function videoOnlyFilter(
+  _req: unknown,
+  file: { mimetype: string },
+  cb: FileFilterCallback,
+): void {
+  if (file.mimetype.startsWith("video/")) {
+    cb(null, true);
+  } else {
+    cb(new BadRequestException("Only video files are allowed"), false);
+  }
+}
+
 @Controller("users/me")
 export class UploadsController {
   constructor(private readonly uploads: UploadsService) {}
@@ -133,5 +151,29 @@ export class MediaUploadController {
     @UploadedFile() file: UploadedImage,
   ) {
     return this.uploads.saveMedia(userId, file);
+  }
+
+  /* ── project presentation video (MP4/WebM) ────────────────── */
+
+  /**
+   * `POST /uploads/video`. The interceptor caps memory at a hard ceiling; the
+   * real 50 MB business limit and the magic-byte check live in the service, so
+   * an oversized or non-video file returns a clean 400.
+   *
+   * Autor: Stevan Gnjato (2023/0141)
+   */
+  @Post("video")
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(
+    FileInterceptor("file", {
+      limits: { fileSize: 100 * 1024 * 1024 },
+      fileFilter: videoOnlyFilter,
+    }),
+  )
+  uploadVideo(
+    @CurrentUser() userId: string,
+    @UploadedFile() file: UploadedImage,
+  ) {
+    return this.uploads.saveVideo(userId, file);
   }
 }

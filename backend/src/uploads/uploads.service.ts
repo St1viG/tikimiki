@@ -10,7 +10,7 @@ import { eq } from "drizzle-orm";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import { users } from "../db/schema";
 import { SubscriptionsService } from "../subscriptions/subscriptions.service";
-import type { UploadedImage } from "./dto";
+import type { UploadedImage, VideoUploadResult } from "./dto";
 
 /* ── response interfaces ──────────────────────────────────── */
 
@@ -32,6 +32,33 @@ export interface UploadDeleteResult {
 
 /** Absolute path to the directory served statically at "/uploads". */
 const UPLOAD_DIR = join(process.cwd(), "uploads");
+
+/** Business limit for uploaded project videos (50 MB). */
+const VIDEO_MAX_BYTES = 50 * 1024 * 1024;
+
+/**
+ * Best-effort magic-byte sniff for the two supported video containers, so a
+ * file merely renamed to `.mp4`/`.webm` (with non-video contents) is rejected:
+ *  - MP4 / ISO-BMFF: the ASCII marker "ftyp" at byte offset 4.
+ *  - WebM / Matroska: the EBML signature 0x1A45DFA3 at byte offset 0.
+ *
+ * Autor: Stevan Gnjato (2023/0141)
+ */
+function sniffVideoType(buffer: Buffer): "video/mp4" | "video/webm" | null {
+  if (buffer.length >= 8 && buffer.toString("ascii", 4, 8) === "ftyp") {
+    return "video/mp4";
+  }
+  if (
+    buffer.length >= 4 &&
+    buffer[0] === 0x1a &&
+    buffer[1] === 0x45 &&
+    buffer[2] === 0xdf &&
+    buffer[3] === 0xa3
+  ) {
+    return "video/webm";
+  }
+  return null;
+}
 
 @Injectable()
 export class UploadsService {
@@ -56,7 +83,7 @@ export class UploadsService {
    */
   private persist(
     userId: string,
-    field: "avatar" | "banner" | "image" | "media",
+    field: "avatar" | "banner" | "image" | "media" | "video",
     file: UploadedImage,
   ): string {
     if (!existsSync(UPLOAD_DIR)) {
@@ -147,6 +174,31 @@ export class UploadsService {
     await this.assertUserExists(userId);
 
     const url = this.persist(userId, "media", file);
+    return { url };
+  }
+
+  /**
+   * Save a project presentation video (MP4/WebM only) and return its url.
+   * Rejects oversized files (>50 MB) and anything that is not really a video
+   * once its magic bytes are inspected.
+   *
+   * Autor: Stevan Gnjato (2023/0141)
+   */
+  async saveVideo(
+    userId: string,
+    file: UploadedImage | undefined,
+  ): Promise<VideoUploadResult> {
+    if (!file) throw new BadRequestException("No file uploaded");
+    await this.assertUserExists(userId);
+
+    if (file.size > VIDEO_MAX_BYTES) {
+      throw new BadRequestException("Video exceeds the 50MB limit");
+    }
+    if (!sniffVideoType(file.buffer)) {
+      throw new BadRequestException("Only MP4 or WebM video files are allowed");
+    }
+
+    const url = this.persist(userId, "video", file);
     return { url };
   }
 
