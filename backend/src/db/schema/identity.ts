@@ -34,6 +34,9 @@ export const users = pgTable(
     googleId: text("google_id"),
     githubId: text("github_id"),
     githubUsername: varchar("github_username", { length: 39 }),
+    // Raw GitHub OAuth access token, refreshed on every login. Stored in
+    // plaintext for now (dev/hackathon phase) — encrypt at rest before prod.
+    githubAccessToken: text("github_access_token"),
     linkedinId: text("linkedin_id"),
     avatarUrl: text("avatar_url"),
     bannerUrl: text("banner_url"),

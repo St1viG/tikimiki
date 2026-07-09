@@ -18,6 +18,12 @@ interface NormalizedProfile {
   email: string | null;
   username: string;
   avatarUrl: string | null;
+  /**
+   * Autor: Dimitrije Pesic (2023/0014)
+   * Raw OAuth access token. Currently only populated by {@link OAuthService.fetchGithub}
+   * (persisted to `users.githubAccessToken`, refreshed on every login).
+   */
+  accessToken?: string;
 }
 
 /**
@@ -153,6 +159,7 @@ export class OAuthService {
       email,
       username: user.login,
       avatarUrl: user.avatar_url,
+      accessToken: token.access_token,
     };
   }
 
@@ -243,6 +250,7 @@ export class OAuthService {
       return {
         githubId: profile.providerId,
         githubUsername: profile.username.slice(0, 39),
+        githubAccessToken: profile.accessToken,
       };
     }
     if (provider === "linkedin") return { linkedinId: profile.providerId };
@@ -261,13 +269,20 @@ export class OAuthService {
           ? users.linkedinId
           : users.googleId;
 
-    // 1. Already linked → done.
+    // 1. Already linked → refresh the provider columns (e.g. a new GitHub
+    // access token is minted on every login) and done.
     const [byProvider] = await this.db
       .select({ userId: users.userId })
       .from(users)
       .where(eq(idColumn, profile.providerId))
       .limit(1);
-    if (byProvider) return byProvider.userId;
+    if (byProvider) {
+      await this.db
+        .update(users)
+        .set(this.providerColumns(provider, profile))
+        .where(eq(users.userId, byProvider.userId));
+      return byProvider.userId;
+    }
 
     // 2. An account with the same verified email exists → link the provider.
     if (profile.email) {
