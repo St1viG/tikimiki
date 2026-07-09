@@ -1131,6 +1131,9 @@ async function uploadFile<T>(path: string, file: File): Promise<T> {
   return (await res.json()) as T;
 }
 export const uploadMedia = (file: File) => uploadFile<{ url: string }>("/uploads/media", file);
+/** Upload a project presentation video (MP4/WebM); returns its public URL. */
+export const uploadProjectVideo = (file: File) =>
+  uploadFile<{ url: string }>("/uploads/video", file);
 export const uploadAvatar = (file: File) =>
   uploadFile<{ avatarUrl: string }>("/users/me/avatar", file);
 export const uploadBanner = (file: File) =>
