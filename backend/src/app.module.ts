@@ -11,6 +11,7 @@ import { GamesModule } from "./games/games.module";
 import { HackathonsModule } from "./hackathons/hackathons.module";
 import { HealthModule } from "./health/health.module";
 import { KanbanModule } from "./kanban/kanban.module";
+import { MatchingModule } from "./matching/matching.module";
 import { ModerationModule } from "./moderation/moderation.module";
 import { NotificationsModule } from "./notifications/notifications.module";
 import { PostsModule } from "./posts/posts.module";
@@ -50,6 +51,7 @@ import { VotingModule } from "./voting/voting.module";
     VotingModule,
     ProjectsModule,
     KanbanModule,
+    MatchingModule,
     ModerationModule,
     UploadsModule,
     BountiesModule,
