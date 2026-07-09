@@ -1350,3 +1350,21 @@ export const getIntegrations = () => GET<Integrations>("/settings/integrations")
 export const disconnectIntegration = (
   provider: "github" | "google" | "linkedin",
 ) => DELETE<Integrations>(`/settings/integrations/${provider}`);
+
+// ── github skills sync (Nenad) ──
+export interface GithubProfileStats {
+  repos: number;
+  topLanguages: string[];
+  stars: number;
+}
+export interface VerifiedSkill {
+  name: string;
+  verified: boolean;
+  source: string;
+}
+export interface GithubSyncResult {
+  stats: GithubProfileStats;
+  verifiedSkills: VerifiedSkill[];
+}
+export const syncGithubSkills = () =>
+  POST<GithubSyncResult>("/users/me/github/sync");
