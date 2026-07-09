@@ -18,6 +18,8 @@
     "lint": "pnpm -r lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "typecheck": "pnpm --filter ./backend typecheck && pnpm --filter ./frontend exec tsc --noEmit",
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test:unit",
     "prepare": "husky",
     "test": "pnpm -r test",
     "test:unit": "pnpm --filter ./backend test:unit",
