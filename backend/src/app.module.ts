@@ -8,6 +8,7 @@ import { AuthzModule } from "./common/authz.module";
 import { DbModule } from "./db/db.module";
 import { EngagementModule } from "./engagement/engagement.module";
 import { GamesModule } from "./games/games.module";
+import { GithubModule } from "./github/github.module";
 import { HackathonsModule } from "./hackathons/hackathons.module";
 import { HealthModule } from "./health/health.module";
 import { KanbanModule } from "./kanban/kanban.module";
@@ -44,6 +45,7 @@ import { VotingModule } from "./voting/voting.module";
     TeamsModule,
     ApplicationsModule,
     GamesModule,
+    GithubModule,
     StoreModule,
     SubscriptionsModule,
     ReportsModule,
