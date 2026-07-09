@@ -49,6 +49,7 @@ const M = {
   noFollowing:    { en: "Not following anyone.",      sr: "Ne prati nikoga." },
   noBadges:       { en: "No badges yet.",             sr: "Još nema bedževa." },
   message:        { en: "Message",                    sr: "Poruka" },
+  verifiedSkill:  { en: "Verified via GitHub",        sr: "Verifikovano preko GitHub-a" },
 } as const;
 
 type Tab = "posts" | "followers" | "following" | "badges";
@@ -317,9 +318,19 @@ export function UserProfileClient({ username }: { username: string }) {
 
               {profile.skills.length > 0 && (
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                  {profile.skills.map((s) => (
-                    <span className="tag tag-v" key={s}>{s}</span>
-                  ))}
+                  {profile.skills.map((s) => {
+                    const verified = profile.verifiedSkillNames.includes(s);
+                    return (
+                      <span className="tag tag-v" key={s}>
+                        {s}
+                        {verified && (
+                          <span title={t("verifiedSkill")}>
+                            <Icon name="check" className="ic-sm" />
+                          </span>
+                        )}
+                      </span>
+                    );
+                  })}
                 </div>
               )}
             </div>

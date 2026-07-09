@@ -46,6 +46,8 @@ export interface MyProfileDto {
   bannerUrl: string | null;
   points: number;
   skills: string[];
+  /** Subset of `skills` GitHub-verified via `GithubService.deriveAndStoreSkills` (N03). */
+  verifiedSkillNames: string[];
   isPremium: boolean;
   createdAt: string;
 }
@@ -66,6 +68,8 @@ export interface PublicProfileDto {
   bannerUrl: string | null;
   points: number;
   skills: string[];
+  /** Subset of `skills` GitHub-verified via `GithubService.deriveAndStoreSkills` (N03). */
+  verifiedSkillNames: string[];
   badges: PublicBadgeDto[];
   followerCount: number;
   followingCount: number;
@@ -124,15 +128,16 @@ export class UsersService {
     return row ? row.points : 0;
   }
 
-  /** Skill names attached to a user, ascending by name. */
-  private async getSkillNames(userId: string): Promise<string[]> {
-    const rows = await this.db
-      .select({ name: skills.name })
+  /** Skill rows attached to a user (name + GitHub-verified flag), ascending by name. */
+  private async getSkillRows(
+    userId: string,
+  ): Promise<{ name: string; verified: boolean }[]> {
+    return this.db
+      .select({ name: skills.name, verified: memberSkills.verified })
       .from(memberSkills)
       .innerJoin(skills, eq(memberSkills.skillId, skills.skillId))
       .where(eq(memberSkills.userId, userId))
       .orderBy(skills.name);
-    return rows.map((r) => r.name);
   }
 
   /** Build the authenticated user's own profile. */
@@ -153,9 +158,9 @@ export class UsersService {
       .limit(1);
     if (!user) throw new NotFoundException("User not found");
 
-    const [points, skillNames, isPremium] = await Promise.all([
+    const [points, skillRows, isPremium] = await Promise.all([
       this.getPoints(userId),
-      this.getSkillNames(userId),
+      this.getSkillRows(userId),
       this.subscriptions.isPremium(userId),
     ]);
 
@@ -168,7 +173,8 @@ export class UsersService {
       avatarUrl: user.avatarUrl,
       bannerUrl: user.bannerUrl,
       points,
-      skills: skillNames,
+      skills: skillRows.map((s) => s.name),
+      verifiedSkillNames: skillRows.filter((s) => s.verified).map((s) => s.name),
       isPremium,
       createdAt: user.createdAt.toISOString(),
     };
@@ -347,10 +353,10 @@ export class UsersService {
       isFollowing = Boolean(f);
     }
 
-    const [points, skillNames, badgeRows, followerRow, followingRow, isPremium] =
+    const [points, skillRows, badgeRows, followerRow, followingRow, isPremium] =
       await Promise.all([
         this.getPoints(user.userId),
-        this.getSkillNames(user.userId),
+        this.getSkillRows(user.userId),
         this.db
           .select({
             badgeId: badges.badgeId,
@@ -381,7 +387,8 @@ export class UsersService {
       avatarUrl: user.avatarUrl,
       bannerUrl: user.bannerUrl,
       points,
-      skills: skillNames,
+      skills: skillRows.map((s) => s.name),
+      verifiedSkillNames: skillRows.filter((s) => s.verified).map((s) => s.name),
       badges: badgeRows.map((b) => ({
         badgeId: b.badgeId,
         name: b.name,

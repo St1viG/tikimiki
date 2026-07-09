@@ -333,6 +333,16 @@ const M = {
     en: "Could not disconnect. Please try again.",
     sr: "Prekidanje veze nije uspelo. Pokušaj ponovo.",
   },
+  syncGithub: { en: "Sync GitHub", sr: "Sinhronizuj GitHub" },
+  syncGithubBusy: { en: "Syncing…", sr: "Sinhronizacija…" },
+  syncGithubSuccess: {
+    en: "GitHub skills synced.",
+    sr: "GitHub veštine su sinhronizovane.",
+  },
+  syncGithubFailed: {
+    en: "Could not sync GitHub. Please try again.",
+    sr: "Sinhronizacija sa GitHub-om nije uspela. Pokušaj ponovo.",
+  },
   settingsSaveFailed: {
     en: "Could not save setting. Please try again.",
     sr: "Čuvanje podešavanja nije uspelo. Pokušaj ponovo.",
@@ -1038,6 +1048,23 @@ export function SettingsClient() {
     },
     [showToast, t],
   );
+
+  /** Refresh GitHub repo/language stats and re-derive verified skill tags (N04). */
+  const handleSyncGithub = useCallback(async () => {
+    setIntBusy((prev) => ({ ...prev, githubSync: true }));
+    try {
+      await api.syncGithubSkills();
+      showToast(t("syncGithubSuccess"), "ok");
+    } catch (err) {
+      console.error("Failed to sync GitHub skills", err);
+      showToast(
+        err instanceof api.ApiError ? err.message : t("syncGithubFailed"),
+        "err",
+      );
+    } finally {
+      setIntBusy((prev) => ({ ...prev, githubSync: false }));
+    }
+  }, [showToast, t]);
 
   // Account: change email / verify email
   const handleChangeEmail = useCallback(async () => {
@@ -2166,13 +2193,22 @@ export function SettingsClient() {
                   </div>
                 </div>
                 {integrations?.github.connected ? (
-                  <button
-                    className="btn btn-ghost ep-int-btn"
-                    onClick={() => handleDisconnect("github")}
-                    disabled={intBusy.github}
-                  >
-                    {t("disconnect")}
-                  </button>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button
+                      className="btn btn-ghost ep-int-btn"
+                      onClick={handleSyncGithub}
+                      disabled={intBusy.githubSync}
+                    >
+                      {intBusy.githubSync ? t("syncGithubBusy") : t("syncGithub")}
+                    </button>
+                    <button
+                      className="btn btn-ghost ep-int-btn"
+                      onClick={() => handleDisconnect("github")}
+                      disabled={intBusy.github}
+                    >
+                      {t("disconnect")}
+                    </button>
+                  </div>
                 ) : (
                   <button
                     className="btn btn-ghost ep-int-btn"

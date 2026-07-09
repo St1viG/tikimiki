@@ -594,6 +594,8 @@ export interface MyProfile {
   bannerUrl: string | null;
   points: number;
   skills: string[];
+  /** Subset of `skills` GitHub-verified via `POST /users/me/github/sync`. */
+  verifiedSkillNames: string[];
   isPremium: boolean;
   createdAt: string;
 }
@@ -606,6 +608,8 @@ export interface PublicProfile {
   bannerUrl: string | null;
   points: number;
   skills: string[];
+  /** Subset of `skills` GitHub-verified via `POST /users/me/github/sync`. */
+  verifiedSkillNames: string[];
   badges: { badgeId: string; name: string; iconUrl: string; category: string }[];
   followerCount: number;
   followingCount: number;
