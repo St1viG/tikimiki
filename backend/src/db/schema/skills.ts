@@ -1,4 +1,5 @@
 import {
+  boolean,
   index,
   pgTable,
   primaryKey,
@@ -29,6 +30,10 @@ export const memberSkills = pgTable(
     skillId: uuid("skill_id")
       .notNull()
       .references(() => skills.skillId, { onDelete: "cascade" }),
+    /** Where this skill tag came from — e.g. `"manual"` or `"github"`. */
+    source: varchar("source", { length: 20 }).notNull().default("manual"),
+    /** Whether an external source (e.g. GitHub activity) corroborates it. */
+    verified: boolean("verified").notNull().default(false),
   },
   (t) => [
     primaryKey({ columns: [t.userId, t.skillId] }),

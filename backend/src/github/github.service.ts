@@ -3,9 +3,13 @@
  */
 import {
   BadGatewayException,
+  Inject,
   Injectable,
   UnauthorizedException,
 } from "@nestjs/common";
+import { ilike } from "drizzle-orm";
+import { DRIZZLE, type DrizzleDB } from "../db/db.module";
+import { memberSkills, skills } from "../db/schema";
 
 const GITHUB_API = "https://api.github.com";
 /** Repos are already sorted by `pushed`, so these are the most active ones —
@@ -33,6 +37,8 @@ export interface GithubProfileStats {
  */
 @Injectable()
 export class GithubService {
+  constructor(@Inject(DRIZZLE) private readonly db: DrizzleDB) {}
+
   /**
    * Repo count, total stars, and languages ranked by estimated usage
    * (byte counts for the most active repos, plain frequency for the rest).
@@ -47,6 +53,42 @@ export class GithubService {
     const topLanguages = await this.rankLanguages(repos, accessToken);
 
     return { repos: repos.length, topLanguages, stars };
+  }
+
+  /**
+   * Find-or-create a `skills` row per language (case-insensitive match on
+   * `name`) and mark it verified on the user's profile — `source: "github"`,
+   * `verified: true` — upserting over any existing row (e.g. a pre-existing
+   * `source: "manual"` tag just gets upgraded, never duplicated).
+   */
+  async deriveAndStoreSkills(
+    userId: string,
+    topLanguages: string[],
+  ): Promise<void> {
+    for (const language of topLanguages) {
+      const [existing] = await this.db
+        .select({ skillId: skills.skillId })
+        .from(skills)
+        .where(ilike(skills.name, language))
+        .limit(1);
+
+      const skillId =
+        existing?.skillId ??
+        (
+          await this.db
+            .insert(skills)
+            .values({ name: language, category: "language" })
+            .returning({ skillId: skills.skillId })
+        )[0].skillId;
+
+      await this.db
+        .insert(memberSkills)
+        .values({ userId, skillId, source: "github", verified: true })
+        .onConflictDoUpdate({
+          target: [memberSkills.userId, memberSkills.skillId],
+          set: { source: "github", verified: true },
+        });
+    }
   }
 
   /**
