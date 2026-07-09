@@ -3,10 +3,11 @@
  */
 import { Module } from "@nestjs/common";
 import { MatchingController } from "./matching.controller";
+import { MatchingService } from "./matching.service";
 
-/** MatchingModule — teammate/team suggestions for a hackathon. Service arrives in D02. */
+/** MatchingModule — teammate/team suggestions for a hackathon. */
 @Module({
   controllers: [MatchingController],
-  providers: [],
+  providers: [MatchingService],
 })
 export class MatchingModule {}
