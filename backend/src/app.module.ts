@@ -17,6 +17,7 @@ import { PostsModule } from "./posts/posts.module";
 import { ProjectsModule } from "./projects/projects.module";
 import { RealtimeModule } from "./realtime/realtime.module";
 import { ReportsModule } from "./reports/reports.module";
+import { SearchModule } from "./search/search.module";
 import { SettingsModule } from "./settings/settings.module";
 import { SocialModule } from "./social/social.module";
 import { StoreModule } from "./store/store.module";
@@ -54,6 +55,7 @@ import { VotingModule } from "./voting/voting.module";
     BountiesModule,
     SettingsModule,
     SocialModule,
+    SearchModule,
   ],
 })
 export class AppModule {}
