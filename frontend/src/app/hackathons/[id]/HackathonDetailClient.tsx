@@ -8,6 +8,7 @@ import { AppShell } from "@/components/shell/AppShell";
 import { RailRight } from "@/components/shell/RailRight";
 import { useT } from "@/components/i18n/LanguageProvider";
 import { useAuth } from "@/components/auth/AuthProvider";
+import { CalendarPopup } from "@/components/popups/CalendarPopup";
 import { initials } from "@/lib/format";
 import {
   getHackathon,
@@ -46,6 +47,7 @@ const M = {
   metaTeams:       { en: "Teams",                       sr: "Timovi" },
   metaPrize:       { en: "Main prize",                  sr: "Glavna nagrada" },
   metaDeadline:    { en: "Apply by",                    sr: "Rok za prijavu" },
+  addToCalendar:   { en: "Add to calendar",             sr: "Dodaj u kalendar" },
 
   // Sections
   aboutTitle:      { en: "About",                       sr: "O hackathonu" },
@@ -98,6 +100,7 @@ export function HackathonDetailClient({ hackathonId }: { hackathonId: string }) 
   const [hack, setHack] = useState<HackathonSummary | null>(null);
   const [loadFailed, setLoadFailed] = useState(false);
   const [existing, setExisting] = useState<Application | null>(null);
+  const [calOpen, setCalOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -239,6 +242,31 @@ export function HackathonDetailClient({ hackathonId }: { hackathonId: string }) 
                 <Icon name="location" className="ic-sm" /> {hack.location}
               </div>
             )}
+
+            {/* Add-to-calendar dropdown, driven by this hackathon's real data */}
+            <div className="hk-cal-wrap hd-cal">
+              <button
+                type="button"
+                className="btn btn-ghost hk-cal-btn"
+                aria-haspopup="menu"
+                aria-expanded={calOpen}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setCalOpen((v) => !v);
+                }}
+              >
+                <Icon name="calendar" /> {t("addToCalendar")}
+              </button>
+              <CalendarPopup
+                open={calOpen}
+                onClose={() => setCalOpen(false)}
+                title={hack.title}
+                location={hack.location ?? undefined}
+                startsAt={hack.startsAt}
+                endsAt={hack.endsAt}
+                description={hack.description ?? undefined}
+              />
+            </div>
           </div>
         </div>
 

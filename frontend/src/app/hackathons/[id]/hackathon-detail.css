@@ -121,3 +121,14 @@
 @media (prefers-reduced-motion:reduce){
   .hd-map-link{ transition:none; }
 }
+
+/* Add-to-calendar dropdown (data-driven CalendarPopup).
+   Autor: Stevan Gnjato (2023/0141) */
+.hd-cal{ margin-top:16px; }
+.hk-cal-wrap{ position:relative; display:inline-block; }
+.hk-cal-btn{ display:inline-flex; align-items:center; gap:8px; }
+.hk-cal-menu{ position:absolute; top:calc(100% + 8px); left:0; min-width:200px; background:var(--surface-2); border:1px solid var(--line); border-radius:12px; padding:6px; box-shadow:0 20px 44px -20px var(--scrim); opacity:0; visibility:hidden; transform:translateY(-6px); transition:opacity .16s var(--ease-out), transform .16s var(--ease-out), visibility .16s; z-index:var(--z-pop); }
+.hk-cal-menu.hk-cal-menu-open{ opacity:1; visibility:visible; transform:translateY(0); }
+.hk-cal-item{ display:flex; align-items:center; gap:9px; font-size:14px; color:var(--ink-2); padding:9px 11px; border-radius:9px; cursor:pointer; text-decoration:none; transition:background .14s, color .14s; }
+.hk-cal-item .ic{ width:16px; height:16px; color:var(--muted); }
+.hk-cal-item:hover{ background:var(--surface); color:var(--ink); }
