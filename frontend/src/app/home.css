@@ -102,6 +102,27 @@
   display: block;
   background: #000;
 }
+/* Videos are never cropped — contain within the frame (letterbox) so the whole,
+   correctly-oriented clip shows. A lone video gets its own natural frame sized to
+   the video's painted ratio, capped so a tall portrait clip doesn't dominate. */
+.pm-video-el {
+  object-fit: contain;
+}
+.pm-media.pm-solo-video {
+  /* Override .post-photo's fixed 16/9 — a lone video sizes to its own (often
+     portrait) frame instead of being cropped into a landscape band. */
+  aspect-ratio: auto;
+  background: #000;
+  display: flex;
+  justify-content: center;
+}
+.pm-solo-video-el {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+}
 /* Arrows stay hidden until the image is hovered, and read quietly even then
    (full strength only on direct hover/keyboard focus of the arrow). */
 .pm-arrow {
@@ -246,7 +267,8 @@
   flex: 1;
   min-width: 0;
   resize: none;
-  min-height: 26px;
+  /* Start ~3 lines tall so there's room to write, then auto-grow up to the cap. */
+  min-height: 72px;
   max-height: 340px;
   line-height: 1.5;
   overflow-y: auto;
@@ -287,8 +309,11 @@
 }
 .ratio-ico {
   display: block;
-  width: 16px;
-  height: 16px;
+  /* Fixed height + width driven by the inline aspect-ratio, so the glyph is
+     visibly tall (Portrait) / square / wide (Landscape). Fixing both dimensions
+     would make the browser ignore aspect-ratio and render three equal squares. */
+  height: 15px;
+  width: auto;
   border: 1.6px solid currentColor;
   border-radius: 3px;
 }
@@ -319,6 +344,18 @@
   max-width: none;
   object-fit: cover;
   display: block;
+}
+/* Videos aren't cropped: give them a full-width, playable block (contained, so
+   the whole frame shows) instead of the small cover-cropped image thumbnail. */
+.cm-thumb.cm-thumb-video {
+  width: 100%;
+  height: auto;
+  cursor: default;
+}
+.cm-thumb-video .cm-thumb-el {
+  height: auto;
+  max-height: 340px;
+  object-fit: contain;
 }
 .cm-vid-badge {
   position: absolute;
@@ -522,6 +559,44 @@
 .composer-preview-empty {
   color: var(--muted);
   font-style: italic;
+}
+/* Media rendered inside the live preview (below the markdown text). */
+.composer-preview-media {
+  margin-top: 12px;
+}
+
+/* Publish outcome toast (background upload succeeded / failed). */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 26px;
+  transform: translate(-50%, 24px);
+  z-index: var(--z-toast);
+  max-width: min(440px, 90vw);
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--ink);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  padding: 13px 18px;
+  box-shadow: 0 20px 50px -20px var(--scrim);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 0.25s var(--ease-out),
+    transform 0.3s var(--ease-quint);
+}
+.toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+.toast.t-green {
+  border-color: color-mix(in srgb, var(--green) 55%, transparent);
+}
+.toast.t-red {
+  border-color: color-mix(in srgb, var(--red) 55%, transparent);
 }
 
 @media (max-width: 560px) {

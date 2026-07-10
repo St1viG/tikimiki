@@ -59,6 +59,29 @@ export function PostMedia({
 
   if (!items.length) return null;
 
+  // A single video is shown in its NATURAL, contained frame — never cover-cropped.
+  // Videos aren't baked to a fixed ratio at compose time (images are), so cropping
+  // would lose content; and some clips report raw, un-rotated videoWidth/Height,
+  // which would snap the frame to the wrong orientation. Letting the browser lay
+  // the video out by its painted ratio (like the composer's edit thumbnail) keeps
+  // it upright and whole in both the preview and the published post.
+  if (items.length === 1 && items[0].type === "video") {
+    return (
+      <div className="pm-wrap">
+        <div className="post-photo pm-media pm-solo-video">
+          <video
+            className="pm-media-el pm-solo-video-el"
+            src={items[0].url}
+            controls
+            playsInline
+            preload="metadata"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      </div>
+    );
+  }
+
   const i = Math.min(idx, items.length - 1);
   const multi = items.length > 1;
   const go = (delta: number) => setIdx((i + delta + items.length) % items.length);
@@ -94,7 +117,7 @@ export function PostMedia({
             <div className="pm-slide" key={j}>
               {m.type === "video" ? (
                 <video
-                  className="pm-media-el"
+                  className="pm-media-el pm-video-el"
                   src={m.url}
                   controls
                   playsInline

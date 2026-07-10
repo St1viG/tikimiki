@@ -9,6 +9,7 @@ import { OrbArt } from "@/components/ui/OrbArt";
 import { useT, useLanguage } from "@/components/i18n/LanguageProvider";
 import { useAuth } from "@/components/auth/AuthProvider";
 import {
+  ApiError,
   type Comment,
   createComment,
   createPost,
@@ -29,6 +30,7 @@ import { ASPECTS, ASPECT_ORDER, snapAspectKey, type AspectKey } from "@/lib/aspe
 import { cropImageToRatio } from "@/lib/cropImage";
 import { coverStyle } from "@/lib/coverCrop";
 import { PostCard } from "@/components/PostCard";
+import { PostMedia } from "@/components/PostMedia";
 import { MarkdownContent } from "@/components/MarkdownContent";
 import { ImageCropper } from "@/components/ImageCropper";
 import { ProfilePopup } from "@/components/popups/ProfilePopup";
@@ -81,6 +83,11 @@ const M = {
   },
   post: { en: "Post", sr: "Objavi" },
   posting: { en: "Posting…", sr: "Objavljivanje…" },
+  postPublished: { en: "Post published.", sr: "Objava je postavljena." },
+  postFailed: {
+    en: "Couldn't publish your post. Try again.",
+    sr: "Nije uspelo postavljanje objave. Pokušaj ponovo.",
+  },
   loading: { en: "Loading…", sr: "Učitavanje…" },
   like: { en: "Like", sr: "Sviđa mi se" },
   follow: { en: "Follow", sr: "Zaprati" },
@@ -142,7 +149,21 @@ export function FeedClient() {
 
   const [posts, setPosts] = useState<FeedPost[] | null>(null);
   const [draft, setDraft] = useState("");
+  // `posting` marks a publish still running in the background (upload + create);
+  // the composer is cleared optimistically the moment Post is pressed so a large
+  // video upload never blocks the user. A toast reports the eventual outcome.
   const [posting, setPosting] = useState(false);
+  const [toast, setToast] = useState<{ msg: string; type: "green" | "red"; show: boolean }>({
+    msg: "",
+    type: "green",
+    show: false,
+  });
+  const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const showToast = (msg: string, type: "green" | "red") => {
+    setToast({ msg, type, show: true });
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(() => setToast((st) => ({ ...st, show: false })), 4000);
+  };
   // Media attached to the new post (uploaded as picked, max 10).
   const [media, setMedia] = useState<MediaDraft[]>([]);
   const mediaInputRef = useRef<HTMLInputElement>(null);
@@ -702,40 +723,55 @@ export function FeedClient() {
     ],
   ] as const;
 
-  const handlePost = async () => {
+  const handlePost = () => {
     const content = draft.trim();
     if (!user || posting) return;
     if (!content && media.length === 0) return;
+
+    // Snapshot what we're publishing, then clear the composer immediately. The
+    // heavy work (image cropping, a possibly-large video upload, create) runs in
+    // the background so the UI never freezes on a big file; on failure we restore
+    // the draft so nothing is lost and surface a toast instead of a console error.
+    const attachments = media;
+    const ratioVal = ASPECTS[postRatio];
     setPosting(true);
-    try {
-      // Bake each image to the post's ratio at its focal point, then upload.
-      // Videos upload as-is (display covers them to the same frame).
-      const ratioVal = ASPECTS[postRatio];
-      const urls: string[] = [];
-      for (const m of media) {
-        if (m.type === "image") {
-          const blob = await cropImageToRatio(m.file, ratioVal, m.focalX, m.focalY, m.zoom);
-          const name = m.file.name.replace(/\.[^.]+$/, "") + ".jpg";
-          const { url } = await uploadMedia(new File([blob], name, { type: "image/jpeg" }));
-          urls.push(url);
-        } else {
-          const { url } = await uploadMedia(m.file);
-          urls.push(url);
+    setDraft("");
+    setPreview(false);
+    setComposerOpen(false);
+    if (composerTextRef.current) composerTextRef.current.style.height = "auto";
+    setMedia([]);
+
+    void (async () => {
+      try {
+        // Bake each image to the post's ratio at its focal point, then upload.
+        // Videos upload as-is (display covers them to the same frame).
+        const urls: string[] = [];
+        for (const m of attachments) {
+          if (m.type === "image") {
+            const blob = await cropImageToRatio(m.file, ratioVal, m.focalX, m.focalY, m.zoom);
+            const name = m.file.name.replace(/\.[^.]+$/, "") + ".jpg";
+            const { url } = await uploadMedia(new File([blob], name, { type: "image/jpeg" }));
+            urls.push(url);
+          } else {
+            const { url } = await uploadMedia(m.file);
+            urls.push(url);
+          }
         }
+        const created = await createPost(content, urls);
+        setPosts((prev) => [created, ...(prev ?? [])]);
+        attachments.forEach((m) => URL.revokeObjectURL(m.previewUrl));
+        if (attachments.length > 0) showToast(t("postPublished"), "green");
+      } catch (err) {
+        console.error(err);
+        // Put the draft + attachments back so the user can retry.
+        setDraft((cur) => cur || content);
+        setMedia((cur) => (cur.length ? cur : attachments));
+        setComposerOpen(true);
+        showToast(err instanceof ApiError && err.message ? err.message : t("postFailed"), "red");
+      } finally {
+        setPosting(false);
       }
-      const created = await createPost(content, urls);
-      setPosts((prev) => [created, ...(prev ?? [])]);
-      setDraft("");
-      setPreview(false);
-      setComposerOpen(false);
-      if (composerTextRef.current) composerTextRef.current.style.height = "auto";
-      media.forEach((m) => URL.revokeObjectURL(m.previewUrl));
-      setMedia([]);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setPosting(false);
-    }
+    })();
   };
 
   // The comment thread + composer for a post (rendered inside the detail modal).
@@ -1096,8 +1132,19 @@ export function FeedClient() {
             </span>
             {preview ? (
               <div className="field composer-text composer-preview">
-                {draft.trim() ? (
-                  <MarkdownContent>{draft}</MarkdownContent>
+                {draft.trim() || media.length > 0 ? (
+                  <>
+                    {draft.trim() && <MarkdownContent>{draft}</MarkdownContent>}
+                    {media.length > 0 && (
+                      // Renders exactly as a real post would — a working <video>
+                      // player included — so the preview matches the result.
+                      <div className="composer-preview-media">
+                        <PostMedia
+                          items={media.map((m) => ({ url: m.previewUrl, type: m.type }))}
+                        />
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <span className="composer-preview-empty">{t("nothingToPreview")}</span>
                 )}
@@ -1120,8 +1167,8 @@ export function FeedClient() {
                   if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) handlePost();
                 }}
                 onFocus={() => setComposerOpen(true)}
-                disabled={!user || posting}
-                rows={1}
+                disabled={!user}
+                rows={3}
               />
             )}
           </div>
@@ -1143,7 +1190,7 @@ export function FeedClient() {
                             className="md-btn"
                             title={t(tool.key)}
                             aria-label={t(tool.key)}
-                            disabled={preview || posting}
+                            disabled={preview}
                             // Keep the textarea selection while clicking the toolbar.
                             onMouseDown={(e) => e.preventDefault()}
                             onClick={() => applyMd(tool.opts)}
@@ -1167,36 +1214,47 @@ export function FeedClient() {
 
               {media.length > 0 && (
                 <>
-                  <div className="composer-ratios" role="group" aria-label={t("aspectRatio")}>
-                    {ASPECT_ORDER.map((key) => (
-                      <button
-                        key={key}
-                        type="button"
-                        className={`ratio-btn${postRatio === key ? " is-on" : ""}`}
-                        onClick={() => setPostRatio(key)}
-                      >
-                        <span
-                          className="ratio-ico"
-                          style={{ aspectRatio: String(ASPECTS[key]) }}
-                          aria-hidden="true"
-                        />
-                        {t(ratioLabelKey[key])}
-                      </button>
-                    ))}
-                  </div>
+                  {/* Ratio only crops images; videos show uncropped, so hide the
+                      selector when nothing here can be cropped (video-only post). */}
+                  {media.some((m) => m.type === "image") && (
+                    <div className="composer-ratios" role="group" aria-label={t("aspectRatio")}>
+                      {ASPECT_ORDER.map((key) => (
+                        <button
+                          key={key}
+                          type="button"
+                          className={`ratio-btn${postRatio === key ? " is-on" : ""}`}
+                          onClick={() => setPostRatio(key)}
+                        >
+                          <span
+                            className="ratio-ico"
+                            style={{ aspectRatio: String(ASPECTS[key]) }}
+                            aria-hidden="true"
+                          />
+                          {t(ratioLabelKey[key])}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                   <div className="composer-media">
                     {media.map((m) => (
                       <div
-                        className="cm-thumb"
+                        className={`cm-thumb${m.type === "video" ? " cm-thumb-video" : ""}`}
                         key={m.id}
-                        style={{ aspectRatio: String(ASPECTS[postRatio]) }}
+                        // Videos aren't cropped, so they get their own full-width,
+                        // playable block instead of a tiny cover-cropped frame.
+                        style={
+                          m.type === "video"
+                            ? undefined
+                            : { aspectRatio: String(ASPECTS[postRatio]) }
+                        }
                       >
                         {m.type === "video" ? (
                           <video
                             className="cm-thumb-el"
                             src={m.previewUrl}
-                            muted
-                            style={{ objectPosition: `${m.focalX * 100}% ${m.focalY * 100}%` }}
+                            controls
+                            playsInline
+                            preload="metadata"
                           />
                         ) : (
                           // eslint-disable-next-line @next/next/no-img-element
@@ -1225,11 +1283,6 @@ export function FeedClient() {
                           >
                             <Icon name="crop" />
                           </button>
-                        )}
-                        {m.type === "video" && (
-                          <span className="cm-vid-badge" aria-hidden="true">
-                            ▶
-                          </span>
                         )}
                         <button
                           type="button"
@@ -1272,7 +1325,7 @@ export function FeedClient() {
                         );
                         mediaInputRef.current?.click();
                       }}
-                      disabled={posting || media.length >= MAX_MEDIA}
+                      disabled={media.length >= MAX_MEDIA}
                     >
                       <Icon name="image" /> {t("addMedia")}
                       {media.length >= 8 && (
@@ -1464,6 +1517,13 @@ export function FeedClient() {
         open={shareTarget !== null}
         onClose={() => setShareTarget(null)}
       />
+      <div
+        className={`toast t-${toast.type}${toast.show ? " show" : ""}`}
+        role="status"
+        aria-live="polite"
+      >
+        {toast.msg}
+      </div>
     </MentionClickContext.Provider>
   );
 }
