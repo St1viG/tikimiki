@@ -15,7 +15,9 @@
   border-radius: var(--r);
   background: var(--surface);
   border: 1px solid var(--line);
-  overflow: hidden;
+  /* Not clipped: the add-to-calendar dropdown opens below the button (near the
+     hero's bottom edge) and must be able to overflow the hero. The banner rounds
+     its own top corners so the visual is unchanged. */
   box-shadow: var(--shadow-sm);
   margin-bottom: 18px;
 }
@@ -23,6 +25,7 @@
   position: relative;
   height: 184px;
   overflow: hidden;
+  border-radius: var(--r) var(--r) 0 0;
   background: var(--grad-banner);
 }
 .hd-hero-banner img {
