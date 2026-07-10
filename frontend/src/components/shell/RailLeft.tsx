@@ -21,6 +21,7 @@ const M = {
   mainNav: { en: "Main navigation", sr: "Glavna navigacija" },
   logoAria: { en: "tikimiki: home", sr: "tikimiki: početna" },
   home: { en: "Home", sr: "Početna" },
+  search: { en: "Search", sr: "Pretraga" },
   hackathons: { en: "Hackathons", sr: "Hackathoni" },
   teams: { en: "Teams", sr: "Timovi" },
   notifications: { en: "Notifications", sr: "Notifikacije" },
@@ -47,6 +48,7 @@ type NavItem = {
 
 const NAV_ITEMS: NavItem[] = [
   { labelKey: "home", href: "/", icon: "home" },
+  { labelKey: "search", href: "/search", icon: "search" },
   { labelKey: "hackathons", href: "/hackathons", icon: "hackathon" },
   { labelKey: "teams", href: "/teams", icon: "teams" },
   { labelKey: "notifications", href: "/notifications", icon: "bell" },

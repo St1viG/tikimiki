@@ -17,6 +17,7 @@ import {
   useState,
 } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import type { HackathonType } from "@tikimiki/types";
 import { Icon } from "@/components/Icon";
 import { AppShell } from "@/components/shell/AppShell";
@@ -66,7 +67,16 @@ const DEBOUNCE_MS = 300;
 
 export function SearchClient() {
   const t = useT(M);
-  const [query, setQuery] = useState("");
+  // Seed (and keep synced with) the URL ?q= so a hand-off from the rail search
+  // box lands here pre-filled and the live search fires immediately. Reading the
+  // param the same way on server and client avoids a hydration mismatch, and the
+  // effect re-syncs if the user searches again from the rail while already here.
+  const searchParams = useSearchParams();
+  const qParam = searchParams.get("q") ?? "";
+  const [query, setQuery] = useState(qParam);
+  useEffect(() => {
+    setQuery(qParam);
+  }, [qParam]);
   // Draft filter inputs. Editing these does NOT search on its own — they are
   // committed to `applied` only when the user presses Search, so the button is
   // meaningful while the text query stays live.

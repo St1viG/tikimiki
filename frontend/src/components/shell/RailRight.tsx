@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Icon } from "@/components/Icon";
 import { GenerativeAvatar } from "@/components/ui/GenerativeAvatar";
 import { useT } from "@/components/i18n/LanguageProvider";
@@ -83,6 +84,7 @@ function conversationSeed(c: Conversation, viewerId: string | null, title: strin
 
 export function RailRight() {
   const t = useT(M);
+  const router = useRouter();
   const { user, status } = useAuth();
   const [convos, setConvos] = useState<Conversation[]>([]);
   const [activeHack, setActiveHack] = useState<ActiveHackathon | null>(null);
@@ -132,11 +134,33 @@ export function RailRight() {
     </Link>
   );
 
+  const goToSearch = (raw: string) => {
+    const q = raw.trim();
+    router.push(q ? `/search?q=${encodeURIComponent(q)}` : "/search");
+  };
   const searchBox = (
-    <div className="search" role="search">
+    // action/method make this work as a plain GET form even before JS hydrates
+    // (Enter → /search?q=…, which the page reads); the onSubmit handler upgrades
+    // it to client-side navigation once hydrated.
+    <form
+      className="search"
+      role="search"
+      action="/search"
+      method="get"
+      onSubmit={(e) => {
+        e.preventDefault();
+        const input = e.currentTarget.elements.namedItem("q") as HTMLInputElement | null;
+        goToSearch(input?.value ?? "");
+      }}
+    >
       <Icon name="search" />
-      <input type="search" aria-label={t("searchAria")} placeholder={t("searchPlaceholder")} />
-    </div>
+      <input
+        type="search"
+        name="q"
+        aria-label={t("searchAria")}
+        placeholder={t("searchPlaceholder")}
+      />
+    </form>
   );
 
   // While loading, render a skeleton with the SAME footprint as the ready card
@@ -205,10 +229,7 @@ export function RailRight() {
 
   return (
     <aside className="rail-right" aria-label={t("cohorAria")}>
-      <div className="search" role="search">
-        <Icon name="search" />
-        <input type="search" aria-label={t("searchAria")} placeholder={t("searchPlaceholder")} />
-      </div>
+      {searchBox}
 
       {/* The .cohor-top header link is CSS-stretched over the whole card, so
           clicks on padding/empty space open Cohor; rows sit above it. */}
