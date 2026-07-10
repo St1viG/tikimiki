@@ -43,18 +43,9 @@ export class ApiError extends Error {
 }
 
 /** Endpoints whose own 401/409 are meaningful — never auto-refresh-retry them. */
-const NO_RETRY = new Set([
-  "/auth/login",
-  "/auth/register",
-  "/auth/refresh",
-  "/auth/logout",
-]);
+const NO_RETRY = new Set(["/auth/login", "/auth/register", "/auth/refresh", "/auth/logout"]);
 
-async function request<T>(
-  path: string,
-  init: RequestInit = {},
-  allowRetry = true,
-): Promise<T> {
+async function request<T>(path: string, init: RequestInit = {}, allowRetry = true): Promise<T> {
   const token = getAccessToken();
   const res = await fetch(`${BASE}${path}`, {
     ...init,
@@ -200,8 +191,7 @@ export interface UpdateHackathonBody {
 export const updateHackathon = (id: string, body: UpdateHackathonBody) =>
   PATCH<HackathonSummary>(`/hackathons/${id}`, body);
 
-export const getMyHackathons = () =>
-  GET<HackathonSummary[]>("/hackathons/mine");
+export const getMyHackathons = () => GET<HackathonSummary[]>("/hackathons/mine");
 
 /* ── hackathon drafts (resumable "organize" form) ─────────── */
 export interface HackathonDraft {
@@ -210,16 +200,13 @@ export interface HackathonDraft {
   createdAt: string;
   updatedAt: string;
 }
-export const getHackathonDrafts = () =>
-  GET<HackathonDraft[]>("/hackathons/drafts");
+export const getHackathonDrafts = () => GET<HackathonDraft[]>("/hackathons/drafts");
 export const getHackathonDraft = (draftId: string) =>
   GET<HackathonDraft>(`/hackathons/drafts/${draftId}`);
 export const createHackathonDraft = (payload: Record<string, unknown>) =>
   POST<HackathonDraft>("/hackathons/drafts", { payload });
-export const updateHackathonDraft = (
-  draftId: string,
-  payload: Record<string, unknown>,
-) => PATCH<HackathonDraft>(`/hackathons/drafts/${draftId}`, { payload });
+export const updateHackathonDraft = (draftId: string, payload: Record<string, unknown>) =>
+  PATCH<HackathonDraft>(`/hackathons/drafts/${draftId}`, { payload });
 export const deleteHackathonDraft = (draftId: string) =>
   DELETE<{ success: true }>(`/hackathons/drafts/${draftId}`);
 
@@ -231,10 +218,7 @@ export async function getFeed(): Promise<FeedPost[]> {
 /** Fetch a single post by id (powers the shareable permalink / deep-link). */
 export const getPost = (postId: string) => GET<FeedPost>(`/posts/${postId}`);
 
-export async function createPost(
-  content: string,
-  attachments: string[] = [],
-): Promise<FeedPost> {
+export async function createPost(content: string, attachments: string[] = []): Promise<FeedPost> {
   return POST<FeedPost>("/posts", { content, attachments });
 }
 
@@ -248,8 +232,7 @@ export async function updatePost(
 }
 
 /** Soft-delete your own post. */
-export const deletePost = (postId: string) =>
-  DELETE<{ success: true }>(`/posts/${postId}`);
+export const deletePost = (postId: string) => DELETE<{ success: true }>(`/posts/${postId}`);
 
 export interface Comment {
   commentId: string;
@@ -270,20 +253,15 @@ export interface LikeResult {
   reactionCount: number;
 }
 
-export const getComments = (postId: string) =>
-  GET<Comment[]>(`/posts/${postId}/comments`);
-export const createComment = (
-  postId: string,
-  content: string,
-  parentCommentId?: string,
-) => POST<Comment>(`/posts/${postId}/comments`, { content, parentCommentId });
+export const getComments = (postId: string) => GET<Comment[]>(`/posts/${postId}/comments`);
+export const createComment = (postId: string, content: string, parentCommentId?: string) =>
+  POST<Comment>(`/posts/${postId}/comments`, { content, parentCommentId });
 /** Edit your own comment's text. Returns the updated comment (with editedAt). */
 export const updateComment = (commentId: string, content: string) =>
   PATCH<Comment>(`/comments/${commentId}`, { content });
 export const deleteComment = (commentId: string) =>
   DELETE<{ success: true; deletedCount: number }>(`/comments/${commentId}`);
-export const togglePostLike = (postId: string) =>
-  POST<LikeResult>(`/posts/${postId}/like`);
+export const togglePostLike = (postId: string) => POST<LikeResult>(`/posts/${postId}/like`);
 export const toggleCommentLike = (commentId: string) =>
   POST<LikeResult>(`/comments/${commentId}/like`);
 
@@ -301,8 +279,7 @@ export interface Notification {
 
 export const getNotifications = (filter: "all" | "unread" = "all") =>
   GET<Notification[]>(`/notifications?filter=${filter}`);
-export const getUnreadCount = () =>
-  GET<{ count: number }>("/notifications/unread-count");
+export const getUnreadCount = () => GET<{ count: number }>("/notifications/unread-count");
 export const markNotificationRead = (id: string) =>
   PATCH<Notification>(`/notifications/${id}/read`);
 export const markAllNotificationsRead = () =>
@@ -384,8 +361,7 @@ export interface Conversation {
 }
 
 export const getServers = () => GET<ServerSummary[]>("/servers");
-export const getServer = (serverId: string) =>
-  GET<ServerDetail>(`/servers/${serverId}`);
+export const getServer = (serverId: string) => GET<ServerDetail>(`/servers/${serverId}`);
 export interface ServerMember {
   userId: string;
   username: string;
@@ -424,12 +400,9 @@ export const getPermissionCatalog = () => GET<Permission[]>("/permissions");
 export const getMyServerPermissions = (serverId: string) =>
   GET<{ permissions: string[] }>(`/servers/${serverId}/my-permissions`);
 
-export const getServerRoles = (serverId: string) =>
-  GET<ServerRole[]>(`/servers/${serverId}/roles`);
-export const createServerRole = (
-  serverId: string,
-  body: { name: string; permissions: string[] },
-) => POST<ServerRole>(`/servers/${serverId}/roles`, body);
+export const getServerRoles = (serverId: string) => GET<ServerRole[]>(`/servers/${serverId}/roles`);
+export const createServerRole = (serverId: string, body: { name: string; permissions: string[] }) =>
+  POST<ServerRole>(`/servers/${serverId}/roles`, body);
 export const updateServerRole = (
   serverId: string,
   roleId: string,
@@ -441,14 +414,8 @@ export const addRoleMember = (serverId: string, roleId: string, userId: string) 
   POST<{ success: true }>(`/servers/${serverId}/roles/${roleId}/members`, {
     userId,
   });
-export const removeRoleMember = (
-  serverId: string,
-  roleId: string,
-  userId: string,
-) =>
-  DELETE<{ success: true }>(
-    `/servers/${serverId}/roles/${roleId}/members/${userId}`,
-  );
+export const removeRoleMember = (serverId: string, roleId: string, userId: string) =>
+  DELETE<{ success: true }>(`/servers/${serverId}/roles/${roleId}/members/${userId}`);
 /** Kick a member from the server (400 if the target is the organizer). */
 export const kickServerMember = (serverId: string, userId: string) =>
   DELETE<{ success: true }>(`/servers/${serverId}/members/${userId}`);
@@ -493,8 +460,7 @@ export interface ActiveHackathon {
   organizationName: string;
 }
 /** GET /me/active-hackathon → the user's current hackathon, or null if none. */
-export const getMyActiveHackathon = () =>
-  GET<ActiveHackathon | null>("/me/active-hackathon");
+export const getMyActiveHackathon = () => GET<ActiveHackathon | null>("/me/active-hackathon");
 
 // Social: friends + blocking
 export type FriendStatus = "none" | "outgoing" | "incoming" | "friends";
@@ -504,14 +470,10 @@ export interface Relationship {
 }
 export const getRelationship = (userId: string) =>
   GET<Relationship>(`/social/relationship/${userId}`);
-export const addFriend = (userId: string) =>
-  POST<Relationship>(`/social/friends/${userId}`);
-export const removeFriend = (userId: string) =>
-  DELETE<Relationship>(`/social/friends/${userId}`);
-export const blockUser = (userId: string) =>
-  POST<Relationship>(`/social/block/${userId}`);
-export const unblockUser = (userId: string) =>
-  DELETE<Relationship>(`/social/block/${userId}`);
+export const addFriend = (userId: string) => POST<Relationship>(`/social/friends/${userId}`);
+export const removeFriend = (userId: string) => DELETE<Relationship>(`/social/friends/${userId}`);
+export const blockUser = (userId: string) => POST<Relationship>(`/social/block/${userId}`);
+export const unblockUser = (userId: string) => DELETE<Relationship>(`/social/block/${userId}`);
 /** The current user's accepted friends. */
 export const getFriends = () => GET<SocialUser[]>("/social/friends");
 export const getChannelMessages = (channelId: string) =>
@@ -528,26 +490,19 @@ export const sendChannelMessage = (
     attachments,
   });
 export const toggleMessageReaction = (messageId: string, symbol: string) =>
-  POST<{ reacted: boolean; symbol: string; count: number }>(
-    `/messages/${messageId}/reactions`,
-    { symbol },
-  );
+  POST<{ reacted: boolean; symbol: string; count: number }>(`/messages/${messageId}/reactions`, {
+    symbol,
+  });
 export const getConversations = () => GET<Conversation[]>("/conversations");
-export const createConversation = (
-  memberIds: string[],
-  name?: string,
-  icon?: string,
-) => POST<Conversation>("/conversations", { memberIds, name, icon });
+export const createConversation = (memberIds: string[], name?: string, icon?: string) =>
+  POST<Conversation>("/conversations", { memberIds, name, icon });
 /** Update a group conversation's name / icon (null clears a field). */
 export const updateConversation = (
   conversationId: string,
   patch: { name?: string | null; icon?: string | null },
 ) => PATCH<Conversation>(`/conversations/${conversationId}`, patch);
 /** Add members to a conversation. */
-export const addConversationMembers = (
-  conversationId: string,
-  userIds: string[],
-) =>
+export const addConversationMembers = (conversationId: string, userIds: string[]) =>
   POST<Conversation>(`/conversations/${conversationId}/members`, { userIds });
 export const getConversationMessages = (conversationId: string) =>
   GET<ChatMessage[]>(`/conversations/${conversationId}/messages`);
@@ -567,10 +522,9 @@ export const sendDirectMessage = (
   });
 /** Edit a message you authored. Returns the new content + editedAt. */
 export const editMessage = (messageId: string, content: string) =>
-  PATCH<{ messageId: string; content: string; editedAt: string }>(
-    `/messages/${messageId}`,
-    { content },
-  );
+  PATCH<{ messageId: string; content: string; editedAt: string }>(`/messages/${messageId}`, {
+    content,
+  });
 
 /** Find an existing 1:1 conversation with `userId`, or create one. Returns its id. */
 export async function startConversation(userId: string): Promise<string> {
@@ -642,8 +596,7 @@ export const updateMyProfile = (body: UpdateProfileBody) =>
   PATCH<MyProfile>("/users/me/profile", body);
 export const changePassword = (currentPassword: string, newPassword: string) =>
   PATCH<{ success: true }>("/users/me/password", { currentPassword, newPassword });
-export const getPublicProfile = (username: string) =>
-  GET<PublicProfile>(`/users/${username}`);
+export const getPublicProfile = (username: string) => GET<PublicProfile>(`/users/${username}`);
 export const toggleFollow = (userId: string) =>
   POST<{ following: boolean; followerCount: number }>(`/users/${userId}/follow`);
 export const getMyPoints = () => GET<PointsSummary>("/users/me/points");
@@ -656,15 +609,10 @@ export interface SocialUser {
 }
 /** Prefix search over username + display name — powers @-mention autocomplete. */
 export const searchUsers = (q: string, limit = 8) =>
-  GET<SocialUser[]>(
-    `/users/search?q=${encodeURIComponent(q)}&limit=${limit}`,
-  );
-export const getFollowers = (username: string) =>
-  GET<SocialUser[]>(`/users/${username}/followers`);
-export const getFollowing = (username: string) =>
-  GET<SocialUser[]>(`/users/${username}/following`);
-export const getUserPosts = (username: string) =>
-  GET<FeedPost[]>(`/users/${username}/posts`);
+  GET<SocialUser[]>(`/users/search?q=${encodeURIComponent(q)}&limit=${limit}`);
+export const getFollowers = (username: string) => GET<SocialUser[]>(`/users/${username}/followers`);
+export const getFollowing = (username: string) => GET<SocialUser[]>(`/users/${username}/following`);
+export const getUserPosts = (username: string) => GET<FeedPost[]>(`/users/${username}/posts`);
 
 // Teams
 export interface Team {
@@ -706,13 +654,11 @@ export interface SoloPlayer {
 
 export const getMyTeams = () => GET<Team[]>("/teams/me");
 export const getOpenTeams = () => GET<OpenTeam[]>("/teams/open");
-export const getTeamLeaderboard = () =>
-  GET<LeaderboardEntry[]>("/teams/leaderboard");
+export const getTeamLeaderboard = () => GET<LeaderboardEntry[]>("/teams/leaderboard");
 export const getSoloPlayers = () => GET<SoloPlayer[]>("/teams/solo");
 export const createTeam = (name: string, hackathonId: string) =>
   POST<Team>("/teams", { name, hackathonId });
-export const joinTeam = (teamId: string) =>
-  POST<Team>(`/teams/${teamId}/join`);
+export const joinTeam = (teamId: string) => POST<Team>(`/teams/${teamId}/join`);
 
 export interface TeamJoinRequest {
   requestId: string;
@@ -749,10 +695,8 @@ export const declineJoinRequest = (id: string) =>
 // Invitations (leader → member; invitee approves)
 export const inviteToTeam = (teamId: string, userId: string, message?: string) =>
   POST<TeamInvitation>(`/teams/${teamId}/invitations`, { userId, message });
-export const getMyInvitations = () =>
-  GET<TeamInvitation[]>("/teams/invitations/me");
-export const getInvitationCount = () =>
-  GET<{ count: number }>("/teams/invitations/count");
+export const getMyInvitations = () => GET<TeamInvitation[]>("/teams/invitations/me");
+export const getInvitationCount = () => GET<{ count: number }>("/teams/invitations/count");
 export const acceptInvitation = (id: string) =>
   POST<{ success: true; status: string }>(`/teams/invitations/${id}/accept`);
 export const declineInvitation = (id: string) =>
@@ -810,11 +754,8 @@ export interface AnswerInput {
   answer: string;
 }
 
-export const applyToHackathon = (
-  hackathonId: string,
-  teamId?: string,
-  answers?: AnswerInput[],
-) => POST<Application>("/applications", { hackathonId, teamId, answers });
+export const applyToHackathon = (hackathonId: string, teamId?: string, answers?: AnswerInput[]) =>
+  POST<Application>("/applications", { hackathonId, teamId, answers });
 export const getApplicationQuestions = (hackathonId: string) =>
   GET<ApplicationQuestion[]>(`/applications/hackathon/${hackathonId}/questions`);
 export const createApplicationQuestion = (
@@ -827,11 +768,7 @@ export const createApplicationQuestion = (
     allowOther?: boolean;
     position?: number;
   },
-) =>
-  POST<ApplicationQuestion>(
-    `/applications/hackathon/${hackathonId}/questions`,
-    body,
-  );
+) => POST<ApplicationQuestion>(`/applications/hackathon/${hackathonId}/questions`, body);
 export const updateApplicationQuestion = (
   questionId: string,
   patch: {
@@ -852,8 +789,7 @@ export const getHackathonApplicants = (hackathonId: string) =>
   GET<Applicant[]>(`/applications/hackathon/${hackathonId}`);
 export const getApplicationStats = (hackathonId: string) =>
   GET<ApplicationStats>(`/applications/hackathon/${hackathonId}/stats`);
-export const approveApplication = (id: string) =>
-  PATCH<Application>(`/applications/${id}/approve`);
+export const approveApplication = (id: string) => PATCH<Application>(`/applications/${id}/approve`);
 export const rejectApplication = (id: string, reason?: string) =>
   PATCH<Application>(`/applications/${id}/reject`, { reason });
 
@@ -885,15 +821,12 @@ export interface PlayResult {
 
 export const getGames = () => GET<Game[]>("/games");
 export const getGamesToday = () => GET<GameTodayState[]>("/games/me/today");
-export const recordGamePlay = (
-  gameId: string,
-  score: number,
-  points?: number,
-) => POST<PlayResult>(`/games/${gameId}/plays`, { score, points });
+export const recordGamePlay = (gameId: string, score: number, points?: number) =>
+  POST<PlayResult>(`/games/${gameId}/plays`, { score, points });
 export const getGameLeaderboard = (gameId: string) =>
-  GET<{ entries: { rank: number; userId: string; username: string; score: number; playedAt: string }[] }>(
-    `/games/${gameId}/leaderboard`,
-  );
+  GET<{
+    entries: { rank: number; userId: string; username: string; score: number; playedAt: string }[];
+  }>(`/games/${gameId}/leaderboard`);
 
 // Store (commerce)
 export interface Cosmetic {
@@ -930,9 +863,15 @@ export interface MerchOrderBody {
 export const getCosmetics = () => GET<Cosmetic[]>("/store/cosmetics");
 export const getMerch = () => GET<Merch[]>("/store/merch");
 export const getInventory = () =>
-  GET<{ cosmetics: { cosmeticId: string; name: string; type: string; rarity: string; obtainedAt: string }[] }>(
-    "/store/me/inventory",
-  );
+  GET<{
+    cosmetics: {
+      cosmeticId: string;
+      name: string;
+      type: string;
+      rarity: string;
+      obtainedAt: string;
+    }[];
+  }>("/store/me/inventory");
 export const buyCosmetic = (cosmeticId: string) =>
   POST<{ success: true; newBalance: number }>(`/store/cosmetics/${cosmeticId}/buy`);
 export const orderMerch = (merchId: string, body: MerchOrderBody) =>
@@ -964,8 +903,7 @@ export const getMySubscription = () =>
   GET<{ subscription: Subscription | null }>("/subscriptions/me");
 export const activateSubscription = (billingCycle: "monthly" | "annual") =>
   POST<Subscription>("/subscriptions/activate", { billingCycle });
-export const cancelSubscription = () =>
-  POST<{ success: true }>("/subscriptions/cancel");
+export const cancelSubscription = () => POST<{ success: true }>("/subscriptions/cancel");
 
 // Reports (moderation)
 export interface Report {
@@ -981,20 +919,14 @@ export interface Report {
   reviewedAt: string | null;
 }
 
-export const createReport = (
-  targetType: string,
-  targetId: string,
-  reason: string,
-) => POST<Report>("/reports", { targetType, targetId, reason });
+export const createReport = (targetType: string, targetId: string, reason: string) =>
+  POST<Report>("/reports", { targetType, targetId, reason });
 export const getReports = (status: "pending" | "resolved" | "all" = "pending") =>
   GET<{ reports: Report[]; stats: { open: number; resolvedToday: number; total: number } }>(
     `/reports?status=${status}`,
   );
-export const resolveReport = (
-  id: string,
-  status: "resolved" | "dismissed",
-  note?: string,
-) => POST<Report>(`/reports/${id}/resolve`, { status, note });
+export const resolveReport = (id: string, status: "resolved" | "dismissed", note?: string) =>
+  POST<Report>(`/reports/${id}/resolve`, { status, note });
 
 // Admin
 export interface AdminMetrics {
@@ -1086,19 +1018,15 @@ export interface ProjectInput {
 }
 /** The caller's team project, or null if the team hasn't started one. */
 export const getTeamProject = (teamId: string) =>
-  GET<{ project: Project | null }>(`/teams/${teamId}/project`).then(
-    (r) => r.project,
-  );
+  GET<{ project: Project | null }>(`/teams/${teamId}/project`).then((r) => r.project);
 export const createProject = (teamId: string, body: ProjectInput) =>
   POST<Project>(`/teams/${teamId}/project`, body);
 export const updateProject = (projectId: string, body: Partial<ProjectInput>) =>
   PATCH<Project>(`/projects/${projectId}`, body);
-export const submitProject = (projectId: string) =>
-  POST<Project>(`/projects/${projectId}/submit`);
+export const submitProject = (projectId: string) => POST<Project>(`/projects/${projectId}/submit`);
 export const withdrawProject = (projectId: string) =>
   POST<Project>(`/projects/${projectId}/withdraw`);
-export const getProject = (projectId: string) =>
-  GET<Project>(`/projects/${projectId}`);
+export const getProject = (projectId: string) => GET<Project>(`/projects/${projectId}`);
 /** Every submitted project in a hackathon (public showcase / judging). */
 export const getHackathonSubmissions = (hackathonId: string) =>
   GET<Project[]>(`/hackathons/${hackathonId}/submissions`);
@@ -1144,8 +1072,7 @@ export interface KanbanBoard {
   teamId: string;
   columns: KanbanColumn[];
 }
-export const getKanbanBoard = (teamId: string) =>
-  GET<KanbanBoard>(`/teams/${teamId}/kanban`);
+export const getKanbanBoard = (teamId: string) => GET<KanbanBoard>(`/teams/${teamId}/kanban`);
 export const createKanbanCard = (
   teamId: string,
   input: { columnId: string; title: string; description?: string },
@@ -1203,18 +1130,14 @@ async function uploadFile<T>(path: string, file: File): Promise<T> {
   }
   return (await res.json()) as T;
 }
-export const uploadMedia = (file: File) =>
-  uploadFile<{ url: string }>("/uploads/media", file);
+export const uploadMedia = (file: File) => uploadFile<{ url: string }>("/uploads/media", file);
 export const uploadAvatar = (file: File) =>
   uploadFile<{ avatarUrl: string }>("/users/me/avatar", file);
 export const uploadBanner = (file: File) =>
   uploadFile<{ bannerUrl: string }>("/users/me/banner", file);
-export const uploadGroupIcon = (file: File) =>
-  uploadFile<{ url: string }>("/uploads/image", file);
-export const deleteAvatarImage = () =>
-  DELETE<{ success: true }>("/users/me/avatar");
-export const deleteBannerImage = () =>
-  DELETE<{ success: true }>("/users/me/banner");
+export const uploadGroupIcon = (file: File) => uploadFile<{ url: string }>("/uploads/image", file);
+export const deleteAvatarImage = () => DELETE<{ success: true }>("/users/me/avatar");
+export const deleteBannerImage = () => DELETE<{ success: true }>("/users/me/banner");
 
 // OAuth (GitHub / Google / LinkedIn)
 /** Full-page navigation target that kicks off the provider OAuth flow. */
@@ -1222,30 +1145,19 @@ export const oauthUrl = (provider: "github" | "google" | "linkedin") =>
   `${BASE}/auth/oauth/${provider}`;
 
 /** Registration pre-flight: which of the given identifiers are still free. */
-export const checkAvailability = (params: {
-  email?: string;
-  username?: string;
-}) => {
+export const checkAvailability = (params: { email?: string; username?: string }) => {
   const q = new URLSearchParams();
   if (params.email) q.set("email", params.email);
   if (params.username) q.set("username", params.username);
-  return GET<{ email?: boolean; username?: boolean }>(
-    `/auth/availability?${q.toString()}`,
-  );
+  return GET<{ email?: boolean; username?: boolean }>(`/auth/availability?${q.toString()}`);
 };
 
 // Admin: audit log + appeals
 export const getAuditLog = (search?: string) =>
-  GET<AuditEntry[]>(
-    `/admin/audit${search ? `?search=${encodeURIComponent(search)}` : ""}`,
-  );
-export const getAppeals = () =>
-  GET<{ pending: Appeal[]; closed: Appeal[] }>("/admin/appeals");
-export const resolveAppeal = (
-  appealId: string,
-  decision: "approve" | "reject",
-  note?: string,
-) => POST<Appeal>(`/admin/appeals/${appealId}/resolve`, { decision, note });
+  GET<AuditEntry[]>(`/admin/audit${search ? `?search=${encodeURIComponent(search)}` : ""}`);
+export const getAppeals = () => GET<{ pending: Appeal[]; closed: Appeal[] }>("/admin/appeals");
+export const resolveAppeal = (appealId: string, decision: "approve" | "reject", note?: string) =>
+  POST<Appeal>(`/admin/appeals/${appealId}/resolve`, { decision, note });
 
 // Audience voting status (window)
 export interface VotingStatus {
@@ -1259,9 +1171,7 @@ export const getVotingStatus = (hackathonId: string) =>
 
 // Account: email verify / password reset / change email / ban appeal
 export const requestEmailVerification = () =>
-  POST<{ alreadyVerified: boolean; devLink?: string }>(
-    "/auth/verify-email/request",
-  );
+  POST<{ alreadyVerified: boolean; devLink?: string }>("/auth/verify-email/request");
 export const confirmEmailVerification = (token: string) =>
   POST<{ success: true }>("/auth/verify-email/confirm", { token });
 export const forgotPassword = (email: string) =>
@@ -1270,11 +1180,8 @@ export const resetPassword = (token: string, newPassword: string) =>
   POST<{ success: true }>("/auth/password/reset", { token, newPassword });
 export const changeEmail = (email: string) =>
   POST<{ success: true; devLink?: string }>("/auth/change-email", { email });
-export const submitBanAppeal = (
-  email: string,
-  password: string,
-  reason: string,
-) => POST<{ success: true }>("/auth/appeal", { email, password, reason });
+export const submitBanAppeal = (email: string, password: string, reason: string) =>
+  POST<{ success: true }>("/auth/appeal", { email, password, reason });
 
 // Bounties + official results
 export interface Bounty {
@@ -1323,15 +1230,8 @@ export const publishHackathonResults = (
   rankings: { projectId: string; rank: number }[],
 ) => POST<HackathonResults>(`/hackathons/${hackathonId}/results`, { rankings });
 /** Set (or clear, with null) the winning project of one bounty (organizer/admin). */
-export const setBountyWinner = (
-  hackathonId: string,
-  bountyId: string,
-  projectId: string | null,
-) =>
-  POST<HackathonResults>(
-    `/hackathons/${hackathonId}/bounties/${bountyId}/winner`,
-    { projectId },
-  );
+export const setBountyWinner = (hackathonId: string, bountyId: string, projectId: string | null) =>
+  POST<HackathonResults>(`/hackathons/${hackathonId}/bounties/${bountyId}/winner`, { projectId });
 
 // Settings: privacy / notifications + integrations
 export interface UserSettings {
@@ -1351,9 +1251,8 @@ export const getSettings = () => GET<UserSettings>("/settings");
 export const updateSettings = (patch: Partial<UserSettings>) =>
   PATCH<UserSettings>("/settings", patch);
 export const getIntegrations = () => GET<Integrations>("/settings/integrations");
-export const disconnectIntegration = (
-  provider: "github" | "google" | "linkedin",
-) => DELETE<Integrations>(`/settings/integrations/${provider}`);
+export const disconnectIntegration = (provider: "github" | "google" | "linkedin") =>
+  DELETE<Integrations>(`/settings/integrations/${provider}`);
 
 // ── github skills sync (Nenad) ──
 export interface GithubProfileStats {
@@ -1370,5 +1269,49 @@ export interface GithubSyncResult {
   stats: GithubProfileStats;
   verifiedSkills: VerifiedSkill[];
 }
-export const syncGithubSkills = () =>
-  POST<GithubSyncResult>("/users/me/github/sync");
+export const syncGithubSkills = () => POST<GithubSyncResult>("/users/me/github/sync");
+
+// ── Pretraga (Stevan) ──
+/**
+ * A single search hit. The backend shapes users, organizations and hackathons
+ * into this uniform structure regardless of their underlying table.
+ */
+export interface SearchHit {
+  id: string;
+  label: string;
+  subtitle?: string;
+  imageUrl?: string;
+}
+export type SearchUserHit = SearchHit;
+export type SearchOrgHit = SearchHit;
+export type SearchHackathonHit = SearchHit;
+
+/** Response of `GET /search`, grouped by entity type. */
+export interface SearchResult {
+  users: SearchUserHit[];
+  organizations: SearchOrgHit[];
+  hackathons: SearchHackathonHit[];
+}
+
+/** Query + optional filters for {@link searchAll}. */
+export interface SearchParams {
+  q?: string;
+  skills?: string[];
+  location?: string;
+  type?: HackathonType;
+  minPrize?: number;
+}
+
+/**
+ * Runs a cross-entity search. Everything is optional — the search can be driven
+ * by `q`, by filters alone, or both; empty/absent values are simply omitted.
+ */
+export function searchAll(params: SearchParams): Promise<SearchResult> {
+  const qs = new URLSearchParams();
+  if (params.q) qs.set("q", params.q);
+  for (const skill of params.skills ?? []) qs.append("skills", skill);
+  if (params.location) qs.set("location", params.location);
+  if (params.type) qs.set("type", params.type);
+  if (params.minPrize !== undefined) qs.set("minPrize", String(params.minPrize));
+  return GET<SearchResult>(`/search?${qs.toString()}`);
+}
