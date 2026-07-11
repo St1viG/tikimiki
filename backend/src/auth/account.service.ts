@@ -105,6 +105,11 @@ export class AccountService {
     if (!u) return {};
     const token = await this.signToken(u.userId, "password_reset", env.PASSWORD_RESET_TTL);
     const link = `${env.WEB_ORIGIN}/reset-password?token=${token}`;
+    await this.mail.sendMail(
+      email,
+      "Reset lozinke",
+      `<p>Klikni <a href="${link}">ovde</a> da resetuješ lozinku.</p>`,
+    );
     return { devLink: this.deliver("password-reset", link) };
   }
 
@@ -136,6 +141,11 @@ export class AccountService {
       .where(eq(users.userId, userId));
     const token = await this.signToken(userId, "email_verify", env.EMAIL_VERIFY_TTL);
     const link = `${env.WEB_ORIGIN}/verify-email?token=${token}`;
+    await this.mail.sendMail(
+      newEmail,
+      "Potvrdi email",
+      `<p>Klikni <a href="${link}">ovde</a> da potvrdiš email adresu.</p>`,
+    );
     return { success: true, devLink: this.deliver("email-verify", link) };
   }
 
