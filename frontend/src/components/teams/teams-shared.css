@@ -19,3 +19,9 @@
 .tm-solo-score {
   margin: 2px 0 2px;
 }
+
+/* OpenTeamCard's complementarity-score badge (suggested-team lists only). */
+.tm-open-score {
+  align-self: flex-start;
+  margin-top: -4px;
+}

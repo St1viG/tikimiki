@@ -1,3 +1,6 @@
+/**
+ * Autor: Nenad Skoković (2023/0039)
+ */
 import { Icon } from "@/components/Icon";
 import { AvatarStack } from "./AvatarStack";
 import type { OpenTeam } from "@/lib/api";
@@ -12,6 +15,9 @@ import type { OpenTeam } from "@/lib/api";
  *   - `hackIcon`    : prefix the hackathon line with a hackathon icon
  *                     (/teams/find did, /teams did not).
  *   - `slotIcon`    : render a plus-icon in empty seats instead of a bare "+".
+ *   - `score`       : how well the caller would complement this team — a
+ *                     badge shown when the card renders a suggested
+ *                     composition rather than the plain open-teams list.
  */
 export interface OpenTeamCardProps {
   team: OpenTeam;
@@ -30,6 +36,7 @@ export interface OpenTeamCardProps {
   showBadge?: boolean;
   hackIcon?: boolean;
   slotIcon?: boolean;
+  score?: number;
 }
 
 export function OpenTeamCard({
@@ -42,6 +49,7 @@ export function OpenTeamCard({
   showBadge = false,
   hackIcon = false,
   slotIcon = false,
+  score,
 }: OpenTeamCardProps) {
   const openSlots = Math.max(team.maxTeamSize - team.memberCount, 0);
   return (
@@ -66,6 +74,7 @@ export function OpenTeamCard({
           {openSlots} {labels.members}
         </strong>
       </div>
+      {score !== undefined && <span className="badge badge-open tm-open-score">+{score}</span>}
       <button
         className="btn btn-violet"
         disabled={sending || requested}

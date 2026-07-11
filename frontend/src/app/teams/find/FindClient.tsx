@@ -22,6 +22,7 @@ import type {
   OpenTeam,
   SoloPlayer,
   TeammateSuggestion,
+  TeamSuggestion,
   LeaderboardEntry,
   TeamInvitation,
   Team,
@@ -34,8 +35,10 @@ import type {
  *   - "Invites"        → api.getMyInvitations()  (accept → api.acceptInvitation,
  *                        decline → api.declineInvitation); badge → api.getInvitationCount()
  *   - "Suggested"      → api.getMyActiveHackathon() then api.getTeamSuggestions(id)
- *                        (ranked by skill complementarity; falls back to an
- *                        empty state when the caller has no active hackathon)
+ *                        — ranked teammates AND ranked open teams to join
+ *                        ("Request to join" → api.requestToJoinTeam), both by
+ *                        skill complementarity; falls back to an empty state
+ *                        when the caller has no active hackathon
  *   - "Open teams"     → api.getOpenTeams()  ("Request to join" → api.requestToJoinTeam)
  *   - "Free agents"    → api.getSoloPlayers() ("Invite to team" → api.inviteToTeam,
  *                        targeting the caller's first team from api.getMyTeams())
@@ -82,6 +85,11 @@ const M = {
     en: "Free agents ranked by how well they'd complement your skills.",
     sr: "Slobodni igrači rangirani po tome koliko dopunjuju tvoje veštine.",
   },
+  sectionSuggestedTeams: { en: "Suggested teams", sr: "Predloženi timovi" },
+  suggestedTeamsHeadline: {
+    en: "Open teams ranked by how well you'd complement them.",
+    sr: "Otvoreni timovi rangirani po tome koliko bi ih ti dopunio/la.",
+  },
   youLabel: { en: "you", sr: "ti" },
   lookingFor: { en: "Looking for", sr: "Traže" },
   members: { en: "members", sr: "člana" },
@@ -99,6 +107,10 @@ const M = {
     sr: "Prijavi se na hakaton da vidiš personalizovane predloge saigrača.",
   },
   emptySuggested: { en: "No suggestions right now.", sr: "Trenutno nema predloga." },
+  emptySuggestedTeams: {
+    en: "No suggested teams right now.",
+    sr: "Trenutno nema predloženih timova.",
+  },
 } as const;
 
 type Filter = "mine" | "invites" | "suggested" | "open" | "solo" | "board";
@@ -119,6 +131,7 @@ export function FindClient() {
   const [openTeams, setOpenTeams] = useState<OpenTeam[]>([]);
   const [soloPlayers, setSoloPlayers] = useState<SoloPlayer[]>([]);
   const [suggestedTeammates, setSuggestedTeammates] = useState<TeammateSuggestion[]>([]);
+  const [suggestedTeams, setSuggestedTeams] = useState<TeamSuggestion[]>([]);
   const [hasActiveHackathon, setHasActiveHackathon] = useState(false);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [myTeams, setMyTeams] = useState<Team[]>([]);
@@ -149,12 +162,11 @@ export function FindClient() {
       setLeaderboard(board);
       setMyTeams(mine);
       setHasActiveHackathon(activeHackathon !== null);
-      setSuggestedTeammates(
-        activeHackathon
-          ? ((await api.getTeamSuggestions(activeHackathon.hackathonId).catch(() => null))
-              ?.teammates ?? [])
-          : [],
-      );
+      const suggestions = activeHackathon
+        ? await api.getTeamSuggestions(activeHackathon.hackathonId).catch(() => null)
+        : null;
+      setSuggestedTeammates(suggestions?.teammates ?? []);
+      setSuggestedTeams(suggestions?.teams ?? []);
     } catch (err) {
       console.error("Failed to load find-teams data", err);
     } finally {
@@ -418,6 +430,64 @@ export function FindClient() {
                     labels={{
                       inviteToTeam: t("inviteToTeam"),
                       invited: t("invited"),
+                    }}
+                  />
+                ))
+              )}
+            </div>
+
+            <div className="tm-ai-head">
+              <div>
+                <div className="tm-ai-eyebrow">
+                  <Icon name="teams" /> {t("sectionSuggestedTeams")}
+                </div>
+                <h2 className="tm-ai-h">{t("suggestedTeamsHeadline")}</h2>
+              </div>
+            </div>
+
+            <div className="tm-open-grid">
+              {loading ? (
+                [0, 1, 2].map((i) => (
+                  <div
+                    key={`sk-suggested-team-${i}`}
+                    className="card tm-open-card"
+                    aria-hidden="true"
+                  >
+                    <span className="skel skel-line" style={{ width: "40%" }} />
+                    <span className="skel skel-line" style={{ width: "60%", height: 18 }} />
+                    <div className="tm-open-avs">
+                      <span className="tm-av tm-av-md is-orb skel skel-circle" />
+                      <span className="tm-av tm-av-md is-orb skel skel-circle" />
+                      <span className="tm-av tm-av-md is-orb skel skel-circle" />
+                    </div>
+                    <span className="skel skel-line" style={{ width: "50%" }} />
+                    <span
+                      className="skel"
+                      style={{ width: 130, height: 36, borderRadius: 10, marginTop: "auto" }}
+                    />
+                  </div>
+                ))
+              ) : !hasActiveHackathon ? (
+                <p className="page-sub">{t("emptySuggestedNoHackathon")}</p>
+              ) : suggestedTeams.length === 0 ? (
+                <p className="page-sub">{t("emptySuggestedTeams")}</p>
+              ) : (
+                suggestedTeams.map((team) => (
+                  <OpenTeamCard
+                    key={team.teamId}
+                    team={team}
+                    requested={requestedTeams.has(team.teamId)}
+                    sending={requestingId === team.teamId}
+                    onRequest={handleRequestJoin}
+                    cardClass="card tm-open-card"
+                    hackIcon
+                    slotIcon
+                    score={team.score}
+                    labels={{
+                      lookingFor: t("lookingFor"),
+                      members: t("members"),
+                      requestJoin: t("requestJoin"),
+                      requested: t("requested"),
                     }}
                   />
                 ))
