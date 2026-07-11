@@ -1,5 +1,8 @@
 "use client";
 
+/**
+ * Autor: Nenad Skoković (2023/0039)
+ */
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { Icon } from "@/components/Icon";
@@ -16,6 +19,7 @@ import {
   SoloPlayerCard,
   InviteCard,
   TeamLeaderboardRow,
+  type SoloPlayerCardPlayer,
 } from "@/components/teams";
 import { useT } from "@/components/i18n/LanguageProvider";
 import { useRequireAuth } from "@/components/auth/AuthProvider";
@@ -236,7 +240,7 @@ export function TeamsClient() {
 
   // Invite a free agent into the caller's primary team. Optimistically mark
   // "Invited"; revert on failure. Callers without a team open JoinTeamPopup.
-  const handleInviteSolo = async (player: SoloPlayer) => {
+  const handleInviteSolo = async (player: SoloPlayerCardPlayer) => {
     if (!myTeam) {
       setJoinTarget(player.username);
       return;

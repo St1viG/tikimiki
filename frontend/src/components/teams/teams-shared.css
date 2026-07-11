@@ -5,10 +5,17 @@
  * <SoloPlayerCard>, <InviteCard> and <TeamLeaderboardRow> visually identical
  * on both /teams and /teams/find. (Page-level layout/grid rules stay in the
  * co-located teams.css / find.css.)
+ *
+ * Autor: Nenad Skoković (2023/0039)
  * */
 
 /* Pixel medal — fills sourced from the --medal-* tokens (globals.css). */
 .px-medal {
   image-rendering: pixelated;
   vertical-align: middle;
+}
+
+/* SoloPlayerCard's complementarity-score badge (suggested-teammate lists only). */
+.tm-solo-score {
+  margin: 2px 0 2px;
 }

@@ -1,4 +1,5 @@
-/* Teams page (scoped) — built on app.css tokens */
+/* Teams page (scoped) — built on app.css tokens
+   Autor: Nenad Skoković (2023/0039) */
 
 /* Tabs row — underline switcher, unified with /teams and the platform's other
    tab strips (hackathons, notifications, manage). Previously a pill group;
@@ -62,6 +63,7 @@
 }
 .tm-page[data-filter="mine"] .tm-section:not([data-section="mine"]),
 .tm-page[data-filter="invites"] .tm-section:not([data-section="invites"]),
+.tm-page[data-filter="suggested"] .tm-section:not([data-section="suggested"]),
 .tm-page[data-filter="open"] .tm-section:not([data-section="open"]),
 .tm-page[data-filter="solo"] .tm-section:not([data-section="solo"]),
 .tm-page[data-filter="board"] .tm-section:not([data-section="board"]) {
