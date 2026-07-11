@@ -12,6 +12,7 @@ import { GithubModule } from "./github/github.module";
 import { HackathonsModule } from "./hackathons/hackathons.module";
 import { HealthModule } from "./health/health.module";
 import { KanbanModule } from "./kanban/kanban.module";
+import { MailModule } from "./mail/mail.module";
 import { MatchingModule } from "./matching/matching.module";
 import { ModerationModule } from "./moderation/moderation.module";
 import { NotificationsModule } from "./notifications/notifications.module";
@@ -53,6 +54,7 @@ import { VotingModule } from "./voting/voting.module";
     VotingModule,
     ProjectsModule,
     KanbanModule,
+    MailModule,
     MatchingModule,
     ModerationModule,
     UploadsModule,

@@ -36,6 +36,12 @@ const schema = z.object({
   GOOGLE_CLIENT_SECRET: z.string().default(""),
   LINKEDIN_CLIENT_ID: z.string().default(""),
   LINKEDIN_CLIENT_SECRET: z.string().default(""),
+  // ── SMTP (optional; blank host = mail disabled, logs to console) ─────
+  SMTP_HOST: z.string().default(""),
+  SMTP_PORT: z.coerce.number().int().positive().default(587),
+  SMTP_USER: z.string().default(""),
+  SMTP_PASS: z.string().default(""),
+  SMTP_FROM: z.string().default("tikimiki <no-reply@tikimiki.local>"),
 });
 
 // Blank values (bare `KEY=` lines in .env) behave like unset keys so the
