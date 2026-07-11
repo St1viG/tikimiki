@@ -94,6 +94,10 @@ const M = {
   approveAllBtn: { en: "Approve all", sr: "Odobri sve" },
 
   openCardAria: { en: "Open application", sr: "Otvori prijavu" },
+  githubBadgeTitle: {
+    en: "GitHub-verified skills",
+    sr: "GitHub-verifikovane veštine",
+  },
   quickActionsTitle: { en: "Quick actions", sr: "Brze akcije" },
   approveAllPending: { en: "Approve all pending", sr: "Odobri sve na čekanju" },
   pendingCountHint: { en: "applications waiting", sr: "prijave čekaju" },
@@ -203,8 +207,10 @@ const M = {
 } as const;
 
 type AppCard = Candidate & {
-  /** Skill substrings the card matched against — none from the API, so blank. */
+  /** Skill substrings the card matched against — feeds the free-text search. */
   skillsRaw: string;
+  /** GitHub-verified skill count — drives the list card's GitHub badge. */
+  githubVerifiedSkillCount: number;
 };
 
 /** Pick a deterministic avatar palette class from a stable string. */
@@ -212,6 +218,9 @@ const AV_CLASSES = ["av-v", "av-l", "av-t", "av-r"] as const;
 function avClassFor(seed: string): string {
   return AV_CLASSES[hashString(seed) % AV_CLASSES.length];
 }
+
+/** Cyclic skill-tag colour classes — purely decorative variety. */
+const SKILL_TAG_CLASSES = ["sk-v", "sk-l", "sk-t"] as const;
 
 /** Normalise the backend's application status string to the UI's enum. */
 function toCandidateStatus(raw: string): CandidateStatus {
@@ -223,10 +232,13 @@ function toCandidateStatus(raw: string): CandidateStatus {
 
 /**
  * Map a backend {@link Applicant} onto the {@link AppCard} the UI renders.
- * GitHub stats and skill chips have NO backing API, so they stay omitted.
+ * Repo/contribution counts have no backing API (they'd require a live
+ * GitHub call per applicant), so `ghContrib`/`ghRepos`/`ghLang` stay
+ * omitted — but tagged skills and their GitHub-verified status do (D07).
  */
 function applicantToCard(a: Applicant, locale: Locale): AppCard {
   const seed = a.username || a.userId;
+  const skillNames = a.skills.map((s) => s.name);
   return {
     id: a.applicationId,
     status: toCandidateStatus(a.status),
@@ -236,9 +248,11 @@ function applicantToCard(a: Applicant, locale: Locale): AppCard {
     avClass: avClassFor(seed),
     time: relTime(a.createdAt, locale),
     desc: a.bio ?? "",
-    skillsList: [],
-    skillsClasses: [],
-    skillsRaw: "",
+    skillsList: skillNames,
+    skillsClasses: skillNames.map((_, i) => SKILL_TAG_CLASSES[i % SKILL_TAG_CLASSES.length]),
+    verifiedSkills: a.skills.filter((s) => s.verified).map((s) => s.name),
+    skillsRaw: skillNames.join(" "),
+    githubVerifiedSkillCount: a.githubVerifiedSkillCount,
     ghContrib: "—",
     ghRepos: "—",
     ghLang: "—",
@@ -689,7 +703,8 @@ function ApplicantsReview({
       !q ||
       card.name.toLowerCase().includes(q) ||
       card.username.toLowerCase().includes(q) ||
-      (card.team ?? "").toLowerCase().includes(q);
+      (card.team ?? "").toLowerCase().includes(q) ||
+      card.skillsRaw.toLowerCase().includes(q);
     return !(tabOk && searchOk);
   };
 
@@ -958,6 +973,11 @@ function ApplicantsReview({
                     )}
                   </div>
                 </div>
+                {c.githubVerifiedSkillCount > 0 && (
+                  <span className="badge badge-open" title={t("githubBadgeTitle")}>
+                    <Icon name="check" className="ic-sm" /> {c.githubVerifiedSkillCount}
+                  </span>
+                )}
                 <span className={pillClass(c.status)}>{PILL_LABEL[c.status]}</span>
                 <span className="chevron" aria-hidden="true">
                   <Icon name="chevron-down" />

@@ -1,5 +1,8 @@
 "use client";
 
+/**
+ * Autor: Nenad Skoković (2023/0039)
+ */
 import { Icon } from "@/components/Icon";
 import { GenerativeAvatar } from "@/components/ui/GenerativeAvatar";
 import { useT } from "@/components/i18n/LanguageProvider";
@@ -31,6 +34,7 @@ const M = {
   rejectBtn: { en: "Reject", sr: "Odbij" },
   approveTeamBtn: { en: "Approve team", sr: "Odobri tim" },
   reApproveBtn: { en: "Re-approve", sr: "Ponovo odobri" },
+  verifiedSkill: { en: "Verified via GitHub", sr: "Verifikovano preko GitHub-a" },
   pillPending: { en: "Pending", sr: "Na čekanju" },
   pillApproved: { en: "Approved", sr: "Odobren/a" },
   pillRejected: { en: "Rejected", sr: "Odbijen/a" },
@@ -57,6 +61,8 @@ export type Candidate = {
   desc: string;
   skillsList: string[];
   skillsClasses: string[];
+  /** Skill names auto-verified from the applicant's GitHub activity. */
+  verifiedSkills?: string[];
   ghContrib: string;
   ghRepos: string;
   ghLang: string;
@@ -159,6 +165,11 @@ export function CandidatePopup({
                   {d.skillsList.map((s, i) => (
                     <span key={`${s}-${i}`} className={`skill-tag ${d.skillsClasses[i] || "sk-v"}`}>
                       {s.trim()}
+                      {d.verifiedSkills?.includes(s) && (
+                        <span title={t("verifiedSkill")}>
+                          <Icon name="check" className="ic-sm" />
+                        </span>
+                      )}
                     </span>
                   ))}
                 </div>
