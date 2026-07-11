@@ -732,6 +732,11 @@ export interface Application {
   rejectionReason?: string | null;
   createdAt: string;
 }
+export interface ApplicantSkill {
+  name: string;
+  /** Auto-verified from the applicant's GitHub activity. */
+  verified: boolean;
+}
 export interface Applicant {
   applicationId: string;
   userId: string;
@@ -742,6 +747,15 @@ export interface Applicant {
   teamName: string | null;
   status: string;
   createdAt: string;
+  skills: ApplicantSkill[];
+  githubVerifiedSkillCount: number;
+}
+export type ApplicantSortBy = "recent" | "skills" | "github";
+/** Query filters for {@link getHackathonApplicants}. */
+export interface ApplicantFilter {
+  skills?: string[];
+  githubVerified?: boolean;
+  sortBy?: ApplicantSortBy;
 }
 export interface ApplicationStats {
   total: number;
@@ -804,8 +818,17 @@ export const deleteApplicationQuestion = (questionId: string) =>
 export const getApplicationAnswers = (applicationId: string) =>
   GET<ApplicationAnswer[]>(`/applications/${applicationId}/answers`);
 export const getMyApplications = () => GET<Application[]>("/applications/me");
-export const getHackathonApplicants = (hackathonId: string) =>
-  GET<Applicant[]>(`/applications/hackathon/${hackathonId}`);
+export function getHackathonApplicants(
+  hackathonId: string,
+  filter: ApplicantFilter = {},
+): Promise<Applicant[]> {
+  const qs = new URLSearchParams();
+  for (const skill of filter.skills ?? []) qs.append("skills", skill);
+  if (filter.githubVerified !== undefined) qs.set("githubVerified", String(filter.githubVerified));
+  if (filter.sortBy) qs.set("sortBy", filter.sortBy);
+  const query = qs.toString();
+  return GET<Applicant[]>(`/applications/hackathon/${hackathonId}${query ? `?${query}` : ""}`);
+}
 export const getApplicationStats = (hackathonId: string) =>
   GET<ApplicationStats>(`/applications/hackathon/${hackathonId}/stats`);
 export const approveApplication = (id: string) => PATCH<Application>(`/applications/${id}/approve`);

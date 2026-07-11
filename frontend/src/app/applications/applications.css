@@ -1,4 +1,5 @@
-/* Applications (admin) — page-specific, all token-based */
+/* Applications (admin) — page-specific, all token-based
+   Autor: Nenad Skoković (2023/0039) */
 
 /* back link */
 .back-link {
@@ -1094,6 +1095,21 @@
 }
 .apps-search-row .search {
   max-width: 360px;
+}
+
+/* skill/GitHub filter + sort row, above the search row */
+.apps-filter-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin: 14px 0 2px;
+}
+.apps-filter-row .apps-picker-field {
+  min-width: 200px;
+}
+.apps-filter-row .search {
+  max-width: 280px;
 }
 
 /* Form builder */

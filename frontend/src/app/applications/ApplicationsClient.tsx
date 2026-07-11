@@ -1,5 +1,8 @@
 "use client";
 
+/**
+ * Autor: Nenad Skoković (2023/0039)
+ */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Icon } from "@/components/Icon";
@@ -15,6 +18,7 @@ import { useRequireAuth } from "@/components/auth/AuthProvider";
 import * as api from "@/lib/api";
 import type {
   Applicant,
+  ApplicantSortBy,
   Application,
   ApplicationAnswer,
   ApplicationQuestion,
@@ -95,6 +99,17 @@ const M = {
   pendingCountHint: { en: "applications waiting", sr: "prijave čekaju" },
   searchLabel: { en: "Search", sr: "Pretraži" },
   searchPh: { en: "Search…", sr: "Pretraži…" },
+
+  filterSkillsLabel: { en: "Skills", sr: "Veštine" },
+  filterSkillsPh: { en: "e.g. React, Go", sr: "npr. React, Go" },
+  filterGithubLabel: { en: "GitHub", sr: "GitHub" },
+  filterGithubAll: { en: "Anyone", sr: "Svi" },
+  filterGithubVerified: { en: "Verified skills", sr: "Verifikovane veštine" },
+  filterGithubUnverified: { en: "No verified skills", sr: "Bez verifikovanih veština" },
+  sortLabel: { en: "Sort by", sr: "Sortiraj po" },
+  sortRecent: { en: "Most recent", sr: "Najnovije" },
+  sortSkills: { en: "Matching skills", sr: "Poklapanje veština" },
+  sortGithub: { en: "GitHub verified", sr: "GitHub verifikacija" },
 
   toastApproved: { en: "Application approved", sr: "Prijava odobrena" },
   toastRejected: { en: "Application rejected", sr: "Prijava odbijena" },
@@ -558,6 +573,25 @@ function ApplicantsReview({
   const [answers, setAnswers] = useState<Record<string, ApplicationAnswer[] | null>>({});
   const [rejectOpen, setRejectOpen] = useState(false);
 
+  // Skill/GitHub filter + sort — resolved server-side (ApplicationsService.listForHackathon).
+  const [skillInput, setSkillInput] = useState("");
+  const [skillFilters, setSkillFilters] = useState<string[]>([]);
+  const [githubFilter, setGithubFilter] = useState<"" | "true" | "false">("");
+  const [sortBy, setSortBy] = useState<ApplicantSortBy>("recent");
+
+  // Debounce the free-text skill input into the committed filter.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSkillFilters(
+        skillInput
+          .split(",")
+          .map((s) => s.trim())
+          .filter(Boolean),
+      );
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [skillInput]);
+
   /* Lazily load an applicant's answers to the hackathon's custom questions. */
   const toggleAnswers = (id: string) => {
     setOpenAnswers((prev) => {
@@ -578,14 +612,19 @@ function ApplicantsReview({
     });
   };
 
-  /* Load applicants + stats for the selected hackathon. */
+  /* Load applicants + stats for the selected hackathon, re-run whenever the
+     skill/GitHub filter or sort changes (server-side, see item 16). */
   useEffect(() => {
     let cancelled = false;
     (async () => {
       setLoading(true);
       try {
         const [applicants, appStats] = await Promise.all([
-          api.getHackathonApplicants(hackathonId),
+          api.getHackathonApplicants(hackathonId, {
+            skills: skillFilters.length ? skillFilters : undefined,
+            githubVerified: githubFilter === "" ? undefined : githubFilter === "true",
+            sortBy,
+          }),
           api.getApplicationStats(hackathonId).catch(() => null),
         ]);
         if (cancelled) return;
@@ -604,7 +643,7 @@ function ApplicantsReview({
     return () => {
       cancelled = true;
     };
-  }, [hackathonId, locale]);
+  }, [hackathonId, locale, skillFilters, githubFilter, sortBy]);
 
   /* counts — derived live from the cards (optimistic updates stay in sync). */
   const ap = cards.filter((c) => c.status === "approved").length;
@@ -817,6 +856,44 @@ function ApplicantsReview({
             <Icon name="check" /> {t("approveAllBtn")}
           </button>
         )}
+      </div>
+
+      {/* Skill / GitHub filter + sort — resolved server-side */}
+      <div className="apps-filter-row">
+        <div className="search" role="search">
+          <Icon name="search" />
+          <input
+            type="search"
+            aria-label={t("filterSkillsLabel")}
+            placeholder={t("filterSkillsPh")}
+            value={skillInput}
+            onChange={(e) => setSkillInput(e.target.value)}
+          />
+        </div>
+        <label className="apps-picker-field">
+          <span className="apps-picker-label">{t("filterGithubLabel")}</span>
+          <select
+            className="apps-select"
+            value={githubFilter}
+            onChange={(e) => setGithubFilter(e.target.value as "" | "true" | "false")}
+          >
+            <option value="">{t("filterGithubAll")}</option>
+            <option value="true">{t("filterGithubVerified")}</option>
+            <option value="false">{t("filterGithubUnverified")}</option>
+          </select>
+        </label>
+        <label className="apps-picker-field">
+          <span className="apps-picker-label">{t("sortLabel")}</span>
+          <select
+            className="apps-select"
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as ApplicantSortBy)}
+          >
+            <option value="recent">{t("sortRecent")}</option>
+            <option value="skills">{t("sortSkills")}</option>
+            <option value="github">{t("sortGithub")}</option>
+          </select>
+        </label>
       </div>
 
       {/* Search */}
