@@ -28,6 +28,7 @@ import {
 } from "../db/schema";
 import { activeTeamMember } from "../common/team.predicates";
 import { AuthzService } from "../common/authz.service";
+import { MailService } from "../mail/mail.service";
 import { NotificationsService } from "../notifications/notifications.service";
 import type {
   ApplicantFilterInput,
@@ -112,6 +113,7 @@ export class ApplicationsService {
     @Inject(DRIZZLE) private readonly db: DrizzleDB,
     private readonly notifications: NotificationsService,
     private readonly authz: AuthzService,
+    private readonly mail: MailService,
   ) {}
 
   async create(userId: string, input: CreateApplicationInput): Promise<ApplicationDto> {
@@ -796,17 +798,33 @@ export class ApplicationsService {
       .where(eq(hackathons.hackathonId, hackathonId))
       .limit(1);
     const title = hk?.title ?? "hakaton";
+    const subject = decision === "approved" ? "Prijava odobrena" : "Prijava odbijena";
+    const body =
+      decision === "approved"
+        ? `Tvoja prijava za ${title} je odobrena. 🎉`
+        : `Tvoja prijava za ${title} je odbijena.${reason ? ` Razlog: ${reason}` : ""}`;
+
     await this.notifications.create({
       userId,
       type: decision === "approved" ? "application_approved" : "application_rejected",
-      title: decision === "approved" ? "Prijava odobrena" : "Prijava odbijena",
-      body:
-        decision === "approved"
-          ? `Tvoja prijava za ${title} je odobrena. 🎉`
-          : `Tvoja prijava za ${title} je odbijena.${reason ? ` Razlog: ${reason}` : ""}`,
+      title: subject,
+      body,
       entityType: "hackathon",
       entityId: hackathonId,
     });
+
+    try {
+      const [user] = await this.db
+        .select({ email: users.email })
+        .from(users)
+        .where(eq(users.userId, userId))
+        .limit(1);
+      if (user?.email) {
+        await this.mail.sendMail(user.email, subject, `<p>${body}</p>`);
+      }
+    } catch (err) {
+      console.error(`[applications] failed to send ${decision} email to user ${userId}:`, err);
+    }
   }
 
   async reject(

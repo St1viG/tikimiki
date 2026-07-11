@@ -3,6 +3,7 @@ import { and, eq, gte, ilike, inArray, isNull, or, sql } from "drizzle-orm";
 import { AuthzService } from "../common/authz.service";
 import { DAY_MS } from "../common/constants";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
+import { MailService } from "../mail/mail.service";
 import {
   appeals,
   auditLog,
@@ -99,7 +100,38 @@ export class AdminService {
   constructor(
     @Inject(DRIZZLE) private readonly db: DrizzleDB,
     private readonly authz: AuthzService,
+    private readonly mail: MailService,
   ) {}
+
+  /**
+   * Emails an organization about a verification outcome, preferring its
+   * `contactEmail` and falling back to the owning user's account email.
+   * Best-effort — logs and swallows any failure so it never blocks the
+   * verify/reject flow.
+   */
+  private async notifyOrgVerification(
+    targetUserId: string,
+    contactEmail: string | null,
+    subject: string,
+    body: string,
+  ): Promise<void> {
+    try {
+      let to = contactEmail;
+      if (!to) {
+        const [user] = await this.db
+          .select({ email: users.email })
+          .from(users)
+          .where(eq(users.userId, targetUserId))
+          .limit(1);
+        to = user?.email ?? null;
+      }
+      if (to) {
+        await this.mail.sendMail(to, subject, `<p>${body}</p>`);
+      }
+    } catch (err) {
+      console.error(`[admin] failed to send org verification email to user ${targetUserId}:`, err);
+    }
+  }
 
   /** Append an entry to the moderation audit log (best-effort, non-blocking). */
   private async audit(
@@ -307,6 +339,13 @@ export class AdminService {
       `Verified organization "${row.name}"`,
     );
 
+    await this.notifyOrgVerification(
+      targetUserId,
+      row.contactEmail,
+      "Organizacija verifikovana",
+      `Vaša organizacija „${row.name}" je verifikovana.`,
+    );
+
     return {
       userId: row.userId,
       name: row.name,
@@ -353,6 +392,13 @@ export class AdminService {
       "organization",
       targetUserId,
       `Rejected organization "${row.name}": ${body.reason}`,
+    );
+
+    await this.notifyOrgVerification(
+      targetUserId,
+      row.contactEmail,
+      "Organizacija odbijena",
+      `Vaša organizacija „${row.name}" je odbijena. Razlog: ${body.reason}`,
     );
 
     return {
