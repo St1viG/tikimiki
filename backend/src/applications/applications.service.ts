@@ -1,3 +1,6 @@
+/**
+ * Autor: Andrej Colić (2023/0492)
+ */
 import {
   BadRequestException,
   ConflictException,
@@ -6,16 +9,18 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { and, asc, desc, eq, isNull, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import {
   applicationQuestions,
   applications,
   hackathons,
+  memberSkills,
   members,
   questionAnswers,
   serverRoles,
   servers,
+  skills,
   teamMembers,
   teams,
   userRoles,
@@ -25,6 +30,7 @@ import { activeTeamMember } from "../common/team.predicates";
 import { AuthzService } from "../common/authz.service";
 import { NotificationsService } from "../notifications/notifications.service";
 import type {
+  ApplicantFilterInput,
   CreateApplicationInput,
   CreateTeamApplicationInput,
   CreateQuestionInput,
@@ -69,6 +75,13 @@ export interface ApplicationDto {
   createdAt: string;
 }
 
+/** One of an applicant's tagged skills, as shown to a reviewer. */
+export interface ApplicantSkillDto {
+  name: string;
+  /** Auto-verified from the applicant's GitHub activity (see GithubService). */
+  verified: boolean;
+}
+
 /** Returned to the org/reviewer (one applicant for a hackathon). */
 export interface ApplicantDto {
   applicationId: string;
@@ -80,6 +93,8 @@ export interface ApplicantDto {
   teamName: string | null;
   status: ApplicationStatus;
   createdAt: string;
+  skills: ApplicantSkillDto[];
+  githubVerifiedSkillCount: number;
 }
 
 export interface ApplicationStatsDto {
@@ -563,7 +578,18 @@ export class ApplicationsService {
     }));
   }
 
-  async listForHackathon(hackathonId: string, userId: string): Promise<ApplicantDto[]> {
+  /**
+   * `GET /applications/hackathon/:hackathonId`, optionally narrowed by
+   * `filter.skills` / `filter.githubVerified` and ordered by `filter.sortBy`
+   * ("recent" — the default, most recent first — "skills", by matching-skill
+   * count when `skills` is given (else total skill count), or "github", by
+   * GitHub-verified skill count). Ties always fall back to most-recent-first.
+   */
+  async listForHackathon(
+    hackathonId: string,
+    userId: string,
+    filter?: ApplicantFilterInput,
+  ): Promise<ApplicantDto[]> {
     await this.authz.assertHackathonOwnerOrAdmin(hackathonId, userId);
     const rows = await this.db
       .select({
@@ -583,17 +609,70 @@ export class ApplicationsService {
       .where(and(eq(applications.hackathonId, hackathonId), isNull(applications.deletedAt)))
       .orderBy(desc(applications.createdAt));
 
-    return rows.map((r) => ({
-      applicationId: r.applicationId,
-      userId: r.userId,
-      username: r.username,
-      avatarUrl: r.avatarUrl,
-      bio: r.bio,
-      teamId: r.teamId,
-      teamName: r.teamName,
-      status: r.status,
-      createdAt: r.createdAt.toISOString(),
-    }));
+    if (rows.length === 0) return [];
+
+    const skillRows = await this.db
+      .select({
+        userId: memberSkills.userId,
+        name: skills.name,
+        verified: memberSkills.verified,
+      })
+      .from(memberSkills)
+      .innerJoin(skills, eq(skills.skillId, memberSkills.skillId))
+      .where(
+        inArray(
+          memberSkills.userId,
+          rows.map((r) => r.userId),
+        ),
+      );
+
+    const skillMap = new Map<string, ApplicantSkillDto[]>();
+    for (const s of skillRows) {
+      const list = skillMap.get(s.userId) ?? [];
+      list.push({ name: s.name, verified: s.verified });
+      skillMap.set(s.userId, list);
+    }
+
+    const wantedSkills = new Set((filter?.skills ?? []).map((s) => s.toLowerCase()));
+
+    let applicants = rows.map((r) => {
+      const applicantSkills = skillMap.get(r.userId) ?? [];
+      return {
+        applicationId: r.applicationId,
+        userId: r.userId,
+        username: r.username,
+        avatarUrl: r.avatarUrl,
+        bio: r.bio,
+        teamId: r.teamId,
+        teamName: r.teamName,
+        status: r.status,
+        createdAt: r.createdAt.toISOString(),
+        skills: applicantSkills,
+        githubVerifiedSkillCount: applicantSkills.filter((s) => s.verified).length,
+        matchedSkillCount: applicantSkills.filter((s) => wantedSkills.has(s.name.toLowerCase()))
+          .length,
+      };
+    });
+
+    if (wantedSkills.size > 0) {
+      applicants = applicants.filter((a) => a.matchedSkillCount > 0);
+    }
+    if (filter?.githubVerified !== undefined) {
+      applicants = applicants.filter(
+        (a) => a.githubVerifiedSkillCount > 0 === filter.githubVerified,
+      );
+    }
+
+    // Stable sort — ties keep the query's most-recent-first order.
+    const skillScore = (a: (typeof applicants)[number]) =>
+      wantedSkills.size > 0 ? a.matchedSkillCount : a.skills.length;
+    if (filter?.sortBy === "skills") {
+      applicants.sort((a, b) => skillScore(b) - skillScore(a));
+    } else if (filter?.sortBy === "github") {
+      applicants.sort((a, b) => b.githubVerifiedSkillCount - a.githubVerifiedSkillCount);
+    }
+
+    return applicants.map(({ matchedSkillCount: _matchedSkillCount, ...a }) => a);
   }
 
   async statsForHackathon(hackathonId: string, userId: string): Promise<ApplicationStatsDto> {

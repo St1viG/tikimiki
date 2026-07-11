@@ -1,5 +1,9 @@
+/**
+ * Autor: Andrej Colić (2023/0492)
+ */
 import { describe, expect, it } from "vitest";
 import {
+  applicantFilterSchema,
   createApplicationSchema,
   createQuestionSchema,
   rejectApplicationSchema,
@@ -95,5 +99,52 @@ describe("rejectApplicationSchema", () => {
 
   it("rejects a reason longer than 2000 characters", () => {
     expect(rejectApplicationSchema.safeParse({ reason: "a".repeat(2001) }).success).toBe(false);
+  });
+});
+
+/* ── Filter/sort prijavljenih ────────────────────────────────── */
+
+describe("applicantFilterSchema", () => {
+  it("defaults sortBy to recent with no filters", () => {
+    const r = applicantFilterSchema.safeParse({});
+    expect(r.success).toBe(true);
+    if (r.success) {
+      expect(r.data.sortBy).toBe("recent");
+      expect(r.data.skills).toBeUndefined();
+      expect(r.data.githubVerified).toBeUndefined();
+    }
+  });
+
+  it("splits a comma-separated skills list and trims entries", () => {
+    const r = applicantFilterSchema.safeParse({ skills: "React, Go ,SQL" });
+    expect(r.success).toBe(true);
+    if (r.success) expect(r.data.skills).toEqual(["React", "Go", "SQL"]);
+  });
+
+  it("accepts a repeated skills query key as an array", () => {
+    const r = applicantFilterSchema.safeParse({ skills: ["React", "Go"] });
+    expect(r.success).toBe(true);
+    if (r.success) expect(r.data.skills).toEqual(["React", "Go"]);
+  });
+
+  it("parses githubVerified=true/false to a boolean", () => {
+    const t = applicantFilterSchema.safeParse({ githubVerified: "true" });
+    const f = applicantFilterSchema.safeParse({ githubVerified: "false" });
+    expect(t.success && t.data.githubVerified).toBe(true);
+    expect(f.success && f.data.githubVerified).toBe(false);
+  });
+
+  it("rejects a non-boolean githubVerified value", () => {
+    expect(applicantFilterSchema.safeParse({ githubVerified: "yes" }).success).toBe(false);
+  });
+
+  it("rejects an unknown sortBy value", () => {
+    expect(applicantFilterSchema.safeParse({ sortBy: "oldest" }).success).toBe(false);
+  });
+
+  it("accepts each documented sortBy option", () => {
+    for (const sortBy of ["recent", "skills", "github"]) {
+      expect(applicantFilterSchema.safeParse({ sortBy }).success).toBe(true);
+    }
   });
 });

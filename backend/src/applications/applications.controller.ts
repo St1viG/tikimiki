@@ -1,3 +1,6 @@
+/**
+ * Autor: Andrej Colić (2023/0492)
+ */
 import {
   Body,
   Controller,
@@ -7,6 +10,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from "@nestjs/common";
 import { CurrentUser } from "../auth/current-user.decorator";
@@ -14,12 +18,14 @@ import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { ZodValidationPipe } from "../common/zod.pipe";
 import { ApplicationsService } from "./applications.service";
 import {
+  applicantFilterSchema,
   createApplicationSchema,
   createQuestionSchema,
   createTeamApplicationSchema,
   rejectApplicationSchema,
   updateQuestionSchema,
   withdrawApplicationSchema,
+  type ApplicantFilterInput,
   type CreateApplicationInput,
   type CreateQuestionInput,
   type CreateTeamApplicationInput,
@@ -60,8 +66,9 @@ export class ApplicationsController {
   listForHackathon(
     @CurrentUser() userId: string,
     @Param("hackathonId", new ParseUUIDPipe()) hackathonId: string,
+    @Query(new ZodValidationPipe(applicantFilterSchema)) filter: ApplicantFilterInput,
   ) {
-    return this.svc.listForHackathon(hackathonId, userId);
+    return this.svc.listForHackathon(hackathonId, userId, filter);
   }
 
   @Get("hackathon/:hackathonId/stats")

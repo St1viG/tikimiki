@@ -1,3 +1,6 @@
+/**
+ * Autor: Andrej Colić (2023/0492)
+ */
 import { z } from "zod";
 
 export const createApplicationSchema = z.object({
@@ -68,3 +71,34 @@ export const updateQuestionSchema = z
     message: "At least one field must be provided",
   });
 export type UpdateQuestionInput = z.infer<typeof updateQuestionSchema>;
+
+/**
+ * Normalises a query parameter that may arrive as a single string, a repeated
+ * key (`?skills=a&skills=b`) or a comma-separated list (`?skills=a,b`) into a
+ * clean, de-blanked `string[]`.
+ */
+const stringList = z.union([z.string(), z.array(z.string())]).transform((value) =>
+  (Array.isArray(value) ? value : [value])
+    .flatMap((entry) => entry.split(","))
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0),
+);
+
+/** How `GET /applications/hackathon/:hackathonId` orders its applicants. */
+export const applicantSortOptions = ["recent", "skills", "github"] as const;
+
+/**
+ * Query for `GET /applications/hackathon/:hackathonId`. `skills` narrows to
+ * applicants who have at least one of the given skills (case-insensitive
+ * name match); `githubVerified` narrows to applicants who do (`true`) or
+ * don't (`false`) have at least one GitHub-verified skill.
+ */
+export const applicantFilterSchema = z.object({
+  skills: stringList.optional(),
+  githubVerified: z
+    .enum(["true", "false"])
+    .transform((v) => v === "true")
+    .optional(),
+  sortBy: z.enum(applicantSortOptions).default("recent"),
+});
+export type ApplicantFilterInput = z.infer<typeof applicantFilterSchema>;

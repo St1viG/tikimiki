@@ -1,5 +1,9 @@
+/**
+ * Autor: Andrej Colić (2023/0492)
+ */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ApplicationsController } from "../../src/applications/applications.controller";
+import type { ApplicantFilterInput } from "../../src/applications/dto";
 import type { ApplicationsService } from "../../src/applications/applications.service";
 
 describe("ApplicationsController (unit)", () => {
@@ -32,9 +36,10 @@ describe("ApplicationsController (unit)", () => {
     expect(svc.listMine).toHaveBeenCalledWith(USER);
   });
 
-  it("listForHackathon forwards hackathonId and userId", () => {
-    controller.listForHackathon(USER, HACK);
-    expect(svc.listForHackathon).toHaveBeenCalledWith(HACK, USER);
+  it("listForHackathon forwards hackathonId, userId and the filter query", () => {
+    const filter = { sortBy: "github" } as ApplicantFilterInput;
+    controller.listForHackathon(USER, HACK, filter);
+    expect(svc.listForHackathon).toHaveBeenCalledWith(HACK, USER, filter);
   });
 
   it("approve forwards applicationId and userId", () => {
