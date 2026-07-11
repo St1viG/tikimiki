@@ -2,6 +2,7 @@
  * Autor: Dimitrije Pesic (2023/0014)
  */
 import { Controller, Get, Param, ParseUUIDPipe, UseGuards } from "@nestjs/common";
+import { CurrentUser } from "../auth/current-user.decorator";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { MatchingService } from "./matching.service";
 
@@ -10,13 +11,12 @@ import { MatchingService } from "./matching.service";
 export class MatchingController {
   constructor(private readonly matchingService: MatchingService) {}
 
-  /**
-   * `GET /hackathons/:id/team-suggestions`. Placeholder response — wiring
-   * `MatchingService` into this endpoint is D04.
-   */
   @Get("hackathons/:id/team-suggestions")
   @UseGuards(JwtAuthGuard)
-  teamSuggestions(@Param("id", new ParseUUIDPipe()) _hackathonId: string) {
-    return { teammates: [], teams: [] };
+  teamSuggestions(
+    @CurrentUser() userId: string,
+    @Param("id", new ParseUUIDPipe()) hackathonId: string,
+  ) {
+    return this.matchingService.teamSuggestions(hackathonId, userId);
   }
 }

@@ -702,6 +702,25 @@ export const acceptInvitation = (id: string) =>
 export const declineInvitation = (id: string) =>
   POST<{ success: true; status: string }>(`/teams/invitations/${id}/decline`);
 
+// Team suggestions (matching)
+export interface TeammateSuggestion {
+  userId: string;
+  username: string;
+  displayName?: string | null;
+  skills: string[];
+  score: number;
+}
+export interface TeamSuggestion extends OpenTeam {
+  score: number;
+}
+export interface TeamSuggestions {
+  teammates: TeammateSuggestion[];
+  teams: TeamSuggestion[];
+}
+
+export const getTeamSuggestions = (hackathonId: string) =>
+  GET<TeamSuggestions>(`/hackathons/${hackathonId}/team-suggestions`);
+
 // Applications
 export interface Application {
   applicationId: string;

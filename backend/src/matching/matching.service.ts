@@ -14,6 +14,7 @@ import {
   teams,
   users,
 } from "../db/schema";
+import { TeamsService, type OpenTeamDto } from "../teams/teams.service";
 
 /** A platform member available to team up for a hackathon. */
 export interface FreeAgentDto {
@@ -28,9 +29,26 @@ export interface ScoredFreeAgentDto extends FreeAgentDto {
   score: number;
 }
 
+/** An open (joinable) team paired with how well the caller would complement it. */
+export interface ScoredOpenTeamDto extends OpenTeamDto {
+  score: number;
+}
+
+/** Response of `GET /hackathons/:id/team-suggestions`. */
+export interface TeamSuggestionsDto {
+  teammates: ScoredFreeAgentDto[];
+  teams: ScoredOpenTeamDto[];
+}
+
+const TEAMMATE_SUGGESTION_LIMIT = 10;
+const TEAM_SUGGESTION_LIMIT = 5;
+
 @Injectable()
 export class MatchingService {
-  constructor(@Inject(DRIZZLE) private readonly db: DrizzleDB) {}
+  constructor(
+    @Inject(DRIZZLE) private readonly db: DrizzleDB,
+    private readonly teamsService: TeamsService,
+  ) {}
 
   /**
    * Members relevant to `hackathonId` — they applied (pending/approved) or
@@ -150,5 +168,68 @@ export class MatchingService {
     return freeAgents
       .map((agent) => ({ ...agent, score: this.complementarityScore(agent.skills, covered) }))
       .sort((a, b) => b.score - a.score || a.username.localeCompare(b.username));
+  }
+
+  /** Distinct skill names tagged on `userId`'s own profile. */
+  async skillsForUser(userId: string): Promise<string[]> {
+    const rows = await this.db
+      .select({ name: skills.name })
+      .from(memberSkills)
+      .innerJoin(skills, eq(skills.skillId, memberSkills.skillId))
+      .where(eq(memberSkills.userId, userId));
+
+    return rows.map((r) => r.name);
+  }
+
+  /** `userId`'s active team within `hackathonId`, if any. */
+  async myActiveTeamId(hackathonId: string, userId: string): Promise<string | null> {
+    const [row] = await this.db
+      .select({ teamId: teamMembers.teamId })
+      .from(teamMembers)
+      .innerJoin(teams, eq(teams.teamId, teamMembers.teamId))
+      .where(
+        and(eq(teamMembers.userId, userId), eq(teams.hackathonId, hackathonId), activeTeamMember),
+      )
+      .limit(1);
+
+    return row?.teamId ?? null;
+  }
+
+  /**
+   * `GET /hackathons/:id/team-suggestions`. If the caller already leads/sits
+   * on a team for this hackathon, suggests free agents that best complement
+   * that team's existing skills. Otherwise suggests both free agents and
+   * open teams that best complement the caller's own skills.
+   */
+  async teamSuggestions(hackathonId: string, userId: string): Promise<TeamSuggestionsDto> {
+    const freeAgents = await this.freeAgentsForHackathon(hackathonId, userId);
+    const myTeamId = await this.myActiveTeamId(hackathonId, userId);
+
+    if (myTeamId) {
+      const teammates = this.rankByComplementarity(
+        freeAgents,
+        await this.teamSkills(myTeamId),
+      ).slice(0, TEAMMATE_SUGGESTION_LIMIT);
+      return { teammates, teams: [] };
+    }
+
+    const mySkills = await this.skillsForUser(userId);
+    const teammates = this.rankByComplementarity(freeAgents, mySkills).slice(
+      0,
+      TEAMMATE_SUGGESTION_LIMIT,
+    );
+
+    const openTeams = (await this.teamsService.openTeams(userId)).filter(
+      (t) => t.hackathonId === hackathonId,
+    );
+    const scoredTeams = await Promise.all(
+      openTeams.map(async (team) => ({
+        ...team,
+        score: this.complementarityScore(mySkills, await this.teamSkills(team.teamId)),
+      })),
+    );
+    scoredTeams.sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
+
+    return { teammates, teams: scoredTeams.slice(0, TEAM_SUGGESTION_LIMIT) };
   }
 }
