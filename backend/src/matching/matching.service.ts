@@ -1,3 +1,6 @@
+/**
+ * Autor: Dimitrije Pesic (2023/0014)
+ */
 import { Inject, Injectable } from "@nestjs/common";
 import { and, asc, eq, inArray, isNull, ne, sql } from "drizzle-orm";
 import { activeTeamMember } from "../common/team.predicates";
@@ -18,6 +21,11 @@ export interface FreeAgentDto {
   username: string;
   displayName: string | null;
   skills: string[];
+}
+
+/** A free agent paired with how well they'd complement a team. */
+export interface ScoredFreeAgentDto extends FreeAgentDto {
+  score: number;
 }
 
 @Injectable()
@@ -102,5 +110,45 @@ export class MatchingService {
       displayName: r.displayName,
       skills: skillMap.get(r.userId) ?? [],
     }));
+  }
+
+  /**
+   * Distinct skill names covered by `teamId`'s active members.
+   */
+  async teamSkills(teamId: string): Promise<string[]> {
+    const rows = await this.db
+      .selectDistinct({ name: skills.name })
+      .from(teamMembers)
+      .innerJoin(memberSkills, eq(memberSkills.userId, teamMembers.userId))
+      .innerJoin(skills, eq(skills.skillId, memberSkills.skillId))
+      .where(and(eq(teamMembers.teamId, teamId), activeTeamMember));
+
+    return rows.map((r) => r.name);
+  }
+
+  /**
+   * How well `candidateSkills` complements a team currently covering
+   * `existingSkills`: the count of distinct candidate skills not already
+   * covered. A candidate who only repeats skills the team already has scores
+   * 0, regardless of how many skills they list.
+   */
+  complementarityScore(candidateSkills: string[], existingSkills: Iterable<string>): number {
+    const covered = new Set(existingSkills);
+    return new Set(candidateSkills.filter((s) => !covered.has(s))).size;
+  }
+
+  /**
+   * `freeAgents` ranked by how much they'd complement a team currently
+   * covering `existingSkills` — highest score first, ties broken
+   * alphabetically by username for a stable order.
+   */
+  rankByComplementarity(
+    freeAgents: FreeAgentDto[],
+    existingSkills: Iterable<string>,
+  ): ScoredFreeAgentDto[] {
+    const covered = new Set(existingSkills);
+    return freeAgents
+      .map((agent) => ({ ...agent, score: this.complementarityScore(agent.skills, covered) }))
+      .sort((a, b) => b.score - a.score || a.username.localeCompare(b.username));
   }
 }
