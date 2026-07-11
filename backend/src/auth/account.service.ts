@@ -12,6 +12,7 @@ import { AuthzService } from "../common/authz.service";
 import { env } from "../config/env";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import { appeals, users } from "../db/schema";
+import { MailService } from "../mail/mail.service";
 
 type AccountTokenType = "email_verify" | "password_reset";
 
@@ -32,6 +33,7 @@ export class AccountService {
     @Inject(DRIZZLE) private readonly db: DrizzleDB,
     private readonly jwt: JwtService,
     private readonly authz: AuthzService,
+    private readonly mail: MailService,
   ) {}
 
   private signToken(userId: string, typ: AccountTokenType, ttlSeconds: number): Promise<string> {
@@ -67,7 +69,7 @@ export class AccountService {
     userId: string,
   ): Promise<{ alreadyVerified: boolean; devLink?: string }> {
     const [u] = await this.db
-      .select({ isEmailVerified: users.isEmailVerified })
+      .select({ isEmailVerified: users.isEmailVerified, email: users.email })
       .from(users)
       .where(eq(users.userId, userId))
       .limit(1);
@@ -76,6 +78,11 @@ export class AccountService {
 
     const token = await this.signToken(userId, "email_verify", env.EMAIL_VERIFY_TTL);
     const link = `${env.WEB_ORIGIN}/verify-email?token=${token}`;
+    await this.mail.sendMail(
+      u.email,
+      "Potvrdi email",
+      `<p>Klikni <a href="${link}">ovde</a> da potvrdiš email adresu.</p>`,
+    );
     return { alreadyVerified: false, devLink: this.deliver("email-verify", link) };
   }
 
