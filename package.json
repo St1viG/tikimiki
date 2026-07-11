@@ -20,7 +20,7 @@
     "format:check": "bash scripts/format.sh --check",
     "typecheck": "pnpm --filter ./backend typecheck && pnpm --filter ./frontend exec tsc --noEmit",
     "check": "pnpm format:check -a && pnpm lint && pnpm typecheck && pnpm test:unit",
-    "prepare": "husky",
+    "prepare": "husky && sh scripts/install-hooks.sh",
     "test": "pnpm -r test",
     "test:unit": "pnpm --filter ./backend test:unit",
     "test:ui": "cd tests/selenium-webdriver && npm test",
