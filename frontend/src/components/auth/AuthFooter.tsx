@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useT } from "@/components/i18n/LanguageProvider";
 import "./auth-shell.css";
 
@@ -17,7 +18,7 @@ import "./auth-shell.css";
 const M = {
   aboutUs: { en: "About us", sr: "O nama" },
   help: { en: "Help", sr: "Pomoć" },
-  privacyAndTerms: { en: "Privacy & terms", sr: "Privatnost i uslovi" },
+  terms: { en: "Terms", sr: "Uslovi" },
   helpCenter: { en: "Help center", sr: "Centar za pomoć" },
   platformRules: { en: "Platform rules", sr: "Pravila platforme" },
   privacy: { en: "Privacy", sr: "Privatnost" },
@@ -29,8 +30,9 @@ export function AuthFooter({ variant = "links" }: { variant?: "links" | "inline"
   if (variant === "inline") {
     return (
       <footer className="auth-footer">
-        <a href="#">{t("helpCenter")}</a> · <a href="#">{t("platformRules")}</a> ·{" "}
-        <a href="#">{t("privacy")}</a>
+        <Link href="/help">{t("helpCenter")}</Link> ·{" "}
+        <Link href="/terms">{t("platformRules")}</Link> ·{" "}
+        <Link href="/privacy">{t("privacy")}</Link>
         <br />
         <span className="cw">
           <b>tiki</b>miki
@@ -43,9 +45,10 @@ export function AuthFooter({ variant = "links" }: { variant?: "links" | "inline"
   return (
     <footer className="auth-footer">
       <div className="auth-footer-links">
-        <a href="#">{t("aboutUs")}</a> <span>·</span>
-        <a href="#">{t("help")}</a> <span>·</span>
-        <a href="#">{t("privacyAndTerms")}</a>
+        <Link href="/about">{t("aboutUs")}</Link> <span>·</span>
+        <Link href="/help">{t("help")}</Link> <span>·</span>
+        <Link href="/privacy">{t("privacy")}</Link> <span>·</span>
+        <Link href="/terms">{t("terms")}</Link>
       </div>
       <div className="auth-footer-copy">
         <b>tiki</b>miki &copy; <span className="yr">2026</span>
