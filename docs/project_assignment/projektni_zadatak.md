@@ -2,7 +2,7 @@
 
 ### Platforma za održavanje i učešće na hakatonima
 
-**Projektni zadatak — Verzija 2.1**
+**Projektni zadatak — Verzija 2.2**
 
 ---
 
@@ -193,7 +193,7 @@ Prilikom izrade projekta koristiće se agilna metodologija razvoja softvera zasn
 
 U ovom poglavlju su definisane tehnologije koje će se koristiti pri izradi projekta.
 
-Za frontend će biti korišćeni HTML5, CSS3, kao i Next.js framework. Dinamičnost i responzivnost interfejsa postiže se upotrebom AJAX tehnologije. Za backend će biti korišćen Django na serverskoj strani. Što se tiče baze podataka, koristiće se PostgreSQL.
+Za frontend će biti korišćeni HTML5, CSS3, kao i React biblioteka uz Next.js framework (verzija 14), pisan u TypeScript-u. Dinamičnost i responzivnost interfejsa postiže se asinhronim dohvatanjem podataka putem Fetch API-ja (REST komunikacija sa backendom), dok se komunikacija u realnom vremenu ostvaruje pomoću WebSocket-a (Socket.IO). Za backend će na serverskoj strani biti korišćen NestJS framework (Node.js, TypeScript) uz Drizzle ORM za pristup bazi. Što se tiče baze podataka, koristiće se PostgreSQL (verzija 16, uz PostGIS ekstenziju).
 
 ### 8.1. Eksterne integracije i API servisi
 
@@ -206,22 +206,11 @@ Kako bi platforma funkcionisala kao kompletan ekosistem i pružila validne podat
 
 ---
 
-## 9. Dokumentacija
-
-Biće potrebno detaljnije dokumentovati osnovne složene delove sistema kako bi bila olakšana buduća nadogradnja. Planirana dokumentacija uključuje:
-
-- API dokumentaciju za sve interne endpointe
-- Tehničku dokumentaciju eksternih integracija
-- Uputstvo za korišćenje sistema za svaku vrstu korisnika posebno
-- Administratorski priručnik za upravljanje sistemom
-
----
-
-## 10. Plan i prioriteti
+## 9. Plan i prioriteti
 
 Razvoj sistema tikimiki podeljen je u tri ključne faze prema prioritetu funkcionalnosti.
 
-### 10.1. Primarne funkcionalnosti (MVP — Minimum Viable Product)
+### 9.1. Primarne funkcionalnosti (MVP — Minimum Viable Product)
 
 Ove funkcionalnosti su osnova sistema i neophodne su za puštanje aplikacije u rad. Ove funkcionalnosti su apsolutni minimum. Samo ove funkcionalnosti neće učiniti tikimiki posebnim, ali su bitne kao početni sadržaj:
 
@@ -230,7 +219,7 @@ Ove funkcionalnosti su osnova sistema i neophodne su za puštanje aplikacije u r
 - **Sistem prijava** — Mehanizam prijave takmičara i njihovo odobravanje/odbijanje od strane organizatora.
 - **Komunikacija** — Implementacija direktnih poruka i osnovnih grupnih kanala.
 
-### 10.2. Napredne funkcionalnosti
+### 9.2. Napredne funkcionalnosti
 
 Nakon realizacije osnovnog jezgra sistema (MVP), razvoj platforme tikimiki nastavlja se kroz iterativno dodavanje naprednih funkcionalnosti. Plan implementacije je osmišljen tako da se prvo uspostavi poverenje i bezbednost, zatim automatizuje tok samog događaja, a na kraju uvedu inovativni AI alati i sistemi za zadržavanje korisnika.
 
@@ -260,3 +249,4 @@ Finalna faza razvoja usmerena je na dugoročni angažman korisnika. Implementira
 | 1.1     | 06.04.2026. | Dopuna i ispravka projektnog zadatka | Andrej Čolić                 |
 | 2.0     | 06.04.2026. | Značajna dopuna projektnog zadatka   | Andrej Čolić, Nenad Skoković |
 | 2.1     | 10.04.2026. | Ispravka sekundarne dizajn boje      | Dimitrije Pešić              |
+| 3.0     | 13.07.2026. | Ispravka tehnologija                 | Dimitrije Pešić              |
