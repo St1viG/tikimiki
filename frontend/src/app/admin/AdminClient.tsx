@@ -98,6 +98,11 @@ const M = {
   rejectVerifBtn: { en: "Reject", sr: "Odbij" },
   toastVerified: { en: "Organization verified.", sr: "Organizacija je verifikovana." },
   verifiedOrgs: { en: "Verified organizations", sr: "Verifikovane organizacije" },
+  rejectedOrgs: { en: "Rejected requests", sr: "Odbijeni zahtevi" },
+  noRejectedOrgs: { en: "No rejected requests.", sr: "Nema odbijenih zahteva." },
+  orgRejectedOn: { en: "rejected", sr: "odbijen" },
+  orgReasonLabel: { en: "Reason", sr: "Razlog" },
+  orgSubmittedOn: { en: "submitted", sr: "podnet" },
   revokeVerifBtn: { en: "Revoke verification", sr: "Ukini verifikaciju" },
   // Wired reports / users / orgs
   reportKindPost: { en: "Post report", sr: "Prijava objave" },
@@ -294,9 +299,14 @@ export function AdminClient() {
   });
   const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
   const [userSearch, setUserSearch] = useState("");
-  const [orgs, setOrgs] = useState<{ pending: AdminOrg[]; verified: AdminOrg[] }>({
+  const [orgs, setOrgs] = useState<{
+    pending: AdminOrg[];
+    verified: AdminOrg[];
+    rejected: AdminOrg[];
+  }>({
     pending: [],
     verified: [],
+    rejected: [],
   });
 
   // Date formatter bound to the active locale.
@@ -1155,7 +1165,9 @@ export function AdminClient() {
                 <div className="adm-org-info">
                   <div className="adm-org-name">{org.name}</div>
                   <div className="adm-org-sub">
-                    {org.websiteUrl ?? org.contactEmail ?? "—"} · {t("orgRequested")}
+                    @{org.username} · {org.contactEmail ?? org.accountEmail} · {t("orgSubmittedOn")}{" "}
+                    {fmtDateTime(org.submittedAt)}
+                    {org.websiteUrl ? ` · ${org.websiteUrl}` : ""}
                   </div>
                 </div>
                 <div className="adm-org-actions">
@@ -1203,6 +1215,41 @@ export function AdminClient() {
                 <div className="adm-org-actions">
                   <button className="adm-btn-xs danger" onClick={() => handleRevokeOrg(org.userId)}>
                     {t("revokeVerifBtn")}
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+
+          <div className="adm-subsection-title" style={{ marginTop: "14px" }}>
+            {t("rejectedOrgs")} <span className="hk-tab-count">{orgs.rejected.length}</span>
+          </div>
+
+          {orgs.rejected.length === 0 ? (
+            <div className="adm-org-row">
+              <div className="adm-org-info">
+                <div className="adm-org-sub" style={{ color: "var(--muted)" }}>
+                  {t("noRejectedOrgs")}
+                </div>
+              </div>
+            </div>
+          ) : (
+            orgs.rejected.map((org) => (
+              <div className="adm-org-row" key={org.userId}>
+                <div className="adm-org-av" aria-hidden="true">
+                  {orgInitials(org.name)}
+                </div>
+                <div className="adm-org-info">
+                  <div className="adm-org-name">{org.name}</div>
+                  <div className="adm-org-sub">
+                    @{org.username} · {t("orgRejectedOn")}
+                    {org.reviewedAt ? ` ${fmtDateTime(org.reviewedAt)}` : ""}
+                    {org.rejectionReason ? ` · ${t("orgReasonLabel")}: ${org.rejectionReason}` : ""}
+                  </div>
+                </div>
+                <div className="adm-org-actions">
+                  <button className="adm-btn-xs ok" onClick={() => handleVerifyOrg(org.userId)}>
+                    <Icon name="check" /> {t("verifyBtn")}
                   </button>
                 </div>
               </div>

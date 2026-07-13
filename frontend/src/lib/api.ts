@@ -122,6 +122,9 @@ export async function logout(): Promise<void> {
   setAccessToken(null);
 }
 
+/** A rejected organization re-submits its verification request (SSU2). */
+export const resubmitOrgVerification = () => POST<{ success: true }>("/auth/organization/resubmit");
+
 // Hackathons
 export async function getHackathons(): Promise<HackathonSummary[]> {
   return GET<HackathonSummary[]>("/hackathons");
@@ -1024,13 +1027,17 @@ export interface AdminOrg {
   contactEmail: string | null;
   verificationStatus: string;
   reviewedAt: string | null;
+  rejectionReason: string | null;
+  username: string;
+  accountEmail: string;
+  submittedAt: string;
 }
 
 export const getAdminMetrics = () => GET<AdminMetrics>("/admin/metrics");
 export const getAdminUsers = (search?: string) =>
   GET<AdminUser[]>(`/admin/users${search ? `?search=${encodeURIComponent(search)}` : ""}`);
 export const getAdminOrganizations = () =>
-  GET<{ pending: AdminOrg[]; verified: AdminOrg[] }>("/admin/organizations");
+  GET<{ pending: AdminOrg[]; verified: AdminOrg[]; rejected: AdminOrg[] }>("/admin/organizations");
 export const verifyOrganization = (userId: string) =>
   POST<AdminOrg>(`/admin/organizations/${userId}/verify`);
 export const rejectOrganization = (userId: string, reason: string) =>

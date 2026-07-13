@@ -59,6 +59,14 @@ export class AccountController {
     return this.account.changeEmail(userId, body.email);
   }
 
+  /** A rejected organization re-submits its verification request (SSU2). */
+  @Post("organization/resubmit")
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard)
+  resubmitOrgVerification(@CurrentUser() userId: string) {
+    return this.account.resubmitOrgVerification(userId);
+  }
+
   @Post("appeal")
   @HttpCode(200)
   @UseGuards(RateLimitGuard)
