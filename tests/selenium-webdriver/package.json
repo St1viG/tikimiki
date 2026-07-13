@@ -8,6 +8,7 @@
     "test": "mocha --timeout 60000 tests/**/*.test.mjs",
     "test:auth": "mocha --timeout 60000 tests/auth.test.mjs",
     "test:calendar": "mocha --timeout 60000 tests/calendar.test.mjs",
+    "test:github-skills": "mocha --timeout 60000 tests/github-skills.test.mjs",
     "test:github-sync": "mocha --timeout 60000 tests/github-sync.test.mjs",
     "test:hackathons": "mocha --timeout 60000 tests/hackathons.test.mjs",
     "test:kanban": "mocha --timeout 60000 tests/kanban.test.mjs",
