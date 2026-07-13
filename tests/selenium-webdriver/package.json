@@ -10,6 +10,7 @@
     "test:hackathons": "mocha --timeout 60000 tests/hackathons.test.mjs",
     "test:kanban": "mocha --timeout 60000 tests/kanban.test.mjs",
     "test:messages": "mocha --timeout 60000 tests/messages.test.mjs",
+    "test:search-filters": "mocha --timeout 60000 tests/search-filters.test.mjs",
     "test:servers": "mocha --timeout 60000 tests/servers.test.mjs"
   },
   "devDependencies": {

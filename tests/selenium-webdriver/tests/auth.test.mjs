@@ -49,6 +49,8 @@ describe("Prijava na sistem (Selenium WebDriver)", function () {
       10000,
       "Očekivana poruka o grešci za pogrešne kredencijale",
     );
+    // Alert ulazi au-msg-in animacijom (od opacity 0) — sačekaj da bude vidljiv.
+    await driver.wait(until.elementIsVisible(errorEl), 5000);
     assert.ok(await errorEl.isDisplayed());
     assert.ok((await driver.getCurrentUrl()).includes("/login"));
   });

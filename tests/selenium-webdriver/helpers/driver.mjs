@@ -20,20 +20,31 @@ export function open(driver, path = "/") {
 /**
  * Prijava kroz korisnički interfejs. Login stranica (AuthClient) koristi:
  *   input[name="identifier"], input[name="password"], button.au-submit.
- * Captcha ("nisam robot", .au-captcha-check) se pojavljuje TEK posle prvog
- * klika na submit i mora se čekirati pre nego što prijava prođe.
- * Čeka da nas app preusmeri sa /login.
+ * Captcha ("nisam robot", .au-captcha-check) se pojavljuje čim su oba polja
+ * popunjena i mora se čekirati pre nego što prijava prođe.
+ *
+ * U dev modu se dešava da kucamo PRE React hidratacije: unos tada ne stigne u
+ * state, pa submit ode kao nativni GET (/login?identifier=…). Zato polja
+ * punimo u petlji dok se captcha ne pojavi — ona je dokaz da je React video
+ * unos. Čeka da nas app preusmeri sa /login.
  */
 export async function login(driver, user = USERS.member) {
   await open(driver, "/login");
-  const idInput = await driver.wait(
+  await driver.wait(
     until.elementLocated(By.css('input[name="identifier"]')),
     20000, // Next.js dev prvi put kompajlira rutu — dug timeout.
   );
-  await idInput.clear();
-  await idInput.sendKeys(user.identifier);
-  await driver.findElement(By.css('input[name="password"]')).sendKeys(user.password);
-  await submitAuthWithCaptcha(driver);
+  await driver.wait(async () => {
+    const idInput = await driver.findElement(By.css('input[name="identifier"]'));
+    await idInput.clear();
+    await idInput.sendKeys(user.identifier);
+    const pwInput = await driver.findElement(By.css('input[name="password"]'));
+    await pwInput.clear();
+    await pwInput.sendKeys(user.password);
+    return (await driver.findElements(By.css(".au-captcha-check"))).length > 0;
+  }, 30000);
+  await driver.findElement(By.css(".au-captcha-check")).click();
+  await driver.findElement(By.css("button.au-submit")).click();
   // Po uspešnoj prijavi app radi router.push("/") — čekamo da nestane /login.
   await driver.wait(async () => !(await driver.getCurrentUrl()).includes("/login"), 15000);
 }
