@@ -6,7 +6,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test:e2e": "jest"
+    "test:e2e": "jest",
+    "test:webdriver": "node e2e/webdriver/video-player.test.js"
   },
   "jest": {
     "rootDir": "e2e/selenium",
