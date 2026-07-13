@@ -259,6 +259,28 @@
   font-size: var(--fs-sm);
   color: var(--muted);
 }
+.tm-tc-appbadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 9px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.tm-tc-appbadge .ic {
+  width: 13px;
+  height: 13px;
+}
+.tm-tc-appbadge--pending {
+  color: var(--amber);
+  background: color-mix(in srgb, var(--amber) 16%, transparent);
+}
+.tm-tc-appbadge--rejected {
+  color: var(--red);
+  background: color-mix(in srgb, var(--red) 16%, transparent);
+}
 
 .tm-tc-side {
   display: flex;

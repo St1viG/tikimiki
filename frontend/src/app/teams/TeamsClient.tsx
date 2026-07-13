@@ -100,6 +100,11 @@ const M = {
   editDraft: { en: "Edit draft", sr: "Uredi nacrt" },
   submittedLabel: { en: "Submitted ✓", sr: "Predato ✓" },
   projectLabel: { en: "Project", sr: "Projekat" },
+  appPending: {
+    en: "Pending organizer approval",
+    sr: "Čeka odobrenje organizatora",
+  },
+  appRejected: { en: "Application rejected", sr: "Prijava odbijena" },
 } as const;
 
 type Filter = "mine" | "invites" | "open" | "solo" | "board";
@@ -373,21 +378,35 @@ export function TeamsClient() {
                           <span className="tnum">{team.memberCount}</span> {t("members")} ·{" "}
                           <span className="tnum">{team.totalXp}</span> XP
                         </div>
+                        {team.applicationStatus === "pending" && (
+                          <div className="tm-tc-appbadge tm-tc-appbadge--pending">
+                            <Icon name="clock" /> {t("appPending")}
+                          </div>
+                        )}
+                        {team.applicationStatus === "rejected" && (
+                          <div className="tm-tc-appbadge tm-tc-appbadge--rejected">
+                            <Icon name="x" /> {t("appRejected")}
+                          </div>
+                        )}
                       </div>
                       <div className="tm-tc-side">
                         <div className="tm-tc-actions">
-                          {/* "Open server" → the team chat surface (/cohor). */}
-                          <Link className="btn btn-violet" href="/cohor">
-                            <Icon name="server" /> {t("openServer")}
-                          </Link>
-                          {/* "Kanban" → team task board. */}
-                          <Link className="btn btn-ghost" href={`/teams/${team.teamId}/kanban`}>
-                            <Icon name="list" /> Kanban
-                          </Link>
+                          {/* "Open server" → the team chat surface (/cohor).
+                              Locked until the organizer approves the hackathon application. */}
+                          {team.applicationStatus === "pending" ? (
+                            <button className="btn btn-violet" disabled>
+                              <Icon name="server" /> {t("openServer")}
+                            </button>
+                          ) : (
+                            <Link className="btn btn-violet" href="/cohor">
+                              <Icon name="server" /> {t("openServer")}
+                            </Link>
+                          )}
                           {/* "Project" → create / edit / submit the team's
                               hackathon deliverable (ProjectPopup). */}
                           <button
                             className="btn btn-ghost"
+                            disabled={team.applicationStatus === "pending"}
                             onClick={() =>
                               setProjectTeam({
                                 teamId: team.teamId,

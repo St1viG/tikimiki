@@ -2755,6 +2755,7 @@ html[data-theme="light-mono"] .premium-link .ic {
 .am-dialog {
   border: none;
   padding: 0;
+  margin: auto;
   background: transparent;
   width: min(560px, 92vw);
   max-height: 86vh;

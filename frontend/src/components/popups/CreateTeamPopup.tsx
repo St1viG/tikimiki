@@ -9,7 +9,7 @@ import type { HackathonSummary } from "@tikimiki/types";
 /**
  * CreateTeamPopup — modal dialog for creating a new team.
  * Triggered by the "Create team" buttons on /teams and /teams/find.
- * Uses the standard app.css modal/overlay/dialog classes.
+ * Uses the shared, themed `.am-*` modal classes (globals.css).
  *
  * Wiring: the "Create team" button POSTs via api.createTeam(name, hackathonId).
  * The hackathon <select> is populated from api.getHackathons() so it carries
@@ -88,7 +88,9 @@ export function CreateTeamPopup({ open, onClose }: { open: boolean; onClose: () 
     api
       .getHackathons()
       .then((list) => {
-        if (!cancelled) setHackathons(list);
+        // Only hackathons still open for registration can accept a new team
+        // (matches the "upcoming"-only gate ApplicationsService enforces).
+        if (!cancelled) setHackathons(list.filter((hk) => hk.status === "upcoming"));
       })
       .catch((err) => {
         console.error("Failed to load hackathons for team creation", err);
@@ -104,16 +106,7 @@ export function CreateTeamPopup({ open, onClose }: { open: boolean; onClose: () 
 
   // Close on backdrop click
   function handleClick(e: React.MouseEvent<HTMLDialogElement>) {
-    const rect = dialogRef.current?.getBoundingClientRect();
-    if (
-      rect &&
-      (e.clientX < rect.left ||
-        e.clientX > rect.right ||
-        e.clientY < rect.top ||
-        e.clientY > rect.bottom)
-    ) {
-      onClose();
-    }
+    if (e.target === dialogRef.current) onClose();
   }
 
   const canSubmit = name.trim().length > 0 && hackathonId !== "" && !submitting;
@@ -138,107 +131,107 @@ export function CreateTeamPopup({ open, onClose }: { open: boolean; onClose: () 
   return (
     <dialog
       ref={dialogRef}
-      className="modal"
+      className="am-dialog"
       aria-label={t("dialogLabel")}
       onClick={handleClick}
       onClose={onClose}
     >
-      <div className="modal-box">
-        <div className="modal-head">
-          <h2 className="modal-title">
+      <div className="am-card" role="document">
+        <div className="am-head">
+          <h2 className="am-title">
             <Icon name="teams" /> {t("title")}
           </h2>
-          <button className="modal-close" aria-label={t("close")} onClick={onClose}>
+          <button className="am-close" aria-label={t("close")} onClick={onClose}>
             <Icon name="x" />
           </button>
         </div>
 
-        <div className="modal-body">
-          <label className="field-label" htmlFor="ct-name">
-            {t("labelName")}
-          </label>
-          <input
-            id="ct-name"
-            className="field"
-            type="text"
-            placeholder={t("placeholderName")}
-            autoComplete="off"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
+        <div className="am-body">
+          <div>
+            <label className="am-q-label" htmlFor="ct-name">
+              {t("labelName")}
+            </label>
+            <input
+              id="ct-name"
+              className="am-input"
+              type="text"
+              placeholder={t("placeholderName")}
+              autoComplete="off"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
 
-          <label className="field-label" htmlFor="ct-hackathon">
-            {t("labelHackathon")}
-          </label>
-          <select
-            id="ct-hackathon"
-            className="field"
-            value={hackathonId}
-            onChange={(e) => setHackathonId(e.target.value)}
-            disabled={loadingHk}
-          >
-            <option value="">
-              {loadingHk
-                ? t("loadingHackathons")
-                : hkError
-                  ? t("hackathonsLoadError")
-                  : hackathons.length === 0
-                    ? t("noHackathons")
-                    : t("selectHackathon")}
-            </option>
-            {hackathons.map((hk) => (
-              <option key={hk.hackathonId} value={hk.hackathonId}>
-                {hk.title}
-              </option>
-            ))}
-          </select>
-
-          {hkError && !loadingHk && (
-            <p
-              role="alert"
-              style={{ color: "var(--red)", fontSize: 13, fontWeight: 600, marginTop: 8 }}
+          <div>
+            <label className="am-q-label" htmlFor="ct-hackathon">
+              {t("labelHackathon")}
+            </label>
+            <select
+              id="ct-hackathon"
+              className="am-input"
+              value={hackathonId}
+              onChange={(e) => setHackathonId(e.target.value)}
+              disabled={loadingHk}
             >
-              {t("hackathonsLoadError")}{" "}
-              <button
-                type="button"
-                onClick={() => setHkReloadToken((n) => n + 1)}
-                style={{
-                  color: "inherit",
-                  fontWeight: 600,
-                  textDecoration: "underline",
-                  background: "none",
-                  border: "none",
-                  padding: 0,
-                  cursor: "pointer",
-                }}
-              >
-                {t("retry")}
-              </button>
-            </p>
-          )}
+              <option value="">
+                {loadingHk
+                  ? t("loadingHackathons")
+                  : hkError
+                    ? t("hackathonsLoadError")
+                    : hackathons.length === 0
+                      ? t("noHackathons")
+                      : t("selectHackathon")}
+              </option>
+              {hackathons.map((hk) => (
+                <option key={hk.hackathonId} value={hk.hackathonId}>
+                  {hk.title}
+                </option>
+              ))}
+            </select>
 
-          <label className="field-label" htmlFor="ct-roles">
-            {t("labelRoles")}
-          </label>
-          <input
-            id="ct-roles"
-            className="field"
-            type="text"
-            placeholder={t("placeholderRoles")}
-            autoComplete="off"
-          />
+            {hkError && !loadingHk && (
+              <p className="am-err" role="alert" style={{ marginTop: 8 }}>
+                {t("hackathonsLoadError")}{" "}
+                <button
+                  type="button"
+                  onClick={() => setHkReloadToken((n) => n + 1)}
+                  style={{
+                    color: "inherit",
+                    fontWeight: 600,
+                    textDecoration: "underline",
+                    background: "none",
+                    border: "none",
+                    padding: 0,
+                    cursor: "pointer",
+                  }}
+                >
+                  {t("retry")}
+                </button>
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="am-q-label" htmlFor="ct-roles">
+              {t("labelRoles")}
+            </label>
+            <input
+              id="ct-roles"
+              className="am-input"
+              type="text"
+              placeholder={t("placeholderRoles")}
+              autoComplete="off"
+            />
+          </div>
 
           {errorMessage && (
-            <p
-              role="alert"
-              style={{ color: "var(--red)", fontSize: 13, fontWeight: 600, marginTop: 8 }}
-            >
+            <p className="am-err" role="alert">
               {errorMessage}
             </p>
           )}
         </div>
 
-        <div className="modal-foot">
+        <div className="am-foot">
           <button className="btn btn-ghost" onClick={onClose}>
             {t("cancel")}
           </button>

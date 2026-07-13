@@ -7,9 +7,11 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { ApplicationsService } from "../applications/applications.service";
 import { activeTeamMember } from "../common/team.predicates";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import {
+  applications,
   channelGroups,
   channels,
   hackathons,
@@ -43,6 +45,8 @@ export interface TeamDto {
   hackathonId: string;
   hackathonTitle: string;
   status: string;
+  /** The caller's own hackathon-application status: "pending" | "approved" | "rejected" | "none". */
+  applicationStatus: string;
   memberCount: number;
   totalXp: number;
   members: TeamMemberDto[];
@@ -128,6 +132,7 @@ export class TeamsService {
   constructor(
     @Inject(DRIZZLE) private readonly db: DrizzleDB,
     private readonly notifications: NotificationsService,
+    private readonly applicationsService: ApplicationsService,
   ) {}
 
   /** Loads active members (with points + username) for the given team ids. */
@@ -159,7 +164,28 @@ export class TeamsService {
   }
 
   /** Builds a full TeamDto for a single team id. */
-  private async buildTeamDto(teamId: string): Promise<TeamDto> {
+  /** The caller's own (non-deleted) application status for a hackathon — "none" if they never applied. */
+  private async myApplicationStatuses(
+    userId: string,
+    hackathonIds: string[],
+  ): Promise<Map<string, string>> {
+    const map = new Map<string, string>();
+    if (hackathonIds.length === 0) return map;
+    const rows = await this.db
+      .select({ hackathonId: applications.hackathonId, status: applications.status })
+      .from(applications)
+      .where(
+        and(
+          eq(applications.userId, userId),
+          inArray(applications.hackathonId, hackathonIds),
+          isNull(applications.deletedAt),
+        ),
+      );
+    for (const r of rows) map.set(r.hackathonId, r.status);
+    return map;
+  }
+
+  private async buildTeamDto(teamId: string, callerId: string): Promise<TeamDto> {
     const [team] = await this.db
       .select({
         teamId: teams.teamId,
@@ -177,6 +203,7 @@ export class TeamsService {
 
     const memberMap = await this.loadActiveMembers([teamId]);
     const active = memberMap.get(teamId) ?? [];
+    const appStatuses = await this.myApplicationStatuses(callerId, [team.hackathonId]);
 
     return {
       teamId: team.teamId,
@@ -184,6 +211,7 @@ export class TeamsService {
       hackathonId: team.hackathonId,
       hackathonTitle: team.hackathonTitle,
       status: team.status,
+      applicationStatus: appStatuses.get(team.hackathonId) ?? "none",
       memberCount: active.length,
       totalXp: active.reduce((sum, m) => sum + Number(m.points), 0),
       members: active.map((m) => ({
@@ -221,6 +249,10 @@ export class TeamsService {
       .orderBy(desc(teams.createdAt));
 
     const memberMap = await this.loadActiveMembers(teamRows.map((t) => t.teamId));
+    const appStatuses = await this.myApplicationStatuses(
+      userId,
+      teamRows.map((t) => t.hackathonId),
+    );
 
     return teamRows.map((t) => {
       const active = memberMap.get(t.teamId) ?? [];
@@ -230,6 +262,7 @@ export class TeamsService {
         hackathonId: t.hackathonId,
         hackathonTitle: t.hackathonTitle,
         status: t.status,
+        applicationStatus: appStatuses.get(t.hackathonId) ?? "none",
         memberCount: active.length,
         totalXp: active.reduce((sum, m) => sum + Number(m.points), 0),
         members: active.map((m) => ({
@@ -404,11 +437,18 @@ export class TeamsService {
     }
 
     const [hackathon] = await this.db
-      .select({ hackathonId: hackathons.hackathonId })
+      .select({ hackathonId: hackathons.hackathonId, status: hackathons.status })
       .from(hackathons)
       .where(and(eq(hackathons.hackathonId, input.hackathonId), isNull(hackathons.deletedAt)))
       .limit(1);
     if (!hackathon) throw new NotFoundException("Hackathon not found");
+    if (hackathon.status !== "upcoming") {
+      throw new BadRequestException("Registration is closed — hackathon is no longer upcoming");
+    }
+
+    if (await this.hasActiveTeamInHackathon(userId, input.hackathonId)) {
+      throw new ConflictException("You already have a team in this hackathon");
+    }
 
     const teamId = await this.db.transaction(async (tx) => {
       const [team] = await tx
@@ -427,7 +467,16 @@ export class TeamsService {
 
     await this.createTeamChannel(teamId, input.hackathonId, input.name);
 
-    return this.buildTeamDto(teamId);
+    // Creating a team does not admit it into the hackathon — the leader still
+    // needs the organizer to approve a hackathon application. File one on
+    // their behalf (best-effort: skip silently if the hackathon requires a
+    // custom application form, closed registration, etc. — the leader can
+    // still apply manually from the hackathon page in that case).
+    await this.applicationsService
+      .create(userId, { hackathonId: input.hackathonId, teamId, answers: [] })
+      .catch(() => undefined);
+
+    return this.buildTeamDto(teamId, userId);
   }
 
   /**
@@ -502,6 +551,7 @@ export class TeamsService {
     const [team] = await this.db
       .select({
         teamId: teams.teamId,
+        hackathonId: teams.hackathonId,
         maxTeamSize: hackathons.maxTeamSize,
       })
       .from(teams)
@@ -521,6 +571,10 @@ export class TeamsService {
       .limit(1);
     if (existing && existing.leftAt === null && existing.deletedAt === null) {
       throw new ConflictException("Already a member of this team");
+    }
+
+    if (await this.hasActiveTeamInHackathon(userId, team.hackathonId)) {
+      throw new ConflictException("You already have a team in this hackathon");
     }
 
     const [{ value: activeCount }] = await this.db
@@ -550,7 +604,7 @@ export class TeamsService {
       });
     }
 
-    return this.buildTeamDto(teamId);
+    return this.buildTeamDto(teamId, userId);
   }
 
   /* ── Join requests + invitations ──────────────────────────── */
@@ -601,6 +655,24 @@ export class TeamsService {
     return Boolean(row);
   }
 
+  /** A user may lead/belong to at most one active team per hackathon. */
+  private async hasActiveTeamInHackathon(userId: string, hackathonId: string): Promise<boolean> {
+    const [row] = await this.db
+      .select({ teamId: teamMembers.teamId })
+      .from(teamMembers)
+      .innerJoin(teams, eq(teams.teamId, teamMembers.teamId))
+      .where(
+        and(
+          eq(teamMembers.userId, userId),
+          eq(teams.hackathonId, hackathonId),
+          isNull(teams.deletedAt),
+          activeTeamMember,
+        ),
+      )
+      .limit(1);
+    return Boolean(row);
+  }
+
   /** POST /teams/:teamId/join-requests — a member requests to join. */
   async requestToJoin(
     userId: string,
@@ -615,7 +687,7 @@ export class TeamsService {
     if (!member) throw new BadRequestException("Only members can join a team");
 
     const [team] = await this.db
-      .select({ teamId: teams.teamId })
+      .select({ teamId: teams.teamId, hackathonId: teams.hackathonId })
       .from(teams)
       .where(and(eq(teams.teamId, teamId), isNull(teams.deletedAt)))
       .limit(1);
@@ -623,6 +695,10 @@ export class TeamsService {
 
     if (await this.isActiveMember(teamId, userId)) {
       throw new ConflictException("Already a member of this team");
+    }
+
+    if (await this.hasActiveTeamInHackathon(userId, team.hackathonId)) {
+      throw new ConflictException("You already have a team in this hackathon");
     }
 
     const [pending] = await this.db

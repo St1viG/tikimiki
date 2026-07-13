@@ -621,6 +621,8 @@ export interface Team {
   hackathonId: string;
   hackathonTitle: string;
   status: string;
+  /** The caller's own hackathon-application status: "pending" | "approved" | "rejected" | "none". */
+  applicationStatus: string;
   memberCount: number;
   totalXp: number;
   members: { userId: string; username: string; displayName?: string | null; role: string }[];

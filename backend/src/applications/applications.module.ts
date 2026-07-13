@@ -7,5 +7,6 @@ import { ApplicationsService } from "./applications.service";
   imports: [MailModule],
   controllers: [ApplicationsController],
   providers: [ApplicationsService],
+  exports: [ApplicationsService],
 })
 export class ApplicationsModule {}
