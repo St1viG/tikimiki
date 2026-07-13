@@ -13,7 +13,8 @@
     "test:kanban": "mocha --timeout 60000 tests/kanban.test.mjs",
     "test:messages": "mocha --timeout 60000 tests/messages.test.mjs",
     "test:search-filters": "mocha --timeout 60000 tests/search-filters.test.mjs",
-    "test:servers": "mocha --timeout 60000 tests/servers.test.mjs"
+    "test:servers": "mocha --timeout 60000 tests/servers.test.mjs",
+    "test:video-upload": "mocha --timeout 60000 tests/video-upload.test.mjs"
   },
   "devDependencies": {
     "mocha": "^10.7.3",
