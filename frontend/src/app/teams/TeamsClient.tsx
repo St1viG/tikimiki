@@ -391,14 +391,19 @@ export function TeamsClient() {
                       </div>
                       <div className="tm-tc-side">
                         <div className="tm-tc-actions">
-                          {/* "Open server" → the team chat surface (/cohor).
+                          {/* "Open server" → this team's hackathon server in Cohor,
+                              deep-linked so it opens even if it isn't the user's
+                              "active" hackathon (e.g. it already ended).
                               Locked until the organizer approves the hackathon application. */}
                           {team.applicationStatus === "pending" ? (
                             <button className="btn btn-violet" disabled>
                               <Icon name="server" /> {t("openServer")}
                             </button>
                           ) : (
-                            <Link className="btn btn-violet" href="/cohor">
+                            <Link
+                              className="btn btn-violet"
+                              href={team.serverId ? `/cohor?server=${team.serverId}` : "/cohor"}
+                            >
                               <Icon name="server" /> {t("openServer")}
                             </Link>
                           )}

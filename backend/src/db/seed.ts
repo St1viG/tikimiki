@@ -441,6 +441,19 @@ async function main() {
     position: 0,
   });
 
+  // Grant server access to the approved applicants — mirrors what
+  // ApplicationsService.approve() does at runtime (grantServerMembership),
+  // so seeded "approved" applications actually see the server in Cohor.
+  const [participantRole] = await db
+    .insert(schema.serverRoles)
+    .values({ serverId: server.serverId, name: "Participant" })
+    .returning();
+  await db.insert(schema.userRoles).values([
+    { serverRoleId: participantRole.serverRoleId, userId: andrej, assignedBy: orgUser.userId },
+    { serverRoleId: participantRole.serverRoleId, userId: mohammed, assignedBy: orgUser.userId },
+    { serverRoleId: participantRole.serverRoleId, userId: nenad, assignedBy: orgUser.userId },
+  ]);
+
   // Channel messages in #opšte
   const channelMsgSeed = [
     { senderId: andrej, content: "Dobrodošli na ETF HackWeek! 🎉", mins: 180 },

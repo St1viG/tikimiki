@@ -623,6 +623,8 @@ export interface Team {
   status: string;
   /** The caller's own hackathon-application status: "pending" | "approved" | "rejected" | "none". */
   applicationStatus: string;
+  /** The Cohor server for this team's hackathon — null if it has none yet. */
+  serverId: string | null;
   memberCount: number;
   totalXp: number;
   members: { userId: string; username: string; displayName?: string | null; role: string }[];

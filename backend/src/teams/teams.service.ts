@@ -47,6 +47,8 @@ export interface TeamDto {
   status: string;
   /** The caller's own hackathon-application status: "pending" | "approved" | "rejected" | "none". */
   applicationStatus: string;
+  /** The Cohor server for this team's hackathon — null if it has none yet. */
+  serverId: string | null;
   memberCount: number;
   totalXp: number;
   members: TeamMemberDto[];
@@ -193,10 +195,12 @@ export class TeamsService {
         hackathonId: teams.hackathonId,
         hackathonTitle: hackathons.title,
         status: hackathons.status,
+        serverId: servers.serverId,
         createdAt: teams.createdAt,
       })
       .from(teams)
       .innerJoin(hackathons, eq(teams.hackathonId, hackathons.hackathonId))
+      .leftJoin(servers, eq(servers.hackathonId, teams.hackathonId))
       .where(and(eq(teams.teamId, teamId), isNull(teams.deletedAt)))
       .limit(1);
     if (!team) throw new NotFoundException("Team not found");
@@ -212,6 +216,7 @@ export class TeamsService {
       hackathonTitle: team.hackathonTitle,
       status: team.status,
       applicationStatus: appStatuses.get(team.hackathonId) ?? "none",
+      serverId: team.serverId,
       memberCount: active.length,
       totalXp: active.reduce((sum, m) => sum + Number(m.points), 0),
       members: active.map((m) => ({
@@ -241,10 +246,12 @@ export class TeamsService {
         hackathonId: teams.hackathonId,
         hackathonTitle: hackathons.title,
         status: hackathons.status,
+        serverId: servers.serverId,
         createdAt: teams.createdAt,
       })
       .from(teams)
       .innerJoin(hackathons, eq(teams.hackathonId, hackathons.hackathonId))
+      .leftJoin(servers, eq(servers.hackathonId, teams.hackathonId))
       .where(and(inArray(teams.teamId, teamIds), isNull(teams.deletedAt)))
       .orderBy(desc(teams.createdAt));
 
@@ -263,6 +270,7 @@ export class TeamsService {
         hackathonTitle: t.hackathonTitle,
         status: t.status,
         applicationStatus: appStatuses.get(t.hackathonId) ?? "none",
+        serverId: t.serverId,
         memberCount: active.length,
         totalXp: active.reduce((sum, m) => sum + Number(m.points), 0),
         members: active.map((m) => ({
