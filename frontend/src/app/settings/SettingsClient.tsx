@@ -327,6 +327,15 @@ const M = {
     en: "Could not disconnect. Please try again.",
     sr: "Prekidanje veze nije uspelo. Pokušaj ponovo.",
   },
+  oauthLinked: { en: "Account linked successfully.", sr: "Nalog je uspešno povezan." },
+  oauthConflict: {
+    en: "That account is already linked to another profile.",
+    sr: "Taj nalog je već povezan sa drugim profilom.",
+  },
+  oauthLinkFailed: {
+    en: "Linking failed. Please try again.",
+    sr: "Povezivanje nije uspelo. Pokušaj ponovo.",
+  },
   syncGithub: { en: "Sync GitHub", sr: "Sinhronizuj GitHub" },
   syncGithubBusy: { en: "Syncing…", sr: "Sinhronizacija…" },
   syncGithubSuccess: {
@@ -990,9 +999,27 @@ export function SettingsClient() {
     [showToast, t],
   );
 
-  // Integrations: connect / disconnect
+  // Integrations: connect / disconnect. Connect uses the LINK variant of the
+  // OAuth flow (?link=1): the provider is attached to the current account —
+  // the plain flow would find-or-create a user and could silently switch the
+  // session to a brand-new account when the emails don't match.
   const connectIntegration = useCallback((provider: "github" | "google") => {
-    window.location.href = api.oauthUrl(provider);
+    window.location.href = api.oauthUrl(provider, { link: true });
+  }, []);
+
+  // Link-flow outcome: the OAuth callback bounces back to
+  // /settings?oauth=linked|conflict|error|unconfigured — toast it, open the
+  // integrations panel, and strip the param so refresh doesn't re-toast.
+  useEffect(() => {
+    const status = new URLSearchParams(window.location.search).get("oauth");
+    if (!status) return;
+    setPanel("integracije");
+    if (status === "linked") showToast(t("oauthLinked"), "ok");
+    else if (status === "conflict") showToast(t("oauthConflict"), "err");
+    else showToast(t("oauthLinkFailed"), "err");
+    window.history.replaceState(null, "", window.location.pathname);
+    // Run once on mount: the param only exists on the redirect landing.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleDisconnect = useCallback(

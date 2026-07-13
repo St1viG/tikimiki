@@ -168,6 +168,25 @@ export class AuthService {
     return { user: this.toPublicUser(u), ...(await this.issueTokens(u.userId)) };
   }
 
+  /**
+   * The user id behind a valid refresh token, or null (missing / invalid /
+   * banned). Read-only: unlike {@link refresh} it issues no new tokens — used
+   * by the OAuth link flow to resolve the current session from the cookie.
+   */
+  async resolveRefreshUserId(refreshToken: string | undefined): Promise<string | null> {
+    if (!refreshToken) return null;
+    try {
+      const payload = await this.jwt.verifyAsync<{ sub: string; typ: string }>(refreshToken, {
+        secret: env.JWT_REFRESH_SECRET,
+      });
+      if (payload.typ !== "refresh") return null;
+      if (await this.authz.isBanned(payload.sub)) return null;
+      return payload.sub;
+    } catch {
+      return null;
+    }
+  }
+
   async refresh(refreshToken: string | undefined) {
     if (!refreshToken) throw new UnauthorizedException("Missing refresh token");
     let sub: string;

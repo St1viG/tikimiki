@@ -104,7 +104,9 @@ export class SettingsService {
 
     const set =
       provider === "github"
-        ? { githubId: null, githubUsername: null, updatedAt: new Date() }
+        ? // The access token must go too — otherwise github/sync keeps working
+          // (it only checks the token) after the user "disconnected".
+          { githubId: null, githubUsername: null, githubAccessToken: null, updatedAt: new Date() }
         : provider === "google"
           ? { googleId: null, updatedAt: new Date() }
           : { linkedinId: null, updatedAt: new Date() };
