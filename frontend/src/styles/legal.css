@@ -1,0 +1,195 @@
+/* Legal / info pages (About, Accessibility, Privacy, Terms, Help) — shared
+   standalone layout. These five routes are structurally identical (wordmark,
+   one wide prose card, footer), unlike login/signup/suspended which each need
+   their own .auth-page tweaks, so they share one stylesheet instead of five
+   near-duplicate ones. */
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  padding: 48px 18px 40px;
+}
+
+.legal-card {
+  width: 100%;
+  max-width: 720px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: 40px 44px 44px;
+  box-shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.85);
+}
+
+.legal-badge {
+  width: 52px;
+  height: 52px;
+  margin-bottom: 18px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  color: var(--lemon);
+  background: color-mix(in srgb, var(--lemon) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--lemon) 28%, transparent);
+}
+.legal-badge .ic {
+  width: 26px;
+  height: 26px;
+}
+
+.legal-title {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: var(--fs-h1);
+  letter-spacing: -0.03em;
+  line-height: 1.08;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+.legal-updated {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+.legal-lead {
+  font-size: var(--fs-base);
+  color: var(--ink-2);
+  line-height: 1.6;
+  margin-bottom: 28px;
+}
+
+.legal-h2 {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: var(--fs-lg);
+  color: var(--ink);
+  margin: 26px 0 10px;
+}
+.legal-h2:first-of-type {
+  margin-top: 0;
+}
+.legal-p {
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+  line-height: 1.65;
+  margin-bottom: 12px;
+}
+.legal-list {
+  margin: 0 0 12px;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.legal-list li {
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+  line-height: 1.6;
+}
+.legal-list li strong {
+  color: var(--ink);
+  font-weight: 650;
+}
+.legal-p strong {
+  color: var(--ink);
+  font-weight: 650;
+}
+.legal-p a,
+.legal-list a {
+  color: var(--violet-light);
+  font-weight: 600;
+  transition: color 0.15s var(--ease-out);
+}
+.legal-p a:hover,
+.legal-list a:hover {
+  color: var(--lemon);
+}
+
+.legal-divider {
+  border: none;
+  border-top: 1px solid var(--line-soft);
+  margin: 28px 0 22px;
+}
+
+.legal-cross {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+}
+.legal-cross a {
+  color: var(--violet-light);
+  font-weight: 600;
+  transition: color 0.15s var(--ease-out);
+}
+.legal-cross a:hover {
+  color: var(--lemon);
+}
+
+.legal-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 22px;
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  transition: color 0.15s var(--ease-out);
+}
+.legal-back .ic {
+  width: 15px;
+  height: 15px;
+}
+.legal-back:hover {
+  color: var(--ink-2);
+}
+
+/* footerVariant="links" markup (shared by login/signup/org-signup already,
+   duplicated here rather than imported since those live in page-specific
+   stylesheets not meant to be cross-imported). */
+.auth-footer {
+  margin-top: 4px;
+  text-align: center;
+}
+.auth-footer-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px 10px;
+  flex-wrap: wrap;
+  margin-bottom: 9px;
+}
+.auth-footer-links a {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  transition: color 0.15s var(--ease-out);
+}
+.auth-footer-links a:hover {
+  color: var(--ink-2);
+}
+.auth-footer-links span {
+  font-size: 10px;
+  color: var(--muted);
+}
+.auth-footer-copy {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: var(--fs-xs);
+  color: var(--violet-light);
+}
+.auth-footer-copy b {
+  color: var(--lemon);
+}
+.auth-footer-copy .yr {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+@media (max-width: 560px) {
+  .legal-card {
+    padding: 30px 22px 34px;
+  }
+}

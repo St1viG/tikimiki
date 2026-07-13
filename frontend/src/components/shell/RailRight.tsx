@@ -302,8 +302,9 @@ export function RailRight() {
 function Footer({ t }: { t: (key: keyof typeof M) => string }) {
   return (
     <footer className="mini">
-      <a href="#">{t("about")}</a> · <a href="#">{t("accessibility")}</a> ·{" "}
-      <a href="#">{t("privacy")}</a>
+      <Link href="/about">{t("about")}</Link> ·{" "}
+      <Link href="/accessibility">{t("accessibility")}</Link> ·{" "}
+      <Link href="/privacy">{t("privacy")}</Link>
       <br />
       <span className="cw">
         <b>tiki</b>miki
