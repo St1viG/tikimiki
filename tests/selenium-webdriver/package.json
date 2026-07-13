@@ -9,6 +9,7 @@
     "test:applicant-approval": "mocha --timeout 60000 tests/applicant-approval.test.mjs",
     "test:auth": "mocha --timeout 60000 tests/auth.test.mjs",
     "test:calendar": "mocha --timeout 60000 tests/calendar.test.mjs",
+    "test:email-verify": "mocha --timeout 60000 tests/email-verify.test.mjs",
     "test:github-skills": "mocha --timeout 60000 tests/github-skills.test.mjs",
     "test:github-sync": "mocha --timeout 60000 tests/github-sync.test.mjs",
     "test:hackathons": "mocha --timeout 60000 tests/hackathons.test.mjs",
