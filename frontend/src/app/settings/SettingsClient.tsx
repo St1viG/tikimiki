@@ -1328,8 +1328,10 @@ export function SettingsClient() {
           </section>
 
           <footer className="mini">
-            <a href="#">{t("about")}</a> · <a href="#">{t("accessibility")}</a> ·{" "}
-            <a href="#">{t("helpCenter")}</a> · <a href="#">{t("privacyTerms")}</a>
+            <Link href="/about">{t("about")}</Link> ·{" "}
+            <Link href="/accessibility">{t("accessibility")}</Link> ·{" "}
+            <Link href="/help">{t("helpCenter")}</Link> ·{" "}
+            <Link href="/privacy">{t("privacyTerms")}</Link>
             <br />
             <span className="cw">
               <b>tiki</b>miki
