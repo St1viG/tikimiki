@@ -5,7 +5,7 @@ describe("registerSchema", () => {
   const base = {
     username: "valid_user",
     email: "a@example.com",
-    password: "password123",
+    password: "Password123!",
   };
 
   it("accepts a valid member registration and defaults accountType to member", () => {
@@ -15,7 +15,19 @@ describe("registerSchema", () => {
   });
 
   it("rejects passwords shorter than 8 characters", () => {
-    expect(registerSchema.safeParse({ ...base, password: "short1" }).success).toBe(false);
+    expect(registerSchema.safeParse({ ...base, password: "Sh0rt!" }).success).toBe(false);
+  });
+
+  it("rejects a password without an uppercase letter", () => {
+    expect(registerSchema.safeParse({ ...base, password: "password123!" }).success).toBe(false);
+  });
+
+  it("rejects a password without a digit", () => {
+    expect(registerSchema.safeParse({ ...base, password: "Password!!!" }).success).toBe(false);
+  });
+
+  it("rejects a password without a symbol", () => {
+    expect(registerSchema.safeParse({ ...base, password: "Password123" }).success).toBe(false);
   });
 
   it("rejects usernames with illegal characters", () => {

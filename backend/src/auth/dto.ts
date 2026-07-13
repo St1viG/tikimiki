@@ -3,6 +3,18 @@ import { z } from "zod";
 export const accountTypeSchema = z.enum(["member", "organization"]);
 export type AccountType = z.infer<typeof accountTypeSchema>;
 
+// Server-side password complexity — mirrors the registration form's live
+// checklist (PW_REQS in AuthClient) so the client hints and the authoritative
+// rule can't drift apart: 8+ chars with an uppercase letter, a digit and a
+// symbol.
+export const passwordSchema = z
+  .string()
+  .min(8)
+  .max(200)
+  .regex(/[A-Z]/, "must contain an uppercase letter")
+  .regex(/\d/, "must contain a digit")
+  .regex(/[^A-Za-z0-9]/, "must contain a symbol");
+
 export const registerSchema = z
   .object({
     username: z
@@ -11,7 +23,7 @@ export const registerSchema = z
       .max(32)
       .regex(/^[a-zA-Z0-9_.-]+$/, "letters, numbers, . _ - only"),
     email: z.string().email().max(254),
-    password: z.string().min(8).max(200),
+    password: passwordSchema,
     accountType: accountTypeSchema.default("member"),
     organizationName: z.string().min(2).max(100).optional(),
   })

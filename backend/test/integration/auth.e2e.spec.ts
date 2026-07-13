@@ -17,7 +17,7 @@ describe("auth (e2e)", () => {
   it("registers, logs in, and returns the profile with roles", async () => {
     const username = uniqueId("auth");
     const email = `${username}@test.dev`;
-    const password = "password123";
+    const password = "Password123!";
 
     const reg = await http()
       .post("/api/v1/auth/register")
@@ -75,7 +75,7 @@ describe("auth (e2e)", () => {
     const u = await registerMember(app);
     await http()
       .post("/api/v1/auth/register")
-      .send({ username: uniqueId("dup"), email: u.email, password: "password123" })
+      .send({ username: uniqueId("dup"), email: u.email, password: "Password123!" })
       .expect(409);
   });
 
@@ -86,7 +86,7 @@ describe("auth (e2e)", () => {
       .send({
         username: u.username,
         email: `${uniqueId("d")}@test.dev`,
-        password: "password123",
+        password: "Password123!",
       })
       .expect(409);
   });

@@ -1,6 +1,7 @@
 import { Body, Controller, Get, HttpCode, Post, Query, Req, Res, UseGuards } from "@nestjs/common";
 import type { Request, Response } from "express";
 import { env } from "../config/env";
+import { RateLimit, RateLimitGuard } from "../common/rate-limit.guard";
 import { ZodValidationPipe } from "../common/zod.pipe";
 import { AuthService } from "./auth.service";
 import { CurrentUser } from "./current-user.decorator";
@@ -37,17 +38,21 @@ export class AuthController {
   }
 
   @Post("register")
+  @UseGuards(RateLimitGuard)
+  @RateLimit(5, 60)
   async register(
     @Body(new ZodValidationPipe(registerSchema)) body: RegisterInput,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { user, accessToken, refreshToken } = await this.auth.register(body);
+    const { user, accessToken, refreshToken, verifyDevLink } = await this.auth.register(body);
     this.setRefreshCookie(res, refreshToken);
-    return { user, accessToken };
+    return { user, accessToken, verifyDevLink };
   }
 
   @Post("login")
   @HttpCode(200)
+  @UseGuards(RateLimitGuard)
+  @RateLimit(10, 60)
   async login(
     @Body(new ZodValidationPipe(loginSchema)) body: LoginInput,
     @Res({ passthrough: true }) res: Response,

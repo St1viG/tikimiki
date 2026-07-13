@@ -1,4 +1,5 @@
 import { Body, Controller, HttpCode, Post, UseGuards } from "@nestjs/common";
+import { RateLimit, RateLimitGuard } from "../common/rate-limit.guard";
 import { ZodValidationPipe } from "../common/zod.pipe";
 import { AccountService } from "./account.service";
 import {
@@ -34,6 +35,8 @@ export class AccountController {
 
   @Post("password/forgot")
   @HttpCode(200)
+  @UseGuards(RateLimitGuard)
+  @RateLimit(3, 60)
   forgot(
     @Body(new ZodValidationPipe(forgotPasswordSchema))
     body: ForgotPasswordInput,
@@ -58,6 +61,8 @@ export class AccountController {
 
   @Post("appeal")
   @HttpCode(200)
+  @UseGuards(RateLimitGuard)
+  @RateLimit(3, 60)
   appeal(@Body(new ZodValidationPipe(appealSchema)) body: AppealInput) {
     return this.account.submitAppeal(body.email, body.password, body.reason);
   }

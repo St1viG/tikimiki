@@ -39,7 +39,7 @@ function http(app: INestApplication) {
 export async function registerMember(app: INestApplication): Promise<TestUser> {
   const username = uniqueId("m");
   const email = `${username}@test.dev`;
-  const password = "password123";
+  const password = "Password123!";
   const res = await http(app)
     .post("/api/v1/auth/register")
     .send({ username, email, password, accountType: "member" })
@@ -57,7 +57,7 @@ export async function registerMember(app: INestApplication): Promise<TestUser> {
 export async function registerOrganization(app: INestApplication): Promise<TestUser> {
   const username = uniqueId("o");
   const email = `${username}@test.dev`;
-  const password = "password123";
+  const password = "Password123!";
   const res = await http(app)
     .post("/api/v1/auth/register")
     .send({

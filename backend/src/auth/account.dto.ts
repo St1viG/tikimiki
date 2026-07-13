@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { passwordSchema } from "./dto";
 
 export const tokenSchema = z.object({ token: z.string().min(1) });
 export type TokenInput = z.infer<typeof tokenSchema>;
@@ -6,9 +7,10 @@ export type TokenInput = z.infer<typeof tokenSchema>;
 export const forgotPasswordSchema = z.object({ email: z.string().email() });
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 
+// A reset password must satisfy the same complexity rule as registration.
 export const resetPasswordSchema = z.object({
   token: z.string().min(1),
-  newPassword: z.string().min(8).max(128),
+  newPassword: passwordSchema,
 });
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 

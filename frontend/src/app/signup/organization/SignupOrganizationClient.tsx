@@ -56,6 +56,10 @@ const M = {
     en: "Password must be at least 8 characters.",
     sr: "Lozinka mora imati najmanje 8 karaktera.",
   },
+  passwordTooWeak: {
+    en: "Password must contain an uppercase letter, a number and a symbol.",
+    sr: "Lozinka mora sadržati veliko slovo, broj i simbol.",
+  },
   emailTaken: {
     en: "That email or username is already taken.",
     sr: "Taj email ili korisničko ime je već zauzeto.",
@@ -119,6 +123,12 @@ export function SignupOrganizationClient() {
     }
     if (password.length < 8) {
       setSubmitError(t("passwordTooShort"));
+      return;
+    }
+    // Same complexity rule the backend registerSchema enforces (and the
+    // member AuthClient checklist shows): uppercase + digit + symbol.
+    if (!/[A-Z]/.test(password) || !/\d/.test(password) || !/[^A-Za-z0-9]/.test(password)) {
+      setSubmitError(t("passwordTooWeak"));
       return;
     }
     if (!matchOk) return;

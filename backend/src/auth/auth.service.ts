@@ -12,6 +12,7 @@ import { AuthzService } from "../common/authz.service";
 import { env } from "../config/env";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import { administrators, members, organizations, users } from "../db/schema";
+import { AccountService } from "./account.service";
 import type { LoginInput, RegisterInput } from "./dto";
 
 export interface PublicUser {
@@ -40,6 +41,7 @@ export class AuthService {
     @Inject(DRIZZLE) private readonly db: DrizzleDB,
     private readonly jwt: JwtService,
     private readonly authz: AuthzService,
+    private readonly account: AccountService,
   ) {}
 
   private toPublicUser(u: UserRow): PublicUser {
@@ -103,7 +105,23 @@ export class AuthService {
       return u;
     });
 
-    return { user: this.toPublicUser(user), ...(await this.issueTokens(user.userId)) };
+    // Verification e-mail is part of registration itself, not a separate
+    // user-initiated step. Best-effort: a mail failure must never abort an
+    // already-committed registration.
+    let verifyDevLink: string | undefined;
+    try {
+      const verification = await this.account.requestEmailVerification(user.userId);
+      verifyDevLink = verification.devLink;
+    } catch {
+      // Mail problems are logged by MailService; the account stays usable and
+      // the user can re-request the link from settings.
+    }
+
+    return {
+      user: this.toPublicUser(user),
+      verifyDevLink,
+      ...(await this.issueTokens(user.userId)),
+    };
   }
 
   /**
