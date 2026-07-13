@@ -1846,6 +1846,13 @@
 .chat-textarea::placeholder {
   color: var(--muted);
 }
+/* The pill-shaped input box already shows focus via :focus-within (border
+   color change); the app-wide lemon focus-visible outline is a sharp
+   rectangle that pokes out past the box's rounded corners, so suppress it
+   here. */
+.chat-textarea:focus-visible {
+  outline: none;
+}
 /* Inline Markdown preview shown in place of the textarea. */
 .chat-preview {
   flex: 1;
