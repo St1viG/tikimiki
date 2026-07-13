@@ -15,6 +15,12 @@ import type { HackathonSummary } from "@tikimiki/types";
  * The hackathon <select> is populated from api.getHackathons() so it carries
  * real hackathon ids. On success the dialog closes; the caller's onClose
  * handler reloads the team lists.
+ *
+ * Failure states are surfaced instead of failing silently: a hackathon-load
+ * error shows an inline message with a Retry action, an empty hackathon list
+ * shows "no hackathons available", and a failed create shows the backend's
+ * actual error message (e.g. "Only members can create a team") rather than a
+ * generic one.
  */
 
 const M = {
@@ -26,6 +32,15 @@ const M = {
   labelHackathon: { en: "Hackathon", sr: "Hackathon" },
   selectHackathon: { en: "— Select hackathon —", sr: "— Odaberi hackathon —" },
   loadingHackathons: { en: "Loading hackathons…", sr: "Učitavanje hackathona…" },
+  hackathonsLoadError: {
+    en: "Could not load hackathons.",
+    sr: "Učitavanje hackathona nije uspelo.",
+  },
+  retry: { en: "Retry", sr: "Pokušaj ponovo" },
+  noHackathons: {
+    en: "No hackathons available right now.",
+    sr: "Trenutno nema dostupnih hackathona.",
+  },
   labelRoles: { en: "Roles you're looking for?", sr: "Koje uloge tražite?" },
   placeholderRoles: { en: "e.g. Backend, ML, Frontend…", sr: "npr. Backend, ML, Frontend…" },
   cancel: { en: "Cancel", sr: "Otkaži" },
@@ -45,8 +60,10 @@ export function CreateTeamPopup({ open, onClose }: { open: boolean; onClose: () 
   const [hackathonId, setHackathonId] = useState("");
   const [hackathons, setHackathons] = useState<HackathonSummary[]>([]);
   const [loadingHk, setLoadingHk] = useState(false);
+  const [hkError, setHkError] = useState(false);
+  const [hkReloadToken, setHkReloadToken] = useState(0);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const el = dialogRef.current;
@@ -55,18 +72,19 @@ export function CreateTeamPopup({ open, onClose }: { open: boolean; onClose: () 
       // Reset the form each time the dialog opens.
       setName("");
       setHackathonId("");
-      setError(false);
+      setErrorMessage(null);
       el.showModal();
     } else {
       el.close();
     }
   }, [open]);
 
-  // Load real hackathon options (with ids) when the dialog opens.
+  // Load real hackathon options (with ids) when the dialog opens (or Retry is clicked).
   useEffect(() => {
     if (!open) return;
     let cancelled = false;
     setLoadingHk(true);
+    setHkError(false);
     api
       .getHackathons()
       .then((list) => {
@@ -74,6 +92,7 @@ export function CreateTeamPopup({ open, onClose }: { open: boolean; onClose: () 
       })
       .catch((err) => {
         console.error("Failed to load hackathons for team creation", err);
+        if (!cancelled) setHkError(true);
       })
       .finally(() => {
         if (!cancelled) setLoadingHk(false);
@@ -81,7 +100,7 @@ export function CreateTeamPopup({ open, onClose }: { open: boolean; onClose: () 
     return () => {
       cancelled = true;
     };
-  }, [open]);
+  }, [open, hkReloadToken]);
 
   // Close on backdrop click
   function handleClick(e: React.MouseEvent<HTMLDialogElement>) {
@@ -102,13 +121,13 @@ export function CreateTeamPopup({ open, onClose }: { open: boolean; onClose: () 
   async function handleCreate() {
     if (!canSubmit) return;
     setSubmitting(true);
-    setError(false);
+    setErrorMessage(null);
     try {
       await api.createTeam(name.trim(), hackathonId);
       onClose();
     } catch (err) {
       console.error("Failed to create team", err);
-      setError(true);
+      setErrorMessage(err instanceof api.ApiError ? err.message : t("error"));
     } finally {
       setSubmitting(false);
     }
@@ -158,13 +177,45 @@ export function CreateTeamPopup({ open, onClose }: { open: boolean; onClose: () 
             onChange={(e) => setHackathonId(e.target.value)}
             disabled={loadingHk}
           >
-            <option value="">{loadingHk ? t("loadingHackathons") : t("selectHackathon")}</option>
+            <option value="">
+              {loadingHk
+                ? t("loadingHackathons")
+                : hkError
+                  ? t("hackathonsLoadError")
+                  : hackathons.length === 0
+                    ? t("noHackathons")
+                    : t("selectHackathon")}
+            </option>
             {hackathons.map((hk) => (
               <option key={hk.hackathonId} value={hk.hackathonId}>
                 {hk.title}
               </option>
             ))}
           </select>
+
+          {hkError && !loadingHk && (
+            <p
+              role="alert"
+              style={{ color: "var(--red)", fontSize: 13, fontWeight: 600, marginTop: 8 }}
+            >
+              {t("hackathonsLoadError")}{" "}
+              <button
+                type="button"
+                onClick={() => setHkReloadToken((n) => n + 1)}
+                style={{
+                  color: "inherit",
+                  fontWeight: 600,
+                  textDecoration: "underline",
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  cursor: "pointer",
+                }}
+              >
+                {t("retry")}
+              </button>
+            </p>
+          )}
 
           <label className="field-label" htmlFor="ct-roles">
             {t("labelRoles")}
@@ -177,12 +228,12 @@ export function CreateTeamPopup({ open, onClose }: { open: boolean; onClose: () 
             autoComplete="off"
           />
 
-          {error && (
+          {errorMessage && (
             <p
               role="alert"
               style={{ color: "var(--red)", fontSize: 13, fontWeight: 600, marginTop: 8 }}
             >
-              {t("error")}
+              {errorMessage}
             </p>
           )}
         </div>
