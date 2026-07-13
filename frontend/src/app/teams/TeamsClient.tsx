@@ -11,7 +11,6 @@ import { RailRight } from "@/components/shell/RailRight";
 import { CreateTeamPopup } from "@/components/popups/CreateTeamPopup";
 import { JoinTeamPopup } from "@/components/popups/JoinTeamPopup";
 import { ProfilePopup } from "@/components/popups/ProfilePopup";
-import { ProjectPopup } from "@/components/popups/ProjectPopup";
 import {
   AV_POS,
   AvatarStack,
@@ -133,13 +132,8 @@ export function TeamsClient() {
   const [invitingUserId, setInvitingUserId] = useState<string | null>(null);
   const [invitedUserIds, setInvitedUserIds] = useState<Set<string>>(new Set());
   const [invitationBusyId, setInvitationBusyId] = useState<string | null>(null);
-  // The caller's project per team (for the card label + popup preload).
+  // The caller's project per team (drives the "Add project"/"Edit draft"/"Submitted" label).
   const [projectsByTeam, setProjectsByTeam] = useState<Record<string, Project | null>>({});
-  // Which team's project popup is open (null = closed).
-  const [projectTeam, setProjectTeam] = useState<{
-    teamId: string;
-    teamName: string;
-  } | null>(null);
 
   const loadAll = useCallback(async () => {
     try {
@@ -408,19 +402,25 @@ export function TeamsClient() {
                             </Link>
                           )}
                           {/* "Project" → create / edit / submit the team's
-                              hackathon deliverable (ProjectPopup). */}
-                          <button
-                            className="btn btn-ghost"
-                            disabled={team.applicationStatus === "pending"}
-                            onClick={() =>
-                              setProjectTeam({
-                                teamId: team.teamId,
-                                teamName: team.name,
-                              })
-                            }
-                          >
-                            <Icon name="rocket" /> {projectBtnLabel(projectsByTeam[team.teamId])}
-                          </button>
+                              hackathon deliverable, in the hackathon's own
+                              Cohor server (#predaja-projekta) rather than a
+                              separate popup. */}
+                          {team.applicationStatus === "pending" ? (
+                            <button className="btn btn-ghost" disabled>
+                              <Icon name="rocket" /> {projectBtnLabel(projectsByTeam[team.teamId])}
+                            </button>
+                          ) : (
+                            <Link
+                              className="btn btn-ghost"
+                              href={
+                                team.serverId
+                                  ? `/cohor?server=${team.serverId}&channel=predaja-projekta`
+                                  : "/cohor"
+                              }
+                            >
+                              <Icon name="rocket" /> {projectBtnLabel(projectsByTeam[team.teamId])}
+                            </Link>
+                          )}
                         </div>
                       </div>
                     </article>
@@ -619,13 +619,6 @@ export function TeamsClient() {
         open={popupUser !== null}
         username={popupUser}
         onClose={() => setPopupUser(null)}
-      />
-      <ProjectPopup
-        open={projectTeam !== null}
-        teamId={projectTeam?.teamId ?? null}
-        teamName={projectTeam?.teamName}
-        onClose={() => setProjectTeam(null)}
-        onChanged={(teamId, p) => setProjectsByTeam((prev) => ({ ...prev, [teamId]: p }))}
       />
     </>
   );

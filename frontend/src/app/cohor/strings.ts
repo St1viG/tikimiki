@@ -218,6 +218,25 @@ export const M = {
   statusGithubName: { en: "GitHub repository", sr: "GitHub repozitorijum" },
   statusLinkAdded: { en: "Link added", sr: "Link dodat" },
   statusLinkNotAdded: { en: "Link not added", sr: "Link nije dodat" },
+  predajaLoading: { en: "Loading your project…", sr: "Učitavanje projekta…" },
+  predajaNoTeam: {
+    en: "Join or create a team for this hackathon to submit a project.",
+    sr: "Pridruži se ili napravi tim za ovaj hakaton da bi predao projekat.",
+  },
+  statusSubmissionName: { en: "Submission", sr: "Predaja" },
+  projectStatusDraft: { en: "Draft", sr: "Nacrt" },
+  projectStatusSubmitted: { en: "Submitted", sr: "Predato" },
+  projectStatusReview: { en: "Under review", sr: "U pregledu" },
+  projectStatusJudged: { en: "Judged", sr: "Ocenjeno" },
+  projectSubmit: { en: "Submit project", sr: "Predaj projekat" },
+  projectSubmitting: { en: "Submitting…", sr: "Predajem…" },
+  projectWithdraw: { en: "Withdraw to draft", sr: "Vrati u nacrt" },
+  projectWithdrawing: { en: "Withdrawing…", sr: "Vraćam…" },
+  projectGenericError: {
+    en: "Something went wrong. Try again.",
+    sr: "Nešto je pošlo po zlu. Pokušaj ponovo.",
+  },
+  videoUploading: { en: "Uploading…", sr: "Otpremam…" },
 
   // Bounties panel
   bountyOrgName: { en: "Sponsor Bounty Challenges", sr: "Sponzorski Bounty Izazovi" },

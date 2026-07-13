@@ -83,6 +83,12 @@ import {
   renameChannel,
   deleteChannel,
   deleteMessage,
+  getTeamProject,
+  createProject,
+  updateProject,
+  submitProject,
+  withdrawProject,
+  uploadProjectVideo,
   ApiError,
   type ServerSummary,
   type ChatMessage as ApiMessage,
@@ -98,6 +104,7 @@ import {
   type ChannelGroup,
   type Permission,
   type ServerRole,
+  type Project,
 } from "@/lib/api";
 import type { HackathonSummary } from "@tikimiki/types";
 import { getSocket } from "@/lib/socket";
@@ -848,6 +855,27 @@ export function CohorClient() {
   // Deep link: /cohor?server=<serverId> opens that server (handled once the
   // servers list has loaded, in the mount effect below).
   const serverParam = searchParams.get("server");
+  // Deep link: /cohor?server=<id>&channel=<name> also selects a channel by
+  // name once that server's channel tree has loaded (e.g. the "Add project"
+  // button on /teams links straight to #predaja-projekta). Consumed once.
+  const channelParam = searchParams.get("channel");
+  const channelDeepLinkConsumed = useRef(false);
+  useEffect(() => {
+    if (!channelParam || channelDeepLinkConsumed.current) return;
+    const cid = chanMap[channelParam];
+    if (!cid) return;
+    let type = "general";
+    for (const g of serverGroups) {
+      const ch = g.channels.find((c) => c.name === channelParam);
+      if (ch) {
+        type = ch.type;
+        break;
+      }
+    }
+    channelDeepLinkConsumed.current = true;
+    switchChannel(channelParam, "", type);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [channelParam, chanMap, serverGroups]);
   useEffect(() => {
     if (!dmParam) return;
     setAppMode("dm");
@@ -1183,16 +1211,22 @@ export function CohorClient() {
     };
   }, [hackathonId]);
 
-  // Resolve the user's first team (drives the real Kanban board).
+  // Resolve the user's team *for the active server's hackathon* (drives the
+  // real Kanban board + project submission panel). Re-runs on server switch
+  // so it never shows a team from a different hackathon.
   useEffect(() => {
+    setMyTeamId(null);
+    setMyTeamName(null);
+    if (!hackathonId) return;
     let cancelled = false;
     (async () => {
       try {
         const teams = await getMyTeams();
         if (cancelled) return;
-        if (teams.length > 0) {
-          setMyTeamId(teams[0].teamId);
-          setMyTeamName(teams[0].name);
+        const mine = teams.find((tm) => tm.hackathonId === hackathonId);
+        if (mine) {
+          setMyTeamId(mine.teamId);
+          setMyTeamName(mine.name);
         }
       } catch {
         /* ignore — fall back to the static fallback board */
@@ -1201,7 +1235,38 @@ export function CohorClient() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [hackathonId]);
+
+  /** Reset + repopulate the predaja form fields from a (possibly null) project. */
+  function applyProject(p: Project | null) {
+    setProject(p);
+    setRepoInput(p?.repositoryUrl ?? "");
+    setRepoEditing(!p?.repositoryUrl);
+  }
+
+  // Load the team's project (predaja panel) whenever the resolved team changes.
+  useEffect(() => {
+    if (!myTeamId) {
+      applyProject(null);
+      return;
+    }
+    let cancelled = false;
+    setProjectLoading(true);
+    getTeamProject(myTeamId)
+      .then((p) => {
+        if (!cancelled) applyProject(p);
+      })
+      .catch(() => {
+        if (!cancelled) applyProject(null);
+      })
+      .finally(() => {
+        if (!cancelled) setProjectLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [myTeamId]);
 
   // Load the Kanban board whenever the resolved team changes.
   useEffect(() => {
@@ -1953,20 +2018,26 @@ export function CohorClient() {
   // Real official results loaded from the backend for the active hackathon.
   const [results, setResults] = useState<HackathonResults | null>(null);
 
-  /* Predaja: video + github */
-  const [video, setVideo] = useState<{ name: string; meta: string } | null>(null);
+  /* Predaja: real project submission — repo/video, backed by
+   * /teams/:teamId/project. `myTeamId` scopes it to the caller's team in the
+   * active hackathon's server. The project itself is created transparently
+   * (titled after the team) the first time a video or repo link is saved. */
+  const [project, setProject] = useState<Project | null>(null);
+  const [projectLoading, setProjectLoading] = useState(false);
+  const [projectBusy, setProjectBusy] = useState<"submit" | "withdraw" | null>(null);
+  const [projectError, setProjectError] = useState<string | null>(null);
+
   const [videoError, setVideoError] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
-  const videoUrlRef = useRef<string | null>(null);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
   const videoFileInputRef = useRef<HTMLInputElement | null>(null);
   const videoReplaceInputRef = useRef<HTMLInputElement | null>(null);
-  const videoPlayerRef = useRef<HTMLVideoElement | null>(null);
 
-  const [githubSaved, setGithubSaved] = useState("");
-  const [githubEditing, setGithubEditing] = useState(true);
-  const [githubInput, setGithubInput] = useState("");
-  const [githubError, setGithubError] = useState(false);
-  const [githubFocused, setGithubFocused] = useState(false);
+  const [repoInput, setRepoInput] = useState("");
+  const [repoEditing, setRepoEditing] = useState(true);
+  const [repoError, setRepoError] = useState(false);
+  const [repoFocused, setRepoFocused] = useState(false);
+  const [repoBusy, setRepoBusy] = useState(false);
 
   /* Scroll refs for the message streams */
   const serverMsgsRef = useRef<HTMLDivElement | null>(null);
@@ -2416,7 +2487,61 @@ export function CohorClient() {
   }
 
   /* Video upload */
-  function processVideoFile(f: File) {
+  function projectErrorMessage(e: unknown): string {
+    if (e instanceof ApiError && e.message) return e.message;
+    return t("projectGenericError");
+  }
+
+  /**
+   * The video/repo sections work the moment the panel opens, with no separate
+   * "create project" step — the very first upload/save transparently creates
+   * the draft (titled after the team) if one doesn't exist yet.
+   */
+  async function ensureProject(): Promise<Project> {
+    if (project) return project;
+    if (!myTeamId) throw new Error("no team");
+    const created = await createProject(myTeamId, { title: myTeamName?.trim() || "Untitled" });
+    setProject(created);
+    return created;
+  }
+
+  async function handleSubmitProject() {
+    if (!project || projectBusy) return;
+    setProjectBusy("submit");
+    setProjectError(null);
+    try {
+      applyProject(await submitProject(project.projectId));
+    } catch (e) {
+      setProjectError(projectErrorMessage(e));
+    } finally {
+      setProjectBusy(null);
+    }
+  }
+
+  async function handleWithdrawProject() {
+    if (!project || projectBusy) return;
+    setProjectBusy("withdraw");
+    setProjectError(null);
+    try {
+      applyProject(await withdrawProject(project.projectId));
+    } catch (e) {
+      setProjectError(projectErrorMessage(e));
+    } finally {
+      setProjectBusy(null);
+    }
+  }
+
+  const videoErrTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  function flashVideoError(msg: string) {
+    setDragOver(false);
+    setVideoError(msg);
+    if (videoErrTimer.current) clearTimeout(videoErrTimer.current);
+    videoErrTimer.current = setTimeout(() => setVideoError(null), 4000);
+  }
+
+  /** Upload a picked video to `/uploads/video`, then persist it on the project. */
+  async function processVideoFile(f: File) {
+    if (!myTeamId) return;
     const allowed = [
       "video/mp4",
       "video/quicktime",
@@ -2434,55 +2559,76 @@ export function CohorClient() {
       flashVideoError(t("videoErrSize"));
       return;
     }
-    if (videoUrlRef.current) URL.revokeObjectURL(videoUrlRef.current);
-    const url = URL.createObjectURL(f);
-    videoUrlRef.current = url;
-    const mb = (f.size / (1024 * 1024)).toFixed(1);
-    setVideo({ name: f.name, meta: mb + t("videoMetaSuffix") });
-    requestAnimationFrame(() => {
-      if (videoPlayerRef.current) videoPlayerRef.current.src = url;
-    });
-  }
-  function removeVideo() {
-    if (videoUrlRef.current) {
-      URL.revokeObjectURL(videoUrlRef.current);
-      videoUrlRef.current = null;
-    }
-    if (videoPlayerRef.current) videoPlayerRef.current.src = "";
-    setVideo(null);
-    if (videoFileInputRef.current) videoFileInputRef.current.value = "";
-    if (videoReplaceInputRef.current) videoReplaceInputRef.current.value = "";
-  }
-  const videoErrTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  function flashVideoError(msg: string) {
     setDragOver(false);
-    setVideoError(msg);
-    if (videoErrTimer.current) clearTimeout(videoErrTimer.current);
-    videoErrTimer.current = setTimeout(() => setVideoError(null), 4000);
+    setUploadingVideo(true);
+    setVideoError(null);
+    try {
+      const target = await ensureProject();
+      const { url } = await uploadProjectVideo(f);
+      applyProject(await updateProject(target.projectId, { videoUrl: url }));
+    } catch (e) {
+      flashVideoError(projectErrorMessage(e));
+    } finally {
+      setUploadingVideo(false);
+      if (videoFileInputRef.current) videoFileInputRef.current.value = "";
+      if (videoReplaceInputRef.current) videoReplaceInputRef.current.value = "";
+    }
+  }
+  async function removeVideo() {
+    if (!project) return;
+    setUploadingVideo(true);
+    setVideoError(null);
+    try {
+      applyProject(await updateProject(project.projectId, { videoUrl: null }));
+    } catch (e) {
+      flashVideoError(projectErrorMessage(e));
+    } finally {
+      setUploadingVideo(false);
+    }
   }
 
-  /* GitHub */
-  function saveGithub() {
-    const val = githubInput.trim();
-    if (!val.match(/^https?:\/\/(www\.)?github\.com\/.+\/.+/)) {
-      setGithubError(true);
+  /* Repository URL */
+  function isValidUrl(v: string): boolean {
+    try {
+      // eslint-disable-next-line no-new
+      new URL(v);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+  async function saveGithub() {
+    if (!myTeamId) return;
+    const val = repoInput.trim();
+    if (!isValidUrl(val)) {
+      setRepoError(true);
       return;
     }
-    setGithubError(false);
-    setGithubSaved(val);
-    setGithubEditing(false);
+    setRepoError(false);
+    setRepoBusy(true);
+    try {
+      const target = await ensureProject();
+      applyProject(await updateProject(target.projectId, { repositoryUrl: val }));
+      setRepoEditing(false);
+    } catch (e) {
+      setProjectError(projectErrorMessage(e));
+    } finally {
+      setRepoBusy(false);
+    }
   }
   function editGithub() {
-    setGithubInput(githubSaved);
-    setGithubEditing(true);
+    setRepoInput(project?.repositoryUrl ?? "");
+    setRepoError(false);
+    setRepoEditing(true);
   }
   function openGithub() {
-    if (githubSaved) window.open(githubSaved, "_blank");
+    if (project?.repositoryUrl) window.open(project.repositoryUrl, "_blank");
   }
 
   /* Derived flags */
-  const videoDone = video !== null;
-  const githubDone = githubSaved !== "" && !githubEditing;
+  const videoDone = Boolean(project?.videoUrl);
+  const githubDone = Boolean(project?.repositoryUrl) && !repoEditing;
+  const projectJudged = project?.status === "under_review" || project?.status === "judged";
   // The active conversation (if any) and whether it is a group — drives the
   // image-aware topbar icon and the "click name → group settings" affordance.
   const activeConvo = dmConvos.find((c) => c.conversationId === activeConvoId);
@@ -3322,222 +3468,292 @@ export function CohorClient() {
                 </div>
               </div>
 
-              {/* Video section */}
-              <div className="panel-section">
-                {!videoDone ? (
-                  <div id="video-empty-state">
-                    <div className="panel-label">{t("videoLabel")}</div>
-                    <div
-                      id="video-drop-zone"
-                      className={
-                        "video-drop-zone" +
-                        (dragOver ? " drag-over" : "") +
-                        (videoError ? " error" : "")
-                      }
-                      onClick={() => videoFileInputRef.current?.click()}
-                      onDragOver={(e) => {
-                        e.preventDefault();
-                        setDragOver(true);
-                      }}
-                      onDragLeave={() => setDragOver(false)}
-                      onDrop={(e) => {
-                        e.preventDefault();
-                        setDragOver(false);
-                        const f = e.dataTransfer.files[0];
-                        if (f) processVideoFile(f);
-                      }}
-                    >
-                      <div className="video-drop-ic">
-                        <Icon name="image" className="ic-lg" />
-                      </div>
-                      <div className="video-drop-title">{t("videoDropTitle")}</div>
-                      <div className="video-drop-sub">{t("videoDropSub")}</div>
-                      <div className="video-drop-btn">
-                        <Icon name="share" className="ic-sm" /> {t("videoUpload")}
-                      </div>
-                      <input
-                        type="file"
-                        id="video-file-input"
-                        ref={videoFileInputRef}
-                        accept="video/mp4,video/quicktime,video/avi,video/*"
-                        style={{ display: "none" }}
-                        onChange={(e) => {
-                          const f = e.target.files?.[0];
-                          if (f) processVideoFile(f);
-                        }}
-                      />
-                    </div>
-                    {videoError && (
+              {!myTeamId ? (
+                <div className="panel-section">
+                  <div className="panel-brief-note">{t("predajaNoTeam")}</div>
+                </div>
+              ) : projectLoading ? (
+                <div className="panel-section">
+                  <div className="panel-brief-note">{t("predajaLoading")}</div>
+                </div>
+              ) : (
+                <>
+                  {projectError && (
+                    <div className="panel-section">
                       <div id="video-upload-err" className="video-upload-err">
-                        ⚠ {videoError}
+                        ⚠ {projectError}
+                      </div>
+                    </div>
+                  )}
+                  {/* Video section */}
+                  <div className="panel-section">
+                    {!videoDone ? (
+                      <div id="video-empty-state">
+                        <div className="panel-label">{t("videoLabel")}</div>
+                        <div
+                          id="video-drop-zone"
+                          className={
+                            "video-drop-zone" +
+                            (dragOver ? " drag-over" : "") +
+                            (videoError ? " error" : "")
+                          }
+                          onClick={() => !uploadingVideo && videoFileInputRef.current?.click()}
+                          onDragOver={(e) => {
+                            e.preventDefault();
+                            setDragOver(true);
+                          }}
+                          onDragLeave={() => setDragOver(false)}
+                          onDrop={(e) => {
+                            e.preventDefault();
+                            setDragOver(false);
+                            const f = e.dataTransfer.files[0];
+                            if (f) processVideoFile(f);
+                          }}
+                        >
+                          <div className="video-drop-ic">
+                            <Icon name="image" className="ic-lg" />
+                          </div>
+                          <div className="video-drop-title">
+                            {uploadingVideo ? t("videoUploading") : t("videoDropTitle")}
+                          </div>
+                          <div className="video-drop-sub">{t("videoDropSub")}</div>
+                          <div className="video-drop-btn">
+                            <Icon name="share" className="ic-sm" /> {t("videoUpload")}
+                          </div>
+                          <input
+                            type="file"
+                            id="video-file-input"
+                            ref={videoFileInputRef}
+                            accept="video/mp4,video/quicktime,video/avi,video/*"
+                            style={{ display: "none" }}
+                            onChange={(e) => {
+                              const f = e.target.files?.[0];
+                              if (f) processVideoFile(f);
+                            }}
+                          />
+                        </div>
+                        {videoError && (
+                          <div id="video-upload-err" className="video-upload-err">
+                            ⚠ {videoError}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div id="video-uploaded-state">
+                        <div className="panel-label-row">
+                          <div className="panel-label">{t("videoLabel")}</div>
+                          {!projectJudged && (
+                            <div className="panel-label-actions">
+                              <button
+                                type="button"
+                                className="mini-btn"
+                                disabled={uploadingVideo}
+                                onClick={() => videoReplaceInputRef.current?.click()}
+                              >
+                                <Icon name="share" className="ic-sm" /> {t("videoReplace")}
+                              </button>
+                              <input
+                                type="file"
+                                id="video-replace-input"
+                                ref={videoReplaceInputRef}
+                                accept="video/*"
+                                style={{ display: "none" }}
+                                onChange={(e) => {
+                                  const f = e.target.files?.[0];
+                                  if (f) processVideoFile(f);
+                                }}
+                              />
+                              <button
+                                type="button"
+                                className="mini-btn mini-btn-danger"
+                                disabled={uploadingVideo}
+                                onClick={removeVideo}
+                              >
+                                <Icon name="x" className="ic-sm" /> {t("videoRemove")}
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                        <div className="video-frame">
+                          <video
+                            id="video-player"
+                            src={project?.videoUrl ?? undefined}
+                            controls
+                            preload="metadata"
+                            style={{
+                              width: "100%",
+                              display: "block",
+                              maxHeight: 340,
+                              background: "#000",
+                            }}
+                          >
+                            {t("videoNoHtml5")}
+                          </video>
+                        </div>
+                        {videoError && (
+                          <div id="video-upload-err" className="video-upload-err">
+                            ⚠ {videoError}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
-                ) : (
-                  <div id="video-uploaded-state">
-                    <div className="panel-label-row">
-                      <div className="panel-label">{t("videoLabel")}</div>
-                      <div className="panel-label-actions">
-                        <button
-                          type="button"
-                          className="mini-btn"
-                          onClick={() => videoReplaceInputRef.current?.click()}
-                        >
-                          <Icon name="share" className="ic-sm" /> {t("videoReplace")}
-                        </button>
-                        <input
-                          type="file"
-                          id="video-replace-input"
-                          ref={videoReplaceInputRef}
-                          accept="video/*"
-                          style={{ display: "none" }}
-                          onChange={(e) => {
-                            const f = e.target.files?.[0];
-                            if (f) processVideoFile(f);
-                          }}
-                        />
-                        <button
-                          type="button"
-                          className="mini-btn mini-btn-danger"
-                          onClick={removeVideo}
-                        >
-                          <Icon name="x" className="ic-sm" /> {t("videoRemove")}
-                        </button>
-                      </div>
-                    </div>
-                    <div className="video-frame">
-                      <video
-                        id="video-player"
-                        ref={videoPlayerRef}
-                        controls
-                        style={{
-                          width: "100%",
-                          display: "block",
-                          maxHeight: 340,
-                          background: "#000",
-                        }}
-                      >
-                        {t("videoNoHtml5")}
-                      </video>
-                    </div>
-                    <div className="video-file-row">
-                      <span className="video-file-ic">
-                        <Icon name="image" className="ic-sm" />
+
+                  {/* GitHub repo section */}
+                  <div className="panel-section">
+                    <div className="panel-label">{t("githubLabel")}</div>
+                    <div
+                      id="github-display"
+                      className="github-display"
+                      style={{ display: githubDone ? "flex" : "none" }}
+                    >
+                      <span className="github-display-ic">
+                        <Icon name="link" className="ic-sm" />
                       </span>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div id="video-filename" className="video-filename">
-                          {video.name}
-                        </div>
-                        <div id="video-meta" className="video-meta">
-                          {video.meta}
+                        <div
+                          id="github-link-display"
+                          className="github-link-display"
+                          onClick={openGithub}
+                        >
+                          {(project?.repositoryUrl ?? "").replace("https://", "")}
                         </div>
                       </div>
-                      <span className="ok-pill">
-                        <Icon name="check" className="ic-sm" /> OK
-                      </span>
+                      {!projectJudged && (
+                        <button type="button" className="mini-btn" onClick={editGithub}>
+                          {t("edit")}
+                        </button>
+                      )}
                     </div>
-                  </div>
-                )}
-              </div>
-
-              {/* GitHub repo section */}
-              <div className="panel-section">
-                <div className="panel-label">{t("githubLabel")}</div>
-                <div
-                  id="github-display"
-                  className="github-display"
-                  style={{ display: githubDone ? "flex" : "none" }}
-                >
-                  <span className="github-display-ic">
-                    <Icon name="link" className="ic-sm" />
-                  </span>
-                  <div style={{ flex: 1, minWidth: 0 }}>
+                    {!projectJudged && (
+                      <div
+                        id="github-input-wrap"
+                        className="github-input-wrap"
+                        style={{ display: githubDone ? "none" : "flex" }}
+                      >
+                        <div
+                          className={"github-input-box" + (repoFocused ? " focused" : "")}
+                          id="github-input-box"
+                        >
+                          <span className="github-input-ic">
+                            <Icon name="link" className="ic-sm" />
+                          </span>
+                          <input
+                            type="text"
+                            id="github-url-input"
+                            aria-label="Repository URL"
+                            placeholder="https://github.com/tim/repo"
+                            value={repoInput}
+                            onChange={(e) => setRepoInput(e.target.value)}
+                            onFocus={() => setRepoFocused(true)}
+                            onBlur={() => setRepoFocused(false)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") saveGithub();
+                            }}
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          className="btn-violet-sm"
+                          onClick={saveGithub}
+                          disabled={repoBusy}
+                        >
+                          {t("save")}
+                        </button>
+                      </div>
+                    )}
                     <div
-                      id="github-link-display"
-                      className="github-link-display"
-                      onClick={openGithub}
+                      id="github-error"
+                      className="github-error"
+                      style={{ display: repoError ? "flex" : "none" }}
                     >
-                      {githubSaved.replace("https://", "")}
+                      <Icon name="x" className="ic-sm" /> {t("githubError")}
                     </div>
-                    <div className="github-display-sub">digitalci · public repo</div>
                   </div>
-                  <button type="button" className="mini-btn" onClick={editGithub}>
-                    {t("edit")}
-                  </button>
-                </div>
-                <div
-                  id="github-input-wrap"
-                  className="github-input-wrap"
-                  style={{ display: githubDone ? "none" : "flex" }}
-                >
-                  <div
-                    className={"github-input-box" + (githubFocused ? " focused" : "")}
-                    id="github-input-box"
-                  >
-                    <span className="github-input-ic">
-                      <Icon name="link" className="ic-sm" />
-                    </span>
-                    <input
-                      type="text"
-                      id="github-url-input"
-                      aria-label="GitHub URL"
-                      placeholder="https://github.com/tim/repo"
-                      value={githubInput}
-                      onChange={(e) => setGithubInput(e.target.value)}
-                      onFocus={() => setGithubFocused(true)}
-                      onBlur={() => setGithubFocused(false)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") saveGithub();
-                      }}
-                    />
-                  </div>
-                  <button type="button" className="btn-violet-sm" onClick={saveGithub}>
-                    {t("save")}
-                  </button>
-                </div>
-                <div
-                  id="github-error"
-                  className="github-error"
-                  style={{ display: githubError ? "flex" : "none" }}
-                >
-                  <Icon name="x" className="ic-sm" /> {t("githubError")}
-                </div>
-              </div>
 
-              {/* Status summary */}
-              <div className="panel-section panel-section-end">
-                <div className="panel-label">{t("statusTitle")}</div>
-                <div className="status-card">
-                  <div className="status-row">
-                    <span
-                      id="status-video-icon"
-                      className={"status-ic" + (videoDone ? " status-ic-done" : "")}
-                    >
-                      <Icon name={videoDone ? "check" : "x"} className="ic-sm" />
-                    </span>
-                    <div style={{ flex: 1 }}>
-                      <div className="status-name">{t("statusVideoName")}</div>
-                      <div id="status-video-txt" className="status-sub">
-                        {videoDone ? t("statusUploaded") : t("statusNotUploaded")}
+                  {/* Status summary */}
+                  <div className="panel-section panel-section-end">
+                    <div className="panel-label">{t("statusTitle")}</div>
+                    <div className="status-card">
+                      <div className="status-row">
+                        <span
+                          id="status-video-icon"
+                          className={"status-ic" + (videoDone ? " status-ic-done" : "")}
+                        >
+                          <Icon name={videoDone ? "check" : "x"} className="ic-sm" />
+                        </span>
+                        <div style={{ flex: 1 }}>
+                          <div className="status-name">{t("statusVideoName")}</div>
+                          <div id="status-video-txt" className="status-sub">
+                            {videoDone ? t("statusUploaded") : t("statusNotUploaded")}
+                          </div>
+                        </div>
                       </div>
+                      <div className="status-row">
+                        <span
+                          id="status-github-icon"
+                          className={"status-ic" + (githubDone ? " status-ic-done" : "")}
+                        >
+                          <Icon name={githubDone ? "check" : "x"} className="ic-sm" />
+                        </span>
+                        <div style={{ flex: 1 }}>
+                          <div className="status-name">{t("statusGithubName")}</div>
+                          <div id="status-github-txt" className="status-sub">
+                            {githubDone ? t("statusLinkAdded") : t("statusLinkNotAdded")}
+                          </div>
+                        </div>
+                      </div>
+                      {project && (
+                        <div className="status-row">
+                          <span
+                            className={
+                              "status-ic" + (project.status !== "draft" ? " status-ic-done" : "")
+                            }
+                          >
+                            <Icon
+                              name={project.status !== "draft" ? "check" : "x"}
+                              className="ic-sm"
+                            />
+                          </span>
+                          <div style={{ flex: 1 }}>
+                            <div className="status-name">{t("statusSubmissionName")}</div>
+                            <div className="status-sub">
+                              {project.status === "draft" && t("projectStatusDraft")}
+                              {project.status === "submitted" && t("projectStatusSubmitted")}
+                              {project.status === "under_review" && t("projectStatusReview")}
+                              {project.status === "judged" && t("projectStatusJudged")}
+                            </div>
+                          </div>
+                          {project.status === "draft" && (
+                            <button
+                              type="button"
+                              className="btn-violet-sm"
+                              onClick={handleSubmitProject}
+                              disabled={projectBusy !== null}
+                            >
+                              {projectBusy === "submit"
+                                ? t("projectSubmitting")
+                                : t("projectSubmit")}
+                            </button>
+                          )}
+                          {project.status === "submitted" && (
+                            <button
+                              type="button"
+                              className="mini-btn"
+                              onClick={handleWithdrawProject}
+                              disabled={projectBusy !== null}
+                            >
+                              {projectBusy === "withdraw"
+                                ? t("projectWithdrawing")
+                                : t("projectWithdraw")}
+                            </button>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
-                  <div className="status-row">
-                    <span
-                      id="status-github-icon"
-                      className={"status-ic" + (githubDone ? " status-ic-done" : "")}
-                    >
-                      <Icon name={githubDone ? "check" : "x"} className="ic-sm" />
-                    </span>
-                    <div style={{ flex: 1 }}>
-                      <div className="status-name">{t("statusGithubName")}</div>
-                      <div id="status-github-txt" className="status-sub">
-                        {githubDone ? t("statusLinkAdded") : t("statusLinkNotAdded")}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                </>
+              )}
             </div>
 
             {/* BOUNTIES PANEL */}

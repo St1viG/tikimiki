@@ -22,9 +22,9 @@ const videoUrlSchema = z
  */
 export const createProjectSchema = z.object({
   title: z.string().trim().min(1).max(200),
-  description: z.string().trim().max(5000).optional(),
-  repositoryUrl: z.string().trim().url().max(2048).optional(),
-  videoUrl: videoUrlSchema.optional(),
+  description: z.string().trim().max(5000).nullable().optional(),
+  repositoryUrl: z.string().trim().url().max(2048).nullable().optional(),
+  videoUrl: videoUrlSchema.nullable().optional(),
 });
 export type CreateProjectInput = z.infer<typeof createProjectSchema>;
 
