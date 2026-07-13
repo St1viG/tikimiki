@@ -40,6 +40,11 @@ function fakeDb(rowsByTable = new Map<unknown, Row[]>()) {
           queries.push(captured);
           return builder;
         },
+        // Rows are keyed by the `from` table alone; a join doesn't change
+        // which stub rows are returned, so this is a passthrough.
+        innerJoin() {
+          return builder;
+        },
         where(condition: SQL | undefined) {
           captured.where = condition;
           return builder;
@@ -73,7 +78,7 @@ describe("SearchService (unit)", () => {
     it("shapes rows uniformly and drops null subtitle/image fields", async () => {
       const rows = new Map<unknown, Row[]>([
         [users, [{ id: "u1", username: "ana", displayName: "Ana Anić", avatarUrl: null }]],
-        [organizations, [{ id: "o1", name: "ETF", logoUrl: "/logo.png" }]],
+        [organizations, [{ id: "o1", username: "etf", name: "ETF", logoUrl: "/logo.png" }]],
         [hackathons, [{ id: "h1", title: "Hack", description: "Kratak opis", logoUrl: null }]],
       ]);
       const { db } = fakeDb(rows);
@@ -83,7 +88,9 @@ describe("SearchService (unit)", () => {
       expect(result.users).toEqual([
         { id: "u1", label: "ana", subtitle: "Ana Anić", imageUrl: undefined },
       ]);
-      expect(result.organizations).toEqual([{ id: "o1", label: "ETF", imageUrl: "/logo.png" }]);
+      expect(result.organizations).toEqual([
+        { id: "o1", label: "ETF", username: "etf", imageUrl: "/logo.png" },
+      ]);
       expect(result.hackathons).toEqual([
         { id: "h1", label: "Hack", subtitle: "Kratak opis", imageUrl: undefined },
       ]);

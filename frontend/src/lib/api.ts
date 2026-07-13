@@ -1326,6 +1326,8 @@ export interface SearchHit {
   label: string;
   subtitle?: string;
   imageUrl?: string;
+  /** Set only on organization hits, so the UI can link to `/u/:username`. */
+  username?: string;
 }
 export type SearchUserHit = SearchHit;
 export type SearchOrgHit = SearchHit;

@@ -331,14 +331,16 @@ export function SearchClient() {
   );
 }
 
-/** One result row; users and hackathons link to their pages, orgs are static. */
+/** One result row; every hit links to its page (organizations via their account username). */
 function SearchRow({ hit, tab }: { hit: SearchHit; tab: Tab }) {
   const href =
     tab === "hackathons"
       ? `/hackathons/${hit.id}`
       : tab === "users"
         ? `/u/${encodeURIComponent(hit.label)}`
-        : null;
+        : hit.username
+          ? `/u/${encodeURIComponent(hit.username)}`
+          : null;
 
   const body = (
     <>

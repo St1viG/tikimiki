@@ -30,6 +30,8 @@ export interface SearchResultItem {
   label: string;
   subtitle?: string;
   imageUrl?: string;
+  /** Set only on organization hits, so the UI can link to `/u/:username`. */
+  username?: string;
 }
 
 export interface SearchResult {
@@ -151,10 +153,12 @@ export class SearchService {
       this.db
         .select({
           id: organizations.userId,
+          username: users.username,
           name: organizations.name,
           logoUrl: organizations.logoUrl,
         })
         .from(organizations)
+        .innerJoin(users, eq(organizations.userId, users.userId))
         .where(organizationCondition)
         .limit(RESULT_LIMIT),
       this.db
@@ -180,6 +184,7 @@ export class SearchService {
       organizations: organizationRows.map((r) => ({
         id: r.id,
         label: r.name,
+        username: r.username,
         imageUrl: r.logoUrl ?? undefined,
       })),
       hackathons: hackathonRows.map((r) => ({
