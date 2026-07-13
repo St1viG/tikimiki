@@ -957,27 +957,44 @@ export const activateSubscription = (billingCycle: "monthly" | "annual") =>
 export const cancelSubscription = () => POST<{ success: true }>("/subscriptions/cancel");
 
 // Reports (moderation)
+export type ReportTargetType = "user" | "post" | "comment" | "message" | "hackathon";
+export type ReportCategory = "spam" | "harassment" | "inappropriate_content" | "other";
+
 export interface Report {
   reportId: string;
   reporterId: string;
   reporterUsername: string;
-  targetType: string;
+  targetType: ReportTargetType;
   targetId: string;
-  reason: string;
+  category: ReportCategory;
+  reason: string | null;
   status: string;
   resolutionNote: string | null;
   createdAt: string;
   reviewedAt: string | null;
 }
 
-export const createReport = (targetType: string, targetId: string, reason: string) =>
-  POST<Report>("/reports", { targetType, targetId, reason });
+export const createReport = (
+  targetType: ReportTargetType,
+  targetId: string,
+  category: ReportCategory,
+  reason?: string,
+) => POST<Report>("/reports", { targetType, targetId, category, reason });
 export const getReports = (status: "pending" | "resolved" | "all" = "pending") =>
   GET<{ reports: Report[]; stats: { open: number; resolvedToday: number; total: number } }>(
     `/reports?status=${status}`,
   );
-export const resolveReport = (id: string, status: "resolved" | "dismissed", note?: string) =>
-  POST<Report>(`/reports/${id}/resolve`, { status, note });
+export const resolveReport = (
+  id: string,
+  status: "resolved" | "dismissed",
+  opts?: { note?: string; removeContent?: boolean; banUser?: boolean },
+) =>
+  POST<Report>(`/reports/${id}/resolve`, {
+    status,
+    note: opts?.note,
+    removeContent: opts?.removeContent ?? false,
+    banUser: opts?.banUser ?? false,
+  });
 
 // Admin
 export interface AdminMetrics {

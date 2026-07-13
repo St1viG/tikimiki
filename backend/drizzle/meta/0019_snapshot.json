@@ -1,5 +1,9 @@
 {
+<<<<<<< HEAD
   "id": "cf6eb8be-4709-490d-bb0b-f51d1b88867b",
+=======
+  "id": "d2ef041e-04a1-4733-aac0-83bd2b024474",
+>>>>>>> cbd5eac (fix(reports): wire up SSU18 — real report enforcement + honest moderator UI)
   "prevId": "0ceca418-3ead-4eb5-9878-e1a49854f5b7",
   "version": "7",
   "dialect": "postgresql",
@@ -876,6 +880,7 @@
           "primaryKey": false,
           "notNull": false
         },
+<<<<<<< HEAD
         "token_version": {
           "name": "token_version",
           "type": "integer",
@@ -883,6 +888,8 @@
           "notNull": true,
           "default": 0
         },
+=======
+>>>>>>> cbd5eac (fix(reports): wire up SSU18 — real report enforcement + honest moderator UI)
         "last_login_at": {
           "name": "last_login_at",
           "type": "timestamp with time zone",
@@ -7828,11 +7835,26 @@
           "primaryKey": false,
           "notNull": true
         },
+<<<<<<< HEAD
+=======
+        "category": {
+          "name": "category",
+          "type": "report_category",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'other'"
+        },
+>>>>>>> cbd5eac (fix(reports): wire up SSU18 — real report enforcement + honest moderator UI)
         "reason": {
           "name": "reason",
           "type": "text",
           "primaryKey": false,
+<<<<<<< HEAD
           "notNull": true
+=======
+          "notNull": false
+>>>>>>> cbd5eac (fix(reports): wire up SSU18 — real report enforcement + honest moderator UI)
         },
         "status": {
           "name": "status",
@@ -8134,7 +8156,13 @@
         "post_comment",
         "post_reaction",
         "mention",
+<<<<<<< HEAD
         "new_application"
+=======
+        "new_application",
+        "report_resolved",
+        "report_dismissed"
+>>>>>>> cbd5eac (fix(reports): wire up SSU18 — real report enforcement + honest moderator UI)
       ]
     },
     "public.org_verification_status": {
@@ -8178,6 +8206,19 @@
         "judged"
       ]
     },
+<<<<<<< HEAD
+=======
+    "public.report_category": {
+      "name": "report_category",
+      "schema": "public",
+      "values": [
+        "spam",
+        "harassment",
+        "inappropriate_content",
+        "other"
+      ]
+    },
+>>>>>>> cbd5eac (fix(reports): wire up SSU18 — real report enforcement + honest moderator UI)
     "public.report_status": {
       "name": "report_status",
       "schema": "public",

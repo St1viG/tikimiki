@@ -3,6 +3,7 @@ import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import { commentReactions, comments, postReactions, posts, users } from "../db/schema";
 import { LIKE } from "../common/constants";
+import { AuthzService } from "../common/authz.service";
 import { NotificationsService } from "../notifications/notifications.service";
 import type { CreateCommentInput, UpdateCommentInput } from "./dto";
 
@@ -52,6 +53,7 @@ export class EngagementService {
   constructor(
     @Inject(DRIZZLE) private readonly db: DrizzleDB,
     private readonly notifications: NotificationsService,
+    private readonly authz: AuthzService,
   ) {}
 
   private commentColumns(viewerId: string | null) {
@@ -236,6 +238,7 @@ export class EngagementService {
     return this.toCommentDto(row);
   }
 
+  /** Soft-delete a comment (and its reply subtree). Author, or an admin acting on a report. */
   async deleteComment(userId: string, commentId: string): Promise<DeleteResult> {
     const [comment] = await this.db
       .select({ userId: comments.userId })
@@ -243,7 +246,7 @@ export class EngagementService {
       .where(and(eq(comments.commentId, commentId), isNull(comments.deletedAt)))
       .limit(1);
     if (!comment) throw new NotFoundException("Comment not found");
-    if (comment.userId !== userId) {
+    if (comment.userId !== userId && !(await this.authz.isAdmin(userId))) {
       throw new ForbiddenException("You can only delete your own comment");
     }
 

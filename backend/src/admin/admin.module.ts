@@ -3,5 +3,10 @@ import { MailModule } from "../mail/mail.module";
 import { AdminController } from "./admin.controller";
 import { AdminService } from "./admin.service";
 
-@Module({ imports: [MailModule], controllers: [AdminController], providers: [AdminService] })
+@Module({
+  imports: [MailModule],
+  controllers: [AdminController],
+  providers: [AdminService],
+  exports: [AdminService],
+})
 export class AdminModule {}

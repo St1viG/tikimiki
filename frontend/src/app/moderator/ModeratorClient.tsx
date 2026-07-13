@@ -7,27 +7,30 @@ import { ModeratorRemoveModal } from "@/components/popups/ModeratorRemoveModal";
 import { ModeratorWarnModal } from "@/components/popups/ModeratorWarnModal";
 import { GenerativeAvatar } from "@/components/ui/GenerativeAvatar";
 import { useT } from "@/components/i18n/LanguageProvider";
-import { useRequireAuth } from "@/components/auth/AuthProvider";
+import { useRequireRole } from "@/components/auth/AuthProvider";
 import { getReports, resolveReport as apiResolveReport, type Report } from "@/lib/api";
 
 /* ModeratorClient — interactive moderator panel, wired to the live reports API
  * (api.getReports / api.resolveReport). Supplies its own
  * `<main className="mod-page" id="main">`.
+ *
+ * There is no separate moderator role or per-hackathon moderation — this
+ * panel is admin-gated and shows reports across the whole platform.
  */
 
 const M = {
   backLabel: { en: "Back", sr: "Nazad" },
   pageTitle: { en: "Content reports", sr: "Prijave sadržaja" },
-  modeBadge: { en: "Moderator", sr: "Moderator" },
+  modeBadge: { en: "Admin", sr: "Admin" },
   pageSub: {
-    en: "ETF HackWeek 2026 · Review and process reports for this hackathon",
-    sr: "ETF HackWeek 2026 · Pregled i obrada prijava za ovaj hakathon",
+    en: "Review and process reports across the platform",
+    sr: "Pregled i obrada prijava sa cele platforme",
   },
   searchLabel: { en: "Search", sr: "Pretraži" },
   searchPh: { en: "Search…", sr: "Pretraži…" },
   statOpen: { en: "Open reports", sr: "Otvorene prijave" },
   statResolved: { en: "Resolved today", sr: "Rešene danas" },
-  statTotal: { en: "Total (this hackathon)", sr: "Ukupno (ovaj hakathon)" },
+  statTotal: { en: "Total", sr: "Ukupno" },
   filterSearchAria: {
     en: "Search reports by user or content",
     sr: "Pretraži prijave po korisniku ili sadržaju",
@@ -40,15 +43,15 @@ const M = {
   chipReason: { en: "Reason", sr: "Razlog" },
   chipSort: { en: "Sort:", sr: "Sortiraj:" },
   chipNewest: { en: "Newest", sr: "Najnovije" },
-  removeMsgBtn: { en: "Remove message", sr: "Ukloni poruku" },
+  removeMsgBtn: { en: "Remove comment", sr: "Ukloni komentar" },
   removePostBtn: { en: "Remove post", sr: "Ukloni objavu" },
-  warnUserBtn: { en: "Warn user", sr: "Upozori korisnika" },
+  resolveBtn: { en: "Resolve", sr: "Reši" },
   dismissBtn: { en: "Dismiss report", sr: "Odbaci prijavu" },
   viewProfileBtn: { en: "View profile", sr: "Pregledaj profil" },
   resolvedLabel: { en: "Resolved", sr: "Rešeno" },
   showCount: { en: "Showing", sr: "Prikazano" },
   ofCount: { en: "of", sr: "od" },
-  reportsFor: { en: "reports for ETF HackWeek 2026", sr: "prijava za ETF HackWeek 2026" },
+  reportsFor: { en: "reports", sr: "prijava" },
   dismissModalTitle: { en: "Dismiss report", sr: "Odbaci prijavu" },
   dismissModalBody: {
     en: "The report will be marked as dismissed. The reporter will be notified that the content did not violate community guidelines.",
@@ -56,13 +59,21 @@ const M = {
   },
   dismissModalCancel: { en: "Cancel", sr: "Otkaži" },
   dismissModalConfirm: { en: "Dismiss", sr: "Odbaci" },
-  toastRemoved: {
+  toastRemovedOnly: {
     en: "Content removed. Reporter notified.",
     sr: "Sadržaj uklonjen. Podnosilac prijave je obavešten.",
   },
-  toastWarned: {
-    en: "Warning sent. Reporter notified.",
-    sr: "Upozorenje poslato. Podnosilac prijave je obavešten.",
+  toastRemovedAndBanned: {
+    en: "Content removed and user banned. Reporter notified.",
+    sr: "Sadržaj uklonjen, korisnik banovan. Podnosilac prijave je obavešten.",
+  },
+  toastBannedOnly: {
+    en: "User banned. Reporter notified.",
+    sr: "Korisnik banovan. Podnosilac prijave je obavešten.",
+  },
+  toastResolved: {
+    en: "Report resolved. Reporter notified.",
+    sr: "Prijava rešena. Podnosilac prijave je obavešten.",
   },
   toastDismissed: {
     en: "Report dismissed. Reporter notified.",
@@ -81,17 +92,16 @@ const M = {
 
 type ModalKind = "remove" | "warn" | "dismiss" | null;
 
-/* Map a free-text reason to a reason-pill modifier class. */
-function reasonClass(reason: string): string {
-  const r = reason.toLowerCase();
-  if (r.includes("spam")) return "mod-reason-spam";
-  if (r.includes("misinfo") || r.includes("neistin") || r.includes("lažn") || r.includes("fake"))
-    return "mod-reason-misinfo";
+/* Map a report category to a reason-pill modifier class. */
+function reasonClass(category: string): string {
+  if (category === "spam") return "mod-reason-spam";
+  if (category === "harassment") return "mod-reason-offensive";
+  if (category === "inappropriate_content") return "mod-reason-misinfo";
   return "mod-reason-offensive";
 }
 
 export function ModeratorClient() {
-  useRequireAuth();
+  const auth = useRequireRole("admin");
   const t = useT(M);
   const [reports, setReports] = useState<Report[]>([]);
   const [stats, setStats] = useState<{ open: number; resolvedToday: number; total: number }>({
@@ -147,8 +157,7 @@ export function ModeratorClient() {
 
   const confirmAction = async (
     decision: "resolved" | "dismissed",
-    note: string,
-    toastMsg: string,
+    opts: { removeContent?: boolean; banUser?: boolean } = {},
   ) => {
     const reportId = pendingReportId;
     closeModal();
@@ -160,8 +169,19 @@ export function ModeratorClient() {
     setReports((rs) => rs.filter((r) => r.reportId !== reportId));
     setStats((s) => ({ ...s, open: Math.max(0, s.open - 1), resolvedToday: s.resolvedToday + 1 }));
 
+    const toastMsg =
+      decision === "dismissed"
+        ? t("toastDismissed")
+        : opts.removeContent && opts.banUser
+          ? t("toastRemovedAndBanned")
+          : opts.removeContent
+            ? t("toastRemovedOnly")
+            : opts.banUser
+              ? t("toastBannedOnly")
+              : t("toastResolved");
+
     try {
-      await apiResolveReport(reportId, decision, note);
+      await apiResolveReport(reportId, decision, opts);
       showToast(toastMsg);
     } catch (err) {
       console.error("Failed to resolve report", err);
@@ -175,7 +195,7 @@ export function ModeratorClient() {
   const isVisible = (report: Report) => {
     if (!searchQuery) return true;
     const haystack =
-      `${report.reason} ${report.reporterUsername} ${report.targetType} ${report.targetId}`.toLowerCase();
+      `${report.reason ?? ""} ${report.category} ${report.reporterUsername} ${report.targetType} ${report.targetId}`.toLowerCase();
     return haystack.includes(searchQuery.toLowerCase());
   };
 
@@ -205,11 +225,11 @@ export function ModeratorClient() {
           </div>
           <div className="mod-admin-chip">
             <span className="avatar v is-orb" aria-hidden="true">
-              <GenerativeAvatar seed="andrej" className="orb-art" />
+              <GenerativeAvatar seed={auth.user?.username ?? "admin"} className="orb-art" />
             </span>
             <div>
-              <div className="mod-admin-chip-name">Andrej Čolić</div>
-              <div className="mod-admin-chip-sub">{t("modeBadge")} · ETF HackWeek 2026</div>
+              <div className="mod-admin-chip-name">{auth.user?.username ?? ""}</div>
+              <div className="mod-admin-chip-sub">{t("modeBadge")}</div>
             </div>
           </div>
         </div>
@@ -316,7 +336,8 @@ export function ModeratorClient() {
               <p className="page-sub">{t("empty")}</p>
             ) : (
               visibleReports.map((report) => {
-                const isPost = report.targetType.toLowerCase().includes("post");
+                const canRemoveContent =
+                  report.targetType === "post" || report.targetType === "comment";
                 return (
                   <div className="mod-report" id={report.reportId} key={report.reportId}>
                     <div className="mod-report-head">
@@ -330,8 +351,8 @@ export function ModeratorClient() {
                           {new Date(report.createdAt).toLocaleString()}
                         </div>
                       </div>
-                      <span className={`mod-reason ${reasonClass(report.reason)}`}>
-                        <Icon name="flag" /> {report.reason}
+                      <span className={`mod-reason ${reasonClass(report.category)}`}>
+                        <Icon name="flag" /> {report.category}
                       </span>
                     </div>
                     <div className="mod-report-meta">
@@ -341,19 +362,27 @@ export function ModeratorClient() {
                       <span>
                         ID: <strong>{report.targetId}</strong>
                       </span>
+                      {report.reason && (
+                        <span>
+                          {t("chipReason")}: <strong>{report.reason}</strong>
+                        </span>
+                      )}
                     </div>
                     <div className="mod-report-actions mod-actions">
-                      <button
-                        className="mod-btn-xs danger"
-                        onClick={() => openResolveModal(report.reportId, "remove")}
-                      >
-                        <Icon name="x" /> {isPost ? t("removePostBtn") : t("removeMsgBtn")}
-                      </button>
+                      {canRemoveContent && (
+                        <button
+                          className="mod-btn-xs danger"
+                          onClick={() => openResolveModal(report.reportId, "remove")}
+                        >
+                          <Icon name="x" />{" "}
+                          {report.targetType === "post" ? t("removePostBtn") : t("removeMsgBtn")}
+                        </button>
+                      )}
                       <button
                         className="mod-btn-xs warn"
                         onClick={() => openResolveModal(report.reportId, "warn")}
                       >
-                        <Icon name="flag" /> {t("warnUserBtn")}
+                        <Icon name="flag" /> {t("resolveBtn")}
                       </button>
                       <button
                         className="mod-btn-xs ok"
@@ -382,13 +411,13 @@ export function ModeratorClient() {
       <ModeratorRemoveModal
         open={openModal === "remove"}
         onClose={closeModal}
-        onConfirm={() => confirmAction("resolved", "Content removed", t("toastRemoved"))}
+        onConfirm={(banUser) => confirmAction("resolved", { removeContent: true, banUser })}
       />
 
       <ModeratorWarnModal
         open={openModal === "warn"}
         onClose={closeModal}
-        onConfirm={() => confirmAction("resolved", "Warning issued", t("toastWarned"))}
+        onConfirm={(banUser) => confirmAction("resolved", { banUser })}
       />
 
       {/* Dismiss modal (inline — single-use variant) */}
@@ -413,7 +442,7 @@ export function ModeratorClient() {
             </button>
             <button
               className="btn btn-violet modal-confirm"
-              onClick={() => confirmAction("dismissed", "Report dismissed", t("toastDismissed"))}
+              onClick={() => confirmAction("dismissed")}
             >
               {t("dismissModalConfirm")}
             </button>

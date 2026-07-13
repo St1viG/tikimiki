@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Icon } from "@/components/Icon";
 import { useT } from "@/components/i18n/LanguageProvider";
 
@@ -11,9 +12,10 @@ import { useT } from "@/components/i18n/LanguageProvider";
 const M = {
   title: { en: "Remove content", sr: "Ukloni sadržaj" },
   body: {
-    en: "The content will be permanently removed from the channel. The author will be notified that the content was removed for violating community guidelines.",
-    sr: "Sadržaj će biti trajno uklonjen iz kanala. Autor će biti obavešten da je sadržaj uklonjen zbog kršenja pravila zajednice.",
+    en: "The content will be soft-deleted immediately. The reporter will be notified of the outcome.",
+    sr: "Sadržaj će odmah biti uklonjen (soft-delete). Podnosilac prijave će biti obavešten o ishodu.",
   },
+  banLabel: { en: "Also ban this user", sr: "Takođe banuj ovog korisnika" },
   cancelBtn: { en: "Cancel", sr: "Otkaži" },
   confirmBtn: { en: "Confirm removal", sr: "Potvrdi uklanjanje" },
 } as const;
@@ -25,9 +27,10 @@ export function ModeratorRemoveModal({
 }: {
   open: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: (banUser: boolean) => void;
 }) {
   const t = useT(M);
+  const [banUser, setBanUser] = useState(false);
 
   return (
     <div
@@ -45,6 +48,10 @@ export function ModeratorRemoveModal({
           <Icon name="x" /> {t("title")}
         </div>
         <div className="modal-body">{t("body")}</div>
+        <label style={{ display: "flex", alignItems: "center", gap: 8, margin: "12px 0 0" }}>
+          <input type="checkbox" checked={banUser} onChange={(e) => setBanUser(e.target.checked)} />
+          {t("banLabel")}
+        </label>
         <div className="modal-actions">
           <button className="btn btn-ghost" onClick={onClose}>
             {t("cancelBtn")}
@@ -52,7 +59,7 @@ export function ModeratorRemoveModal({
           <button
             className="btn btn-primary modal-confirm"
             style={{ background: "var(--red)", color: "#fff" }}
-            onClick={onConfirm}
+            onClick={() => onConfirm(banUser)}
           >
             {t("confirmBtn")}
           </button>

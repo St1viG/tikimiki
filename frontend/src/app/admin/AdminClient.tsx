@@ -479,8 +479,13 @@ export function AdminClient() {
   };
 
   // Reports
-  const runResolveReport = (id: string, status: "resolved" | "dismissed", note?: string) => {
-    resolveReport(id, status, note?.trim() ? note.trim() : undefined)
+  const runResolveReport = (
+    id: string,
+    status: "resolved" | "dismissed",
+    note?: string,
+    removeContent?: boolean,
+  ) => {
+    resolveReport(id, status, { note: note?.trim() ? note.trim() : undefined, removeContent })
       .then(() => {
         setReports((list) => list.filter((r) => r.reportId !== id));
         setReportStats((st) => ({ ...st, open: Math.max(0, st.open - 1) }));
@@ -499,12 +504,16 @@ export function AdminClient() {
   };
 
   // "Resolve" routes the optional resolution note through the styled remove
-  // modal; "Dismiss" needs no note and runs immediately.
-  const handleResolveReport = (id: string, status: "resolved" | "dismissed") => {
+  // modal and, for posts/comments, also soft-deletes the reported content;
+  // "Dismiss" needs no note and runs immediately.
+  const handleResolveReport = (report: Report, status: "resolved" | "dismissed") => {
     if (status === "resolved") {
-      openModal("modal-remove", (reason) => runResolveReport(id, "resolved", reason));
+      const removeContent = report.targetType === "post" || report.targetType === "comment";
+      openModal("modal-remove", (reason) =>
+        runResolveReport(report.reportId, "resolved", reason, removeContent),
+      );
     } else {
-      runResolveReport(id, "dismissed");
+      runResolveReport(report.reportId, "dismissed");
     }
   };
 
@@ -987,17 +996,17 @@ export function AdminClient() {
                     </strong>
                   </span>
                 </div>
-                <div className="adm-report-quote">{rep.reason}</div>
+                {rep.reason && <div className="adm-report-quote">{rep.reason}</div>}
                 <div className="adm-report-actions">
                   <button
                     className="adm-btn-xs danger"
-                    onClick={() => handleResolveReport(rep.reportId, "resolved")}
+                    onClick={() => handleResolveReport(rep, "resolved")}
                   >
                     {t("resolveReportBtn")}
                   </button>
                   <button
                     className="adm-btn-xs"
-                    onClick={() => handleResolveReport(rep.reportId, "dismissed")}
+                    onClick={() => handleResolveReport(rep, "dismissed")}
                   >
                     {t("dismissReport")}
                   </button>

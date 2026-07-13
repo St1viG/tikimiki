@@ -35,6 +35,7 @@ import { MarkdownContent } from "@/components/MarkdownContent";
 import { ImageCropper } from "@/components/ImageCropper";
 import { ProfilePopup } from "@/components/popups/ProfilePopup";
 import { SharePopup } from "@/components/popups/SharePopup";
+import { ReportPopup } from "@/components/popups/ReportPopup";
 import { MentionText } from "@/components/mentions/MentionText";
 import { MentionClickContext } from "@/components/mentions/MentionLink";
 import { useMentionAutocomplete } from "@/components/mentions/useMentionAutocomplete";
@@ -104,6 +105,8 @@ const M = {
   cmtOptions: { en: "Comment options", sr: "Opcije komentara" },
   editCmt: { en: "Edit", sr: "Izmeni" },
   deleteCmt: { en: "Delete", sr: "Obriši" },
+  reportCmt: { en: "Report", sr: "Prijavi" },
+  reportSubmitted: { en: "Report submitted", sr: "Prijava poslata" },
   saveCmt: { en: "Save", sr: "Sačuvaj" },
   savingCmt: { en: "Saving…", sr: "Čuvanje…" },
   cancelCmt: { en: "Cancel", sr: "Otkaži" },
@@ -206,6 +209,8 @@ export function FeedClient() {
   const [confirmDeleteComment, setConfirmDeleteComment] = useState<string | null>(null);
   // Comment id whose "⋯" actions menu is open.
   const [commentMenuOpen, setCommentMenuOpen] = useState<string | null>(null);
+  // Comment id whose report popup is open.
+  const [reportCommentId, setReportCommentId] = useState<string | null>(null);
   // Author whose profile popup is open (clicked from a post/comment avatar/name/handle).
   const [popupUser, setPopupUser] = useState<string | null>(null);
   // Post whose share sheet (copy link / send to friends) is open.
@@ -923,6 +928,37 @@ export function FeedClient() {
                   )}
                 </span>
               )}
+              {!isOwnComment && user && !isEditing && (
+                <span className="post-menu">
+                  <button
+                    type="button"
+                    className="post-menu-btn"
+                    aria-label={t("cmtOptions")}
+                    aria-haspopup="menu"
+                    aria-expanded={commentMenuOpen === c.commentId}
+                    onClick={() =>
+                      setCommentMenuOpen((o) => (o === c.commentId ? null : c.commentId))
+                    }
+                    style={{ width: 26, height: 26 }}
+                  >
+                    <Icon name="more" />
+                  </button>
+                  {commentMenuOpen === c.commentId && (
+                    <div className="post-menu-pop" role="menu">
+                      <button
+                        type="button"
+                        role="menuitem"
+                        onClick={() => {
+                          setCommentMenuOpen(null);
+                          setReportCommentId(c.commentId);
+                        }}
+                      >
+                        <Icon name="flag" /> {t("reportCmt")}
+                      </button>
+                    </div>
+                  )}
+                </span>
+              )}
             </span>
             {isEditing ? (
               <div className="post-edit" style={{ marginTop: 6 }}>
@@ -1516,6 +1552,13 @@ export function FeedClient() {
         post={shareTarget}
         open={shareTarget !== null}
         onClose={() => setShareTarget(null)}
+      />
+      <ReportPopup
+        open={reportCommentId !== null}
+        targetType="comment"
+        targetId={reportCommentId ?? ""}
+        onClose={() => setReportCommentId(null)}
+        onSubmitted={() => showToast(t("reportSubmitted"), "green")}
       />
       <div
         className={`toast t-${toast.type}${toast.show ? " show" : ""}`}

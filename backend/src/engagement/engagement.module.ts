@@ -7,5 +7,6 @@ import { EngagementService } from "./engagement.service";
   imports: [AuthModule],
   controllers: [EngagementController],
   providers: [EngagementService],
+  exports: [EngagementService],
 })
 export class EngagementModule {}

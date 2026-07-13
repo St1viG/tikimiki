@@ -92,6 +92,9 @@ export type ReportTargetType = (typeof REPORT_TARGET_TYPE)[number];
 export const REPORT_STATUS = tuple("pending", "reviewed", "resolved", "dismissed");
 export type ReportStatus = (typeof REPORT_STATUS)[number];
 
+export const REPORT_CATEGORY = tuple("spam", "harassment", "inappropriate_content", "other");
+export type ReportCategory = (typeof REPORT_CATEGORY)[number];
+
 export const ENTITY_TYPE = tuple(
   "user",
   "hackathon",
@@ -128,5 +131,7 @@ export const NOTIFICATION_TYPE = tuple(
   "team_request_accepted",
   "post_comment",
   "post_reaction",
+  "report_resolved",
+  "report_dismissed",
 );
 export type NotificationType = (typeof NOTIFICATION_TYPE)[number];

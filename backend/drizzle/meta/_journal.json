@@ -138,8 +138,13 @@
     {
       "idx": 19,
       "version": "7",
+<<<<<<< HEAD
       "when": 1783983622492,
       "tag": "0019_concerned_overlord",
+=======
+      "when": 1783983401223,
+      "tag": "0019_nostalgic_supernaut",
+>>>>>>> cbd5eac (fix(reports): wire up SSU18 — real report enforcement + honest moderator UI)
       "breakpoints": true
     }
   ]

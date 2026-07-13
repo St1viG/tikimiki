@@ -27,6 +27,7 @@ import {
 import { monthYear } from "@/lib/format";
 import { personName } from "@/lib/displayName";
 import { ProfilePopup } from "@/components/popups/ProfilePopup";
+import { ReportPopup } from "@/components/popups/ReportPopup";
 
 /** Public account page at /u/[username]: profile header + posts / followers / following / badges. */
 
@@ -52,6 +53,8 @@ const M = {
   noBadges: { en: "No badges yet.", sr: "Još nema bedževa." },
   message: { en: "Message", sr: "Poruka" },
   verifiedSkill: { en: "Verified via GitHub", sr: "Verifikovano preko GitHub-a" },
+  report: { en: "Report", sr: "Prijavi" },
+  reportSubmitted: { en: "Report submitted", sr: "Prijava poslata" },
 } as const;
 
 type Tab = "posts" | "followers" | "following" | "badges";
@@ -76,6 +79,8 @@ export function UserProfileClient({ username }: { username: string }) {
   const [followerCount, setFollowerCount] = useState(0);
   const [followBusy, setFollowBusy] = useState(false);
   const [popupUser, setPopupUser] = useState<string | null>(null);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportSent, setReportSent] = useState(false);
 
   const joined = (iso: string) => monthYear(iso, locale);
 
@@ -376,6 +381,14 @@ export function UserProfileClient({ username }: { username: string }) {
                       >
                         <Icon name="comment" /> {t("message")}
                       </button>
+                      <button
+                        type="button"
+                        className="btn btn-ghost"
+                        onClick={() => setReportOpen(true)}
+                      >
+                        <Icon name="flag" /> {t("report")}
+                      </button>
+                      {reportSent && <span className="share-copied">{t("reportSubmitted")}</span>}
                     </div>
                   )
                 )}
@@ -549,6 +562,18 @@ export function UserProfileClient({ username }: { username: string }) {
         username={popupUser}
         onClose={() => setPopupUser(null)}
       />
+      {profile && (
+        <ReportPopup
+          open={reportOpen}
+          targetType="user"
+          targetId={profile.userId}
+          onClose={() => setReportOpen(false)}
+          onSubmitted={() => {
+            setReportSent(true);
+            setTimeout(() => setReportSent(false), 2500);
+          }}
+        />
+      )}
     </AppShell>
   );
 }

@@ -2,6 +2,7 @@ import { ForbiddenException, Inject, Injectable, NotFoundException } from "@nest
 import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import type { FeedPost } from "@tikimiki/types";
 import { LIKE } from "../common/constants";
+import { AuthzService } from "../common/authz.service";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import { postAttachments, posts, users } from "../db/schema";
 import { NotificationsService } from "../notifications/notifications.service";
@@ -93,6 +94,7 @@ export class PostsService {
   constructor(
     @Inject(DRIZZLE) private readonly db: DrizzleDB,
     private readonly notifications: NotificationsService,
+    private readonly authz: AuthzService,
   ) {}
 
   /** Ordered attachments for a set of posts, grouped by post id (no N+1). */
@@ -235,7 +237,7 @@ export class PostsService {
     return updated;
   }
 
-  /** Soft-delete a post. Author-only. */
+  /** Soft-delete a post. Author, or an admin acting on a report. */
   async remove(userId: string, postId: string): Promise<{ success: true }> {
     const [post] = await this.db
       .select({ userId: posts.userId })
@@ -243,7 +245,7 @@ export class PostsService {
       .where(and(eq(posts.postId, postId), isNull(posts.deletedAt)))
       .limit(1);
     if (!post) throw new NotFoundException("Post not found");
-    if (post.userId !== userId) {
+    if (post.userId !== userId && !(await this.authz.isAdmin(userId))) {
       throw new ForbiddenException("You can only delete your own post");
     }
 
