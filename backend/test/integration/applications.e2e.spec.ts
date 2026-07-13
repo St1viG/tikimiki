@@ -374,6 +374,116 @@ describe("applications lifecycle (e2e)", () => {
     });
   });
 
+  describe("required application questions", () => {
+    async function addQuestion(
+      org: { token: string },
+      hackathonId: string,
+      required: boolean,
+    ): Promise<string> {
+      const res = await http()
+        .post(`/api/v1/applications/hackathon/${hackathonId}/questions`)
+        .set("Authorization", `Bearer ${org.token}`)
+        .send({ prompt: "Zašto želiš da učestvuješ?", type: "short_text", required })
+        .expect(201);
+      return (res.body as { questionId: string }).questionId;
+    }
+
+    it("blocks apply when a required question has no answer (400)", async () => {
+      const org = await registerOrganization(app);
+      const hk = await createHackathon(app, org);
+      await addQuestion(org, hk.hackathonId, true);
+      const applicant = await registerMember(app);
+
+      await apply(applicant.token, hk.hackathonId).expect(400);
+    });
+
+    it("blocks apply when a required answer is blank (400)", async () => {
+      const org = await registerOrganization(app);
+      const hk = await createHackathon(app, org);
+      const questionId = await addQuestion(org, hk.hackathonId, true);
+      const applicant = await registerMember(app);
+
+      await http()
+        .post("/api/v1/applications")
+        .set("Authorization", `Bearer ${applicant.token}`)
+        .send({ hackathonId: hk.hackathonId, answers: [{ questionId, answer: "   " }] })
+        .expect(400);
+    });
+
+    it("lets a member apply once every required question is answered", async () => {
+      const org = await registerOrganization(app);
+      const hk = await createHackathon(app, org);
+      const questionId = await addQuestion(org, hk.hackathonId, true);
+      const applicant = await registerMember(app);
+
+      const res = await http()
+        .post("/api/v1/applications")
+        .set("Authorization", `Bearer ${applicant.token}`)
+        .send({ hackathonId: hk.hackathonId, answers: [{ questionId, answer: "Zbog iskustva." }] })
+        .expect(201);
+      expect(res.body.status).toBe("pending");
+    });
+
+    it("does not require an answer to an optional question", async () => {
+      const org = await registerOrganization(app);
+      const hk = await createHackathon(app, org);
+      await addQuestion(org, hk.hackathonId, false);
+      const applicant = await registerMember(app);
+
+      await apply(applicant.token, hk.hackathonId).expect(201);
+    });
+
+    it("rejects an answer to another hackathon's question (400)", async () => {
+      const org = await registerOrganization(app);
+      const hk = await createHackathon(app, org);
+      const otherHk = await createHackathon(app, org);
+      const foreignQuestionId = await addQuestion(org, otherHk.hackathonId, false);
+      const applicant = await registerMember(app);
+
+      await http()
+        .post("/api/v1/applications")
+        .set("Authorization", `Bearer ${applicant.token}`)
+        .send({
+          hackathonId: hk.hackathonId,
+          answers: [{ questionId: foreignQuestionId, answer: "x" }],
+        })
+        .expect(400);
+    });
+
+    it("blocks team apply when a required question has no answer (400)", async () => {
+      const org = await registerOrganization(app);
+      const hk = await createHackathon(app, org);
+      await addQuestion(org, hk.hackathonId, true);
+      const leader = await registerMember(app);
+      const team = await createTeam(app, hk.hackathonId, leader);
+
+      await http()
+        .post("/api/v1/applications/team")
+        .set("Authorization", `Bearer ${leader.token}`)
+        .send({ hackathonId: hk.hackathonId, teamId: team.teamId })
+        .expect(400);
+    });
+
+    it("team apply succeeds when required questions are answered", async () => {
+      const org = await registerOrganization(app);
+      const hk = await createHackathon(app, org);
+      const questionId = await addQuestion(org, hk.hackathonId, true);
+      const leader = await registerMember(app);
+      const team = await createTeam(app, hk.hackathonId, leader);
+
+      const res = await http()
+        .post("/api/v1/applications/team")
+        .set("Authorization", `Bearer ${leader.token}`)
+        .send({
+          hackathonId: hk.hackathonId,
+          teamId: team.teamId,
+          answers: [{ questionId, answer: "Tim spreman za rad." }],
+        })
+        .expect(201);
+      expect(res.body).toHaveLength(1);
+    });
+  });
+
   // ── SSU-10: calendar export ──────────────────────────────────────────────
 
   describe("GET /hackathons/:id/calendar.ics", () => {

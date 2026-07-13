@@ -392,11 +392,23 @@ async function main() {
     },
     { applicationId: appByUser[mohammed], questionId: qRole.questionId, answer: "Frontend" },
     {
+      applicationId: appByUser[nenad],
+      questionId: qWhy.questionId,
+      answer: "Da testiram backend znanje pod pritiskom rokova.",
+    },
+    { applicationId: appByUser[nenad], questionId: qRole.questionId, answer: "Backend" },
+    {
       applicationId: appByUser[fenjer],
       questionId: qWhy.questionId,
       answer: "ML demo koji rešava realan problem.",
     },
     { applicationId: appByUser[fenjer], questionId: qRole.questionId, answer: "ML" },
+    {
+      applicationId: appByUser[mara],
+      questionId: qWhy.questionId,
+      answer: "Želim da radim na dizajnu proizvoda sa pravim timom.",
+    },
+    { applicationId: appByUser[mara], questionId: qRole.questionId, answer: "Dizajn" },
   ]);
 
   // ── Discord-style server for the ETF hackathon ─────────────────────
