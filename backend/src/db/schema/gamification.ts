@@ -15,7 +15,7 @@ import {
   varchar,
 } from "drizzle-orm/pg-core";
 import { badgeCategory, pointTxnType } from "./_enums";
-import { members } from "./identity";
+import { members, users } from "./identity";
 
 const tz = { withTimezone: true } as const;
 
@@ -90,7 +90,7 @@ export const gamePlays = pgTable(
       .references(() => games.gameId, { onDelete: "cascade" }),
     userId: uuid("user_id")
       .notNull()
-      .references(() => members.userId, { onDelete: "cascade" }),
+      .references(() => users.userId, { onDelete: "cascade" }),
     score: integer("score").notNull().default(0),
     pointsAwarded: integer("points_awarded").notNull().default(0),
     playedAt: timestamp("played_at", tz).notNull().defaultNow(),
