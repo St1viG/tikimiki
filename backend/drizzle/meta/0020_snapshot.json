@@ -1,6 +1,6 @@
 {
-  "id": "d2ef041e-04a1-4733-aac0-83bd2b024474",
-  "prevId": "0ceca418-3ead-4eb5-9878-e1a49854f5b7",
+  "id": "d289d175-7d29-404c-ae8e-b4fe32278c5c",
+  "prevId": "d2ef041e-04a1-4733-aac0-83bd2b024474",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -875,6 +875,13 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "token_version": {
+          "name": "token_version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
         },
         "last_login_at": {
           "name": "last_login_at",
