@@ -1186,8 +1186,8 @@ export const deleteBannerImage = () => DELETE<{ success: true }>("/users/me/bann
 
 // OAuth (GitHub / Google / LinkedIn)
 /** Full-page navigation target that kicks off the provider OAuth flow. */
-export const oauthUrl = (provider: "github" | "google" | "linkedin") =>
-  `${BASE}/auth/oauth/${provider}`;
+export const oauthUrl = (provider: "github" | "google" | "linkedin", opts?: { link?: boolean }) =>
+  `${BASE}/auth/oauth/${provider}${opts?.link ? "?link=1" : ""}`;
 
 /** Registration pre-flight: which of the given identifiers are still free. */
 export const checkAvailability = (params: { email?: string; username?: string }) => {

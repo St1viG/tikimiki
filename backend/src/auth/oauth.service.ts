@@ -91,13 +91,45 @@ export class OAuthService {
     if (!this.isConfigured(provider)) {
       throw new BadRequestException(`${provider} OAuth is not configured`);
     }
-    const profile =
-      provider === "github"
-        ? await this.fetchGithub(code)
-        : provider === "linkedin"
-          ? await this.fetchLinkedin(code)
-          : await this.fetchGoogle(code);
+    const profile = await this.fetchProfile(provider, code);
     return this.upsertUser(provider, profile);
+  }
+
+  /**
+   * Exchange the auth code and attach the provider identity to an EXISTING
+   * account (Settings → "Poveži"). Unlike {@link completeLogin} this never
+   * creates a user and never picks a different account: if the provider
+   * identity already belongs to someone else the caller gets "conflict" and
+   * nothing is written.
+   */
+  async completeLink(
+    provider: OAuthProvider,
+    code: string,
+    userId: string,
+  ): Promise<"linked" | "conflict"> {
+    if (!this.isConfigured(provider)) {
+      throw new BadRequestException(`${provider} OAuth is not configured`);
+    }
+    const profile = await this.fetchProfile(provider, code);
+    const [owner] = await this.db
+      .select({ userId: users.userId })
+      .from(users)
+      .where(eq(this.providerIdColumn(provider), profile.providerId))
+      .limit(1);
+    if (owner && owner.userId !== userId) return "conflict";
+    await this.db
+      .update(users)
+      .set(this.providerColumns(provider, profile))
+      .where(eq(users.userId, userId));
+    return "linked";
+  }
+
+  private fetchProfile(provider: OAuthProvider, code: string): Promise<NormalizedProfile> {
+    return provider === "github"
+      ? this.fetchGithub(code)
+      : provider === "linkedin"
+        ? this.fetchLinkedin(code)
+        : this.fetchGoogle(code);
   }
 
   private async fetchGithub(code: string): Promise<NormalizedProfile> {
@@ -228,6 +260,15 @@ export class OAuthService {
     };
   }
 
+  /** The users column holding this provider's stable account id. */
+  private providerIdColumn(provider: OAuthProvider) {
+    return provider === "github"
+      ? users.githubId
+      : provider === "linkedin"
+        ? users.linkedinId
+        : users.googleId;
+  }
+
   /** The id/handle columns a provider owns on the users row. */
   private providerColumns(
     provider: OAuthProvider,
@@ -246,12 +287,7 @@ export class OAuthService {
 
   /** Link the provider to an existing account, or create a fresh member user. */
   private async upsertUser(provider: OAuthProvider, profile: NormalizedProfile): Promise<string> {
-    const idColumn =
-      provider === "github"
-        ? users.githubId
-        : provider === "linkedin"
-          ? users.linkedinId
-          : users.googleId;
+    const idColumn = this.providerIdColumn(provider);
 
     // 1. Already linked → refresh the provider columns (e.g. a new GitHub
     // access token is minted on every login) and done.
