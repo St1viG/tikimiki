@@ -93,8 +93,14 @@ describe("@-mentions (e2e)", () => {
       const caller = await registerMember(app);
       const target = await registerMember(app);
 
+      // Factory usernames share a Date.now()-derived prefix, so a short query
+      // matches every user registered in this run and the target can fall
+      // outside the endpoint's result limit. All-but-last-char is still a
+      // genuine prefix but narrow enough to keep the target in the results.
+      const q = target.username.slice(0, -1);
+
       const res = await http()
-        .get(`/api/v1/users/search?q=${target.username.slice(0, 6)}`)
+        .get(`/api/v1/users/search?q=${q}`)
         .set("Authorization", `Bearer ${caller.token}`)
         .expect(200);
 
