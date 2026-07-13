@@ -203,7 +203,11 @@ export function HackathonsClient() {
   const hidden = (text: string) => q !== "" && !text.toLowerCase().includes(q);
 
   const all = hacks ?? [];
-  const liveHacks = all.filter((h) => h.status === "ongoing");
+  // `status` is set by the organizer (upcoming → ongoing → finished) and has no
+  // automatic time-based expiry, so a hackathon can stay "ongoing" in the DB
+  // long after its endsAt has passed. Guard the live section with the actual
+  // end time so it never shows something that has already ended.
+  const liveHacks = all.filter((h) => h.status === "ongoing" && new Date(h.endsAt).getTime() > now);
   const finishedHacks = all.filter((h) => h.status === "finished");
 
   // Upcoming grid: status "upcoming" + Type filter + Sort.
