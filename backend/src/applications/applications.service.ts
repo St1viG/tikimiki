@@ -186,6 +186,8 @@ export class ApplicationsService {
       throw new ConflictException("You already have an active application for this hackathon");
     }
 
+    await this.assertAnswersCompleteForm(input.hackathonId, input.answers);
+
     const applicationId = await this.db.transaction(async (tx) => {
       const [created] = await tx
         .insert(applications)
@@ -280,6 +282,8 @@ export class ApplicationsService {
       throw new BadRequestException("Registration deadline has passed");
     }
 
+    await this.assertAnswersCompleteForm(input.hackathonId, input.answers);
+
     // Fetch all active team members.
     const teamMemberRows = await this.db
       .select({ userId: teamMembers.userId })
@@ -345,6 +349,50 @@ export class ApplicationsService {
       .catch(() => undefined);
 
     return Promise.all(createdIds.map((id) => this.getOwnApplication(id)));
+  }
+
+  /**
+   * Validates submitted answers against the hackathon's application form:
+   * every answer must reference a question on this form (no duplicates), and
+   * every required question must receive a non-blank answer.
+   */
+  private async assertAnswersCompleteForm(
+    hackathonId: string,
+    answers: { questionId: string; answer: string }[] | undefined,
+  ): Promise<void> {
+    const questions = await this.db
+      .select({
+        questionId: applicationQuestions.questionId,
+        prompt: applicationQuestions.prompt,
+        required: applicationQuestions.required,
+      })
+      .from(applicationQuestions)
+      .where(eq(applicationQuestions.hackathonId, hackathonId));
+
+    const known = new Set(questions.map((q) => q.questionId));
+    const answered = new Map<string, string>();
+    for (const a of answers ?? []) {
+      if (!known.has(a.questionId)) {
+        throw new BadRequestException(
+          "Answer references a question that is not on this hackathon's application form",
+        );
+      }
+      if (answered.has(a.questionId)) {
+        throw new BadRequestException("Duplicate answer for the same question");
+      }
+      answered.set(a.questionId, a.answer);
+    }
+
+    const missing = questions.filter(
+      (q) => q.required && (answered.get(q.questionId) ?? "").trim() === "",
+    );
+    if (missing.length > 0) {
+      throw new BadRequestException(
+        `All required questions must be answered (missing: ${missing
+          .map((q) => `"${q.prompt}"`)
+          .join(", ")})`,
+      );
+    }
   }
 
   /* ── Application-form questions ──────────────────────────── */
