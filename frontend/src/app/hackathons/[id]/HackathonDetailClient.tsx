@@ -276,6 +276,52 @@ export function HackathonDetailClient({ hackathonId }: { hackathonId: string }) 
           </div>
         </div>
 
+        {/* Apply CTA */}
+        <div className="hd-cta">
+          {isOwner ? (
+            <div className="hd-cta-own">
+              <span>{t("ctaOwn")}</span>
+              <Link className="btn btn-primary" href={`/hackathons/${hack.hackathonId}/edit`}>
+                <Icon name="settings" /> {t("editHackathon")}
+              </Link>
+              <Link className="btn btn-ghost" href="/applications">
+                {t("manageApps")}
+              </Link>
+            </div>
+          ) : existing ? (
+            <div className="hd-cta-applied">
+              <span className={`hk-apply-status ${appStatusClass(existing.status)}`}>
+                <Icon
+                  name={
+                    existing.status === "approved"
+                      ? "check"
+                      : existing.status === "rejected"
+                        ? "x"
+                        : "clock"
+                  }
+                />{" "}
+                {appStatusLabel(existing.status)}
+              </span>
+              <Link className="btn btn-ghost" href={`/hackathons/${hack.hackathonId}/apply`}>
+                {t("viewApplication")}
+              </Link>
+            </div>
+          ) : !user ? (
+            <Link className="btn btn-primary hd-cta-btn" href="/login">
+              <Icon name="flag" /> {t("ctaSignIn")}
+            </Link>
+          ) : canApply ? (
+            <Link
+              className="btn btn-primary hd-cta-btn"
+              href={`/hackathons/${hack.hackathonId}/apply`}
+            >
+              <Icon name="flag" /> {t("ctaApply")}
+            </Link>
+          ) : (
+            <p className="hd-cta-closed">{t("deadlinePassed")}</p>
+          )}
+        </div>
+
         {/* Meta grid */}
         <div className="hd-meta">
           <div className="hd-meta-item">
@@ -360,52 +406,6 @@ export function HackathonDetailClient({ hackathonId }: { hackathonId: string }) 
             )}
           </section>
         ) : null}
-
-        {/* Apply CTA */}
-        <div className="hd-cta">
-          {isOwner ? (
-            <div className="hd-cta-own">
-              <span>{t("ctaOwn")}</span>
-              <Link className="btn btn-primary" href={`/hackathons/${hack.hackathonId}/edit`}>
-                <Icon name="settings" /> {t("editHackathon")}
-              </Link>
-              <Link className="btn btn-ghost" href="/applications">
-                {t("manageApps")}
-              </Link>
-            </div>
-          ) : existing ? (
-            <div className="hd-cta-applied">
-              <span className={`hk-apply-status ${appStatusClass(existing.status)}`}>
-                <Icon
-                  name={
-                    existing.status === "approved"
-                      ? "check"
-                      : existing.status === "rejected"
-                        ? "x"
-                        : "clock"
-                  }
-                />{" "}
-                {appStatusLabel(existing.status)}
-              </span>
-              <Link className="btn btn-ghost" href={`/hackathons/${hack.hackathonId}/apply`}>
-                {t("viewApplication")}
-              </Link>
-            </div>
-          ) : !user ? (
-            <Link className="btn btn-primary hd-cta-btn" href="/login">
-              <Icon name="flag" /> {t("ctaSignIn")}
-            </Link>
-          ) : canApply ? (
-            <Link
-              className="btn btn-primary hd-cta-btn"
-              href={`/hackathons/${hack.hackathonId}/apply`}
-            >
-              <Icon name="flag" /> {t("ctaApply")}
-            </Link>
-          ) : (
-            <p className="hd-cta-closed">{t("deadlinePassed")}</p>
-          )}
-        </div>
       </main>
     </AppShell>
   );
