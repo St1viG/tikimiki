@@ -22,6 +22,8 @@ export interface HackathonSummary {
   longitude: number | null;
   logoUrl: string | null;
   bannerUrl: string | null;
+  /** Whether the organizing account has passed admin verification. */
+  organizationVerified: boolean;
   participantCount: number;
   /** Non-deleted teams registered for the hackathon. */
   teamCount: number;

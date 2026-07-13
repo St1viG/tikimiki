@@ -69,6 +69,12 @@
   background: var(--grad-plate);
   color: var(--lemon);
   border: 1px solid var(--line);
+  overflow: hidden;
+}
+.hd-org-av img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .hk-verify {
   display: inline-grid;

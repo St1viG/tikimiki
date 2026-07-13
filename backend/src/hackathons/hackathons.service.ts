@@ -59,6 +59,7 @@ const columns = {
   longitude: sql<number | null>`ST_X(${hackathons.coordinates}::geometry)`,
   logoUrl: hackathons.logoUrl,
   bannerUrl: hackathons.bannerUrl,
+  organizationVerified: sql<boolean>`(${organizations.verificationStatus} = 'approved')`,
   createdAt: hackathons.createdAt,
   participantCount: sql<number>`(
     select count(*)::int from applications a

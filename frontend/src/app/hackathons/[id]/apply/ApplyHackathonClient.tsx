@@ -332,14 +332,21 @@ export function ApplyHackathonClient({ hackathonId }: { hackathonId: string }) {
       <div className="ap-hero-body">
         <div className="ap-org">
           <div className="ap-org-av" aria-hidden="true">
-            {initials(hack.organizationName)}
+            {hack.logoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={hack.logoUrl} alt="" />
+            ) : (
+              initials(hack.organizationName)
+            )}
           </div>
           <span className="ap-org-name">
             {t("by")} <strong>{hack.organizationName}</strong>
           </span>
-          <span className="hk-verify" title={t("verifiedOrg")}>
-            <Icon name="shield" />
-          </span>
+          {hack.organizationVerified && (
+            <span className="hk-verify" title={t("verifiedOrg")}>
+              <Icon name="shield" />
+            </span>
+          )}
         </div>
         <h2 className="ap-hero-title">{hack.title}</h2>
         <div className="ap-hero-tags">
