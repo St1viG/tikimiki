@@ -5,7 +5,31 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:e2e": "jest"
+  },
+  "jest": {
+    "rootDir": "e2e/selenium",
+    "testEnvironment": "node",
+    "testMatch": [
+      "**/*.spec.ts"
+    ],
+    "testTimeout": 60000,
+    "transform": {
+      "^.+\\.ts$": [
+        "ts-jest",
+        {
+          "tsconfig": {
+            "target": "ES2020",
+            "module": "commonjs",
+            "esModuleInterop": true,
+            "resolveJsonModule": true,
+            "skipLibCheck": true,
+            "strict": true
+          }
+        }
+      ]
+    }
   },
   "dependencies": {
     "@tikimiki/types": "workspace:*",
@@ -18,11 +42,16 @@
     "socket.io-client": "^4"
   },
   "devDependencies": {
+    "@types/jest": "^30.0.0",
     "@types/node": "^20",
     "@types/react": "^18.3",
     "@types/react-dom": "^18.3",
+    "@types/selenium-webdriver": "^4.35.6",
     "eslint": "^8",
     "eslint-config-next": "14.2.5",
+    "jest": "^30.4.2",
+    "selenium-webdriver": "^4.46.0",
+    "ts-jest": "^29.4.11",
     "typescript": "^5.4.5"
   }
 }
