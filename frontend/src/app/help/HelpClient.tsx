@@ -6,6 +6,7 @@ import { useT } from "@/components/i18n/LanguageProvider";
 import { AuthShell } from "@/components/auth/AuthShell";
 
 const M = {
+  back: { en: "Back", sr: "Nazad" },
   title: { en: "Help Center", sr: "Centar za pomoć" },
   lead: {
     en: "Quick answers to the questions we hear most. Can't find yours? Email us at the bottom of the page.",
@@ -79,6 +80,10 @@ export function HelpClient() {
   return (
     <AuthShell as="main" footerVariant="links">
       <section className="legal-card" aria-labelledby="legal-heading">
+        <Link className="legal-back" href="/">
+          <Icon name="arrow-left" />
+          {t("back")}
+        </Link>
         <div className="legal-badge" aria-hidden="true">
           <Icon name="mail" />
         </div>
