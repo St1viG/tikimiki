@@ -13,6 +13,7 @@ import {
   appealStatus,
   entityType,
   notificationType,
+  reportCategory,
   reportStatus,
   reportTargetType,
 } from "./_enums";
@@ -30,7 +31,11 @@ export const reports = pgTable(
       .references(() => users.userId, { onDelete: "cascade" }),
     targetType: reportTargetType("target_type").notNull(),
     targetId: uuid("target_id").notNull(),
-    reason: text("reason").notNull(),
+    // Default exists only so the migration can add this NOT NULL column to a
+    // table that may already have rows — the application layer always sends
+    // an explicit category via createReportSchema.
+    category: reportCategory("category").notNull().default("other"),
+    reason: text("reason"),
     status: reportStatus("status").notNull().default("pending"),
     reviewedBy: uuid("reviewed_by").references(() => administrators.userId, {
       onDelete: "set null",

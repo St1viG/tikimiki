@@ -1,21 +1,26 @@
 "use client";
 
+import { useState } from "react";
 import { Icon } from "@/components/Icon";
 import { useT } from "@/components/i18n/LanguageProvider";
 
 /**
- * ModeratorWarnModal — "Warn user" confirmation dialog.
- * Rendered by ModeratorClient when a moderator clicks "Warn user".
+ * ModeratorWarnModal — resolves a report without removing content.
+ * Rendered by ModeratorClient when a moderator clicks "Resolve".
+ *
+ * There is no separate warning system — this only marks the report resolved
+ * and (optionally) bans the user. It never claims to have sent a warning.
  */
 
 const M = {
-  title: { en: "Warn user", sr: "Upozori korisnika" },
+  title: { en: "Resolve report", sr: "Reši prijavu" },
   body: {
-    en: "The user will be sent an official warning. Repeated violations may lead to account suspension by an administrator.",
-    sr: "Korisniku će biti poslato zvanično upozorenje. Ponovljeni prekršaji mogu dovesti do suspenzije naloga od strane administratora.",
+    en: "The report will be marked resolved without removing any content. The reporter will be notified.",
+    sr: "Prijava će biti označena kao rešena bez uklanjanja sadržaja. Podnosilac prijave će biti obavešten.",
   },
+  banLabel: { en: "Also ban this user", sr: "Takođe banuj ovog korisnika" },
   cancelBtn: { en: "Cancel", sr: "Otkaži" },
-  confirmBtn: { en: "Send warning", sr: "Pošalji upozorenje" },
+  confirmBtn: { en: "Resolve", sr: "Reši" },
 } as const;
 
 export function ModeratorWarnModal({
@@ -25,9 +30,10 @@ export function ModeratorWarnModal({
 }: {
   open: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: (banUser: boolean) => void;
 }) {
   const t = useT(M);
+  const [banUser, setBanUser] = useState(false);
 
   return (
     <div
@@ -45,11 +51,15 @@ export function ModeratorWarnModal({
           <Icon name="flag" /> {t("title")}
         </div>
         <div className="modal-body">{t("body")}</div>
+        <label style={{ display: "flex", alignItems: "center", gap: 8, margin: "12px 0 0" }}>
+          <input type="checkbox" checked={banUser} onChange={(e) => setBanUser(e.target.checked)} />
+          {t("banLabel")}
+        </label>
         <div className="modal-actions">
           <button className="btn btn-ghost" onClick={onClose}>
             {t("cancelBtn")}
           </button>
-          <button className="btn btn-primary modal-confirm" onClick={onConfirm}>
+          <button className="btn btn-primary modal-confirm" onClick={() => onConfirm(banUser)}>
             {t("confirmBtn")}
           </button>
         </div>

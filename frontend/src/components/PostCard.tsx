@@ -6,6 +6,7 @@ import { Icon } from "@/components/Icon";
 import { PostAuthor } from "@/components/PostAuthor";
 import { PostMedia } from "@/components/PostMedia";
 import { MarkdownContent } from "@/components/MarkdownContent";
+import { ReportPopup } from "@/components/popups/ReportPopup";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useT, useLanguage } from "@/components/i18n/LanguageProvider";
 import { deletePost, updatePost } from "@/lib/api";
@@ -31,6 +32,8 @@ const M = {
   postOptions: { en: "Post options", sr: "Opcije objave" },
   editPost: { en: "Edit", sr: "Izmeni" },
   deletePost: { en: "Delete", sr: "Obriši" },
+  reportPost: { en: "Report", sr: "Prijavi" },
+  reportSubmitted: { en: "Report submitted", sr: "Prijava poslata" },
   deleteTitle: { en: "Delete post?", sr: "Obrisati objavu?" },
   deleteConfirm: {
     en: "This post will be permanently removed. This action can't be undone.",
@@ -136,6 +139,8 @@ export function PostCard({
   const [savingEdit, setSavingEdit] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportSent, setReportSent] = useState(false);
   const editTextRef = useRef<HTMLTextAreaElement>(null);
 
   // Close the "⋯" menu on any outside click or Escape.
@@ -274,6 +279,33 @@ export function PostCard({
         </div>
       )}
     </div>
+  ) : user ? (
+    <div className="post-menu">
+      <button
+        type="button"
+        className="post-menu-btn"
+        aria-label={t("postOptions")}
+        aria-haspopup="menu"
+        aria-expanded={menuOpen}
+        onClick={() => setMenuOpen((o) => !o)}
+      >
+        <Icon name="more" />
+      </button>
+      {menuOpen && (
+        <div className="post-menu-pop" role="menu">
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              setMenuOpen(false);
+              setReportOpen(true);
+            }}
+          >
+            <Icon name="flag" /> {t("reportPost")}
+          </button>
+        </div>
+      )}
+    </div>
   ) : null;
 
   return (
@@ -393,8 +425,20 @@ export function PostCard({
               {shareCopied && <span className="share-copied">{t("linkCopied")}</span>}
             </button>
           )}
+          {reportSent && <span className="share-copied">{t("reportSubmitted")}</span>}
         </div>
       </article>
+
+      <ReportPopup
+        open={reportOpen}
+        targetType="post"
+        targetId={post.postId}
+        onClose={() => setReportOpen(false)}
+        onSubmitted={() => {
+          setReportSent(true);
+          setTimeout(() => setReportSent(false), 2500);
+        }}
+      />
 
       {confirmOpen && (
         <div

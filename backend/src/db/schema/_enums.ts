@@ -101,6 +101,13 @@ export const reportStatus = pgEnum("report_status", [
   "dismissed",
 ]);
 
+export const reportCategory = pgEnum("report_category", [
+  "spam",
+  "harassment",
+  "inappropriate_content",
+  "other",
+]);
+
 export const entityType = pgEnum("entity_type", [
   "user",
   "hackathon",
@@ -138,6 +145,8 @@ export const notificationType = pgEnum("notification_type", [
   "post_reaction",
   "mention",
   "new_application",
+  "report_resolved",
+  "report_dismissed",
 ]);
 
 export const appealStatus = pgEnum("appeal_status", ["pending", "approved", "rejected"]);
