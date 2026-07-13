@@ -284,7 +284,10 @@ export function HackathonDetailClient({ hackathonId }: { hackathonId: string }) 
               <Link className="btn btn-primary" href={`/hackathons/${hack.hackathonId}/edit`}>
                 <Icon name="settings" /> {t("editHackathon")}
               </Link>
-              <Link className="btn btn-ghost" href="/applications">
+              <Link
+                className="btn btn-ghost"
+                href={`/applications?hackathonId=${hack.hackathonId}`}
+              >
                 {t("manageApps")}
               </Link>
             </div>

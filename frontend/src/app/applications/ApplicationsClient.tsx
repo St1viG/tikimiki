@@ -5,6 +5,7 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Icon } from "@/components/Icon";
 import {
   CandidatePopup,
@@ -443,11 +444,18 @@ function OrganizerSurface({
   t: (k: keyof typeof M) => string;
   showToast: (msg: string, type: "green" | "red") => void;
 }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const urlHackathonId = searchParams.get("hackathonId");
+
   const [hackathons, setHackathons] = useState<HackathonSummary[] | null>(null);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(urlHackathonId);
   const [view, setView] = useState<OrgView>("applicants");
 
   // Load the hackathons this account may manage (own, or all for admins).
+  // A `?hackathonId=` in the URL (e.g. arriving from a hackathon's own page)
+  // takes precedence over defaulting to the first one, so a direct link lands
+  // on the right hackathon instead of forcing a manual pick from the list.
   useEffect(() => {
     let cancelled = false;
     api
@@ -456,7 +464,10 @@ function OrganizerSurface({
         if (cancelled) return;
         const mine = isAdmin ? all : all.filter((h) => h.organizationId === userId);
         setHackathons(mine);
-        setSelectedId((cur) => cur ?? mine[0]?.hackathonId ?? null);
+        setSelectedId((cur) => {
+          if (cur && mine.some((h) => h.hackathonId === cur)) return cur;
+          return mine[0]?.hackathonId ?? null;
+        });
       })
       .catch(() => {
         if (!cancelled) setHackathons([]);
@@ -469,6 +480,16 @@ function OrganizerSurface({
   const selected = useMemo(
     () => hackathons?.find((h) => h.hackathonId === selectedId) ?? null,
     [hackathons, selectedId],
+  );
+
+  // Keep the URL's `hackathonId` in sync with the picker so the choice
+  // survives a refresh or back-navigation.
+  const selectHackathon = useCallback(
+    (id: string) => {
+      setSelectedId(id);
+      router.replace(`/applications?hackathonId=${id}`);
+    },
+    [router],
   );
 
   return (
@@ -509,7 +530,7 @@ function OrganizerSurface({
                   className="apps-select"
                   aria-label={t("pickAria")}
                   value={selectedId ?? ""}
-                  onChange={(e) => setSelectedId(e.target.value)}
+                  onChange={(e) => selectHackathon(e.target.value)}
                 >
                   {hackathons.map((h) => (
                     <option key={h.hackathonId} value={h.hackathonId}>

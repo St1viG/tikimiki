@@ -236,7 +236,10 @@ export function ManageClient() {
                       >
                         {t("view")}
                       </Link>
-                      <Link className="btn btn-ghost hk-btn-sm" href="/applications">
+                      <Link
+                        className="btn btn-ghost hk-btn-sm"
+                        href={`/applications?hackathonId=${h.hackathonId}`}
+                      >
                         {t("applications")}
                       </Link>
                       <Link

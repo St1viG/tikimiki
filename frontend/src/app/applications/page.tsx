@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import "./applications.css";
 import { AppShell } from "@/components/shell/AppShell";
 import { ApplicationsClient } from "./ApplicationsClient";
@@ -14,9 +15,12 @@ export const metadata: Metadata = {
 };
 
 export default function ApplicationsPage() {
+  // Suspense boundary required because ApplicationsClient reads useSearchParams().
   return (
     <AppShell right={<></>}>
-      <ApplicationsClient />
+      <Suspense>
+        <ApplicationsClient />
+      </Suspense>
     </AppShell>
   );
 }
