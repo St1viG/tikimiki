@@ -6,6 +6,7 @@ import { useT } from "@/components/i18n/LanguageProvider";
 import { AuthShell } from "@/components/auth/AuthShell";
 
 const M = {
+  back: { en: "Back", sr: "Nazad" },
   title: { en: "Terms of Service", sr: "Uslovi korišćenja" },
   updated: { en: "Last updated July 1, 2026", sr: "Poslednje ažurirano 1. jula 2026." },
   lead: {
@@ -52,6 +53,10 @@ export function TermsClient() {
   return (
     <AuthShell as="main" footerVariant="links">
       <section className="legal-card" aria-labelledby="legal-heading">
+        <Link className="legal-back" href="/">
+          <Icon name="arrow-left" />
+          {t("back")}
+        </Link>
         <div className="legal-badge" aria-hidden="true">
           <Icon name="flag" />
         </div>

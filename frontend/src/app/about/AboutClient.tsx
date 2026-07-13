@@ -6,6 +6,7 @@ import { useT } from "@/components/i18n/LanguageProvider";
 import { AuthShell } from "@/components/auth/AuthShell";
 
 const M = {
+  back: { en: "Back", sr: "Nazad" },
   title: { en: "About tikimiki", sr: "O tikimiki platformi" },
   lead: {
     en: "tikimiki is an all-in-one hackathon platform: discover hackathons, apply and form a team, then run the whole event — chat, project submission, judging and results — without leaving the app.",
@@ -44,6 +45,10 @@ export function AboutClient() {
   return (
     <AuthShell as="main" footerVariant="links">
       <section className="legal-card" aria-labelledby="legal-heading">
+        <Link className="legal-back" href="/">
+          <Icon name="arrow-left" />
+          {t("back")}
+        </Link>
         <div className="legal-badge" aria-hidden="true">
           <Icon name="sparkles" />
         </div>
