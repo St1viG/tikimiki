@@ -21,9 +21,9 @@ import { useSearchParams } from "next/navigation";
 import type { HackathonType } from "@tikimiki/types";
 import { Icon } from "@/components/Icon";
 import { AppShell } from "@/components/shell/AppShell";
+import { OrbArt } from "@/components/ui/OrbArt";
 import { useT } from "@/components/i18n/LanguageProvider";
 import { searchAll, type SearchHit, type SearchResult } from "@/lib/api";
-import { initials } from "@/lib/format";
 
 const M = {
   title: { en: "Search", sr: "Pretraga" },
@@ -343,12 +343,7 @@ function SearchRow({ hit, tab }: { hit: SearchHit; tab: Tab }) {
   const body = (
     <>
       <span className="search-avatar" aria-hidden="true">
-        {hit.imageUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={hit.imageUrl} alt="" loading="lazy" />
-        ) : (
-          initials(hit.label)
-        )}
+        <OrbArt url={hit.imageUrl} seed={hit.label} />
       </span>
       <span className="search-meta">
         <span className="search-label">{hit.label}</span>
