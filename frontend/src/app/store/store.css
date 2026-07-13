@@ -206,6 +206,13 @@
   width: 12px;
   height: 12px;
 }
+/* Beats `.merch-card.is-premium .merch-img .ic` (same specificity, declared
+   earlier) — otherwise the "legendary"/"mythic" badge's flame icon inherits
+   the item's big 56px icon size instead of staying badge-sized. */
+.merch-card.is-premium .merch-badge .ic {
+  width: 12px;
+  height: 12px;
+}
 /* Intentional asymmetry: the "hot" sticker sits slightly askew */
 .merch-badge-hot {
   color: var(--on-accent);
