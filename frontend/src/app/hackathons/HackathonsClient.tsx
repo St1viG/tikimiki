@@ -352,12 +352,19 @@ export function HackathonsClient() {
                     <div className="hk-featured-top">
                       <div className="hk-card-org">
                         <div className="hk-org-av" aria-hidden="true">
-                          {initials(h.organizationName)}
+                          {h.logoUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={h.logoUrl} alt="" />
+                          ) : (
+                            initials(h.organizationName)
+                          )}
                         </div>
                         <span>{h.organizationName}</span>
-                        <span className="hk-verify" title={t("verifiedOrg")}>
-                          <Icon name="shield" />
-                        </span>
+                        {h.organizationVerified && (
+                          <span className="hk-verify" title={t("verifiedOrg")}>
+                            <Icon name="shield" />
+                          </span>
+                        )}
                       </div>
                       {countdown && (
                         <div className="hk-countdown">
@@ -469,12 +476,19 @@ export function HackathonsClient() {
                 <div className="hk-card-body">
                   <div className="hk-card-org">
                     <div className="hk-org-av hk-org-av-sm" aria-hidden="true">
-                      {initials(h.organizationName)}
+                      {h.logoUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={h.logoUrl} alt="" />
+                      ) : (
+                        initials(h.organizationName)
+                      )}
                     </div>
                     <span>{h.organizationName}</span>
-                    <span className="hk-verify" title={t("verifiedOrg")}>
-                      <Icon name="shield" />
-                    </span>
+                    {h.organizationVerified && (
+                      <span className="hk-verify" title={t("verifiedOrg")}>
+                        <Icon name="shield" />
+                      </span>
+                    )}
                   </div>
                   <h3 className="hk-card-name">
                     <Link href={`/hackathons/${h.hackathonId}`}>{h.title}</Link>
