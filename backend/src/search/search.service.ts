@@ -163,6 +163,7 @@ export class SearchService {
           title: hackathons.title,
           description: hackathons.description,
           logoUrl: hackathons.logoUrl,
+          bannerUrl: hackathons.bannerUrl,
         })
         .from(hackathons)
         .where(and(...hackathonConditions))
@@ -185,7 +186,10 @@ export class SearchService {
         id: r.id,
         label: r.title,
         subtitle: truncate(r.description, SUBTITLE_MAX_LENGTH),
-        imageUrl: r.logoUrl ?? undefined,
+        // logoUrl is rarely set (organizers only ever see bannerUrl reflected
+        // on the hackathon page), so fall back to it for a real image instead
+        // of the initials placeholder.
+        imageUrl: r.logoUrl ?? r.bannerUrl ?? undefined,
       })),
     };
   }
