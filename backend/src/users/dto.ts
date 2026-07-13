@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { passwordSchema } from "../auth/dto";
 
 /** An image reference: either a local upload path ("/uploads/…") or an absolute
  *  http(s) URL. Uploaded avatars/banners are served as relative paths, so a
@@ -16,7 +17,15 @@ const imageRef = z
 /** PATCH /users/me/profile body. */
 export const updateProfileSchema = z
   .object({
-    username: z.string().trim().min(3).max(32).optional(),
+    // Same username format rule as registration (auth/dto.ts) — profile edits
+    // must not let through names the signup form rejects.
+    username: z
+      .string()
+      .trim()
+      .min(3)
+      .max(32)
+      .regex(/^[a-zA-Z0-9_.-]+$/, "letters, numbers, . _ - only")
+      .optional(),
     displayName: z.string().trim().max(80).nullable().optional(),
     bio: z.string().trim().max(500).nullable().optional(),
     avatarUrl: imageRef,
@@ -30,7 +39,8 @@ export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 export const changePasswordSchema = z
   .object({
     currentPassword: z.string().min(1),
-    newPassword: z.string().min(8).max(256),
+    // Same complexity rule as registration and password reset.
+    newPassword: passwordSchema,
   })
   .strict();
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;

@@ -560,6 +560,8 @@ export interface PublicProfile {
   userId: string;
   username: string;
   displayName: string | null;
+  /** Present only when the user enabled the `showEmail` privacy setting. */
+  email: string | null;
   bio: string | null;
   avatarUrl: string | null;
   bannerUrl: string | null;

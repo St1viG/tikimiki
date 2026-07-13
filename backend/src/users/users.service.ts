@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Inject,
   Injectable,
   NotFoundException,
@@ -16,6 +17,7 @@ import {
 } from "../posts/posts.service";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import {
+  administrators,
   badges,
   follows,
   memberSkills,
@@ -25,6 +27,7 @@ import {
   posts,
   skills,
   userBadges,
+  userSettings,
   users,
 } from "../db/schema";
 import { NotificationsService } from "../notifications/notifications.service";
@@ -63,6 +66,8 @@ export interface PublicProfileDto {
   userId: string;
   username: string;
   displayName: string | null;
+  /** Account email — present only when the user enabled `showEmail` (SSU3). */
+  email: string | null;
   bio: string | null;
   avatarUrl: string | null;
   bannerUrl: string | null;
@@ -295,12 +300,56 @@ export class UsersService {
     }
 
     const newHash = await hash(input.newPassword);
+    // Bumping tokenVersion invalidates every outstanding refresh token, so a
+    // password change signs the account out of all devices (SSU3).
     await this.db
       .update(users)
-      .set({ passwordHash: newHash, updatedAt: new Date() })
+      .set({
+        passwordHash: newHash,
+        tokenVersion: sql`${users.tokenVersion} + 1`,
+        updatedAt: new Date(),
+      })
       .where(eq(users.userId, userId));
 
     return { success: true };
+  }
+
+  /** The target's privacy-relevant settings (defaults when no row exists). */
+  private async profilePrivacy(
+    targetUserId: string,
+  ): Promise<{ visibility: "all" | "members" | "none"; showEmail: boolean }> {
+    const [row] = await this.db
+      .select({
+        profileVisibility: userSettings.profileVisibility,
+        showEmail: userSettings.showEmail,
+      })
+      .from(userSettings)
+      .where(eq(userSettings.userId, targetUserId))
+      .limit(1);
+    return { visibility: row?.profileVisibility ?? "all", showEmail: row?.showEmail ?? false };
+  }
+
+  /**
+   * Enforce the target's `profileVisibility` setting (SSU3): "members" needs
+   * a signed-in viewer, "none" hides the profile from everyone except the
+   * owner and platform administrators.
+   */
+  private async assertProfileVisible(
+    targetUserId: string,
+    viewerId: string | null,
+    visibility: "all" | "members" | "none",
+  ): Promise<void> {
+    if (visibility === "all" || viewerId === targetUserId) return;
+    if (viewerId) {
+      if (visibility === "members") return;
+      const [admin] = await this.db
+        .select({ id: administrators.userId })
+        .from(administrators)
+        .where(eq(administrators.userId, viewerId))
+        .limit(1);
+      if (admin) return;
+    }
+    throw new ForbiddenException("This profile is private");
   }
 
   /** Public profile lookup by username. */
@@ -313,6 +362,7 @@ export class UsersService {
         userId: users.userId,
         username: users.username,
         displayName: users.displayName,
+        email: users.email,
         bio: users.bio,
         avatarUrl: users.avatarUrl,
         bannerUrl: users.bannerUrl,
@@ -322,6 +372,9 @@ export class UsersService {
       .where(eq(users.username, username))
       .limit(1);
     if (!user) throw new NotFoundException("User not found");
+
+    const privacy = await this.profilePrivacy(user.userId);
+    await this.assertProfileVisible(user.userId, viewerId, privacy.visibility);
 
     let isFollowing = false;
     if (viewerId && viewerId !== user.userId) {
@@ -362,6 +415,7 @@ export class UsersService {
       userId: user.userId,
       username: user.username,
       displayName: user.displayName,
+      email: privacy.showEmail ? user.email : null,
       bio: user.bio,
       avatarUrl: user.avatarUrl,
       bannerUrl: user.bannerUrl,
@@ -394,8 +448,10 @@ export class UsersService {
   }
 
   /** GET /users/:username/followers — users who follow :username. */
-  async listFollowers(username: string): Promise<SocialUserDto[]> {
+  async listFollowers(username: string, viewerId: string | null = null): Promise<SocialUserDto[]> {
     const targetId = await this.userIdByUsername(username);
+    const { visibility } = await this.profilePrivacy(targetId);
+    await this.assertProfileVisible(targetId, viewerId, visibility);
     const rows = await this.db
       .select({
         userId: users.userId,
@@ -411,8 +467,10 @@ export class UsersService {
   }
 
   /** GET /users/:username/following — users :username follows. */
-  async listFollowing(username: string): Promise<SocialUserDto[]> {
+  async listFollowing(username: string, viewerId: string | null = null): Promise<SocialUserDto[]> {
     const targetId = await this.userIdByUsername(username);
+    const { visibility } = await this.profilePrivacy(targetId);
+    await this.assertProfileVisible(targetId, viewerId, visibility);
     const rows = await this.db
       .select({
         userId: users.userId,
@@ -433,6 +491,8 @@ export class UsersService {
     viewerId: string | null,
   ): Promise<FeedPostWithDisplayName[]> {
     const targetId = await this.userIdByUsername(username);
+    const { visibility } = await this.profilePrivacy(targetId);
+    await this.assertProfileVisible(targetId, viewerId, visibility);
     const rows = await this.db
       .select({
         postId: posts.postId,

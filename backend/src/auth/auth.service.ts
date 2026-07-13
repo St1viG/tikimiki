@@ -66,16 +66,32 @@ export class AuthService {
 
   /** Public entry for non-password logins (OAuth): mint a fresh session. */
   async issueSession(userId: string) {
-    return this.issueTokens(userId);
+    return this.issueTokens(userId, await this.currentTokenVersion(userId));
   }
 
-  private async issueTokens(userId: string) {
+  /** The user's current token version (0 when the user is missing). */
+  private async currentTokenVersion(userId: string): Promise<number> {
+    const [u] = await this.db
+      .select({ tokenVersion: users.tokenVersion })
+      .from(users)
+      .where(and(eq(users.userId, userId), isNull(users.deletedAt)))
+      .limit(1);
+    return u?.tokenVersion ?? 0;
+  }
+
+  /**
+   * Refresh tokens carry the tokenVersion they were minted with (`ver`); a
+   * password change bumps the version, so every other device's refresh token
+   * stops working (SSU3 "sign out of all devices"). Access tokens stay
+   * stateless and simply expire within JWT_ACCESS_TTL.
+   */
+  private async issueTokens(userId: string, tokenVersion: number) {
     const accessToken = await this.jwt.signAsync(
       { sub: userId, typ: "access" },
       { secret: env.JWT_ACCESS_SECRET, expiresIn: env.JWT_ACCESS_TTL },
     );
     const refreshToken = await this.jwt.signAsync(
-      { sub: userId, typ: "refresh" },
+      { sub: userId, typ: "refresh", ver: tokenVersion },
       { secret: env.JWT_REFRESH_SECRET, expiresIn: env.JWT_REFRESH_TTL },
     );
     return { accessToken, refreshToken };
@@ -136,7 +152,7 @@ export class AuthService {
     return {
       user: this.toPublicUser(user),
       verifyDevLink,
-      ...(await this.issueTokens(user.userId)),
+      ...(await this.issueTokens(user.userId, user.tokenVersion)),
     };
   }
 
@@ -199,7 +215,7 @@ export class AuthService {
 
     await this.db.update(users).set({ lastLoginAt: new Date() }).where(eq(users.userId, u.userId));
 
-    return { user: this.toPublicUser(u), ...(await this.issueTokens(u.userId)) };
+    return { user: this.toPublicUser(u), ...(await this.issueTokens(u.userId, u.tokenVersion)) };
   }
 
   /**
@@ -210,11 +226,14 @@ export class AuthService {
   async resolveRefreshUserId(refreshToken: string | undefined): Promise<string | null> {
     if (!refreshToken) return null;
     try {
-      const payload = await this.jwt.verifyAsync<{ sub: string; typ: string }>(refreshToken, {
-        secret: env.JWT_REFRESH_SECRET,
-      });
+      const payload = await this.jwt.verifyAsync<{ sub: string; typ: string; ver?: number }>(
+        refreshToken,
+        { secret: env.JWT_REFRESH_SECRET },
+      );
       if (payload.typ !== "refresh") return null;
       if (await this.authz.isBanned(payload.sub)) return null;
+      // Tokens minted before a password change carry a stale version.
+      if ((payload.ver ?? 0) !== (await this.currentTokenVersion(payload.sub))) return null;
       return payload.sub;
     } catch {
       return null;
@@ -224,12 +243,15 @@ export class AuthService {
   async refresh(refreshToken: string | undefined) {
     if (!refreshToken) throw new UnauthorizedException("Missing refresh token");
     let sub: string;
+    let ver: number;
     try {
-      const payload = await this.jwt.verifyAsync<{ sub: string; typ: string }>(refreshToken, {
-        secret: env.JWT_REFRESH_SECRET,
-      });
+      const payload = await this.jwt.verifyAsync<{ sub: string; typ: string; ver?: number }>(
+        refreshToken,
+        { secret: env.JWT_REFRESH_SECRET },
+      );
       if (payload.typ !== "refresh") throw new Error("wrong token type");
       sub = payload.sub;
+      ver = payload.ver ?? 0;
     } catch {
       throw new UnauthorizedException("Invalid refresh token");
     }
@@ -237,7 +259,13 @@ export class AuthService {
     if (await this.authz.isBanned(sub)) {
       throw new ForbiddenException("This account is banned");
     }
-    return this.issueTokens(sub);
+    // A password change bumps tokenVersion — refresh tokens minted before it
+    // are dead, which is what signs the account out of all other devices.
+    const currentVersion = await this.currentTokenVersion(sub);
+    if (ver !== currentVersion) {
+      throw new UnauthorizedException("Session revoked — please sign in again");
+    }
+    return this.issueTokens(sub, currentVersion);
   }
 
   async me(

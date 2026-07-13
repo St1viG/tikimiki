@@ -71,13 +71,15 @@ export class UsersController {
   /* ── public profile + social/posts (more specific first) ──── */
 
   @Get(":username/followers")
-  listFollowers(@Param("username") username: string) {
-    return this.users.listFollowers(username);
+  @UseGuards(OptionalJwtAuthGuard)
+  listFollowers(@Param("username") username: string, @OptionalUser() viewerId: string | null) {
+    return this.users.listFollowers(username, viewerId);
   }
 
   @Get(":username/following")
-  listFollowing(@Param("username") username: string) {
-    return this.users.listFollowing(username);
+  @UseGuards(OptionalJwtAuthGuard)
+  listFollowing(@Param("username") username: string, @OptionalUser() viewerId: string | null) {
+    return this.users.listFollowing(username, viewerId);
   }
 
   @Get(":username/posts")

@@ -13,6 +13,7 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { useT, useLanguage } from "@/components/i18n/LanguageProvider";
 import type { FeedPost } from "@tikimiki/types";
 import {
+  ApiError,
   type PublicProfile,
   type SocialUser,
   getFollowers,
@@ -34,6 +35,7 @@ const M = {
   pageSub: { en: "Profile & posts", sr: "Profil i objave" },
   loading: { en: "Loading…", sr: "Učitavanje…" },
   notFound: { en: "Profile not found.", sr: "Profil nije pronađen." },
+  privateProfile: { en: "This profile is private.", sr: "Ovaj profil je privatan." },
   edit: { en: "Edit", sr: "Izmena" },
   follow: { en: "Follow", sr: "Zaprati" },
   following: { en: "Following ✓", sr: "Pratiš ✓" },
@@ -63,6 +65,7 @@ export function UserProfileClient({ username }: { username: string }) {
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [isPrivate, setIsPrivate] = useState(false);
   const [tab, setTab] = useState<Tab>("posts");
 
   const [posts, setPosts] = useState<FeedPost[] | null>(null);
@@ -94,6 +97,7 @@ export function UserProfileClient({ username }: { username: string }) {
     let cancelled = false;
     setLoading(true);
     setNotFound(false);
+    setIsPrivate(false);
     getPublicProfile(username)
       .then((p) => {
         if (!cancelled) {
@@ -102,8 +106,11 @@ export function UserProfileClient({ username }: { username: string }) {
           setFollowerCount(p.followerCount);
         }
       })
-      .catch(() => {
-        if (!cancelled) setNotFound(true);
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        // 403 = the owner limited profile visibility (SSU3 privacy setting).
+        if (err instanceof ApiError && err.status === 403) setIsPrivate(true);
+        else setNotFound(true);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -114,7 +121,7 @@ export function UserProfileClient({ username }: { username: string }) {
   }, [username]);
 
   useEffect(() => {
-    if (notFound) return;
+    if (notFound || isPrivate) return;
     if (tab === "posts" && posts === null) {
       getUserPosts(username)
         .then((p) => {
@@ -286,9 +293,9 @@ export function UserProfileClient({ username }: { username: string }) {
               ))}
             </div>
           </div>
-        ) : notFound || !profile ? (
+        ) : notFound || isPrivate || !profile ? (
           <p className="page-sub" style={{ padding: "0 4px" }}>
-            {t("notFound")}
+            {isPrivate ? t("privateProfile") : t("notFound")}
           </p>
         ) : (
           <>
@@ -335,6 +342,7 @@ export function UserProfileClient({ username }: { username: string }) {
                   <div className="time">
                     <span className="post-handle">@{name}</span> · {t("memberSince")}{" "}
                     {joined(profile.createdAt)}
+                    {profile.email ? <> · {profile.email}</> : null}
                   </div>
                   {profile.bio && (
                     <p className="post-body" style={{ marginTop: 6 }}>

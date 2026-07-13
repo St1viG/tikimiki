@@ -5,6 +5,7 @@ import {
   check,
   foreignKey,
   index,
+  integer,
   pgTable,
   primaryKey,
   text,
@@ -37,6 +38,9 @@ export const users = pgTable(
     avatarUrl: text("avatar_url"),
     bannerUrl: text("banner_url"),
     bio: text("bio"),
+    // Bumped on password change/reset; refresh tokens carry the version they
+    // were minted with, so a bump invalidates every other device's session.
+    tokenVersion: integer("token_version").notNull().default(0),
     lastLoginAt: timestamp("last_login_at", tz),
     createdAt: timestamp("created_at", tz).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", tz).notNull().defaultNow(),

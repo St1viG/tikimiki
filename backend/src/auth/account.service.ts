@@ -6,7 +6,7 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { hash, verify } from "@node-rs/argon2";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 import { JwtService } from "@nestjs/jwt";
 import { AuthzService } from "../common/authz.service";
 import { env } from "../config/env";
@@ -116,9 +116,15 @@ export class AccountService {
   async resetPassword(token: string, newPassword: string): Promise<{ success: true }> {
     const userId = await this.verifyToken(token, "password_reset");
     const passwordHash = await hash(newPassword);
+    // Same as changePassword: bump tokenVersion so every existing refresh
+    // token (any device) is revoked along with the old password (SSU3).
     await this.db
       .update(users)
-      .set({ passwordHash, updatedAt: new Date() })
+      .set({
+        passwordHash,
+        tokenVersion: sql`${users.tokenVersion} + 1`,
+        updatedAt: new Date(),
+      })
       .where(eq(users.userId, userId));
     return { success: true };
   }

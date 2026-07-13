@@ -238,9 +238,9 @@ const M = {
   },
   gifAvatar: { en: "GIF avatar", sr: "GIF avatar" },
   uploadGifAvatar: { en: "Upload GIF avatar", sr: "Upload GIF avatara" },
-  gifAvatarHint: { en: "Max 8MB · GIF, APNG", sr: "Maks. 8MB · GIF, APNG" },
+  gifAvatarHint: { en: "Max 5MB · GIF, APNG", sr: "Maks. 5MB · GIF, APNG" },
   gifBanner: { en: "GIF banner", sr: "GIF baner" },
-  gifBannerHint: { en: "Max 15MB · GIF, APNG", sr: "Maks. 15MB · GIF, APNG" },
+  gifBannerHint: { en: "Max 8MB · GIF, APNG", sr: "Maks. 8MB · GIF, APNG" },
 
   // account: display name card
   accDisplayNameSub: {
@@ -304,8 +304,16 @@ const M = {
     sr: "Lozinka mora imati najmanje 8 karaktera",
   },
   pwShort: { en: "Password is too short", sr: "Lozinka je prekratka" },
+  pwWeak: {
+    en: "Password needs an uppercase letter, a number and a symbol",
+    sr: "Lozinka mora sadržati veliko slovo, broj i simbol",
+  },
   pwNoMatch: { en: "Passwords do not match", sr: "Lozinke se ne poklapaju" },
   pwMatch: { en: "Passwords match ✓", sr: "Lozinke se poklapaju ✓" },
+  pwChangedRelogin: {
+    en: "Password changed. Signing you out of all devices — sign in again.",
+    sr: "Lozinka promenjena. Odjavljujemo te sa svih uređaja — prijavi se ponovo.",
+  },
   pwStrong: { en: "Password is strong enough", sr: "Lozinka je dovoljno jaka" },
 
   // integrations
@@ -584,6 +592,10 @@ const M = {
   },
 } as const;
 
+// Mirrors the backend passwordSchema (auth/dto.ts): uppercase + digit + symbol.
+const isPasswordComplex = (pw: string) =>
+  /[A-Z]/.test(pw) && /\d/.test(pw) && /[^A-Za-z0-9]/.test(pw);
+
 export function SettingsClient() {
   const t = useT(M);
   const { locale } = useLanguage();
@@ -644,6 +656,10 @@ export function SettingsClient() {
   // Password hint
   const [pwNew, setPwNew] = useState("");
   const [pwConfirm, setPwConfirm] = useState("");
+
+  const router = useRouter();
+  const { logout } = useAuth();
+  useRequireAuth();
 
   // Save-status visibility (per card id)
   const [savedCards, setSavedCards] = useState<Record<string, boolean>>({});
@@ -957,23 +973,28 @@ export function SettingsClient() {
     }
   }, [t]);
 
-  // Change password
+  // Change password. On success the backend bumps tokenVersion (revoking the
+  // refresh token on every device — SSU3), so the only honest follow-up is to
+  // sign this session out too and send the user to the login page.
   const handleChangePassword = useCallback(async () => {
-    if (pwNew.length < 8 || pwNew !== pwConfirm) return;
+    if (pwNew.length < 8 || !isPasswordComplex(pwNew) || pwNew !== pwConfirm) return;
     setSavingCard((prev) => ({ ...prev, pw: true }));
     try {
       await api.changePassword(pwCurrent, pwNew);
       setPwCurrent("");
       setPwNew("");
       setPwConfirm("");
-      saveCard("pw");
+      showToast(t("pwChangedRelogin"), "ok");
+      setTimeout(() => {
+        void logout().finally(() => router.push("/login"));
+      }, 1500);
     } catch (err) {
       console.error("Failed to change password", err);
       showToast(err instanceof api.ApiError ? err.message : t("pwShort"), "err");
     } finally {
       setSavingCard((prev) => ({ ...prev, pw: false }));
     }
-  }, [pwCurrent, pwNew, pwConfirm, saveCard, showToast, t]);
+  }, [pwCurrent, pwNew, pwConfirm, showToast, t, logout, router]);
 
   // Privacy / notification settings
   // Optimistically applies the patch, then reconciles with the server
@@ -1119,6 +1140,9 @@ export function SettingsClient() {
     if (pwNew.length < 8) {
       pwHintText = t("pwShort");
       pwHintColor = "var(--red)";
+    } else if (!isPasswordComplex(pwNew)) {
+      pwHintText = t("pwWeak");
+      pwHintColor = "var(--red)";
     } else if (pwConfirm && pwNew !== pwConfirm) {
       pwHintText = t("pwNoMatch");
       pwHintColor = "var(--red)";
@@ -1130,10 +1154,6 @@ export function SettingsClient() {
       pwHintColor = "var(--green)";
     }
   }
-
-  const router = useRouter();
-  const { logout } = useAuth();
-  useRequireAuth();
 
   // Danger / confirm
   // NOTE: there is no api.ts endpoint for deactivate / delete-data /
@@ -1599,13 +1619,14 @@ export function SettingsClient() {
                   type="text"
                   value={name}
                   id="inp-ime"
+                  maxLength={80}
                   onChange={(e) => {
                     setName(e.target.value);
                     syncPreview();
                   }}
                 />
-                <div className={`ep-char-count${charWarn(name, 40) ? " warn" : ""}`} id="cnt-ime">
-                  {charCount(name, 40)}
+                <div className={`ep-char-count${charWarn(name, 80) ? " warn" : ""}`} id="cnt-ime">
+                  {charCount(name, 80)}
                 </div>
               </div>
 
@@ -1622,6 +1643,7 @@ export function SettingsClient() {
                     type="text"
                     value={username}
                     id="inp-username"
+                    maxLength={32}
                     onChange={(e) => {
                       setUsername(e.target.value);
                       syncPreview();
@@ -1629,10 +1651,10 @@ export function SettingsClient() {
                   />
                 </div>
                 <div
-                  className={`ep-char-count${charWarn(username, 20) ? " warn" : ""}`}
+                  className={`ep-char-count${charWarn(username, 32) ? " warn" : ""}`}
                   id="cnt-username"
                 >
-                  {charCount(username, 20)}
+                  {charCount(username, 32)}
                 </div>
               </div>
 
@@ -1644,14 +1666,15 @@ export function SettingsClient() {
                   className="ep-input"
                   id="inp-bio"
                   value={bio}
+                  maxLength={500}
                   onChange={(e) => {
                     setBio(e.target.value);
                     syncPreview();
                   }}
                   placeholder={t("bioPlaceholder")}
                 />
-                <div className={`ep-char-count${charWarn(bio, 160) ? " warn" : ""}`} id="cnt-bio">
-                  {charCount(bio, 160)}
+                <div className={`ep-char-count${charWarn(bio, 500) ? " warn" : ""}`} id="cnt-bio">
+                  {charCount(bio, 500)}
                 </div>
               </div>
 
@@ -1903,16 +1926,17 @@ export function SettingsClient() {
                   type="text"
                   value={name}
                   id="inp-ime-nalog"
+                  maxLength={80}
                   onChange={(e) => {
                     setName(e.target.value);
                     syncPreview();
                   }}
                 />
                 <div
-                  className={`ep-char-count${charWarn(name, 40) ? " warn" : ""}`}
+                  className={`ep-char-count${charWarn(name, 80) ? " warn" : ""}`}
                   id="cnt-ime-nalog"
                 >
-                  {charCount(name, 40)}
+                  {charCount(name, 80)}
                 </div>
               </div>
             </div>
@@ -2037,7 +2061,13 @@ export function SettingsClient() {
               <SaveStatus id="pw">{t("passwordChanged")}</SaveStatus>
               <button
                 className="btn btn-primary"
-                disabled={savingCard.pw || pwNew.length < 8 || pwNew !== pwConfirm || !pwCurrent}
+                disabled={
+                  savingCard.pw ||
+                  pwNew.length < 8 ||
+                  !isPasswordComplex(pwNew) ||
+                  pwNew !== pwConfirm ||
+                  !pwCurrent
+                }
                 onClick={handleChangePassword}
               >
                 {t("changePassword")}
