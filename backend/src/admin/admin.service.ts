@@ -56,11 +56,18 @@ export interface OrgDto {
   contactEmail: string | null;
   verificationStatus: OrgVerificationStatus;
   reviewedAt: string | null;
+  rejectionReason: string | null;
+  /** Owning account details shown on the request (SSU2 review step). */
+  username: string;
+  accountEmail: string;
+  /** The request is created at registration, so this is the account createdAt. */
+  submittedAt: string;
 }
 
 export interface OrganizationsResponse {
   pending: OrgDto[];
   verified: OrgDto[];
+  rejected: OrgDto[];
 }
 
 export interface SuccessResponse {
@@ -275,10 +282,14 @@ export class AdminService {
     }));
   }
 
-  async listOrganizations(callerId: string): Promise<OrganizationsResponse> {
-    await this.authz.assertAdmin(callerId);
+  /** Select one organization joined with its owning account, as an OrgDto. */
+  private async orgDto(targetUserId: string): Promise<OrgDto | null> {
+    const [r] = await this.orgRowsQuery().where(eq(organizations.userId, targetUserId)).limit(1);
+    return r ? this.toOrgDto(r) : null;
+  }
 
-    const rows = await this.db
+  private orgRowsQuery() {
+    return this.db
       .select({
         userId: organizations.userId,
         name: organizations.name,
@@ -286,22 +297,53 @@ export class AdminService {
         contactEmail: organizations.contactEmail,
         verificationStatus: organizations.verificationStatus,
         reviewedAt: organizations.reviewedAt,
+        rejectionReason: organizations.rejectionReason,
+        username: users.username,
+        accountEmail: users.email,
+        submittedAt: users.createdAt,
       })
       .from(organizations)
-      .orderBy(organizations.name);
+      .innerJoin(users, eq(organizations.userId, users.userId));
+  }
 
-    const mapped = rows.map((r): OrgDto => ({
+  private toOrgDto(r: {
+    userId: string;
+    name: string;
+    websiteUrl: string | null;
+    contactEmail: string | null;
+    verificationStatus: OrgVerificationStatus;
+    reviewedAt: Date | null;
+    rejectionReason: string | null;
+    username: string;
+    accountEmail: string;
+    submittedAt: Date;
+  }): OrgDto {
+    return {
       userId: r.userId,
       name: r.name,
       websiteUrl: r.websiteUrl,
       contactEmail: r.contactEmail,
       verificationStatus: r.verificationStatus,
       reviewedAt: r.reviewedAt ? r.reviewedAt.toISOString() : null,
-    }));
+      rejectionReason: r.rejectionReason,
+      username: r.username,
+      accountEmail: r.accountEmail,
+      submittedAt: r.submittedAt.toISOString(),
+    };
+  }
 
+  async listOrganizations(callerId: string): Promise<OrganizationsResponse> {
+    await this.authz.assertAdmin(callerId);
+
+    const rows = await this.orgRowsQuery().orderBy(organizations.name);
+    const mapped = rows.map((r) => this.toOrgDto(r));
+
+    // All three states are listed so the admin sees the full request history
+    // (SSU2 step 3: pending / approved / rejected).
     return {
       pending: mapped.filter((o) => o.verificationStatus === "pending"),
       verified: mapped.filter((o) => o.verificationStatus === "approved"),
+      rejected: mapped.filter((o) => o.verificationStatus === "rejected"),
     };
   }
 
@@ -318,14 +360,7 @@ export class AdminService {
         rejectionReason: null,
       })
       .where(eq(organizations.userId, targetUserId))
-      .returning({
-        userId: organizations.userId,
-        name: organizations.name,
-        websiteUrl: organizations.websiteUrl,
-        contactEmail: organizations.contactEmail,
-        verificationStatus: organizations.verificationStatus,
-        reviewedAt: organizations.reviewedAt,
-      });
+      .returning({ name: organizations.name, contactEmail: organizations.contactEmail });
 
     if (!row) {
       throw new NotFoundException("Organization not found");
@@ -346,14 +381,7 @@ export class AdminService {
       `Vaša organizacija „${row.name}" je verifikovana.`,
     );
 
-    return {
-      userId: row.userId,
-      name: row.name,
-      websiteUrl: row.websiteUrl,
-      contactEmail: row.contactEmail,
-      verificationStatus: row.verificationStatus,
-      reviewedAt: row.reviewedAt ? row.reviewedAt.toISOString() : null,
-    };
+    return (await this.orgDto(targetUserId))!;
   }
 
   async rejectOrganization(
@@ -373,14 +401,7 @@ export class AdminService {
         reviewedAt: now,
       })
       .where(eq(organizations.userId, targetUserId))
-      .returning({
-        userId: organizations.userId,
-        name: organizations.name,
-        websiteUrl: organizations.websiteUrl,
-        contactEmail: organizations.contactEmail,
-        verificationStatus: organizations.verificationStatus,
-        reviewedAt: organizations.reviewedAt,
-      });
+      .returning({ name: organizations.name, contactEmail: organizations.contactEmail });
 
     if (!row) {
       throw new NotFoundException("Organization not found");
@@ -401,14 +422,7 @@ export class AdminService {
       `Vaša organizacija „${row.name}" je odbijena. Razlog: ${body.reason}`,
     );
 
-    return {
-      userId: row.userId,
-      name: row.name,
-      websiteUrl: row.websiteUrl,
-      contactEmail: row.contactEmail,
-      verificationStatus: row.verificationStatus,
-      reviewedAt: row.reviewedAt ? row.reviewedAt.toISOString() : null,
-    };
+    return (await this.orgDto(targetUserId))!;
   }
 
   async banUser(

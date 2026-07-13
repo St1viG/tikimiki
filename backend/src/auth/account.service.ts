@@ -11,7 +11,7 @@ import { JwtService } from "@nestjs/jwt";
 import { AuthzService } from "../common/authz.service";
 import { env } from "../config/env";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
-import { appeals, users } from "../db/schema";
+import { administrators, appeals, organizations, users } from "../db/schema";
 import { MailService } from "../mail/mail.service";
 
 type AccountTokenType = "email_verify" | "password_reset";
@@ -147,6 +147,75 @@ export class AccountService {
       `<p>Klikni <a href="${link}">ovde</a> da potvrdiš email adresu.</p>`,
     );
     return { success: true, devLink: this.deliver("email-verify", link) };
+  }
+
+  /**
+   * Forward a (new or resubmitted) organization verification request to every
+   * platform administrator by email (SSU2). Best-effort — a mail failure must
+   * never block registration or resubmission.
+   */
+  async notifyAdminsOfOrgRequest(orgName: string, username: string, email: string): Promise<void> {
+    try {
+      const admins = await this.db
+        .select({ email: users.email })
+        .from(administrators)
+        .innerJoin(users, eq(administrators.userId, users.userId))
+        .where(isNull(users.deletedAt));
+      await Promise.all(
+        admins.map((a) =>
+          this.mail.sendMail(
+            a.email,
+            "Nov zahtev za verifikaciju organizacije",
+            `<p>Organizacija „${orgName}" (korisnik @${username}, ${email}) čeka verifikaciju u admin panelu.</p>`,
+          ),
+        ),
+      );
+    } catch (err) {
+      console.error("[account] failed to notify admins about org request:", err);
+    }
+  }
+
+  /**
+   * A rejected organization submits a fresh verification request (SSU2
+   * alternative flow): status goes back to `pending`, the previous review is
+   * cleared, and administrators are notified again.
+   */
+  async resubmitOrgVerification(userId: string): Promise<{ success: true }> {
+    const [org] = await this.db
+      .select({
+        name: organizations.name,
+        verificationStatus: organizations.verificationStatus,
+      })
+      .from(organizations)
+      .where(eq(organizations.userId, userId))
+      .limit(1);
+    if (!org) throw new BadRequestException("Not an organization account");
+    if (org.verificationStatus === "approved") {
+      throw new ConflictException("Organization is already verified");
+    }
+    if (org.verificationStatus === "pending") {
+      throw new ConflictException("A verification request is already pending");
+    }
+
+    await this.db
+      .update(organizations)
+      .set({
+        verificationStatus: "pending",
+        reviewedBy: null,
+        reviewedAt: null,
+        rejectionReason: null,
+      })
+      .where(eq(organizations.userId, userId));
+
+    const [user] = await this.db
+      .select({ username: users.username, email: users.email })
+      .from(users)
+      .where(eq(users.userId, userId))
+      .limit(1);
+    if (user) {
+      await this.notifyAdminsOfOrgRequest(org.name, user.username, user.email);
+    }
+    return { success: true };
   }
 
   /** A banned user (who can't log in) submits an appeal — auth by credentials. */

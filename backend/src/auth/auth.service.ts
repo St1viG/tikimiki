@@ -33,6 +33,12 @@ export interface AuthRoles {
   isOrganization: boolean;
 }
 
+export interface MeOrganization {
+  name: string;
+  verificationStatus: "pending" | "approved" | "rejected";
+  rejectionReason: string | null;
+}
+
 type UserRow = typeof users.$inferSelect;
 
 @Injectable()
@@ -115,6 +121,16 @@ export class AuthService {
     } catch {
       // Mail problems are logged by MailService; the account stays usable and
       // the user can re-request the link from settings.
+    }
+
+    // SSU2: a new organization registration IS the verification request — it
+    // must be forwarded to the administrators automatically (best-effort).
+    if (input.accountType === "organization") {
+      await this.account.notifyAdminsOfOrgRequest(
+        input.organizationName!,
+        user.username,
+        user.email,
+      );
     }
 
     return {
@@ -224,7 +240,9 @@ export class AuthService {
     return this.issueTokens(sub);
   }
 
-  async me(userId: string): Promise<PublicUser & { roles: AuthRoles }> {
+  async me(
+    userId: string,
+  ): Promise<PublicUser & { roles: AuthRoles; organization?: MeOrganization }> {
     const [u] = await this.db
       .select()
       .from(users)
@@ -244,7 +262,11 @@ export class AuthService {
         .where(eq(members.userId, userId))
         .limit(1),
       this.db
-        .select({ id: organizations.userId })
+        .select({
+          name: organizations.name,
+          verificationStatus: organizations.verificationStatus,
+          rejectionReason: organizations.rejectionReason,
+        })
         .from(organizations)
         .where(eq(organizations.userId, userId))
         .limit(1),
@@ -257,6 +279,17 @@ export class AuthService {
         isMember: member.length > 0,
         isOrganization: org.length > 0,
       },
+      // The org's own verification state, so the UI can gate hackathon
+      // creation and surface the rejection reason / resubmit action (SSU2).
+      ...(org.length > 0
+        ? {
+            organization: {
+              name: org[0].name,
+              verificationStatus: org[0].verificationStatus,
+              rejectionReason: org[0].rejectionReason,
+            },
+          }
+        : {}),
     };
   }
 }

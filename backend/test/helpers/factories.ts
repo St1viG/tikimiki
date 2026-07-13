@@ -4,6 +4,7 @@ import request from "supertest";
 import {
   administrators,
   hackathons,
+  organizations,
   projects,
   serverRoles,
   servers,
@@ -53,8 +54,12 @@ export async function registerMember(app: INestApplication): Promise<TestUser> {
   };
 }
 
-/** Register an organization account through the real API; returns its token. */
-export async function registerOrganization(app: INestApplication): Promise<TestUser> {
+/**
+ * Register an organization account through the real API; returns its token.
+ * The org stays in verification status `pending` (SSU2), so it cannot create
+ * hackathons yet — use {@link registerOrganization} for a ready-to-use org.
+ */
+export async function registerPendingOrganization(app: INestApplication): Promise<TestUser> {
   const username = uniqueId("o");
   const email = `${username}@test.dev`;
   const password = "Password123!";
@@ -75,6 +80,34 @@ export async function registerOrganization(app: INestApplication): Promise<TestU
     password,
     token: res.body.accessToken,
   };
+}
+
+// One throwaway reviewer admin per test app, minted lazily: approving an org
+// requires a non-null reviewed_by referencing a real administrator.
+const reviewerAdmins = new WeakMap<INestApplication, string>();
+async function reviewerAdminId(app: INestApplication): Promise<string> {
+  let id = reviewerAdmins.get(app);
+  if (!id) {
+    const admin = await registerMember(app);
+    await makeAdmin(app, admin);
+    id = admin.userId;
+    reviewerAdmins.set(app, id);
+  }
+  return id;
+}
+
+/** Register an ADMIN-VERIFIED organization account (the common test case). */
+export async function registerOrganization(app: INestApplication): Promise<TestUser> {
+  const org = await registerPendingOrganization(app);
+  await dbOf(app)
+    .update(organizations)
+    .set({
+      verificationStatus: "approved",
+      reviewedBy: await reviewerAdminId(app),
+      reviewedAt: new Date(),
+    })
+    .where(eq(organizations.userId, org.userId));
+  return org;
 }
 
 /** Promote a user to platform admin (insert the `administrators` row). */

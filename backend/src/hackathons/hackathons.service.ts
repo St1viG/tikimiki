@@ -146,12 +146,22 @@ export class HackathonsService {
 
   async create(userId: string, input: CreateHackathonInput): Promise<HackathonSummary> {
     const [org] = await this.db
-      .select({ userId: organizations.userId })
+      .select({
+        userId: organizations.userId,
+        verificationStatus: organizations.verificationStatus,
+      })
       .from(organizations)
       .where(eq(organizations.userId, userId))
       .limit(1);
     if (!org) {
       throw new ForbiddenException("Only organization accounts can create hackathons");
+    }
+    // SSU2: an organization gets hackathon-creation privileges only once an
+    // administrator has approved its verification request.
+    if (org.verificationStatus !== "approved") {
+      throw new ForbiddenException(
+        "Organization must be verified by an administrator before creating hackathons",
+      );
     }
 
     const startsAt = new Date(input.startsAt);
@@ -293,15 +303,24 @@ export class HackathonsService {
 
   /* ── drafts (resumable "organize a hackathon" form) ───────── */
 
-  /** Ensure the caller is an organization account. */
+  /** Ensure the caller is a verified organization account. */
   private async assertOrganization(userId: string): Promise<void> {
     const [org] = await this.db
-      .select({ userId: organizations.userId })
+      .select({
+        userId: organizations.userId,
+        verificationStatus: organizations.verificationStatus,
+      })
       .from(organizations)
       .where(eq(organizations.userId, userId))
       .limit(1);
     if (!org) {
       throw new ForbiddenException("Only organization accounts can organize hackathons");
+    }
+    // Drafts are part of the creation flow, so they get the same SSU2 gate.
+    if (org.verificationStatus !== "approved") {
+      throw new ForbiddenException(
+        "Organization must be verified by an administrator before creating hackathons",
+      );
     }
   }
 

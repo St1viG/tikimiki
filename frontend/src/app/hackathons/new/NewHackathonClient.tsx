@@ -20,6 +20,7 @@ import {
   getHackathon,
   getHackathonDraft,
   getHackathonDrafts,
+  resubmitOrgVerification,
   createApplicationQuestion,
   updateApplicationQuestion,
   updateHackathon,
@@ -64,6 +65,27 @@ const M = {
   },
   gateLogin: { en: "Sign in", sr: "Prijava" },
   gateBrowse: { en: "Browse hackathons", sr: "Pregledaj hackathone" },
+  gatePendingTitle: { en: "Verification pending", sr: "Verifikacija na čekanju" },
+  gatePendingBody: {
+    en: "Your organization is awaiting administrator approval. You will be able to create hackathons once it is verified.",
+    sr: "Tvoja organizacija čeka odobrenje administratora. Kreiranje hackathona biće dostupno čim verifikacija bude odobrena.",
+  },
+  gateRejectedTitle: { en: "Verification rejected", sr: "Verifikacija odbijena" },
+  gateRejectedBody: {
+    en: "Your organization's verification request was rejected.",
+    sr: "Zahtev za verifikaciju tvoje organizacije je odbijen.",
+  },
+  gateReasonLabel: { en: "Reason", sr: "Razlog" },
+  gateResubmit: { en: "Resubmit request", sr: "Podnesi zahtev ponovo" },
+  gateResubmitting: { en: "Submitting…", sr: "Slanje…" },
+  gateResubmitted: {
+    en: "Request resubmitted — awaiting administrator approval.",
+    sr: "Zahtev je ponovo podnet — čeka odobrenje administratora.",
+  },
+  gateResubmitError: {
+    en: "Could not resubmit the request. Try again.",
+    sr: "Ponovno podnošenje nije uspelo. Pokušaj ponovo.",
+  },
 
   // Sections
   secBasics: { en: "Basics", sr: "Osnovno" },
@@ -299,6 +321,11 @@ export function NewHackathonClient({
   };
 
   const isOrg = !!user?.roles.isOrganization;
+  // SSU2: only ADMIN-VERIFIED organizations may create hackathons (the
+  // backend enforces the same rule on create and on the draft endpoints).
+  const orgStatus = user?.organization?.verificationStatus;
+  const isVerifiedOrg = isOrg && orgStatus === "approved";
+  const [resubmitState, setResubmitState] = useState<"idle" | "busy" | "done" | "error">("idle");
   const needsLocation = form.type !== "virtual";
 
   const restore = useCallback((payload: Record<string, unknown>) => {
@@ -369,7 +396,7 @@ export function NewHackathonClient({
 
   // Create mode: resume a specific draft (?draft=…) or offer the latest one.
   useEffect(() => {
-    if (isEdit || !isOrg) return;
+    if (isEdit || !isVerifiedOrg) return;
     let cancelled = false;
     (async () => {
       try {
@@ -391,12 +418,12 @@ export function NewHackathonClient({
     return () => {
       cancelled = true;
     };
-  }, [isEdit, isOrg, resumeDraftId, restore]);
+  }, [isEdit, isVerifiedOrg, resumeDraftId, restore]);
 
   // Autosave (create mode): debounced create/patch of the server draft. Held
   // back while a resume prompt is pending and until nothing meaningful exists.
   useEffect(() => {
-    if (isEdit || !isOrg || !hydrated.current || resumeOffer) return;
+    if (isEdit || !isVerifiedOrg || !hydrated.current || resumeOffer) return;
     const meaningful =
       form.title.trim() !== "" || form.description.trim() !== "" || questions.length > 0;
     if (!meaningful && !draftId) return;
@@ -417,7 +444,7 @@ export function NewHackathonClient({
       }
     }, 900);
     return () => clearTimeout(handle);
-  }, [form, questions, isEdit, isOrg, draftId, resumeOffer]);
+  }, [form, questions, isEdit, isVerifiedOrg, draftId, resumeOffer]);
 
   const continueDraft = () => {
     if (!resumeOffer) return;
@@ -431,8 +458,19 @@ export function NewHackathonClient({
     setResumeOffer(null);
   };
 
-  // Non-organization gate
-  if (status !== "loading" && !isOrg) {
+  // Gate: anonymous visitors, non-organization accounts and — per SSU2 —
+  // organizations that are not yet (or no longer) admin-verified.
+  if (status !== "loading" && !isVerifiedOrg) {
+    const pendingView = isOrg && (orgStatus === "pending" || resubmitState === "done");
+    const rejectedView = isOrg && orgStatus === "rejected" && resubmitState !== "done";
+
+    const handleResubmit = () => {
+      setResubmitState("busy");
+      resubmitOrgVerification()
+        .then(() => setResubmitState("done"))
+        .catch(() => setResubmitState("error"));
+    };
+
     return (
       <AppShell right={<RailRight />}>
         <main className="nh-page" id="nh-main">
@@ -452,13 +490,42 @@ export function NewHackathonClient({
             <div className="nh-gate-icon" aria-hidden="true">
               <Icon name="shield" />
             </div>
-            <h2 className="nh-gate-title">{t("gateTitle")}</h2>
-            <p className="nh-gate-body">{user ? t("gateBody") : t("gateBodyAnon")}</p>
+            <h2 className="nh-gate-title">
+              {pendingView
+                ? t("gatePendingTitle")
+                : rejectedView
+                  ? t("gateRejectedTitle")
+                  : t("gateTitle")}
+            </h2>
+            {pendingView ? (
+              <p className="nh-gate-body">
+                {resubmitState === "done" ? t("gateResubmitted") : t("gatePendingBody")}
+              </p>
+            ) : rejectedView ? (
+              <p className="nh-gate-body">
+                {t("gateRejectedBody")}
+                {user?.organization?.rejectionReason
+                  ? ` ${t("gateReasonLabel")}: ${user.organization.rejectionReason}`
+                  : ""}
+                {resubmitState === "error" ? ` ${t("gateResubmitError")}` : ""}
+              </p>
+            ) : (
+              <p className="nh-gate-body">{user ? t("gateBody") : t("gateBodyAnon")}</p>
+            )}
             <div className="nh-gate-actions">
               {!user && (
                 <Link className="btn btn-primary" href="/login">
                   {t("gateLogin")}
                 </Link>
+              )}
+              {rejectedView && (
+                <button
+                  className="btn btn-primary"
+                  onClick={handleResubmit}
+                  disabled={resubmitState === "busy"}
+                >
+                  {resubmitState === "busy" ? t("gateResubmitting") : t("gateResubmit")}
+                </button>
               )}
               <Link className="btn btn-ghost" href="/hackathons">
                 {t("gateBrowse")}

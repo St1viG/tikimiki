@@ -22,6 +22,15 @@ export interface AuthRoles {
   isOrganization: boolean;
 }
 
+export type OrgVerificationStatus = "pending" | "approved" | "rejected";
+
+/** Verification state of the caller's own organization account. */
+export interface MeOrganization {
+  name: string;
+  verificationStatus: OrgVerificationStatus;
+  rejectionReason: string | null;
+}
+
 /** POST /auth/register, /auth/login → access token in body, refresh in cookie. */
 export interface AuthResponse {
   user: PublicUser;
@@ -36,6 +45,8 @@ export interface RefreshResponse {
 /** GET /auth/me */
 export interface MeResponse extends PublicUser {
   roles: AuthRoles;
+  /** Present only for organization accounts. */
+  organization?: MeOrganization;
 }
 
 export interface RegisterBody {
