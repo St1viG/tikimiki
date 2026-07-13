@@ -7,7 +7,7 @@
     "start": "next start",
     "lint": "next lint",
     "test:e2e": "jest",
-    "test:webdriver": "node e2e/webdriver/video-player.test.js"
+    "test:webdriver": "for f in e2e/webdriver/*.test.js; do node \"$f\" || exit 1; done"
   },
   "jest": {
     "rootDir": "e2e/selenium",
