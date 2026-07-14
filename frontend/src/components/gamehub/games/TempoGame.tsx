@@ -261,11 +261,9 @@ export function TempoGame({ open, onClose, onComplete }: GameModalProps) {
   }, [open, onClose]);
 
   /* typing handler */
-  const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const commitValue = useCallback(
+    (val: string) => {
       if (phase === "done") return;
-
-      const val = e.target.value;
 
       /* start timer on first keystroke */
       if (phase === "idle" && val.length > 0) {
@@ -297,6 +295,37 @@ export function TempoGame({ open, onClose, onComplete }: GameModalProps) {
       }
     },
     [phase, target, tick, onComplete],
+  );
+
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => commitValue(e.target.value),
+    [commitValue],
+  );
+
+  /* Tab would move focus out of the hidden textarea (and off the modal
+     entirely); swallow it and insert the indentation the snippet expects. */
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key !== "Tab") return;
+      e.preventDefault();
+      if (phase === "done") return;
+
+      const ta = e.currentTarget;
+      const start = ta.selectionStart ?? typed.length;
+      const end = ta.selectionEnd ?? start;
+
+      let insert = "";
+      for (let i = start; i < target.length && (target[i] === " " || target[i] === "\t"); i++) {
+        insert += target[i];
+      }
+      if (insert === "") return;
+
+      commitValue(typed.slice(0, start) + insert + typed.slice(end));
+      requestAnimationFrame(() => {
+        ta.selectionStart = ta.selectionEnd = start + insert.length;
+      });
+    },
+    [phase, target, typed, commitValue],
   );
 
   /* derived display values */
@@ -386,22 +415,24 @@ export function TempoGame({ open, onClose, onComplete }: GameModalProps) {
 
         {/* body */}
         {phase !== "done" ? (
-          <div className="tg-body">
+          <div className="tg-body" onClick={() => taRef.current?.focus()}>
             {/* target display */}
             <div className="tg-target" aria-hidden="true">
               <pre className="tg-pre">
-                {charMap.map((ci, idx) => (
-                  <span key={idx} className={`tg-ch tg-ch--${ci.state}`}>
-                    {ci.char === "\n" ? (
-                      <>
-                        <br />
-                        {ci.state === "cursor" && <span className="tg-cursor-line" />}
-                      </>
-                    ) : (
-                      ci.char
-                    )}
-                  </span>
-                ))}
+                {charMap.map((ci, idx) =>
+                  ci.char === "\n" ? (
+                    /* newline spans must not get tg-ch--cursor: the ::before bar
+                       would stretch across both line boxes */
+                    <span key={idx} className="tg-ch">
+                      {ci.state === "cursor" && <span className="tg-cursor-line" />}
+                      <br />
+                    </span>
+                  ) : (
+                    <span key={idx} className={`tg-ch tg-ch--${ci.state}`}>
+                      {ci.char}
+                    </span>
+                  ),
+                )}
                 {/* cursor at end */}
                 {typed.length === target.length && phase === "playing" && (
                   <span className="tg-ch tg-ch--cursor"> </span>
@@ -415,6 +446,7 @@ export function TempoGame({ open, onClose, onComplete }: GameModalProps) {
               className="tg-input"
               value={typed}
               onChange={handleChange}
+              onKeyDown={handleKeyDown}
               spellCheck={false}
               autoCapitalize="none"
               autoCorrect="off"
