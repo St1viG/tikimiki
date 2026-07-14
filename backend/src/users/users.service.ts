@@ -562,12 +562,16 @@ export class UsersService {
       }
     }
 
+    // All rows share the same author, so their equipped name effect is fetched once.
+    const { usernameEffect } = await this.cosmetics.equippedForUser(targetId);
+
     return rows.map((r) => ({
       postId: r.postId,
       authorId: r.authorId,
       authorUsername: r.authorUsername,
       authorDisplayName: r.authorDisplayName,
       authorAvatarUrl: r.authorAvatarUrl,
+      authorUsernameEffect: usernameEffect,
       content: r.content,
       createdAt: r.createdAt.toISOString(),
       attachments: attMap.get(r.postId) ?? [],

@@ -4,6 +4,7 @@ import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import { commentReactions, comments, postReactions, posts, users } from "../db/schema";
 import { LIKE } from "../common/constants";
 import { AuthzService } from "../common/authz.service";
+import { CosmeticsService, type EquippedCosmeticDto } from "../common/cosmetics.service";
 import { NotificationsService } from "../notifications/notifications.service";
 import type { CreateCommentInput, UpdateCommentInput } from "./dto";
 
@@ -14,6 +15,8 @@ export interface CommentDto {
   authorUsername: string;
   authorDisplayName: string | null;
   authorAvatarUrl: string | null;
+  /** Author's equipped username effect (e.g. neon name), null when none. */
+  authorUsernameEffect: EquippedCosmeticDto | null;
   parentCommentId: string | null;
   content: string;
   createdAt: string;
@@ -54,6 +57,7 @@ export class EngagementService {
     @Inject(DRIZZLE) private readonly db: DrizzleDB,
     private readonly notifications: NotificationsService,
     private readonly authz: AuthzService,
+    private readonly cosmetics: CosmeticsService,
   ) {}
 
   private commentColumns(viewerId: string | null) {
@@ -81,7 +85,10 @@ export class EngagementService {
     };
   }
 
-  private toCommentDto(r: CommentRow): CommentDto {
+  private toCommentDto(
+    r: CommentRow,
+    authorUsernameEffect: EquippedCosmeticDto | null = null,
+  ): CommentDto {
     return {
       commentId: r.commentId,
       postId: r.postId,
@@ -89,6 +96,7 @@ export class EngagementService {
       authorUsername: r.authorUsername,
       authorDisplayName: r.authorDisplayName,
       authorAvatarUrl: r.authorAvatarUrl,
+      authorUsernameEffect,
       parentCommentId: r.parentCommentId,
       content: r.content,
       createdAt: r.createdAt.toISOString(),
@@ -135,7 +143,10 @@ export class EngagementService {
       .innerJoin(users, eq(comments.userId, users.userId))
       .where(and(eq(comments.postId, postId), isNull(comments.deletedAt)))
       .orderBy(asc(comments.createdAt));
-    return rows.map((r) => this.toCommentDto(r));
+    const equipped = await this.cosmetics.equippedForUsers([
+      ...new Set(rows.map((r) => r.authorId)),
+    ]);
+    return rows.map((r) => this.toCommentDto(r, equipped.get(r.authorId)?.usernameEffect ?? null));
   }
 
   async createComment(
@@ -177,7 +188,8 @@ export class EngagementService {
       .where(eq(comments.commentId, created.commentId))
       .limit(1);
 
-    const dto = this.toCommentDto(row);
+    const { usernameEffect } = await this.cosmetics.equippedForUser(userId);
+    const dto = this.toCommentDto(row, usernameEffect);
 
     // Notify the post's author about the new comment.
     const [post] = await this.db
@@ -235,7 +247,8 @@ export class EngagementService {
       .innerJoin(users, eq(comments.userId, users.userId))
       .where(eq(comments.commentId, commentId))
       .limit(1);
-    return this.toCommentDto(row);
+    const { usernameEffect } = await this.cosmetics.equippedForUser(userId);
+    return this.toCommentDto(row, usernameEffect);
   }
 
   /** Soft-delete a comment (and its reply subtree). Author, or an admin acting on a report. */

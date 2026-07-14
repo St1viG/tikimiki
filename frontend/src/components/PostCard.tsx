@@ -320,6 +320,7 @@ export function PostCard({
             username={post.authorUsername}
             displayName={post.authorDisplayName}
             avatarUrl={post.authorAvatarUrl}
+            usernameEffect={post.authorUsernameEffect}
             createdAt={post.createdAt}
             editedAt={post.editedAt}
             editedLabel={t("editedLabel")}

@@ -3,6 +3,7 @@ import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import type { FeedPost } from "@tikimiki/types";
 import { LIKE } from "../common/constants";
 import { AuthzService } from "../common/authz.service";
+import { CosmeticsService } from "../common/cosmetics.service";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import { postAttachments, posts, users } from "../db/schema";
 import { NotificationsService } from "../notifications/notifications.service";
@@ -95,7 +96,22 @@ export class PostsService {
     @Inject(DRIZZLE) private readonly db: DrizzleDB,
     private readonly notifications: NotificationsService,
     private readonly authz: AuthzService,
+    private readonly cosmetics: CosmeticsService,
   ) {}
+
+  /** Attach each author's equipped username effect (neon name) in one batch. */
+  private async withAuthorEffects(
+    list: FeedPostWithDisplayName[],
+  ): Promise<FeedPostWithDisplayName[]> {
+    if (list.length === 0) return list;
+    const equipped = await this.cosmetics.equippedForUsers([
+      ...new Set(list.map((p) => p.authorId)),
+    ]);
+    return list.map((p) => ({
+      ...p,
+      authorUsernameEffect: equipped.get(p.authorId)?.usernameEffect ?? null,
+    }));
+  }
 
   /** Ordered attachments for a set of posts, grouped by post id (no N+1). */
   private async attachmentsByPost(ids: string[]): Promise<Map<string, PostAttachment[]>> {
@@ -123,7 +139,7 @@ export class PostsService {
       .orderBy(desc(posts.createdAt))
       .limit(50);
     const attMap = await this.attachmentsByPost(rows.map((r) => r.postId));
-    return rows.map((r) => toFeedPost(r, attMap.get(r.postId) ?? []));
+    return this.withAuthorEffects(rows.map((r) => toFeedPost(r, attMap.get(r.postId) ?? [])));
   }
 
   async create(
@@ -164,12 +180,15 @@ export class PostsService {
       entityId: row.postId,
     });
 
+    const equipped = await this.cosmetics.equippedForUser(userId);
+
     return {
       postId: row.postId,
       authorId: userId,
       authorUsername: author.username,
       authorDisplayName: author.displayName,
       authorAvatarUrl: author.avatarUrl,
+      authorUsernameEffect: equipped.usernameEffect,
       content: row.content,
       createdAt: row.createdAt.toISOString(),
       editedAt: null,
@@ -201,7 +220,8 @@ export class PostsService {
       .limit(1);
     if (!row) return null;
     const attMap = await this.attachmentsByPost([row.postId]);
-    return toFeedPost(row, attMap.get(row.postId) ?? []);
+    const [post] = await this.withAuthorEffects([toFeedPost(row, attMap.get(row.postId) ?? [])]);
+    return post;
   }
 
   /** Edit a post's content + attachments. Author-only; stamps `editedAt`. */

@@ -10,6 +10,7 @@ import { OrbArt } from "@/components/ui/OrbArt";
 import { useT } from "@/components/i18n/LanguageProvider";
 import { useAuth } from "@/components/auth/AuthProvider";
 import * as api from "@/lib/api";
+import { usernameEffectStyle } from "@/lib/cosmetics";
 import { personName } from "@/lib/displayName";
 import { getSocket } from "@/lib/socket";
 
@@ -248,7 +249,9 @@ export function RailLeft() {
                 <OrbArt url={user.avatarUrl} seed={user.username} />
               </span>
               <span className="pm-info">
-                <span className="pm-name">{personName(user)}</span>
+                <span className="pm-name" style={usernameEffectStyle(user.usernameEffect)}>
+                  {personName(user)}
+                </span>
                 <span className="pm-user">@{user.username}</span>
               </span>
             </button>

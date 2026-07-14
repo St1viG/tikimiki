@@ -9,6 +9,7 @@ import { JwtService } from "@nestjs/jwt";
 import { hash, verify } from "@node-rs/argon2";
 import { and, eq, isNull, or } from "drizzle-orm";
 import { AuthzService } from "../common/authz.service";
+import { CosmeticsService, type EquippedCosmeticDto } from "../common/cosmetics.service";
 import { env } from "../config/env";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import { administrators, members, organizations, users } from "../db/schema";
@@ -48,6 +49,7 @@ export class AuthService {
     private readonly jwt: JwtService,
     private readonly authz: AuthzService,
     private readonly account: AccountService,
+    private readonly cosmetics: CosmeticsService,
   ) {}
 
   private toPublicUser(u: UserRow): PublicUser {
@@ -268,9 +270,13 @@ export class AuthService {
     return this.issueTokens(sub, currentVersion);
   }
 
-  async me(
-    userId: string,
-  ): Promise<PublicUser & { roles: AuthRoles; organization?: MeOrganization }> {
+  async me(userId: string): Promise<
+    PublicUser & {
+      roles: AuthRoles;
+      organization?: MeOrganization;
+      usernameEffect: EquippedCosmeticDto | null;
+    }
+  > {
     const [u] = await this.db
       .select()
       .from(users)
@@ -278,7 +284,7 @@ export class AuthService {
       .limit(1);
     if (!u) throw new UnauthorizedException();
 
-    const [admin, member, org] = await Promise.all([
+    const [admin, member, org, equipped] = await Promise.all([
       this.db
         .select({ id: administrators.userId })
         .from(administrators)
@@ -298,10 +304,12 @@ export class AuthService {
         .from(organizations)
         .where(eq(organizations.userId, userId))
         .limit(1),
+      this.cosmetics.equippedForUser(userId),
     ]);
 
     return {
       ...this.toPublicUser(u),
+      usernameEffect: equipped.usernameEffect,
       roles: {
         isAdmin: admin.length > 0,
         isMember: member.length > 0,

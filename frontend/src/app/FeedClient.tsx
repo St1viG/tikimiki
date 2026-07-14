@@ -25,6 +25,7 @@ import {
   getPost,
 } from "@/lib/api";
 import { relTime } from "@/lib/format";
+import { usernameEffectStyle } from "@/lib/cosmetics";
 import { personName } from "@/lib/displayName";
 import { ASPECTS, ASPECT_ORDER, snapAspectKey, type AspectKey } from "@/lib/aspect";
 import { cropImageToRatio } from "@/lib/cropImage";
@@ -848,6 +849,7 @@ export function FeedClient() {
                 className="name"
                 role="button"
                 tabIndex={0}
+                style={usernameEffectStyle(c.authorUsernameEffect)}
                 onClick={() => setPopupUser(c.authorUsername)}
                 onKeyDown={(e) => onProfileKey(e, c.authorUsername)}
               >

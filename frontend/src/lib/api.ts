@@ -244,6 +244,8 @@ export interface Comment {
   authorUsername: string;
   authorDisplayName?: string | null;
   authorAvatarUrl: string | null;
+  /** Author's equipped username effect (e.g. neon name), null when none. */
+  authorUsernameEffect?: EquippedCosmetic | null;
   parentCommentId: string | null;
   content: string;
   createdAt: string;

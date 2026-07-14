@@ -3,6 +3,8 @@
  * Response shapes returned by /api/v1/auth/*.
  */
 
+import type { EquippedCosmeticRef } from "./feed";
+
 export type AccountType = "member" | "organization";
 
 export interface PublicUser {
@@ -47,6 +49,8 @@ export interface MeResponse extends PublicUser {
   roles: AuthRoles;
   /** Present only for organization accounts. */
   organization?: MeOrganization;
+  /** The caller's equipped username effect (e.g. neon name), null when none. */
+  usernameEffect?: EquippedCosmeticRef | null;
 }
 
 export interface RegisterBody {

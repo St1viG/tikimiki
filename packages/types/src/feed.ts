@@ -6,6 +6,14 @@ export interface PostMedia {
   type: "image" | "video";
 }
 
+/** An equipped store cosmetic (e.g. neon name), shaped for client rendering. */
+export interface EquippedCosmeticRef {
+  cosmeticId: string;
+  name: string;
+  /** Free-form render hints from the catalogue, e.g. { glow: "#A78BFA" }. */
+  renderData: Record<string, unknown>;
+}
+
 export interface FeedPost {
   postId: string;
   authorId: string;
@@ -14,6 +22,8 @@ export interface FeedPost {
   authorDisplayName?: string | null;
   /** Author's uploaded avatar URL, if any (else a generated avatar is shown). */
   authorAvatarUrl?: string | null;
+  /** Author's equipped username effect (e.g. neon name), null/absent when none. */
+  authorUsernameEffect?: EquippedCosmeticRef | null;
   content: string;
   /** Ordered image/video attachments (0–10). */
   attachments?: PostMedia[];

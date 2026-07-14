@@ -1,5 +1,7 @@
 import type { KeyboardEvent } from "react";
 import { OrbArt } from "@/components/ui/OrbArt";
+import type { EquippedCosmetic } from "@/lib/api";
+import { usernameEffectStyle } from "@/lib/cosmetics";
 import { personName } from "@/lib/displayName";
 import { relTime, type Locale } from "@/lib/format";
 
@@ -21,6 +23,7 @@ export function PostAuthor({
   username,
   displayName,
   avatarUrl,
+  usernameEffect,
   createdAt,
   locale,
   onOpenProfile,
@@ -31,6 +34,8 @@ export function PostAuthor({
   username: string;
   displayName?: string | null;
   avatarUrl?: string | null;
+  /** Author's equipped username effect (e.g. neon name), when any. */
+  usernameEffect?: EquippedCosmetic | null;
   createdAt: string;
   locale: Locale;
   onOpenProfile: (username: string) => void;
@@ -64,7 +69,14 @@ export function PostAuthor({
     </span>
   );
   const nameEl = (
-    <span className="name" role="button" tabIndex={0} onClick={open} onKeyDown={onKey}>
+    <span
+      className="name"
+      role="button"
+      tabIndex={0}
+      style={usernameEffectStyle(usernameEffect)}
+      onClick={open}
+      onKeyDown={onKey}
+    >
       {name}
     </span>
   );
