@@ -22,6 +22,8 @@ export type MerchItem = {
   variant: string;
   price: number;
   icon: string;
+  /** Real product photo, when the catalogue provides one; falls back to `icon`. */
+  imageUrl: string | null;
   hasSizes: boolean;
   isPremium?: boolean;
   badge?: MerchBadge;
@@ -56,6 +58,7 @@ export function cosmeticToItem(c: Cosmetic): MerchItem {
     variant: c.description ?? c.type,
     price,
     icon: "premium",
+    imageUrl: null,
     hasSizes: false,
     isPremium: true,
     badge: cosmeticBadge(c.rarity),
@@ -103,6 +106,7 @@ export function merchToItem(m: Merch): MerchItem {
     variant: m.description ?? "",
     price: m.pointCost,
     icon: merchIcon(cat),
+    imageUrl: m.imageUrl,
     hasSizes,
     ariaLabel: `${m.name}, ${formatXp(m.pointCost)} XP`,
     requiresDelivery: true,

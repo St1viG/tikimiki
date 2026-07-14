@@ -154,6 +154,7 @@ export function StoreClient() {
       variant: item.variant,
       price: item.price,
       icon: item.icon,
+      imageUrl: item.imageUrl,
       hasSizes: item.hasSizes,
       requiresDelivery: item.requiresDelivery,
       xp,
@@ -181,6 +182,7 @@ export function StoreClient() {
       variant: item.variant,
       price: item.price,
       icon: item.icon,
+      imageUrl: item.imageUrl,
       hasSizes: false,
       requiresDelivery: item.requiresDelivery,
       xp,
@@ -355,7 +357,12 @@ export function StoreClient() {
                   aria-label={item.ariaLabel}
                 >
                   <div className="merch-img">
-                    <Icon name={item.icon} />
+                    {item.imageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element -- product photos are seeded arbitrary paths, not build-time known
+                      <img src={item.imageUrl} alt="" loading="lazy" />
+                    ) : (
+                      <Icon name={item.icon} />
+                    )}
                     {item.badge && (
                       <span
                         className={[

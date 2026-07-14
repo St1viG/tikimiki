@@ -76,6 +76,7 @@ export type ModalState =
       variant: string;
       price: number;
       icon: string;
+      imageUrl: string | null;
       hasSizes: boolean;
       /** Physical merch collects a shipping address; digital items skip it. */
       requiresDelivery: boolean;
@@ -126,7 +127,7 @@ export function BuyModal({
 
   if (!state.open) return null;
 
-  const { name, variant, price, icon, hasSizes, requiresDelivery, xp } = state;
+  const { name, variant, price, icon, imageUrl, hasSizes, requiresDelivery, xp } = state;
   const notEnough = price > xp;
 
   /** Render a reward value like "up to +150 XP daily" / "+300 XP". */
@@ -190,7 +191,12 @@ export function BuyModal({
         {/* Item row */}
         <div className="modal-item-row">
           <div className="modal-item-icon" id="modal-icon" aria-hidden="true">
-            <Icon name={icon} />
+            {imageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element -- product photos are seeded arbitrary paths, not build-time known
+              <img src={imageUrl} alt="" />
+            ) : (
+              <Icon name={icon} />
+            )}
           </div>
           <div>
             <div className="modal-item-name" id="modal-name">
