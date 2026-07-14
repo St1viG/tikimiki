@@ -744,7 +744,7 @@ export class TeamsService {
         lead.leaderId,
         "team_request_received",
         "Novi zahtev za tim",
-        `${u?.username ?? "Neko"} želi da se priključi timu ${lead.teamName}.`,
+        `${u ? `@${u.username}` : "Neko"} želi da se priključi timu ${lead.teamName}.`,
         teamId,
       );
     }

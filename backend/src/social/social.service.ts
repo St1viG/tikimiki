@@ -221,8 +221,8 @@ export class SocialService {
       title,
       body:
         type === "friend_request_received"
-          ? `${actor?.username ?? "Neko"} ti je poslao zahtev za prijateljstvo.`
-          : `${actor?.username ?? "Neko"} je prihvatio tvoj zahtev.`,
+          ? `${actor ? `@${actor.username}` : "Neko"} ti je poslao zahtev za prijateljstvo.`
+          : `${actor ? `@${actor.username}` : "Neko"} je prihvatio tvoj zahtev.`,
       entityType: "user",
       entityId: actorId,
     });

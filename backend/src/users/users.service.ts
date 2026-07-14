@@ -655,7 +655,7 @@ export class UsersService {
         userId: followeeId,
         type: "new_follower",
         title: "Novi pratilac",
-        body: `${follower?.username ?? "Neko"} te sada prati.`,
+        body: `${follower ? `@${follower.username}` : "Neko"} te sada prati.`,
         entityType: "user",
         entityId: followerId,
       });

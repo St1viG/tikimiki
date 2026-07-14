@@ -6,6 +6,7 @@ import { Icon } from "@/components/Icon";
 import { AppShell } from "@/components/shell/AppShell";
 import { RailRight } from "@/components/shell/RailRight";
 import { useT } from "@/components/i18n/LanguageProvider";
+import { MentionText } from "@/components/mentions/MentionText";
 import { useRequireAuth } from "@/components/auth/AuthProvider";
 import { formatRelativeTime } from "@/lib/format";
 import {
@@ -217,7 +218,12 @@ export function NotificationsClient() {
         <div className="notif-body">
           <div className="notif-text">
             <b>{n.title}</b>
-            {n.body ? <> {n.body}</> : null}
+            {n.body ? (
+              <>
+                {" "}
+                <MentionText>{n.body}</MentionText>
+              </>
+            ) : null}
           </div>
           <div className="notif-time">{formatRelativeTime(n.createdAt)}</div>
         </div>
