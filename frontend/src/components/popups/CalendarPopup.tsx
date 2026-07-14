@@ -19,6 +19,10 @@ import { useT } from "@/components/i18n/LanguageProvider";
  *   startsAt    — event start (ISO string or Date)
  *   endsAt      — event end (ISO string or Date)
  *   description — optional details line
+ *   url         — optional link to the event page (path or absolute)
+ *
+ * The description in the created calendar event is enriched with the
+ * event page link and a tikimiki footer.
  *
  * Autor: Stevan Gnjato (2023/0141)
  */
@@ -27,6 +31,11 @@ const M = {
   menuLabel: { en: "Add to calendar", sr: "Dodaj u kalendar" },
   google: { en: "Google Calendar", sr: "Google Calendar" },
   apple: { en: "Apple Calendar (.ics)", sr: "Apple Calendar (.ics)" },
+  eventPage: { en: "Event page", sr: "Stranica hackathona" },
+  footer: {
+    en: "Added via tikimiki — the all-in-one hackathon platform",
+    sr: "Dodato preko tikimiki — sve-u-jednom platforme za hackathone",
+  },
 } as const;
 
 /** Details of the event the calendar links target. */
@@ -36,6 +45,7 @@ interface CalendarEvent {
   startsAt: string | Date;
   endsAt: string | Date;
   description?: string;
+  url?: string;
 }
 
 /** Format an ISO string or Date as a UTC calendar timestamp (yyyymmddThhmmssZ). */
@@ -64,6 +74,10 @@ function googleCalUrl(event: CalendarEvent): string {
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
 
+/** Escape text for an ICS property value (RFC 5545 §3.3.11). */
+const icsText = (s: string) =>
+  s.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
+
 /** Build the raw .ics file contents for the event. */
 function buildIcs(event: CalendarEvent): string {
   const lines = [
@@ -75,10 +89,11 @@ function buildIcs(event: CalendarEvent): string {
     `DTSTAMP:${calStamp(new Date())}`,
     `DTSTART:${calStamp(event.startsAt)}`,
     `DTEND:${calStamp(event.endsAt)}`,
-    `SUMMARY:${event.title}`,
+    `SUMMARY:${icsText(event.title)}`,
   ];
-  if (event.location) lines.push(`LOCATION:${event.location}`);
-  if (event.description) lines.push(`DESCRIPTION:${event.description}`);
+  if (event.location) lines.push(`LOCATION:${icsText(event.location)}`);
+  if (event.description) lines.push(`DESCRIPTION:${icsText(event.description)}`);
+  if (event.url) lines.push(`URL:${event.url}`);
   lines.push("END:VEVENT", "END:VCALENDAR");
   return lines.join("\r\n");
 }
@@ -91,6 +106,7 @@ export function CalendarPopup({
   startsAt,
   endsAt,
   description,
+  url,
 }: {
   open: boolean;
   onClose: () => void;
@@ -99,11 +115,26 @@ export function CalendarPopup({
   startsAt: string | Date;
   endsAt: string | Date;
   description?: string;
+  url?: string;
 }) {
   const t = useT(M);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const event: CalendarEvent = { title, location, startsAt, endsAt, description };
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const eventUrl = url ? (url.startsWith("http") ? url : `${origin}${url}`) : undefined;
+
+  const details = [description, eventUrl && `${t("eventPage")}: ${eventUrl}`, `—\n${t("footer")}`]
+    .filter(Boolean)
+    .join("\n\n");
+
+  const event: CalendarEvent = {
+    title,
+    location,
+    startsAt,
+    endsAt,
+    description: details,
+    url: eventUrl,
+  };
 
   // Close when a click happens outside this menu
   useEffect(() => {

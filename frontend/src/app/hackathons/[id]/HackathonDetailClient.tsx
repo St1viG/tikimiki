@@ -278,6 +278,7 @@ export function HackathonDetailClient({ hackathonId }: { hackathonId: string }) 
                 startsAt={hack.startsAt}
                 endsAt={hack.endsAt}
                 description={hack.description ?? undefined}
+                url={`/hackathons/${hackathonId}`}
               />
             </div>
           </div>
