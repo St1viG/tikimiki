@@ -34,6 +34,24 @@ export class StoreController {
     return this.store.buyCosmetic(userId, cosmeticId);
   }
 
+  @Post("cosmetics/:cosmeticId/equip")
+  @UseGuards(JwtAuthGuard)
+  equipCosmetic(
+    @CurrentUser() userId: string,
+    @Param("cosmeticId", ParseUUIDPipe) cosmeticId: string,
+  ) {
+    return this.store.equipCosmetic(userId, cosmeticId);
+  }
+
+  @Post("cosmetics/:cosmeticId/unequip")
+  @UseGuards(JwtAuthGuard)
+  unequipCosmetic(
+    @CurrentUser() userId: string,
+    @Param("cosmeticId", ParseUUIDPipe) cosmeticId: string,
+  ) {
+    return this.store.unequipCosmetic(userId, cosmeticId);
+  }
+
   @Post("merch/:merchId/order")
   @UseGuards(JwtAuthGuard)
   orderMerch(

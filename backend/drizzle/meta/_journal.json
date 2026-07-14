@@ -148,6 +148,13 @@
       "when": 1783986518773,
       "tag": "0020_familiar_norrin_radd",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1784024227159,
+      "tag": "0021_neon_profile_decoration",
+      "breakpoints": true
     }
   ]
 }

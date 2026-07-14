@@ -30,6 +30,7 @@ import {
   userSettings,
   users,
 } from "../db/schema";
+import { CosmeticsService, type EquippedCosmeticDto } from "../common/cosmetics.service";
 import { NotificationsService } from "../notifications/notifications.service";
 import { SubscriptionsService } from "../subscriptions/subscriptions.service";
 import type { ChangePasswordInput, UpdateProfileInput } from "./dto";
@@ -82,6 +83,10 @@ export interface PublicProfileDto {
   isFollowing: boolean;
   /** Whether this user currently has an active Premium subscription. */
   isPremium: boolean;
+  /** Equipped username effect (e.g. neon name), null when none. */
+  usernameEffect: EquippedCosmeticDto | null;
+  /** Equipped profile decoration (banner/avatar frame), null when none. */
+  profileDecoration: EquippedCosmeticDto | null;
   createdAt: string;
 }
 
@@ -121,6 +126,7 @@ export class UsersService {
     @Inject(DRIZZLE) private readonly db: DrizzleDB,
     private readonly notifications: NotificationsService,
     private readonly subscriptions: SubscriptionsService,
+    private readonly cosmetics: CosmeticsService,
   ) {}
 
   /** Fetch points balance for a user (0 if no member row). */
@@ -386,30 +392,32 @@ export class UsersService {
       isFollowing = Boolean(f);
     }
 
-    const [points, skillRows, badgeRows, followerRow, followingRow, isPremium] = await Promise.all([
-      this.getPoints(user.userId),
-      this.getSkillRows(user.userId),
-      this.db
-        .select({
-          badgeId: badges.badgeId,
-          name: badges.name,
-          iconUrl: badges.iconUrl,
-          category: badges.category,
-        })
-        .from(userBadges)
-        .innerJoin(badges, eq(userBadges.badgeId, badges.badgeId))
-        .where(eq(userBadges.userId, user.userId))
-        .orderBy(desc(userBadges.awardedAt)),
-      this.db
-        .select({ value: sql<number>`count(*)::int` })
-        .from(follows)
-        .where(eq(follows.followeeId, user.userId)),
-      this.db
-        .select({ value: sql<number>`count(*)::int` })
-        .from(follows)
-        .where(eq(follows.followerId, user.userId)),
-      this.subscriptions.isPremium(user.userId),
-    ]);
+    const [points, skillRows, badgeRows, followerRow, followingRow, isPremium, equipped] =
+      await Promise.all([
+        this.getPoints(user.userId),
+        this.getSkillRows(user.userId),
+        this.db
+          .select({
+            badgeId: badges.badgeId,
+            name: badges.name,
+            iconUrl: badges.iconUrl,
+            category: badges.category,
+          })
+          .from(userBadges)
+          .innerJoin(badges, eq(userBadges.badgeId, badges.badgeId))
+          .where(eq(userBadges.userId, user.userId))
+          .orderBy(desc(userBadges.awardedAt)),
+        this.db
+          .select({ value: sql<number>`count(*)::int` })
+          .from(follows)
+          .where(eq(follows.followeeId, user.userId)),
+        this.db
+          .select({ value: sql<number>`count(*)::int` })
+          .from(follows)
+          .where(eq(follows.followerId, user.userId)),
+        this.subscriptions.isPremium(user.userId),
+        this.cosmetics.equippedForUser(user.userId),
+      ]);
 
     return {
       userId: user.userId,
@@ -432,6 +440,8 @@ export class UsersService {
       followingCount: followingRow[0] ? Number(followingRow[0].value) : 0,
       isFollowing,
       isPremium,
+      usernameEffect: equipped.usernameEffect,
+      profileDecoration: equipped.profileDecoration,
       createdAt: user.createdAt.toISOString(),
     };
   }

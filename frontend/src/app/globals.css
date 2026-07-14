@@ -2994,3 +2994,46 @@ html[data-theme="light-mono"] .premium-link .ic {
   font-size: 0.78rem;
   color: var(--muted);
 }
+
+/* ── Cosmetics: equipped profile decorations ─────────────────────────────
+   `.cos-deco-frame` renders a neon frame around the whole card carrying it
+   (profile-popup modal, cohor mini-profile / DM docked card, settings
+   preview card). The glow colour comes from the item render data via the
+   --deco-glow variable (see lib/cosmetics.ts); defaults to the brand violet.
+   `:where()` keeps the position rule at zero specificity so cards that are
+   position: fixed/absolute keep their own positioning. Card containers clip
+   with overflow: hidden, so the glow is drawn inward. */
+:where(.cos-deco-frame) {
+  position: relative;
+}
+.cos-deco-frame {
+  --deco-glow: #a78bfa;
+  border-color: color-mix(in srgb, var(--deco-glow) 70%, transparent) !important;
+}
+.cos-deco-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  border-radius: inherit;
+  border: 2px solid var(--deco-glow);
+  box-shadow:
+    inset 0 0 10px color-mix(in srgb, var(--deco-glow) 70%, transparent),
+    inset 0 0 26px color-mix(in srgb, var(--deco-glow) 30%, transparent);
+  pointer-events: none;
+  animation: cos-deco-pulse 2.6s ease-in-out infinite;
+}
+@keyframes cos-deco-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cos-deco-frame::after {
+    animation: none;
+  }
+}

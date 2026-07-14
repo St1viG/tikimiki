@@ -1156,3 +1156,65 @@ textarea.ep-input {
     display: none;
   }
 }
+
+/* ── Customization card (owned cosmetics: equip / unequip) ─────────────── */
+.ep-cos-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  margin-top: 8px;
+}
+.ep-cos-row.equipped {
+  border-color: color-mix(in srgb, var(--violet, #a78bfa) 45%, var(--line));
+}
+.ep-cos-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+.ep-cos-preview {
+  font-weight: 700;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ep-cos-meta {
+  color: var(--muted);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+.ep-cos-deco-swatch {
+  width: 64px;
+  height: 26px;
+  flex: none;
+  border-radius: 8px;
+  background:
+    linear-gradient(
+      120deg,
+      color-mix(in srgb, var(--deco-glow, #a78bfa) 25%, transparent),
+      transparent 70%
+    ),
+    var(--bg2, rgba(255, 255, 255, 0.04));
+}
+.ep-cos-equipped-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--green);
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.ep-cos-empty {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}

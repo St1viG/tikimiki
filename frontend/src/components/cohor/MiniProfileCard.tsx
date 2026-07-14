@@ -1,6 +1,8 @@
 import { Icon } from "@/components/Icon";
 import { OrbArt } from "@/components/ui/OrbArt";
 import { PremiumBadge } from "@/components/ui/PremiumBadge";
+import type { EquippedCosmetic } from "@/lib/api";
+import { usernameEffectStyle } from "@/lib/cosmetics";
 import { personName } from "@/lib/displayName";
 
 /**
@@ -21,6 +23,14 @@ export interface MiniProfileCardMember {
   avatarUrl: string | null;
   bannerUrl?: string | null;
   isPremium?: boolean;
+  /** Equipped username effect (e.g. neon name), when any. */
+  usernameEffect?: EquippedCosmetic | null;
+  /**
+   * Equipped profile decoration. Not rendered here — each call site puts the
+   * `.cos-deco-frame` class on its own positioned card wrapper so the neon
+   * frame surrounds the whole card.
+   */
+  profileDecoration?: EquippedCosmetic | null;
   /** Server roles — only rendered when `showDetails` is set. */
   roles?: string[];
   /** Team name — only rendered when `showDetails` is set. */
@@ -108,7 +118,12 @@ export function MiniProfileCard({
             }
           }}
         >
-          <span className="mini-profile-name-text">{name}</span>
+          <span
+            className="mini-profile-name-text"
+            style={usernameEffectStyle(member.usernameEffect)}
+          >
+            {name}
+          </span>
           {member.isPremium && <PremiumBadge size={13} />}
         </div>
         <div className="mini-profile-handle">@{member.username}</div>

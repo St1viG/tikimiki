@@ -559,11 +559,11 @@ async function main() {
       pointCost: 1200,
     },
     {
-      type: "banner_effect",
-      name: "Konfete",
-      description: "Animirane konfete na baneru.",
+      type: "avatar_decoration",
+      name: "Neon dekoracija",
+      description: "Neonski okvir na profilu.",
       rarity: "legendary",
-      renderData: { fx: "confetti" },
+      renderData: { frame: "neon", glow: "#A78BFA" },
       pointCost: 3000,
     },
   ]);

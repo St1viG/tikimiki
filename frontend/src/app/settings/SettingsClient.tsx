@@ -14,6 +14,7 @@ import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
 import { useAuth, useRequireAuth } from "@/components/auth/AuthProvider";
 import * as api from "@/lib/api";
+import { profileDecorationStyle, usernameEffectStyle, withDecorationClass } from "@/lib/cosmetics";
 
 /**
  * SettingsClient — the interactive settings surface.
@@ -226,6 +227,32 @@ const M = {
   colorTeal: { en: "Teal", sr: "Tirkizna" },
   colorRed: { en: "Red", sr: "Crvena" },
   colorLight: { en: "Light", sr: "Svetla" },
+
+  // customization card (cosmetics from the store)
+  cosTitle: { en: "Customization", sr: "Personalizacija" },
+  cosSub: {
+    en: "Name effects and profile decorations you own — bought in the store",
+    sr: "Efekti imena i dekoracije profila koje poseduješ — kupuju se u prodavnici",
+  },
+  cosNameFx: { en: "Name effects", sr: "Efekti imena" },
+  cosDecorations: { en: "Profile decorations", sr: "Dekoracije profila" },
+  cosDecorationsHint: {
+    en: "Shown on your profile popup and on cohor member cards",
+    sr: "Prikazuju se na tvom profil popup-u i na karticama članova cohor servera",
+  },
+  cosEquip: { en: "Equip", sr: "Aktiviraj" },
+  cosUnequip: { en: "Unequip", sr: "Ukloni" },
+  cosEquipped: { en: "Equipped", sr: "Aktivno" },
+  cosLoading: { en: "Loading inventory…", sr: "Učitavanje inventara…" },
+  cosEmpty: {
+    en: "You don't own any cosmetics yet — the Neon name and Neon decoration are waiting in the store.",
+    sr: "Još ne poseduješ nijednu kozmetiku — Neon ime i Neon dekoracija te čekaju u prodavnici.",
+  },
+  cosOpenStore: { en: "Open store", sr: "Otvori prodavnicu" },
+  cosEquipFailed: {
+    en: "Could not update customization. Please try again.",
+    sr: "Promena personalizacije nije uspela. Pokušaj ponovo.",
+  },
 
   // premium personalization card
   premiumPersTitle: {
@@ -668,6 +695,10 @@ export function SettingsClient() {
   // Privacy / notification settings (api.getSettings)
   const [settings, setSettings] = useState<api.UserSettings | null>(null);
 
+  // Owned cosmetics (api.getInventory) — null until loaded.
+  const [inventory, setInventory] = useState<api.InventoryCosmetic[] | null>(null);
+  const [cosBusy, setCosBusy] = useState<string | null>(null);
+
   // Integrations (api.getIntegrations)
   const [integrations, setIntegrations] = useState<api.Integrations | null>(null);
   const [intBusy, setIntBusy] = useState<Record<string, boolean>>({});
@@ -768,6 +799,15 @@ export function SettingsClient() {
         setIntegrations(i);
       } catch (err) {
         console.error("Failed to load integrations", err);
+      }
+    })();
+    (async () => {
+      try {
+        const inv = await api.getInventory();
+        if (cancelled) return;
+        setInventory(inv.cosmetics);
+      } catch (err) {
+        console.error("Failed to load cosmetics inventory", err);
       }
     })();
     return () => {
@@ -1020,6 +1060,33 @@ export function SettingsClient() {
     [showToast, t],
   );
 
+  // Equip / unequip an owned cosmetic. The server keeps one equipped item per
+  // slot, so after a change the inventory is re-read for authoritative state
+  // (equipping a second name effect silently replaces the first).
+  const toggleCosmetic = useCallback(
+    async (c: api.InventoryCosmetic) => {
+      setCosBusy(c.cosmeticId);
+      try {
+        if (c.equipped) await api.unequipCosmetic(c.cosmeticId);
+        else await api.equipCosmetic(c.cosmeticId);
+        const inv = await api.getInventory();
+        setInventory(inv.cosmetics);
+      } catch (err) {
+        console.error("Failed to toggle cosmetic", err);
+        showToast(err instanceof api.ApiError ? err.message : t("cosEquipFailed"), "err");
+      } finally {
+        setCosBusy(null);
+      }
+    },
+    [showToast, t],
+  );
+
+  // Equipped cosmetics drive the live profile preview in the right rail.
+  const nameFxItems = (inventory ?? []).filter((c) => c.type === "username_effect");
+  const decorationItems = (inventory ?? []).filter((c) => c.type !== "username_effect");
+  const equippedNameFx = nameFxItems.find((c) => c.equipped) ?? null;
+  const equippedDecoration = decorationItems.find((c) => c.equipped) ?? null;
+
   // Integrations: connect / disconnect. Connect uses the LINK variant of the
   // OAuth flow (?link=1): the provider is attached to the current account —
   // the plain flow would find-or-create a user and could silently switch the
@@ -1268,7 +1335,11 @@ export function SettingsClient() {
               placeholder={t("searchPlaceholder")}
             />
           </div>
-          <section className="ppc" aria-labelledby="ppc-card-title">
+          <section
+            className={withDecorationClass("ppc", equippedDecoration)}
+            style={profileDecorationStyle(equippedDecoration)}
+            aria-labelledby="ppc-card-title"
+          >
             <header className="ppc-header">
               <h2 className="ppc-title" id="ppc-card-title">
                 {t("profilePreview")}
@@ -1301,7 +1372,13 @@ export function SettingsClient() {
               <div
                 className="ppc-name"
                 id="ppc-name"
-                style={{ color, display: "inline-flex", alignItems: "center", gap: 6 }}
+                style={{
+                  color,
+                  ...usernameEffectStyle(equippedNameFx),
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                }}
               >
                 {name}
                 {isPremium && <PremiumBadge size={13} />}
@@ -1817,6 +1894,102 @@ export function SettingsClient() {
               <button className="btn btn-primary" disabled title={t("notSavedYet")}>
                 {t("save")}
               </button>
+            </div>
+          </div>
+
+          {/* Customization: owned name effects + profile decorations (store cosmetics) */}
+          <div className="ep-card">
+            <div className="ep-card-header">
+              <div className="ep-card-title">{t("cosTitle")}</div>
+              <div className="ep-card-sub">{t("cosSub")}</div>
+            </div>
+            <div className="ep-card-body">
+              {inventory === null ? (
+                <div className="ep-banner-hint" role="status">
+                  {t("cosLoading")}
+                </div>
+              ) : inventory.length === 0 ? (
+                <div className="ep-cos-empty">
+                  <span className="ep-banner-hint">{t("cosEmpty")}</span>
+                  <Link className="btn btn-ghost ep-mini-btn" href="/store">
+                    <Icon name="cart" /> {t("cosOpenStore")}
+                  </Link>
+                </div>
+              ) : (
+                <>
+                  {nameFxItems.length > 0 && (
+                    <div className="ep-field">
+                      <span className="ep-label">{t("cosNameFx")}</span>
+                      {nameFxItems.map((c) => (
+                        <div
+                          className={`ep-cos-row${c.equipped ? " equipped" : ""}`}
+                          key={c.cosmeticId}
+                        >
+                          <div className="ep-cos-info">
+                            <span className="ep-cos-preview" style={usernameEffectStyle(c)}>
+                              {name || username}
+                            </span>
+                            <span className="ep-cos-meta">
+                              {c.name} · {c.rarity}
+                            </span>
+                          </div>
+                          {c.equipped && (
+                            <span className="ep-cos-equipped-chip">
+                              <Icon name="check" /> {t("cosEquipped")}
+                            </span>
+                          )}
+                          <button
+                            type="button"
+                            className={`btn ${c.equipped ? "btn-ghost" : "btn-primary"} ep-mini-btn`}
+                            disabled={cosBusy === c.cosmeticId}
+                            onClick={() => void toggleCosmetic(c)}
+                          >
+                            {c.equipped ? t("cosUnequip") : t("cosEquip")}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {decorationItems.length > 0 && (
+                    <div className="ep-field">
+                      <span className="ep-label">{t("cosDecorations")}</span>
+                      <div className="ep-banner-hint" style={{ marginBottom: "8px" }}>
+                        {t("cosDecorationsHint")}
+                      </div>
+                      {decorationItems.map((c) => (
+                        <div
+                          className={`ep-cos-row${c.equipped ? " equipped" : ""}`}
+                          key={c.cosmeticId}
+                        >
+                          <div className="ep-cos-info">
+                            <span
+                              className={withDecorationClass("ep-cos-deco-swatch", c)}
+                              style={profileDecorationStyle(c)}
+                              aria-hidden="true"
+                            />
+                            <span className="ep-cos-meta">
+                              {c.name} · {c.rarity}
+                            </span>
+                          </div>
+                          {c.equipped && (
+                            <span className="ep-cos-equipped-chip">
+                              <Icon name="check" /> {t("cosEquipped")}
+                            </span>
+                          )}
+                          <button
+                            type="button"
+                            className={`btn ${c.equipped ? "btn-ghost" : "btn-primary"} ep-mini-btn`}
+                            disabled={cosBusy === c.cosmeticId}
+                            onClick={() => void toggleCosmetic(c)}
+                          >
+                            {c.equipped ? t("cosUnequip") : t("cosEquip")}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           </div>
 

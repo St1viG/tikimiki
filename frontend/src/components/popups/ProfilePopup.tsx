@@ -18,6 +18,7 @@ import {
   type SocialUser,
 } from "@/lib/api";
 import { personName } from "@/lib/displayName";
+import { profileDecorationStyle, usernameEffectStyle, withDecorationClass } from "@/lib/cosmetics";
 import "./ProfilePopup.css";
 
 /**
@@ -188,7 +189,12 @@ export function ProfilePopup({ open, onClose, username }: ProfilePopupProps) {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="pp-modal" id="pp-modal" key={modalKey}>
+      <div
+        className={withDecorationClass("pp-modal", profile?.profileDecoration)}
+        id="pp-modal"
+        key={modalKey}
+        style={profileDecorationStyle(profile?.profileDecoration)}
+      >
         <button className="pp-close" onClick={onClose} aria-label={t("close")}>
           <Icon name="x" />
         </button>
@@ -216,7 +222,7 @@ export function ProfilePopup({ open, onClose, username }: ProfilePopupProps) {
           </div>
 
           <div className="pp-card-body">
-            <div className="pp-name">
+            <div className="pp-name" style={usernameEffectStyle(profile?.usernameEffect)}>
               {fullName}
               {profile?.isPremium && <PremiumBadge size={15} />}
             </div>

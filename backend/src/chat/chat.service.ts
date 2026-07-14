@@ -8,6 +8,7 @@ import {
 } from "@nestjs/common";
 import { and, asc, desc, eq, gt, inArray, isNull, ne, or, sql } from "drizzle-orm";
 import { AuthzService } from "../common/authz.service";
+import { CosmeticsService, type EquippedCosmeticDto } from "../common/cosmetics.service";
 import { activeTeamMember } from "../common/team.predicates";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import { NotificationsService } from "../notifications/notifications.service";
@@ -87,6 +88,10 @@ export interface ServerMemberDto {
   isModerator: boolean;
   /** True when the member currently holds an active Premium subscription. */
   isPremium: boolean;
+  /** Equipped username effect (e.g. neon name), null when none. */
+  usernameEffect: EquippedCosmeticDto | null;
+  /** Equipped profile decoration (banner/avatar frame), null when none. */
+  profileDecoration: EquippedCosmeticDto | null;
 }
 
 /** Server summary returned after an update. */
@@ -145,6 +150,10 @@ export interface ConversationMemberDto {
   bannerUrl: string | null;
   /** True when the member currently holds an active Premium subscription. */
   isPremium: boolean;
+  /** Equipped username effect (e.g. neon name), null when none. */
+  usernameEffect: EquippedCosmeticDto | null;
+  /** Equipped profile decoration (banner/avatar frame), null when none. */
+  profileDecoration: EquippedCosmeticDto | null;
 }
 
 export interface ConversationLastMessageDto {
@@ -222,6 +231,7 @@ export class ChatService {
     private readonly authz: AuthzService,
     private readonly notifications: NotificationsService,
     private readonly subscriptions: SubscriptionsService,
+    private readonly cosmetics: CosmeticsService,
   ) {}
 
   /**
@@ -415,6 +425,8 @@ export class ChatService {
         teamName: null,
         isModerator: false,
         isPremium: false,
+        usernameEffect: null,
+        profileDecoration: null,
       };
       entry.roles.push(r.roleName);
       if (r.roleHasPerm) entry.isModerator = true;
@@ -444,6 +456,8 @@ export class ChatService {
           teamName: null,
           isModerator: true,
           isPremium: false,
+          usernameEffect: null,
+          profileDecoration: null,
         });
       }
     }
@@ -468,17 +482,27 @@ export class ChatService {
         if (e) e.teamName = t.teamName;
       }
 
-      const premium = await this.subscriptions.premiumUserIds(memberIds);
+      const [premium, equippedMap] = await Promise.all([
+        this.subscriptions.premiumUserIds(memberIds),
+        this.cosmetics.equippedForUsers(memberIds),
+      ]);
       for (const id of premium) {
         const e = byUser.get(id);
         if (e) e.isPremium = true;
+      }
+      for (const [id, equipped] of equippedMap) {
+        const e = byUser.get(id);
+        if (e) {
+          e.usernameEffect = equipped.usernameEffect;
+          e.profileDecoration = equipped.profileDecoration;
+        }
       }
     }
 
     return [...byUser.values()];
   }
 
-  /** Attach `isPremium` to conversation-member rows with a single batch query. */
+  /** Attach `isPremium` + equipped cosmetics to conversation-member rows with batch queries. */
   private async withPremium(
     rows: {
       userId: string;
@@ -488,8 +512,10 @@ export class ChatService {
       bannerUrl: string | null;
     }[],
   ): Promise<ConversationMemberDto[]> {
-    const premium = await this.subscriptions.premiumUserIds([
-      ...new Set(rows.map((r) => r.userId)),
+    const ids = [...new Set(rows.map((r) => r.userId))];
+    const [premium, equippedMap] = await Promise.all([
+      this.subscriptions.premiumUserIds(ids),
+      this.cosmetics.equippedForUsers(ids),
     ]);
     return rows.map((r) => ({
       userId: r.userId,
@@ -498,6 +524,8 @@ export class ChatService {
       avatarUrl: r.avatarUrl,
       bannerUrl: r.bannerUrl,
       isPremium: premium.has(r.userId),
+      usernameEffect: equippedMap.get(r.userId)?.usernameEffect ?? null,
+      profileDecoration: equippedMap.get(r.userId)?.profileDecoration ?? null,
     }));
   }
 
@@ -1388,8 +1416,10 @@ export class ChatService {
         ),
       );
 
-    const premiumMembers = await this.subscriptions.premiumUserIds([
-      ...new Set(memberRows.map((m) => m.userId)),
+    const memberIds = [...new Set(memberRows.map((m) => m.userId))];
+    const [premiumMembers, equippedByUser] = await Promise.all([
+      this.subscriptions.premiumUserIds(memberIds),
+      this.cosmetics.equippedForUsers(memberIds),
     ]);
     const membersByConvo = new Map<string, ConversationMemberDto[]>();
     for (const m of memberRows) {
@@ -1401,6 +1431,8 @@ export class ChatService {
         avatarUrl: m.avatarUrl,
         bannerUrl: m.bannerUrl,
         isPremium: premiumMembers.has(m.userId),
+        usernameEffect: equippedByUser.get(m.userId)?.usernameEffect ?? null,
+        profileDecoration: equippedByUser.get(m.userId)?.profileDecoration ?? null,
       });
       membersByConvo.set(m.conversationId, list);
     }

@@ -15,6 +15,7 @@ import {
   merchOrders,
   merchVariants,
   userCosmetics,
+  userEquippedCosmetics,
 } from "../db/schema";
 import type { CreateMerchOrderInput } from "./dto";
 
@@ -49,11 +50,20 @@ export interface InventoryCosmeticDto {
   name: string;
   type: string;
   rarity: string;
+  /** Render hints from cosmetic_items.render_data (e.g. { glow: "#A78BFA" }). */
+  renderData: Record<string, unknown>;
+  /** Whether the cosmetic is currently equipped in its slot. */
+  equipped: boolean;
   obtainedAt: string;
 }
 
 export interface InventoryResponse {
   cosmetics: InventoryCosmeticDto[];
+}
+
+export interface EquipCosmeticResponse {
+  success: true;
+  equipped: boolean;
 }
 
 export interface BuyCosmeticResponse {
@@ -145,18 +155,26 @@ export class StoreService {
 
   /* ── GET /store/me/inventory (auth) ─────────────────────── */
   async getInventory(userId: string): Promise<InventoryResponse> {
-    const rows = await this.db
-      .select({
-        cosmeticId: userCosmetics.cosmeticId,
-        name: cosmeticItems.name,
-        type: cosmeticItems.type,
-        rarity: cosmeticItems.rarity,
-        obtainedAt: userCosmetics.obtainedAt,
-      })
-      .from(userCosmetics)
-      .innerJoin(cosmeticItems, eq(userCosmetics.cosmeticId, cosmeticItems.cosmeticId))
-      .where(eq(userCosmetics.userId, userId))
-      .orderBy(asc(cosmeticItems.name));
+    const [rows, equippedRows] = await Promise.all([
+      this.db
+        .select({
+          cosmeticId: userCosmetics.cosmeticId,
+          name: cosmeticItems.name,
+          type: cosmeticItems.type,
+          rarity: cosmeticItems.rarity,
+          renderData: cosmeticItems.renderData,
+          obtainedAt: userCosmetics.obtainedAt,
+        })
+        .from(userCosmetics)
+        .innerJoin(cosmeticItems, eq(userCosmetics.cosmeticId, cosmeticItems.cosmeticId))
+        .where(eq(userCosmetics.userId, userId))
+        .orderBy(asc(cosmeticItems.name)),
+      this.db
+        .select({ cosmeticId: userEquippedCosmetics.cosmeticId })
+        .from(userEquippedCosmetics)
+        .where(eq(userEquippedCosmetics.userId, userId)),
+    ]);
+    const equipped = new Set(equippedRows.map((r) => r.cosmeticId));
 
     return {
       cosmetics: rows.map((r) => ({
@@ -164,9 +182,47 @@ export class StoreService {
         name: r.name,
         type: r.type,
         rarity: r.rarity,
+        renderData: (r.renderData ?? {}) as Record<string, unknown>,
+        equipped: equipped.has(r.cosmeticId),
         obtainedAt: r.obtainedAt.toISOString(),
       })),
     };
+  }
+
+  /* ── POST /store/cosmetics/:cosmeticId/equip (auth) ─────── */
+  async equipCosmetic(userId: string, cosmeticId: string): Promise<EquipCosmeticResponse> {
+    const [owned] = await this.db
+      .select({ type: cosmeticItems.type })
+      .from(userCosmetics)
+      .innerJoin(cosmeticItems, eq(cosmeticItems.cosmeticId, userCosmetics.cosmeticId))
+      .where(and(eq(userCosmetics.userId, userId), eq(userCosmetics.cosmeticId, cosmeticId)))
+      .limit(1);
+    if (!owned) throw new NotFoundException("Cosmetic not owned");
+
+    // One equipped cosmetic per slot (userId + slot is the PK) — equipping
+    // another item of the same type replaces the previous one.
+    await this.db
+      .insert(userEquippedCosmetics)
+      .values({ userId, slot: owned.type, cosmeticId })
+      .onConflictDoUpdate({
+        target: [userEquippedCosmetics.userId, userEquippedCosmetics.slot],
+        set: { cosmeticId },
+      });
+
+    return { success: true as const, equipped: true };
+  }
+
+  /* ── POST /store/cosmetics/:cosmeticId/unequip (auth) ───── */
+  async unequipCosmetic(userId: string, cosmeticId: string): Promise<EquipCosmeticResponse> {
+    await this.db
+      .delete(userEquippedCosmetics)
+      .where(
+        and(
+          eq(userEquippedCosmetics.userId, userId),
+          eq(userEquippedCosmetics.cosmeticId, cosmeticId),
+        ),
+      );
+    return { success: true as const, equipped: false };
   }
 
   /* ── POST /store/cosmetics/:cosmeticId/buy (auth) ───────── */

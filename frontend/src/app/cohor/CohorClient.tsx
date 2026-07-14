@@ -24,6 +24,7 @@ import {
   type MentionCandidate,
 } from "@/components/mentions/useMentionAutocomplete";
 import { MentionClickContext } from "@/components/mentions/MentionLink";
+import { profileDecorationStyle, usernameEffectStyle, withDecorationClass } from "@/lib/cosmetics";
 import { isUserMentioned } from "@/lib/mentions";
 import { ImageLightbox } from "@/components/ImageLightbox";
 import { CohorToast, type CohorToastVariant } from "@/components/popups/CohorToast";
@@ -2675,7 +2676,9 @@ export function CohorClient() {
       </div>
       <div className="member-info">
         <div className="member-name">
-          {personName({ displayName: m.displayName, username: m.username })}
+          <span style={usernameEffectStyle(m.usernameEffect)}>
+            {personName({ displayName: m.displayName, username: m.username })}
+          </span>
           {m.isModerator && <span className="member-mod-badge">{t("srvModeratorBadge")}</span>}
         </div>
         <div className="member-handle">@{m.username}</div>
@@ -4996,7 +4999,8 @@ export function CohorClient() {
                   const o = others[0];
                   return (
                     <div
-                      className="dm-docked-card"
+                      className={withDecorationClass("dm-docked-card", o.profileDecoration)}
+                      style={profileDecorationStyle(o.profileDecoration)}
                       onContextMenu={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
@@ -5075,6 +5079,8 @@ export function CohorClient() {
                                 teamName: null,
                                 isModerator: false,
                                 isPremium: m.isPremium,
+                                usernameEffect: m.usernameEffect,
+                                profileDecoration: m.profileDecoration,
                               },
                               anchorTop: r.top,
                               anchorLeft: r.left,
@@ -5104,6 +5110,8 @@ export function CohorClient() {
                                 teamName: null,
                                 isModerator: false,
                                 isPremium: m.isPremium,
+                                usernameEffect: m.usernameEffect,
+                                profileDecoration: m.profileDecoration,
                               },
                               anchorTop: r.top,
                               anchorLeft: r.left,
@@ -5165,9 +5173,10 @@ export function CohorClient() {
         <div
           ref={measureMiniCard}
           key={miniProfile.member.userId}
-          className="mini-profile-card"
+          className={withDecorationClass("mini-profile-card", miniProfile.member.profileDecoration)}
           role="dialog"
           style={{
+            ...profileDecorationStyle(miniProfile.member.profileDecoration),
             // Vertically align with the clicked element (its top edge), but
             // never let the card run off the bottom — clamp by its MEASURED
             // height so it is always fully visible (NOT the mouse position).

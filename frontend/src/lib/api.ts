@@ -346,6 +346,10 @@ export interface ConversationMember {
   avatarUrl: string | null;
   bannerUrl: string | null;
   isPremium: boolean;
+  /** Equipped username effect (e.g. neon name), null when none. */
+  usernameEffect: EquippedCosmetic | null;
+  /** Equipped profile decoration (banner/avatar frame), null when none. */
+  profileDecoration: EquippedCosmetic | null;
 }
 export interface Conversation {
   conversationId: string;
@@ -377,6 +381,10 @@ export interface ServerMember {
   isModerator: boolean;
   /** True when the member currently holds an active Premium subscription. */
   isPremium: boolean;
+  /** Equipped username effect (e.g. neon name), null when none. */
+  usernameEffect: EquippedCosmetic | null;
+  /** Equipped profile decoration (banner/avatar frame), null when none. */
+  profileDecoration: EquippedCosmetic | null;
 }
 export const getServerMembers = (serverId: string) =>
   GET<ServerMember[]>(`/servers/${serverId}/members`);
@@ -541,6 +549,12 @@ export async function startConversation(userId: string): Promise<string> {
 }
 
 // Users: profile, settings, social
+/** An equipped cosmetic shaped for rendering (name + render hints). */
+export interface EquippedCosmetic {
+  cosmeticId: string;
+  name: string;
+  renderData: Record<string, unknown>;
+}
 export interface MyProfile {
   userId: string;
   username: string;
@@ -574,6 +588,10 @@ export interface PublicProfile {
   followingCount: number;
   isFollowing: boolean;
   isPremium: boolean;
+  /** Equipped username effect (e.g. neon name), null when none. */
+  usernameEffect: EquippedCosmetic | null;
+  /** Equipped profile decoration (banner/avatar frame), null when none. */
+  profileDecoration: EquippedCosmetic | null;
   createdAt: string;
 }
 export interface UpdateProfileBody {
@@ -911,20 +929,28 @@ export interface MerchOrderBody {
   shippingZip: string;
 }
 
+/** A cosmetic the user owns, as returned by GET /store/me/inventory. */
+export interface InventoryCosmetic {
+  cosmeticId: string;
+  name: string;
+  type: string;
+  rarity: string;
+  /** Render hints (e.g. { glow: "#A78BFA" } for neon effects). */
+  renderData: Record<string, unknown>;
+  /** Whether the cosmetic is currently equipped in its slot. */
+  equipped: boolean;
+  obtainedAt: string;
+}
+
 export const getCosmetics = () => GET<Cosmetic[]>("/store/cosmetics");
 export const getMerch = () => GET<Merch[]>("/store/merch");
-export const getInventory = () =>
-  GET<{
-    cosmetics: {
-      cosmeticId: string;
-      name: string;
-      type: string;
-      rarity: string;
-      obtainedAt: string;
-    }[];
-  }>("/store/me/inventory");
+export const getInventory = () => GET<{ cosmetics: InventoryCosmetic[] }>("/store/me/inventory");
 export const buyCosmetic = (cosmeticId: string) =>
   POST<{ success: true; newBalance: number }>(`/store/cosmetics/${cosmeticId}/buy`);
+export const equipCosmetic = (cosmeticId: string) =>
+  POST<{ success: true; equipped: boolean }>(`/store/cosmetics/${cosmeticId}/equip`);
+export const unequipCosmetic = (cosmeticId: string) =>
+  POST<{ success: true; equipped: boolean }>(`/store/cosmetics/${cosmeticId}/unequip`);
 export const orderMerch = (merchId: string, body: MerchOrderBody) =>
   POST<{ orderId: string; status: string; pointsSpent: number; newBalance: number }>(
     `/store/merch/${merchId}/order`,
