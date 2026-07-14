@@ -917,6 +917,22 @@ export const getGameLeaderboard = (gameId: string) =>
     entries: { rank: number; userId: string; username: string; score: number; playedAt: string }[];
   }>(`/games/${gameId}/leaderboard`);
 
+/** One ranked row on the member leaderboard (SSU17). */
+export interface LeaderboardEntry {
+  userId: string;
+  username: string;
+  displayName: string | null;
+  avatarUrl: string | null;
+  points: number;
+  badgeCount: number;
+  hackathonCount: number;
+}
+export type LeaderboardPeriod = "all" | "month" | "week";
+export const getLeaderboard = (period: LeaderboardPeriod, hackathonId?: string) =>
+  GET<LeaderboardEntry[]>(
+    `/leaderboard?period=${period}${hackathonId ? `&hackathonId=${encodeURIComponent(hackathonId)}` : ""}`,
+  );
+
 // Store (commerce)
 export interface Cosmetic {
   cosmeticId: string;
