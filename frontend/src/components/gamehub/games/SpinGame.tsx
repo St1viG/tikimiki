@@ -291,6 +291,7 @@ export function SpinGame({ open, onClose, onComplete }: GameModalProps) {
       onComplete?.({
         kind: "reward",
         display: prize.type === "miss" ? "Promašaj" : prize.label,
+        raw: prize.type === "xp" ? Number(prize.label.match(/\d+/)?.[0] ?? 0) : 0,
       });
     }
   }
