@@ -29,6 +29,7 @@ const M = {
   gamehub: { en: "GameHub", sr: "GameHub" },
   settings: { en: "Settings", sr: "Podešavanja" },
   premium: { en: "Premium", sr: "Premium" },
+  adminPanel: { en: "Admin panel", sr: "Admin panel" },
   unread: { en: "unread", sr: "nepročitanih" },
   newItems: { en: "new items", sr: "nove stavke" },
   accountMenu: { en: "Account menu", sr: "Meni naloga" },
@@ -191,6 +192,17 @@ export function RailLeft() {
         >
           <Icon name="premium" /> {t("premium")}
         </Link>
+
+        {/* Admin-only entry to the admin panel, just above the account chip. */}
+        {user?.roles.isAdmin && (
+          <Link
+            className="nav-link"
+            href="/admin"
+            aria-current={isActive(pathname, "/admin") ? "page" : undefined}
+          >
+            <Icon name="shield" /> {t("adminPanel")}
+          </Link>
+        )}
 
         {user ? (
           <div className="pm-menu-wrap" ref={menuWrapRef}>
