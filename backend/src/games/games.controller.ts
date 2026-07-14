@@ -27,7 +27,7 @@ export class GamesController {
     @Param("gameId", new ParseUUIDPipe()) gameId: string,
     @Body(new ZodValidationPipe(createPlaySchema)) body: CreatePlayInput,
   ) {
-    return this.games.recordPlay(userId, gameId, body.score);
+    return this.games.recordPlay(userId, gameId, body.score, body.perfect ?? false);
   }
 
   @Get(":gameId/leaderboard")

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Icon } from "@/components/Icon";
 import { OrbArt } from "@/components/ui/OrbArt";
 import { PremiumBadge } from "@/components/ui/PremiumBadge";
-import { useT } from "@/components/i18n/LanguageProvider";
+import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
 import { useAuth } from "@/components/auth/AuthProvider";
 import {
   getFollowers,
@@ -52,7 +52,28 @@ const M = {
   earnedBadges: { en: "Earned badges", sr: "Zarađeni bedževi" },
   noBadges: { en: "No badges earned yet.", sr: "Još nema zarađenih bedževa." },
   noSkills: { en: "No skills listed.", sr: "Nema navedenih veština." },
+  badgeHowTo: { en: "How to earn it", sr: "Kako se dobija" },
+  badgeAwarded: { en: "Earned", sr: "Osvojen" },
+  badgeDetails: { en: "Badge details", sr: "Detalji bedža" },
 } as const;
+
+/**
+ * Translations for known badges, keyed by their DB `name`. The DB stores a
+ * single description (English fallback for badges seeded before i18n / the
+ * Serbian legacy seeds); anything not listed here falls back to that value.
+ */
+const BADGE_I18N: Record<string, { en: string; sr: string }> = {
+  Flawless4: {
+    en: "Complete the Groups daily game without a single mistake.",
+    sr: "Pređi dnevnu igru Grupe bez ijedne greške.",
+  },
+  "Prvi hakaton": {
+    en: "Participated in a first hackathon.",
+    sr: "Učestvovao na prvom hakatonu.",
+  },
+  "Timski igrač": { en: "Formed a team.", sr: "Formirao tim." },
+  Pobednik: { en: "Won a hackathon prize.", sr: "Osvojio nagradu." },
+};
 
 type PpTab = "overview" | "badges";
 
@@ -83,8 +104,54 @@ function joinedLabel(iso: string): string {
   return `${MONTHS_SR[d.getMonth()]} ${d.getFullYear()}.`;
 }
 
+const MONTHS_EN = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+/** Locale-aware full date, e.g. "14. jula 2026." / "July 14, 2026". */
+function awardedLabel(iso: string, locale: "en" | "sr"): string {
+  const d = new Date(iso);
+  if (locale === "sr") return `${d.getDate()}. ${MONTHS_SR[d.getMonth()]} ${d.getFullYear()}.`;
+  return `${MONTHS_EN[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+}
+
+type ProfileBadge = PublicProfile["badges"][number];
+
+/** How a badge is earned, in the viewer's language (DB description as fallback). */
+function badgeDescription(b: ProfileBadge, locale: "en" | "sr"): string {
+  return BADGE_I18N[b.name]?.[locale] ?? b.description;
+}
+
+/** Circular badge art: the badge's SVG icon, falling back to a trophy glyph. */
+function BadgeArt({ iconUrl, name }: { iconUrl: string; name: string }) {
+  const [failed, setFailed] = useState(false);
+  if (!iconUrl || failed) {
+    return (
+      <span className="pp-badge-fallback" aria-hidden="true">
+        <Icon name="trophy" />
+      </span>
+    );
+  }
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={iconUrl} alt={name} onError={() => setFailed(true)} />
+  );
+}
+
 export function ProfilePopup({ open, onClose, username }: ProfilePopupProps) {
   const t = useT(M);
+  const { locale } = useLanguage();
   const { user } = useAuth();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<PpTab>("overview");
@@ -100,6 +167,8 @@ export function ProfilePopup({ open, onClose, username }: ProfilePopupProps) {
   // Followers/following sub-view (null = show normal tabs).
   const [listMode, setListMode] = useState<"followers" | "following" | null>(null);
   const [listUsers, setListUsers] = useState<SocialUser[] | null>(null);
+  // Badge whose details (how to earn + award date) are open in the badges tab.
+  const [selectedBadge, setSelectedBadge] = useState<ProfileBadge | null>(null);
 
   const onToggleFollow = async () => {
     if (!profile || followBusy) return;
@@ -141,6 +210,7 @@ export function ProfilePopup({ open, onClose, username }: ProfilePopupProps) {
     setProfile(null);
     setListMode(null);
     setListUsers(null);
+    setSelectedBadge(null);
     getPublicProfile(username)
       .then((p) => {
         if (!cancelled) {
@@ -361,7 +431,10 @@ export function ProfilePopup({ open, onClose, username }: ProfilePopupProps) {
                   className={`pp-tab${activeTab === "badges" ? " active" : ""}`}
                   role="tab"
                   aria-selected={activeTab === "badges"}
-                  onClick={() => setActiveTab("badges")}
+                  onClick={() => {
+                    setActiveTab("badges");
+                    setSelectedBadge(null);
+                  }}
                 >
                   {t("tabBadges")}
                 </button>
@@ -417,19 +490,61 @@ export function ProfilePopup({ open, onClose, username }: ProfilePopupProps) {
                   className={`pp-panel${activeTab === "badges" ? " active" : ""}`}
                   id="tab-badges"
                 >
-                  <div className="pp-section-label">{t("earnedBadges")}</div>
-                  {profile.badges.length === 0 ? (
-                    <div className="pp-empty">
-                      <Icon name="shield" /> {t("noBadges")}
+                  {selectedBadge ? (
+                    /* Badge details: how to earn it + when this user earned it. */
+                    <div className="pp-badge-detail" aria-label={t("badgeDetails")}>
+                      <button
+                        className="pp-tab active"
+                        type="button"
+                        onClick={() => setSelectedBadge(null)}
+                        style={{ marginBottom: 10 }}
+                      >
+                        ← {t("back")}
+                      </button>
+                      <div className="pp-badge-detail-head">
+                        <span className="pp-badge-circle pp-badge-circle-lg">
+                          <BadgeArt iconUrl={selectedBadge.iconUrl} name={selectedBadge.name} />
+                        </span>
+                        <div>
+                          <div className="pp-badge-detail-name">{selectedBadge.name}</div>
+                          <div className="pp-badge-detail-cat">{selectedBadge.category}</div>
+                        </div>
+                      </div>
+                      <div className="pp-section-label">{t("badgeHowTo")}</div>
+                      <p className="pp-badge-detail-desc">
+                        {badgeDescription(selectedBadge, locale)}
+                      </p>
+                      <div className="pp-badge-detail-awarded">
+                        <Icon name="calendar" /> {t("badgeAwarded")}:{" "}
+                        {awardedLabel(selectedBadge.awardedAt, locale)}
+                      </div>
                     </div>
                   ) : (
-                    <div className="pp-skills">
-                      {profile.badges.map((b) => (
-                        <span className="tag tag-v" key={b.badgeId} title={b.category}>
-                          <Icon name="trophy" /> {b.name}
-                        </span>
-                      ))}
-                    </div>
+                    <>
+                      <div className="pp-section-label">{t("earnedBadges")}</div>
+                      {profile.badges.length === 0 ? (
+                        <div className="pp-empty">
+                          <Icon name="shield" /> {t("noBadges")}
+                        </div>
+                      ) : (
+                        <div className="pp-badges-grid">
+                          {profile.badges.map((b) => (
+                            <button
+                              className="pp-badge-item"
+                              type="button"
+                              key={b.badgeId}
+                              title={b.name}
+                              onClick={() => setSelectedBadge(b)}
+                            >
+                              <span className="pp-badge-circle">
+                                <BadgeArt iconUrl={b.iconUrl} name={b.name} />
+                              </span>
+                              <span className="pp-badge-name">{b.name}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               </div>

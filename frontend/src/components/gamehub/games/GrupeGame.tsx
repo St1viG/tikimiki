@@ -198,15 +198,18 @@ export function GrupeGame({ open, onClose, onComplete }: GameModalProps) {
     completedRef.current = false;
   }, [open, seed]);
 
-  /* Finish: fire onComplete exactly once, then flip to the result screen */
+  /* Finish: fire onComplete exactly once, then flip to the result screen.
+     `perfect` marks a flawless win (all 4 groups, zero mistakes) — the backend
+     awards the "Grupe bez greške" badge for it. */
   const finish = useCallback(
-    (solved: number) => {
+    (solved: number, perfect = false) => {
       if (!completedRef.current) {
         completedRef.current = true;
         const result: GameResult = {
           kind: "score",
           display: `${solved}/4`,
           raw: solved,
+          perfect,
         };
         onComplete?.(result);
       }
@@ -251,7 +254,7 @@ export function GrupeGame({ open, onClose, onComplete }: GameModalProps) {
       setHint(null);
       if (nextSolved.length === 4) {
         setPhase("won");
-        finish(4);
+        finish(4, mistakes === 0);
       }
     } else {
       // Wrong group: shake, spend a life, "one away" if 3/4 belong together.

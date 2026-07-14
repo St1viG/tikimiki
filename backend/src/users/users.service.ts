@@ -59,8 +59,12 @@ export interface MyProfileDto {
 export interface PublicBadgeDto {
   badgeId: string;
   name: string;
+  /** How the badge is earned (English fallback; the client may translate known names). */
+  description: string;
   iconUrl: string;
   category: string;
+  /** When this user earned the badge (ISO). */
+  awardedAt: string;
 }
 
 export interface PublicProfileDto {
@@ -400,8 +404,10 @@ export class UsersService {
           .select({
             badgeId: badges.badgeId,
             name: badges.name,
+            description: badges.description,
             iconUrl: badges.iconUrl,
             category: badges.category,
+            awardedAt: userBadges.awardedAt,
           })
           .from(userBadges)
           .innerJoin(badges, eq(userBadges.badgeId, badges.badgeId))
@@ -433,8 +439,10 @@ export class UsersService {
       badges: badgeRows.map((b) => ({
         badgeId: b.badgeId,
         name: b.name,
+        description: b.description,
         iconUrl: b.iconUrl,
         category: b.category,
+        awardedAt: b.awardedAt.toISOString(),
       })),
       followerCount: followerRow[0] ? Number(followerRow[0].value) : 0,
       followingCount: followingRow[0] ? Number(followingRow[0].value) : 0,

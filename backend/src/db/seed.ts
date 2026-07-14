@@ -532,6 +532,15 @@ async function main() {
         category: "achievement",
         iconUrl: "/badges/winner.svg",
       },
+      {
+        // Awarded automatically by GamesService.recordPlay (matched by name).
+        // Language-neutral name; the description is the English fallback (the
+        // frontend translates known badges via its own i18n map).
+        name: "Flawless4",
+        description: "Complete the Groups daily game without a single mistake.",
+        category: "achievement",
+        iconUrl: "/badges/flawless4.svg",
+      },
     ])
     .returning();
   await db.insert(schema.userBadges).values([

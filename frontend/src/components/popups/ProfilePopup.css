@@ -526,3 +526,95 @@
     font-size: 24px;
   }
 }
+
+/* Badges tab: circular badge grid + per-badge detail view */
+.pp-badges-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.pp-badge-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  width: 84px;
+  padding: 8px 4px;
+  background: none;
+  border: 0;
+  border-radius: 12px;
+  cursor: pointer;
+  color: inherit;
+  transition: background 0.15s ease;
+}
+.pp-badge-item:hover {
+  background: color-mix(in srgb, var(--violet-light) 10%, transparent);
+}
+.pp-badge-circle {
+  width: 56px;
+  height: 56px;
+  flex: none;
+  border-radius: 50%;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--violet-light) 22%, transparent);
+}
+.pp-badge-circle img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.pp-badge-circle-lg {
+  width: 72px;
+  height: 72px;
+}
+.pp-badge-fallback {
+  display: grid;
+  place-items: center;
+  color: var(--violet-light);
+}
+.pp-badge-name {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: center;
+  max-width: 100%;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.pp-badge-detail-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.pp-badge-detail-name {
+  font-weight: 800;
+  font-size: 16px;
+}
+.pp-badge-detail-cat {
+  font-size: 11.5px;
+  color: var(--muted);
+  text-transform: capitalize;
+  margin-top: 2px;
+}
+.pp-badge-detail-desc {
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 4px 0 14px;
+}
+.pp-badge-detail-awarded {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12.5px;
+  color: var(--muted);
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+}

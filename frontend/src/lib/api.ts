@@ -583,7 +583,16 @@ export interface PublicProfile {
   skills: string[];
   /** Subset of `skills` GitHub-verified via `POST /users/me/github/sync`. */
   verifiedSkillNames: string[];
-  badges: { badgeId: string; name: string; iconUrl: string; category: string }[];
+  badges: {
+    badgeId: string;
+    name: string;
+    /** How the badge is earned (English fallback; known names are translated client-side). */
+    description: string;
+    iconUrl: string;
+    category: string;
+    /** When this user earned the badge (ISO). */
+    awardedAt: string;
+  }[];
   followerCount: number;
   followingCount: number;
   isFollowing: boolean;
@@ -890,8 +899,8 @@ export interface PlayResult {
 
 export const getGames = () => GET<Game[]>("/games");
 export const getGamesToday = () => GET<GameTodayState[]>("/games/me/today");
-export const recordGamePlay = (gameId: string, score: number, points?: number) =>
-  POST<PlayResult>(`/games/${gameId}/plays`, { score, points });
+export const recordGamePlay = (gameId: string, score: number, points?: number, perfect?: boolean) =>
+  POST<PlayResult>(`/games/${gameId}/plays`, { score, points, perfect });
 export const getGameLeaderboard = (gameId: string) =>
   GET<{
     entries: { rank: number; userId: string; username: string; score: number; playedAt: string }[];

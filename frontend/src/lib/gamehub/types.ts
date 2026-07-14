@@ -33,6 +33,8 @@ export interface GameResult {
   kind: ResultKind;
   display: string;
   raw?: number;
+  /** True when the run was flawless (e.g. Grupe solved with zero mistakes) — drives achievement badges. */
+  perfect?: boolean;
 }
 
 /** A friend's play of a given game today. `playedAt` is relative, e.g. "pre 2h". */

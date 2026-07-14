@@ -2,7 +2,13 @@ import { BadRequestException, Inject, Injectable, NotFoundException } from "@nes
 import { and, desc, eq, gte, sql } from "drizzle-orm";
 import { PointsService } from "../common/points.service";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
-import { games, gamePlays, members, users } from "../db/schema";
+import { badges, games, gamePlays, members, userBadges, users } from "../db/schema";
+import { NotificationsService } from "../notifications/notifications.service";
+
+/** The achievement badge for finishing Grupe with zero mistakes (seeded/migrated by name). */
+const GRUPE_PERFECT_BADGE = "Flawless4";
+const GRUPE_SLUG = "grupe";
+const GRUPE_GROUP_COUNT = 4;
 
 /** A publicly visible active game. */
 export interface GameDto {
@@ -53,6 +59,7 @@ export class GamesService {
   constructor(
     @Inject(DRIZZLE) private readonly db: DrizzleDB,
     private readonly points: PointsService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   /** UTC start-of-today, used for daily-limit comparisons. */
@@ -136,10 +143,16 @@ export class GamesService {
    * Points are computed **server-side** from the submitted `score` and the
    * game's `maxPointsPerPlay` cap — the client cannot dictate the reward.
    */
-  async recordPlay(userId: string, gameId: string, score: number): Promise<PlayResultDto> {
+  async recordPlay(
+    userId: string,
+    gameId: string,
+    score: number,
+    perfect = false,
+  ): Promise<PlayResultDto> {
     const [game] = await this.db
       .select({
         gameId: games.gameId,
+        slug: games.slug,
         name: games.name,
         isActive: games.isActive,
         baseDailyPlays: games.baseDailyPlays,
@@ -176,7 +189,7 @@ export class GamesService {
     const pointsAwarded =
       game.maxPointsPerPlay === null ? score : Math.min(score, game.maxPointsPerPlay);
 
-    return this.db.transaction(async (tx) => {
+    const { result, awardedBadgeId } = await this.db.transaction(async (tx) => {
       const [play] = await tx
         .insert(gamePlays)
         .values({ gameId, userId, score, pointsAwarded })
@@ -200,13 +213,52 @@ export class GamesService {
         newBalance = credited.newBalance;
       }
 
+      // Achievement: a flawless Grupe run (all 4 groups, zero mistakes) earns
+      // the "Grupe bez greške" badge once. `perfect` comes from the client but
+      // is gated on the game slug + a full-solve score; user_badges' PK makes
+      // the award idempotent. Badges are member-only (FK → members).
+      let badgeId: string | null = null;
+      if (member && perfect && game.slug === GRUPE_SLUG && score >= GRUPE_GROUP_COUNT) {
+        const [badge] = await tx
+          .select({ badgeId: badges.badgeId })
+          .from(badges)
+          .where(eq(badges.name, GRUPE_PERFECT_BADGE))
+          .limit(1);
+        if (badge) {
+          const inserted = await tx
+            .insert(userBadges)
+            .values({ userId, badgeId: badge.badgeId })
+            .onConflictDoNothing()
+            .returning({ badgeId: userBadges.badgeId });
+          if (inserted.length > 0) badgeId = badge.badgeId;
+        }
+      }
+
       return {
-        playId: play.playId,
-        score: play.score,
-        pointsAwarded: play.pointsAwarded,
-        newBalance,
+        result: {
+          playId: play.playId,
+          score: play.score,
+          pointsAwarded: play.pointsAwarded,
+          newBalance,
+        },
+        awardedBadgeId: badgeId,
       };
     });
+
+    // Notify outside the transaction so a rollback can't leave a stray
+    // notification (create() writes through its own connection + socket push).
+    if (awardedBadgeId) {
+      await this.notifications.create({
+        userId,
+        type: "badge_awarded",
+        title: `Osvojen bedž: ${GRUPE_PERFECT_BADGE}`,
+        body: "Rešio/la si sve četiri grupe bez ijedne greške!",
+        entityType: "badge",
+        entityId: awardedBadgeId,
+      });
+    }
+
+    return result;
   }
 
   /** PUBLIC: top 10 plays today for a game, by score desc. */

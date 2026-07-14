@@ -172,7 +172,7 @@ export function GamehubClient() {
     const metric = result.raw ?? 0;
     const points = computePoints(result, game);
     api
-      .recordGamePlay(game.gameId, metric, points)
+      .recordGamePlay(game.gameId, metric, points, result.perfect ?? false)
       .then(() => refreshToday())
       .catch((err) => {
         console.error("Failed to record game play", err);
