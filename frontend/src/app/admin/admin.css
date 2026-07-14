@@ -678,7 +678,7 @@
   border-radius: var(--r);
   background: var(--surface);
   border: 1px solid var(--line);
-  overflow: hidden;
+  overflow-x: auto;
 }
 .adm-table {
   width: 100%;
@@ -731,16 +731,19 @@
   font-size: 13.5px;
   font-weight: 600;
   color: var(--ink);
+  white-space: nowrap;
 }
 .adm-user-handle {
   font-family: var(--mono);
   font-size: 11.5px;
   color: var(--muted);
   letter-spacing: -0.01em;
+  white-space: nowrap;
 }
 .adm-email {
   color: var(--ink-2);
   font-size: 13px;
+  white-space: nowrap;
 }
 .adm-reports-count {
   font-family: var(--mono);
@@ -1203,9 +1206,6 @@
 @media (max-width: 560px) {
   .adm-stats {
     grid-template-columns: 1fr;
-  }
-  .adm-table-wrap {
-    overflow-x: auto;
   }
   .adm-table {
     min-width: 560px;
