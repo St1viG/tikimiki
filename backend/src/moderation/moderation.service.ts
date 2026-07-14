@@ -44,6 +44,15 @@ const PERMISSION_CATALOG: { name: string; description: string }[] = [
   { name: "kick_members", description: "Remove members from the server" },
 ];
 
+/**
+ * Canonical per-server "Moderator" role, provisioned lazily on first assign.
+ * Carries exactly the permission the scoped report surfaces key off
+ * (`manage_messages` — see ReportsService.list/resolve), so an organizer can
+ * hand off report handling in one step instead of hand-building a role.
+ */
+const MODERATOR_ROLE_NAME = "Moderator";
+const MODERATOR_ROLE_PERMISSIONS = ["manage_messages"];
+
 @Injectable()
 export class ModerationService implements OnModuleInit {
   constructor(
@@ -299,6 +308,109 @@ export class ModerationService implements OnModuleInit {
       userId: targetUserId,
     });
     return { success: true };
+  }
+
+  /* ── Moderators (canonical "Moderator" role) ────────────── */
+
+  /**
+   * One-step moderator hand-off: assign the canonical "Moderator" role to a
+   * member, provisioning the role (with `manage_messages`) on first use.
+   * Gated on `manage_roles`, which the organizer and admins hold implicitly —
+   * same gate as the generic role-membership endpoints this shortcuts.
+   */
+  async assignModerator(
+    serverId: string,
+    actorId: string,
+    targetUserId: string,
+  ): Promise<{ success: true }> {
+    await this.authz.assertServerPermission(serverId, actorId, "manage_roles");
+    await this.assertServerExists(serverId);
+
+    const [member] = await this.db
+      .select({ userId: members.userId })
+      .from(members)
+      .where(eq(members.userId, targetUserId))
+      .limit(1);
+    if (!member) {
+      throw new BadRequestException("Target user is not a member account");
+    }
+
+    const roleId = await this.ensureModeratorRole(serverId);
+    await this.db
+      .insert(userRoles)
+      .values({ serverRoleId: roleId, userId: targetUserId, assignedBy: actorId })
+      .onConflictDoNothing();
+
+    this.realtime.emitServerEvent(serverId, "rolesChanged", {
+      serverId,
+      roleId,
+      userId: targetUserId,
+    });
+    return { success: true };
+  }
+
+  /** Take the canonical "Moderator" role away from a member (idempotent). */
+  async removeModerator(
+    serverId: string,
+    actorId: string,
+    targetUserId: string,
+  ): Promise<{ success: true }> {
+    await this.authz.assertServerPermission(serverId, actorId, "manage_roles");
+    await this.assertServerExists(serverId);
+
+    const roleId = await this.findModeratorRole(serverId);
+    // No Moderator role on the server ⇒ the target already isn't one; the
+    // removal is a no-op success, mirroring the DELETE-membership semantics.
+    if (roleId) {
+      await this.db
+        .delete(userRoles)
+        .where(and(eq(userRoles.serverRoleId, roleId), eq(userRoles.userId, targetUserId)));
+      this.realtime.emitServerEvent(serverId, "rolesChanged", {
+        serverId,
+        roleId,
+        userId: targetUserId,
+      });
+    }
+    return { success: true };
+  }
+
+  private async findModeratorRole(serverId: string): Promise<string | null> {
+    const [role] = await this.db
+      .select({ serverRoleId: serverRoles.serverRoleId })
+      .from(serverRoles)
+      .where(and(eq(serverRoles.serverId, serverId), eq(serverRoles.name, MODERATOR_ROLE_NAME)))
+      .limit(1);
+    return role?.serverRoleId ?? null;
+  }
+
+  /**
+   * Find-or-create the canonical Moderator role, then idempotently guarantee
+   * it carries MODERATOR_ROLE_PERMISSIONS — covering both a fresh role and a
+   * hand-made "Moderator" that was stripped of the permission. Survives a
+   * concurrent create via the (server_id, name) unique index.
+   */
+  private async ensureModeratorRole(serverId: string): Promise<string> {
+    let roleId = await this.findModeratorRole(serverId);
+    if (!roleId) {
+      try {
+        const [role] = await this.db
+          .insert(serverRoles)
+          .values({ serverId, name: MODERATOR_ROLE_NAME })
+          .returning({ serverRoleId: serverRoles.serverRoleId });
+        roleId = role.serverRoleId;
+      } catch (err) {
+        if (!isUniqueViolation(err)) throw err;
+        roleId = await this.findModeratorRole(serverId);
+        if (!roleId) throw err;
+      }
+    }
+
+    const permIds = await this.resolvePermissionIds(MODERATOR_ROLE_PERMISSIONS);
+    await this.db
+      .insert(serverRolePermissions)
+      .values(permIds.map((permissionId) => ({ serverRoleId: roleId!, permissionId })))
+      .onConflictDoNothing();
+    return roleId;
   }
 
   /** Remove ALL of a user's role memberships on the server (full kick). */

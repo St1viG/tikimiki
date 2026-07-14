@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Icon } from "@/components/Icon";
 import { AppShell } from "@/components/shell/AppShell";
 import { GenerativeAvatar } from "@/components/ui/GenerativeAvatar";
@@ -23,6 +24,7 @@ import {
   resolveReport,
   getAdminUsers,
   getAdminOrganizations,
+  getAdminModerationServers,
   verifyOrganization,
   rejectOrganization,
   banUser,
@@ -34,6 +36,7 @@ import {
   type Report,
   type AdminUser,
   type AdminOrg,
+  type ModerationServer,
 } from "@/lib/api";
 
 /* AdminClient — interactive admin panel ("/admin"). */
@@ -64,6 +67,16 @@ const M = {
   chartHint: { en: "logged-in users", sr: "prijavljeni korisnici" },
   chartReports: { en: "Reports by category (30 days)", sr: "Prijave po kategoriji (30 dana)" },
   chartHealth: { en: "System health", sr: "Zdravlje sistema" },
+  modServersTitle: { en: "Moderator pages", sr: "Moderator stranice" },
+  modServersSub: {
+    en: "One per hackathon's Cohor server — organizers and assigned server Moderators can also open these.",
+    sr: "Po jedna za svaki Cohor server hakatona — organizatori i dodeljeni Moderatori servera takođe mogu da ih otvore.",
+  },
+  modServersEmpty: {
+    en: "No hackathons with a Cohor server yet.",
+    sr: "Još nema hakatona sa Cohor serverom.",
+  },
+  modServersOpen: { en: "Open", sr: "Otvori" },
   filterReportsLabel: { en: "Search reports", sr: "Pretraži prijave" },
   filterReportsPh: {
     en: "Search reports by user or content...",
@@ -255,6 +268,18 @@ const M = {
 
 type TabFilter = "pregled" | "prijave" | "korisnici" | "organizacije" | "audit" | "zalbe";
 
+const TAB_FILTERS: readonly TabFilter[] = [
+  "pregled",
+  "prijave",
+  "korisnici",
+  "organizacije",
+  "audit",
+  "zalbe",
+];
+function isTabFilter(v: string | null): v is TabFilter {
+  return v !== null && (TAB_FILTERS as readonly string[]).includes(v);
+}
+
 type ModalId = "modal-remove" | "modal-suspend" | "modal-reject" | "modal-revoke";
 
 type ToastType = "green" | "red";
@@ -269,7 +294,9 @@ export function AdminClient() {
   useRequireRole("admin");
   const t = useT(M);
   const { locale } = useLanguage();
-  const [filter, setFilter] = useState<TabFilter>("pregled");
+  const searchParams = useSearchParams();
+  const urlTab = searchParams.get("tab");
+  const [filter, setFilter] = useState<TabFilter>(isTabFilter(urlTab) ? urlTab : "pregled");
   const [activeModal, setActiveModal] = useState<ModalId | null>(null);
   // Reason text + confirm handler for the reason-driven action modals
   // (remove report / reject org / revoke verification).
@@ -298,6 +325,7 @@ export function AdminClient() {
     resolvedToday: 0,
     total: 0,
   });
+  const [moderationServers, setModerationServers] = useState<ModerationServer[]>([]);
   const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
   const [userSearch, setUserSearch] = useState("");
   const [userRoleFilter, setUserRoleFilter] = useState<"all" | AdminUser["role"]>("all");
@@ -382,6 +410,14 @@ export function AdminClient() {
     }
   }, []);
 
+  const loadModerationServers = useCallback(async () => {
+    try {
+      setModerationServers(await getAdminModerationServers());
+    } catch {
+      setModerationServers([]);
+    }
+  }, []);
+
   const loadUsers = useCallback(async (search?: string) => {
     try {
       const list = await getAdminUsers(search?.trim() ? search.trim() : undefined);
@@ -413,12 +449,13 @@ export function AdminClient() {
     void loadAudit();
     void loadAppeals();
     void loadReports();
+    void loadModerationServers();
     void loadUsers();
     void loadOrgs();
     return () => {
       active = false;
     };
-  }, [loadAudit, loadAppeals, loadReports, loadUsers, loadOrgs]);
+  }, [loadAudit, loadAppeals, loadReports, loadModerationServers, loadUsers, loadOrgs]);
 
   const switchTab = (name: TabFilter) => {
     setFilter(name);
@@ -958,6 +995,47 @@ export function AdminClient() {
 
         {/* Prijave sadržaja */}
         <section className="adm-section" data-section="prijave" aria-label={t("tabReports")}>
+          <div className="adm-subsection-title">
+            {t("modServersTitle")}
+            <div className="adm-subsection-sub">{t("modServersSub")}</div>
+          </div>
+
+          {moderationServers.length === 0 ? (
+            <div className="adm-org-row">
+              <div className="adm-org-info">
+                <div className="adm-org-sub" style={{ color: "var(--muted)" }}>
+                  {t("modServersEmpty")}
+                </div>
+              </div>
+            </div>
+          ) : (
+            moderationServers.map((m) => (
+              <div className="adm-org-row" key={m.serverId}>
+                <div className="adm-org-av" aria-hidden="true">
+                  {orgInitials(m.hackathonTitle)}
+                </div>
+                <div className="adm-org-info">
+                  <div className="adm-org-name">
+                    {m.hackathonTitle}
+                    {m.openReportCount > 0 && (
+                      <span className="hk-tab-count">{m.openReportCount}</span>
+                    )}
+                  </div>
+                  <div className="adm-org-sub">{m.organizationName}</div>
+                </div>
+                <div className="adm-org-actions">
+                  <Link className="adm-btn-xs" href={`/moderator?server=${m.serverId}`}>
+                    {t("modServersOpen")}
+                  </Link>
+                </div>
+              </div>
+            ))
+          )}
+
+          <div className="adm-subsection-title" style={{ marginTop: "18px" }}>
+            {t("tabReports")}
+          </div>
+
           <div className="hk-filter-bar">
             <div className="hk-search">
               <Icon name="search" />

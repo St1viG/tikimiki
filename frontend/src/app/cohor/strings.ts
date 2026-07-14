@@ -766,4 +766,8 @@ export const M = {
   srvKicked: { en: "Member removed", sr: "Član uklonjen" },
   srvKickFailed: { en: "Could not kick member", sr: "Izbacivanje nije uspelo" },
   srvModeratorBadge: { en: "mod", sr: "mod" },
+  srvMakeMod: { en: "Make moderator", sr: "Postavi za moderatora" },
+  srvRemoveMod: { en: "Remove moderator", sr: "Ukloni moderatora" },
+  srvModAssigned: { en: "Moderator role assigned", sr: "Moderatorska rola dodeljena" },
+  srvModRemoved: { en: "Moderator role removed", sr: "Moderatorska rola uklonjena" },
 } as const;

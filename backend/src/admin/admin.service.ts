@@ -12,6 +12,7 @@ import {
   organizations,
   posts,
   reports,
+  servers,
   teams,
   userBans,
   users,
@@ -48,6 +49,15 @@ export interface UserRowDto {
   role: AdminUserRole;
   banned: boolean;
   createdAt: string;
+}
+
+/** One row in the admin panel's directory of per-hackathon moderator pages. */
+export interface ModerationServerDto {
+  hackathonId: string;
+  hackathonTitle: string;
+  serverId: string;
+  organizationName: string;
+  openReportCount: number;
 }
 
 export interface OrgDto {
@@ -288,6 +298,44 @@ export class AdminService {
       banned: r.banned,
       createdAt: r.createdAt.toISOString(),
     }));
+  }
+
+  /**
+   * Every hackathon's Cohor server, for the admin panel's "moderator pages"
+   * directory (each row deep-links to /moderator?server=<serverId>).
+   */
+  async listModerationServers(callerId: string): Promise<ModerationServerDto[]> {
+    await this.authz.assertAdmin(callerId);
+
+    // Aliased for the same reason as listUsers above: the correlated count
+    // subquery has its own channel_groups.server_id column, so the outer
+    // reference must be qualified as "srv"."server_id" (written literally
+    // below, not interpolated) or Postgres resolves it against the subquery.
+    const srv = alias(servers, "srv");
+
+    const rows = await this.db
+      .select({
+        hackathonId: hackathons.hackathonId,
+        hackathonTitle: hackathons.title,
+        serverId: srv.serverId,
+        organizationName: organizations.name,
+        openReportCount: sql<number>`(
+          select count(*)::int
+          from reports r
+          inner join channel_messages cm on cm.message_id = r.target_id
+          inner join channels c on c.channel_id = cm.channel_id
+          inner join channel_groups cg on cg.group_id = c.group_id
+          where r.target_type = 'message'
+            and cg.server_id = srv.server_id
+            and r.status = 'pending'
+        )`,
+      })
+      .from(srv)
+      .innerJoin(hackathons, eq(hackathons.hackathonId, srv.hackathonId))
+      .innerJoin(organizations, eq(organizations.userId, hackathons.organizationId))
+      .orderBy(hackathons.title);
+
+    return rows;
   }
 
   /** Select one organization joined with its owning account, as an OrgDto. */

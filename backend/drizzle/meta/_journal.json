@@ -169,6 +169,13 @@
       "when": 1784026583362,
       "tag": "0023_flawless4_badge_rename",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1784030589968,
+      "tag": "0024_sharp_blink",
+      "breakpoints": true
     }
   ]
 }

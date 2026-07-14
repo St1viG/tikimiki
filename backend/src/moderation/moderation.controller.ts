@@ -103,6 +103,27 @@ export class ModerationController {
     return this.moderation.removeRoleMember(serverId, roleId, userId, targetUserId);
   }
 
+  /* ── Moderators (canonical "Moderator" role) ────────────── */
+
+  @Post("servers/:serverId/moderators")
+  assignModerator(
+    @CurrentUser() userId: string,
+    @Param("serverId", new ParseUUIDPipe()) serverId: string,
+    @Body(new ZodValidationPipe(assignRoleMemberSchema))
+    body: AssignRoleMemberInput,
+  ) {
+    return this.moderation.assignModerator(serverId, userId, body.userId);
+  }
+
+  @Delete("servers/:serverId/moderators/:userId")
+  removeModerator(
+    @CurrentUser() userId: string,
+    @Param("serverId", new ParseUUIDPipe()) serverId: string,
+    @Param("userId", new ParseUUIDPipe()) targetUserId: string,
+  ) {
+    return this.moderation.removeModerator(serverId, userId, targetUserId);
+  }
+
   /* ── Kick ───────────────────────────────────────────────── */
 
   @Delete("servers/:serverId/members/:userId")

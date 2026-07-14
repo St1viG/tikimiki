@@ -39,6 +39,11 @@ export class AdminController {
     return this.svc.listOrganizations(userId);
   }
 
+  @Get("moderation-servers")
+  listModerationServers(@CurrentUser() userId: string) {
+    return this.svc.listModerationServers(userId);
+  }
+
   @Post("organizations/:userId/verify")
   verifyOrganization(@CurrentUser() callerId: string, @Param("userId") targetUserId: string) {
     return this.svc.verifyOrganization(callerId, targetUserId);

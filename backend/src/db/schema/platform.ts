@@ -37,7 +37,10 @@ export const reports = pgTable(
     category: reportCategory("category").notNull().default("other"),
     reason: text("reason"),
     status: reportStatus("status").notNull().default("pending"),
-    reviewedBy: uuid("reviewed_by").references(() => administrators.userId, {
+    // References users (not administrators): message reports can now also be
+    // resolved by a hackathon organizer or an assigned server "Moderator",
+    // not just a platform admin — see ReportsService.resolve().
+    reviewedBy: uuid("reviewed_by").references(() => users.userId, {
       onDelete: "set null",
     }),
     reviewedAt: timestamp("reviewed_at", tz),

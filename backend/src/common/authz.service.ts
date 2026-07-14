@@ -4,6 +4,7 @@ import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import {
   administrators,
   channelGroups,
+  channelMessages,
   channels,
   hackathons,
   permissions,
@@ -163,5 +164,20 @@ export class AuthzService {
       .limit(1);
     if (!row) throw new NotFoundException("Channel not found");
     return row.serverId;
+  }
+
+  /**
+   * The Cohor server a channel message belongs to, or null for a direct
+   * message (DMs aren't tied to any server).
+   */
+  async serverIdForMessage(messageId: string): Promise<string | null> {
+    const [row] = await this.db
+      .select({ serverId: channelGroups.serverId })
+      .from(channelMessages)
+      .innerJoin(channels, eq(channels.channelId, channelMessages.channelId))
+      .innerJoin(channelGroups, eq(channelGroups.groupId, channels.groupId))
+      .where(eq(channelMessages.messageId, messageId))
+      .limit(1);
+    return row?.serverId ?? null;
   }
 }

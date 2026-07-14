@@ -2,29 +2,42 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { Icon } from "@/components/Icon";
 import { ModeratorRemoveModal } from "@/components/popups/ModeratorRemoveModal";
 import { ModeratorWarnModal } from "@/components/popups/ModeratorWarnModal";
 import { GenerativeAvatar } from "@/components/ui/GenerativeAvatar";
 import { useT } from "@/components/i18n/LanguageProvider";
-import { useRequireRole } from "@/components/auth/AuthProvider";
-import { getReports, resolveReport as apiResolveReport, type Report } from "@/lib/api";
+import { useRequireAuth } from "@/components/auth/AuthProvider";
+import {
+  ApiError,
+  getReports,
+  getServer,
+  resolveReport as apiResolveReport,
+  type Report,
+} from "@/lib/api";
 
 /* ModeratorClient — interactive moderator panel, wired to the live reports API
  * (api.getReports / api.resolveReport). Supplies its own
  * `<main className="mod-page" id="main">`.
  *
- * There is no separate moderator role or per-hackathon moderation — this
- * panel is admin-gated and shows reports across the whole platform.
+ * Two modes, both server-enforced (this component just reflects what the API
+ * allows):
+ *  - Global (`?server` absent): every report, platform-wide — admin only.
+ *  - Scoped (`?server=<serverId>`): that Cohor server's message reports only
+ *    — its hackathon's organizer, an assigned server "Moderator", or an
+ *    admin. A caller without access gets a 403 from the API and is bounced
+ *    home, same as the old admin-only gate did for non-admins.
  */
 
 const M = {
   backLabel: { en: "Back", sr: "Nazad" },
   pageTitle: { en: "Content reports", sr: "Prijave sadržaja" },
   modeBadge: { en: "Admin", sr: "Admin" },
-  pageSub: {
-    en: "Review and process reports across the platform",
-    sr: "Pregled i obrada prijava sa cele platforme",
+  modeBadgeServer: { en: "Moderator", sr: "Moderator" },
+  accessDenied: {
+    en: "You don't have access to this server's reports.",
+    sr: "Nemaš pristup prijavama ovog servera.",
   },
   searchLabel: { en: "Search", sr: "Pretraži" },
   searchPh: { en: "Search…", sr: "Pretraži…" },
@@ -45,6 +58,7 @@ const M = {
   chipNewest: { en: "Newest", sr: "Najnovije" },
   removeMsgBtn: { en: "Remove comment", sr: "Ukloni komentar" },
   removePostBtn: { en: "Remove post", sr: "Ukloni objavu" },
+  removeMessageBtn: { en: "Remove message", sr: "Ukloni poruku" },
   resolveBtn: { en: "Resolve", sr: "Reši" },
   dismissBtn: { en: "Dismiss report", sr: "Odbaci prijavu" },
   viewProfileBtn: { en: "View profile", sr: "Pregledaj profil" },
@@ -101,8 +115,12 @@ function reasonClass(category: string): string {
 }
 
 export function ModeratorClient() {
-  const auth = useRequireRole("admin");
+  const auth = useRequireAuth();
   const t = useT(M);
+  const searchParams = useSearchParams();
+  const serverId = searchParams.get("server");
+  const [serverName, setServerName] = useState<string | null>(null);
+  const [accessDenied, setAccessDenied] = useState(false);
   const [reports, setReports] = useState<Report[]>([]);
   const [stats, setStats] = useState<{ open: number; resolvedToday: number; total: number }>({
     open: 0,
@@ -120,14 +138,27 @@ export function ModeratorClient() {
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
+    if (auth.status !== "authenticated") return;
     let active = true;
     (async () => {
       try {
-        const data = await getReports("pending");
+        const data = await getReports("pending", serverId ?? undefined);
         if (!active) return;
         setReports(data.reports);
         setStats(data.stats);
+        if (serverId) {
+          getServer(serverId)
+            .then((s) => active && setServerName(s.name))
+            .catch(() => {
+              /* header falls back to a generic label */
+            });
+        }
       } catch (err) {
+        if (!active) return;
+        if (err instanceof ApiError && err.status === 403) {
+          setAccessDenied(true);
+          return;
+        }
         console.error("Failed to load reports", err);
       } finally {
         if (active) setLoading(false);
@@ -136,7 +167,7 @@ export function ModeratorClient() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [auth.status, serverId]);
 
   const showToast = useCallback((msg: string) => {
     setToastText(msg);
@@ -200,24 +231,40 @@ export function ModeratorClient() {
   };
 
   const visibleReports = reports.filter(isVisible);
+  const modeLabel = serverId ? t("modeBadgeServer") : t("modeBadge");
+  // .page-title is globally forced to a single-line, ellipsis-truncated
+  // heading (see globals.css) — a pill badge nested inside it gets clipped
+  // instead of shown, so the server name goes into the title text itself
+  // (which the global truncation handles fine) instead of a separate badge.
+  // .page-sub is globally display:none, so scoped context can't live there.
+  const titleText = serverId && serverName ? `${t("pageTitle")} — ${serverName}` : t("pageTitle");
+
+  if (accessDenied) {
+    return (
+      <main className="mod-page" id="main">
+        <div className="page-head">
+          <Link className="col-back" href="/admin?tab=prijave" aria-label={t("backLabel")}>
+            <Icon name="arrow-left" />
+          </Link>
+          <div className="col-titles">
+            <h1 className="page-title">{t("pageTitle")}</h1>
+            <p style={{ color: "var(--muted)", fontSize: "13.5px" }}>{t("accessDenied")}</p>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <>
       <main className="mod-page" id="main" data-filter="prijave">
         {/* PAGE HEADER */}
         <div className="page-head">
-          <Link className="col-back" href="/cohor" aria-label={t("backLabel")}>
+          <Link className="col-back" href="/admin?tab=prijave" aria-label={t("backLabel")}>
             <Icon name="arrow-left" />
           </Link>
           <div className="col-titles">
-            <h1 className="page-title">
-              <Icon name="shield" />
-              {t("pageTitle")}
-              <span className="mod-mode-badge">
-                <Icon name="shield" /> {t("modeBadge")}
-              </span>
-            </h1>
-            <p className="page-sub">{t("pageSub")}</p>
+            <h1 className="page-title">{titleText}</h1>
           </div>
           <div className="search" role="search">
             <Icon name="search" />
@@ -229,7 +276,7 @@ export function ModeratorClient() {
             </span>
             <div>
               <div className="mod-admin-chip-name">{auth.user?.username ?? ""}</div>
-              <div className="mod-admin-chip-sub">{t("modeBadge")}</div>
+              <div className="mod-admin-chip-sub">{modeLabel}</div>
             </div>
           </div>
         </div>
@@ -337,7 +384,9 @@ export function ModeratorClient() {
             ) : (
               visibleReports.map((report) => {
                 const canRemoveContent =
-                  report.targetType === "post" || report.targetType === "comment";
+                  report.targetType === "post" ||
+                  report.targetType === "comment" ||
+                  report.targetType === "message";
                 return (
                   <div className="mod-report" id={report.reportId} key={report.reportId}>
                     <div className="mod-report-head">
@@ -375,7 +424,11 @@ export function ModeratorClient() {
                           onClick={() => openResolveModal(report.reportId, "remove")}
                         >
                           <Icon name="x" />{" "}
-                          {report.targetType === "post" ? t("removePostBtn") : t("removeMsgBtn")}
+                          {report.targetType === "post"
+                            ? t("removePostBtn")
+                            : report.targetType === "message"
+                              ? t("removeMessageBtn")
+                              : t("removeMsgBtn")}
                         </button>
                       )}
                       <button

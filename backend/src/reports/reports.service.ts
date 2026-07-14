@@ -8,8 +8,18 @@ import {
 import { and, count, desc, eq, gte, inArray } from "drizzle-orm";
 import { AdminService } from "../admin/admin.service";
 import { AuthzService } from "../common/authz.service";
+import { ChatService } from "../chat/chat.service";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
-import { comments, posts, reports, users } from "../db/schema";
+import {
+  channelGroups,
+  channelMessages,
+  channels,
+  comments,
+  messages,
+  posts,
+  reports,
+  users,
+} from "../db/schema";
 import { EngagementService } from "../engagement/engagement.service";
 import { NotificationsService } from "../notifications/notifications.service";
 import { PostsService } from "../posts/posts.service";
@@ -97,6 +107,7 @@ export class ReportsService {
     private readonly engagement: EngagementService,
     private readonly admin: AdminService,
     private readonly notifications: NotificationsService,
+    private readonly chat: ChatService,
   ) {}
 
   async create(reporterId: string, input: CreateReportInput): Promise<ReportDto> {
@@ -146,11 +157,22 @@ export class ReportsService {
   }
 
   async list(userId: string, query: ListReportsQuery): Promise<ListReportsResponse> {
+    const { serverId } = query;
+    if (serverId) {
+      // Per-Cohor view: the hackathon's organizer, an assigned server
+      // "Moderator", or a platform admin — never the platform-wide list.
+      await this.authz.assertServerPermission(serverId, userId, "manage_messages");
+      return this.listForServer(serverId, query.status);
+    }
     await this.authz.assertAdmin(userId);
-    const baseWhere =
-      query.status === "all"
+    return this.listPlatformWide(query.status);
+  }
+
+  private async listPlatformWide(status: ListReportsQuery["status"]): Promise<ListReportsResponse> {
+    const statusWhere =
+      status === "all"
         ? undefined
-        : query.status === "pending"
+        : status === "pending"
           ? eq(reports.status, "pending")
           : inArray(reports.status, ["resolved", "dismissed"]);
 
@@ -158,7 +180,7 @@ export class ReportsService {
       .select(reportColumns)
       .from(reports)
       .innerJoin(users, eq(reports.reporterId, users.userId))
-      .where(baseWhere)
+      .where(statusWhere)
       .orderBy(desc(reports.createdAt))
       .limit(200);
 
@@ -184,11 +206,86 @@ export class ReportsService {
 
     return {
       reports: rows.map(toReportDto),
-      stats: {
-        open: openRow.value,
-        resolvedToday: resolvedTodayRow.value,
-        total: totalRow.value,
-      },
+      stats: { open: openRow.value, resolvedToday: resolvedTodayRow.value, total: totalRow.value },
+    };
+  }
+
+  /**
+   * Message reports belonging to one Cohor server. Post/comment/user/
+   * hackathon reports have no single owning server, so this view — unlike
+   * the platform-wide one — only ever surfaces `targetType: "message"` rows.
+   */
+  private async listForServer(
+    serverId: string,
+    status: ListReportsQuery["status"],
+  ): Promise<ListReportsResponse> {
+    const statusWhere =
+      status === "all"
+        ? undefined
+        : status === "pending"
+          ? eq(reports.status, "pending")
+          : inArray(reports.status, ["resolved", "dismissed"]);
+
+    // Every query below needs the same reports→channelMessages→channels→
+    // channelGroups chain to scope to this one server; drizzle's builder
+    // doesn't let that be extracted as a shared partial, so each query joins
+    // it fresh, same as the count queries in listPlatformWide above.
+    const rows = await this.db
+      .select(reportColumns)
+      .from(reports)
+      .innerJoin(users, eq(reports.reporterId, users.userId))
+      .innerJoin(channelMessages, eq(channelMessages.messageId, reports.targetId))
+      .innerJoin(channels, eq(channels.channelId, channelMessages.channelId))
+      .innerJoin(channelGroups, eq(channelGroups.groupId, channels.groupId))
+      .where(
+        and(eq(reports.targetType, "message"), eq(channelGroups.serverId, serverId), statusWhere),
+      )
+      .orderBy(desc(reports.createdAt))
+      .limit(200);
+
+    const startOfToday = new Date();
+    startOfToday.setUTCHours(0, 0, 0, 0);
+
+    const [openRow] = await this.db
+      .select({ value: count() })
+      .from(reports)
+      .innerJoin(channelMessages, eq(channelMessages.messageId, reports.targetId))
+      .innerJoin(channels, eq(channels.channelId, channelMessages.channelId))
+      .innerJoin(channelGroups, eq(channelGroups.groupId, channels.groupId))
+      .where(
+        and(
+          eq(reports.targetType, "message"),
+          eq(channelGroups.serverId, serverId),
+          eq(reports.status, "pending"),
+        ),
+      );
+
+    const [resolvedTodayRow] = await this.db
+      .select({ value: count() })
+      .from(reports)
+      .innerJoin(channelMessages, eq(channelMessages.messageId, reports.targetId))
+      .innerJoin(channels, eq(channels.channelId, channelMessages.channelId))
+      .innerJoin(channelGroups, eq(channelGroups.groupId, channels.groupId))
+      .where(
+        and(
+          eq(reports.targetType, "message"),
+          eq(channelGroups.serverId, serverId),
+          inArray(reports.status, ["resolved", "dismissed"]),
+          gte(reports.reviewedAt, startOfToday),
+        ),
+      );
+
+    const [totalRow] = await this.db
+      .select({ value: count() })
+      .from(reports)
+      .innerJoin(channelMessages, eq(channelMessages.messageId, reports.targetId))
+      .innerJoin(channels, eq(channels.channelId, channelMessages.channelId))
+      .innerJoin(channelGroups, eq(channelGroups.groupId, channels.groupId))
+      .where(and(eq(reports.targetType, "message"), eq(channelGroups.serverId, serverId)));
+
+    return {
+      reports: rows.map(toReportDto),
+      stats: { open: openRow.value, resolvedToday: resolvedTodayRow.value, total: totalRow.value },
     };
   }
 
@@ -214,6 +311,14 @@ export class ReportsService {
         .limit(1);
       return row?.userId ?? null;
     }
+    if (targetType === "message") {
+      const [row] = await this.db
+        .select({ userId: messages.senderId })
+        .from(messages)
+        .where(eq(messages.messageId, targetId))
+        .limit(1);
+      return row?.userId ?? null;
+    }
     throw new BadRequestException("Banning is not supported for this report's target type");
   }
 
@@ -234,6 +339,12 @@ export class ReportsService {
       });
       return;
     }
+    if (targetType === "message") {
+      await this.chat.deleteMessage(targetId, reviewerId).catch((err) => {
+        if (!(err instanceof NotFoundException)) throw err;
+      });
+      return;
+    }
     throw new BadRequestException("Content removal is not supported for this report's target type");
   }
 
@@ -242,8 +353,6 @@ export class ReportsService {
     reportId: string,
     input: ResolveReportInput,
   ): Promise<ReportDto> {
-    await this.authz.assertAdmin(reviewerId);
-
     const [report] = await this.db
       .select(reportColumns)
       .from(reports)
@@ -252,6 +361,18 @@ export class ReportsService {
       .limit(1);
     if (!report) {
       throw new NotFoundException("Report not found");
+    }
+
+    // Message reports scope to their Cohor server — the organizer, an
+    // assigned server "Moderator", or an admin may resolve them. Every other
+    // target type (post/comment/user/hackathon, and DM messages, which have
+    // no owning server) stays admin-only, same as the platform-wide list.
+    const serverId =
+      report.targetType === "message" ? await this.authz.serverIdForMessage(report.targetId) : null;
+    if (serverId) {
+      await this.authz.assertServerPermission(serverId, reviewerId, "manage_messages");
+    } else {
+      await this.authz.assertAdmin(reviewerId);
     }
 
     if (input.status === "resolved" && input.removeContent) {

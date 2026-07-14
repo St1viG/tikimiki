@@ -25,5 +25,11 @@ export type ResolveReportInput = z.infer<typeof resolveReportSchema>;
 
 export const listReportsQuerySchema = z.object({
   status: z.enum(["pending", "resolved", "all"]).default("pending"),
+  /**
+   * Scope to a single Cohor server's message reports (its hackathon's
+   * organizer / assigned server moderators / admins). Omitted → the
+   * platform-wide, admin-only view across every report type.
+   */
+  serverId: z.string().uuid().optional(),
 });
 export type ListReportsQuery = z.infer<typeof listReportsQuerySchema>;

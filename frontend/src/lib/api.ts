@@ -429,6 +429,15 @@ export const addRoleMember = (serverId: string, roleId: string, userId: string) 
   });
 export const removeRoleMember = (serverId: string, roleId: string, userId: string) =>
   DELETE<{ success: true }>(`/servers/${serverId}/roles/${roleId}/members/${userId}`);
+/**
+ * One-step assign/remove of the canonical "Moderator" role (the backend
+ * provisions the role with `manage_messages` on first use). Organizer-gated
+ * via `manage_roles`, same as the generic role-membership endpoints.
+ */
+export const assignServerModerator = (serverId: string, userId: string) =>
+  POST<{ success: true }>(`/servers/${serverId}/moderators`, { userId });
+export const removeServerModerator = (serverId: string, userId: string) =>
+  DELETE<{ success: true }>(`/servers/${serverId}/moderators/${userId}`);
 /** Kick a member from the server (400 if the target is the organizer). */
 export const kickServerMember = (serverId: string, userId: string) =>
   DELETE<{ success: true }>(`/servers/${serverId}/members/${userId}`);
@@ -1017,9 +1026,14 @@ export const createReport = (
   category: ReportCategory,
   reason?: string,
 ) => POST<Report>("/reports", { targetType, targetId, category, reason });
-export const getReports = (status: "pending" | "resolved" | "all" = "pending") =>
+/**
+ * `serverId` scopes to one Cohor server's message reports (the hackathon's
+ * organizer, an assigned server "Moderator", or an admin). Omitted → the
+ * platform-wide, admin-only view across every report type.
+ */
+export const getReports = (status: "pending" | "resolved" | "all" = "pending", serverId?: string) =>
   GET<{ reports: Report[]; stats: { open: number; resolvedToday: number; total: number } }>(
-    `/reports?status=${status}`,
+    `/reports?status=${status}${serverId ? `&serverId=${serverId}` : ""}`,
   );
 export const resolveReport = (
   id: string,
@@ -1089,11 +1103,20 @@ export interface AdminOrg {
   submittedAt: string;
 }
 
+export interface ModerationServer {
+  hackathonId: string;
+  hackathonTitle: string;
+  serverId: string;
+  organizationName: string;
+  openReportCount: number;
+}
+
 export const getAdminMetrics = () => GET<AdminMetrics>("/admin/metrics");
 export const getAdminUsers = (search?: string) =>
   GET<AdminUser[]>(`/admin/users${search ? `?search=${encodeURIComponent(search)}` : ""}`);
 export const getAdminOrganizations = () =>
   GET<{ pending: AdminOrg[]; verified: AdminOrg[]; rejected: AdminOrg[] }>("/admin/organizations");
+export const getAdminModerationServers = () => GET<ModerationServer[]>("/admin/moderation-servers");
 export const verifyOrganization = (userId: string) =>
   POST<AdminOrg>(`/admin/organizations/${userId}/verify`);
 export const rejectOrganization = (userId: string, reason: string) =>

@@ -77,6 +77,8 @@ import {
   deleteServerRole,
   addRoleMember,
   removeRoleMember,
+  assignServerModerator,
+  removeServerModerator,
   kickServerMember,
   updateServer,
   createChannelGroup,
@@ -1714,6 +1716,38 @@ export function CohorClient() {
     [activeServerId, refreshRoles, refreshMembersAndPerms, t],
   );
 
+  // One-click hand-off of the canonical "Moderator" role (the backend
+  // provisions the role with manage_messages on first assign).
+  const makeModerator = useCallback(
+    async (userId: string) => {
+      if (!activeServerId) return;
+      try {
+        await assignServerModerator(activeServerId, userId);
+        refreshRoles();
+        refreshMembersAndPerms(activeServerId);
+        showToast("violet", "check", <>{t("srvModAssigned")}</>, 2500);
+      } catch (err) {
+        setMembersErr(err instanceof ApiError ? err.message : t("chActionFailed"));
+      }
+    },
+    [activeServerId, refreshRoles, refreshMembersAndPerms, showToast, t],
+  );
+
+  const unmakeModerator = useCallback(
+    async (userId: string) => {
+      if (!activeServerId) return;
+      try {
+        await removeServerModerator(activeServerId, userId);
+        refreshRoles();
+        refreshMembersAndPerms(activeServerId);
+        showToast("violet", "check", <>{t("srvModRemoved")}</>, 2500);
+      } catch (err) {
+        setMembersErr(err instanceof ApiError ? err.message : t("chActionFailed"));
+      }
+    },
+    [activeServerId, refreshRoles, refreshMembersAndPerms, showToast, t],
+  );
+
   // Kick a member from the server, then refetch members.
   const kickMember = useCallback(
     async (userId: string) => {
@@ -2832,18 +2866,24 @@ export function CohorClient() {
                   </button>
                 )}
               </div>
-              <div className="ch-admin-btns">
-                {/* "Edit hackathon" and "Moderators" placeholder buttons removed:
-                  they only fired alert() with no backing API. Server settings
-                  (gear, above) now covers roles/members; content reports stays. */}
-                <Link
-                  className="ch-admin-btn ch-admin-btn-mod"
-                  style={{ flexBasis: "100%" }}
-                  href="/moderator"
-                >
-                  <Icon name="flag" className="ic-sm" /> {t("contentReports")}
-                </Link>
-              </div>
+              {can("manage_messages") && (
+                <div className="ch-admin-btns">
+                  {/* "Edit hackathon" and "Moderators" placeholder buttons removed:
+                    they only fired alert() with no backing API. Server settings
+                    (gear, above) now covers roles/members; content reports stays.
+                    Gated on manage_messages (organizer/admin/assigned server
+                    Moderator all hold it) since that's exactly who /moderator
+                    accepts for this server — everyone else got a dead-end
+                    redirect before this was scoped. */}
+                  <Link
+                    className="ch-admin-btn ch-admin-btn-mod"
+                    style={{ flexBasis: "100%" }}
+                    href={`/moderator?server=${activeServerId}`}
+                  >
+                    <Icon name="flag" className="ic-sm" /> {t("contentReports")}
+                  </Link>
+                </div>
+              )}
             </div>
 
             <div className="ch-list">
@@ -6553,6 +6593,23 @@ export function CohorClient() {
                           </div>
                           <div className="srv-member-handle">@{m.username}</div>
                         </div>
+                        {/* One-click "Moderator" role toggle. Hidden for self and
+                            for the organizer's implicit entry (they already hold
+                            every permission; the backend would 400 the org
+                            account as a non-member anyway). */}
+                        {!isSelf && can("manage_roles") && !m.roles.includes("Organizer") && (
+                          <button
+                            type="button"
+                            className="srv-mini-btn"
+                            onClick={() =>
+                              m.roles.includes("Moderator")
+                                ? unmakeModerator(m.userId)
+                                : makeModerator(m.userId)
+                            }
+                          >
+                            {m.roles.includes("Moderator") ? t("srvRemoveMod") : t("srvMakeMod")}
+                          </button>
+                        )}
                         {!isSelf &&
                           (kickConfirm === m.userId ? (
                             <button
