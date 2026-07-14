@@ -142,7 +142,8 @@ export class ReportsService {
         .returning({ reportId: reports.reportId });
       inserted = row;
     } catch {
-      // Unique index race: reporter + target already exists.
+      // The pre-insert check has a TOCTOU window; the unique index is the real
+      // guard — catch its violation and surface the same user-facing error.
       throw new ConflictException("You have already reported this target");
     }
 
@@ -385,7 +386,8 @@ export class ReportsService {
         await this.admin
           .banUser(reviewerId, authorId, { reason: input.note ?? `Resolved report ${reportId}` })
           .catch((err) => {
-            // Already banned by another report/action — not fatal, resolution continues.
+            // A concurrent resolution of a different report may have already banned
+            // this user; swallow the conflict so this resolution still completes.
             if (!(err instanceof ConflictException)) throw err;
           });
       }
@@ -407,9 +409,9 @@ export class ReportsService {
       throw new NotFoundException("Report not found");
     }
 
-    // Deliberately scoped to just this one report: other pending reports on
-    // the same target are left untouched (no auto-close), even when this
-    // resolution results in the content being removed or the user banned.
+    // Only the reporter of this specific report is notified; other users who
+    // reported the same target are not auto-closed — each report is resolved
+    // independently so moderators can add different notes or decisions.
     await this.notifications.create({
       userId: report.reporterId,
       type: input.status === "resolved" ? "report_resolved" : "report_dismissed",

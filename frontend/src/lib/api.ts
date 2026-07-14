@@ -58,6 +58,7 @@ async function request<T>(path: string, init: RequestInit = {}, allowRetry = tru
   });
 
   // Access token expired → mint a fresh one from the refresh cookie, retry once.
+  // allowRetry=false on the recursive call prevents an infinite loop if refresh itself 401s.
   if (res.status === 401 && allowRetry && !NO_RETRY.has(path)) {
     try {
       await refreshSession();
@@ -551,6 +552,7 @@ export const editMessage = (messageId: string, content: string) =>
 /** Find an existing 1:1 conversation with `userId`, or create one. Returns its id. */
 export async function startConversation(userId: string): Promise<string> {
   const convs = await getConversations();
+  // members.length === 2 guards against group conversations that also contain this user.
   const existing = convs.find(
     (c) => c.members.length === 2 && c.members.some((m) => m.userId === userId),
   );
@@ -1251,6 +1253,7 @@ async function uploadFile<T>(path: string, file: File): Promise<T> {
     const form = new FormData();
     form.append("file", file);
     const token = getAccessToken();
+    // Content-Type is intentionally omitted so the browser sets the multipart boundary itself.
     return fetch(`${BASE}${path}`, {
       method: "POST",
       credentials: "include",

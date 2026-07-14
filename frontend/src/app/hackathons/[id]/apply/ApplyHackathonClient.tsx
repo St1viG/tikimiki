@@ -155,7 +155,8 @@ export function ApplyHackathonClient({ hackathonId }: { hackathonId: string }) {
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
 
-  // Hackathon + questions are public (no auth needed).
+  // Hackathon + questions are public endpoints — loaded without checking auth status;
+  // the auth check only gates whether the form itself is rendered.
   useEffect(() => {
     let cancelled = false;
     getHackathon(hackathonId)
@@ -177,6 +178,8 @@ export function ApplyHackathonClient({ hackathonId }: { hackathonId: string }) {
       return;
     }
     let cancelled = false;
+    // getMyTeams() returns ALL the viewer's teams across hackathons; filter to
+    // this hackathon so only relevant teams appear in the team-selection section.
     getMyTeams()
       .then((all) => {
         if (!cancelled) setTeams(all.filter((tm) => tm.hackathonId === hackathonId));

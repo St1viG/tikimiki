@@ -273,7 +273,8 @@ export class UsersService {
         .returning({ skillId: skills.skillId, name: skills.name });
       for (const s of created) byName.set(s.name, s.skillId);
 
-      // Re-read any that lost the insert race (conflict → not returned).
+      // `onConflictDoNothing` suppresses the error but also suppresses RETURNING,
+      // so re-fetch any skill whose row already existed before our insert.
       const stillMissing = missing.filter((n) => !byName.has(n));
       if (stillMissing.length > 0) {
         const refetched = await tx

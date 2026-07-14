@@ -62,10 +62,10 @@ export class SearchService {
     // skills filter was not supplied at all (so it is skipped entirely).
     const skillIds = query.skills?.length ? await this.resolveSkillIds(query.skills) : undefined;
 
-    // An entity is included only when something constrains it, so a filter-only
-    // request (e.g. a location with no text query) returns just the entities that
-    // filter applies to — not every row, and not an empty page. Inactive entities
-    // get a `false` guard so their query returns nothing.
+    // Guards prevent returning every row when no constraint applies to an entity:
+    // e.g. a location-only search would otherwise match all users (no location
+    // filter for users) and return them unfiltered. `sql\`false\`` short-circuits
+    // the query cheaply rather than skipping it entirely at the JS level.
     const usersActive = Boolean(q) || skillIds !== undefined;
     const hackathonsActive =
       Boolean(q) ||
@@ -119,8 +119,9 @@ export class SearchService {
       );
     }
     if (query.minPrize !== undefined) {
-      // `award_value` is free text (e.g. "$5,000", "MacBook"); strip non-digits
-      // and compare numerically. Non-numeric awards drop out (become NULL).
+      // award_value is free-text entered by the organizer (e.g. "$5 000", "MacBook Pro").
+      // We strip non-digit characters and cast to numeric so monetary amounts are
+      // comparable; non-numeric values (like "MacBook") yield NULL and are excluded.
       hackathonConditions.push(
         inArray(
           hackathons.hackathonId,

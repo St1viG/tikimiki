@@ -195,6 +195,8 @@ export class ProjectsService {
    */
   async getProject(projectId: string, viewerId: string | null): Promise<ProjectDto> {
     const row = await this.loadProject(projectId);
+    // Return 404 (not 403) for drafts so non-members can't probe whether a
+    // team's draft project exists before it is publicly submitted.
     if (row.status === "draft") {
       const isMember = viewerId != null && (await this.isTeamMember(row.teamId, viewerId));
       if (!isMember) throw new NotFoundException("Project not found");
@@ -302,8 +304,9 @@ export class ProjectsService {
           eq(teams.hackathonId, hackathonId),
           isNull(projects.deletedAt),
           isNull(teams.deletedAt),
-          // Anything past draft is a real submission.
-          // (draft ⇔ submittedAt is null per the DB CHECK.)
+          // No SQL filter on status — the JS filter below excludes drafts.
+          // The DB CHECK guarantees draft ↔ submittedAt IS NULL, but Drizzle
+          // can't express that condition in a typed WHERE without a raw sql tag.
         ),
       )
       .orderBy(asc(projects.submittedAt));

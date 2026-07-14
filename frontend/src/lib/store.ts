@@ -85,6 +85,7 @@ export function merchCategory(name: string): FilterCat {
     return "solje";
   if (n.includes("majic") || n.includes("shirt") || n.includes("tee") || n.includes("t-shirt"))
     return "majice";
+  // Unrecognised names fall back to "majice" so the grid never silently drops an item.
   return "majice";
 }
 

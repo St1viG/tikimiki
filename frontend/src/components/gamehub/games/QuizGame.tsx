@@ -295,7 +295,8 @@ export function QuizGame({ open, onClose, onComplete }: GameModalProps) {
     const newScore = correct ? score + 1 : score;
     if (correct) setScore(newScore);
     setAnswer({ selected: idx, revealed: true });
-    // On last question, pre-compute result to pass to onComplete later
+    // Pre-compute on the last question so `advance` can call onComplete with the right score
+    // before the state setter for score has re-rendered (closures capture the stale value).
     if (isLastQuestion) {
       setFinalResult({
         kind: "score",

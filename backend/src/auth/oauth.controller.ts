@@ -101,6 +101,8 @@ export class OAuthController {
     const cookies = req.cookies as Record<string, string> | undefined;
     const linking = cookies?.[LINK_COOKIE] === "1";
     if (linking) res.clearCookie(LINK_COOKIE, { path: "/api/v1/auth/oauth" });
+    // Read the state cookie AFTER clearing it; the browser already sent it in
+    // this request, so clearing it prevents replay on a second callback hit.
     const cookieState = cookies?.[STATE_COOKIE];
     if (!isProvider(provider) || !code || !state || state !== cookieState) {
       return linking ? this.settingsRedirect(res, "error") : this.loginRedirect(res, "error");

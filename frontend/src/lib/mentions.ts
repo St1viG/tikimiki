@@ -21,6 +21,7 @@ export function splitMentions(text: string): MentionSegment[] {
     if (handle.length < 3) continue;
     if (start > last) segs.push({ type: "text", value: text.slice(last, start) });
     segs.push({ type: "mention", username: handle, raw: `@${handle}` });
+    // Advance past '@' + the trimmed handle; the stripped trailing chars remain in the next text segment.
     last = start + 1 + handle.length; // consume '@' + handle (trimmed tail stays text)
   }
   if (last < text.length) segs.push({ type: "text", value: text.slice(last) });
@@ -45,6 +46,7 @@ const CODE_SPAN_RE = /(```[\s\S]*?```|`[^`\n]*`)/g;
  * react-markdown renders it through the normal link path. Skips code spans.
  */
 export function linkifyMentions(src: string): string {
+  // split() with a capturing group interleaves code spans at odd indices, text at even.
   return src
     .split(CODE_SPAN_RE)
     .map((part, i) =>

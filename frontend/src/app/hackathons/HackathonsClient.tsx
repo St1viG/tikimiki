@@ -198,7 +198,8 @@ export function HackathonsClient() {
     return () => window.clearInterval(id);
   }, []);
 
-  // Text search: hide cards/rows that don't match
+  // Text search: hide cards/rows that don't match.
+  // `hidden` returns true (= hide) — the name is intentionally read as "is this hidden?".
   const q = searchQ.trim().toLowerCase();
   const hidden = (text: string) => q !== "" && !text.toLowerCase().includes(q);
 

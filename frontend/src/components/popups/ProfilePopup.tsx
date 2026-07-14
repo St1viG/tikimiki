@@ -101,6 +101,8 @@ const MONTHS_SR = [
 
 function joinedLabel(iso: string): string {
   const d = new Date(iso);
+  // Serbian uses the genitive case for months in date expressions (e.g. "januara",
+  // not "januar") — MONTHS_SR already holds the genitive forms.
   return `${MONTHS_SR[d.getMonth()]} ${d.getFullYear()}.`;
 }
 
@@ -160,7 +162,8 @@ export function ProfilePopup({ open, onClose, username }: ProfilePopupProps) {
 
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [loading, setLoading] = useState(false);
-  // Follow state (mirrors profile.isFollowing / followerCount so the button + count update live).
+  // Follow state is mirrored locally so the button + count reflect toggles
+  // immediately without re-fetching the profile from the server.
   const [following, setFollowing] = useState(false);
   const [followerCount, setFollowerCount] = useState(0);
   const [followBusy, setFollowBusy] = useState(false);
@@ -196,6 +199,8 @@ export function ProfilePopup({ open, onClose, username }: ProfilePopupProps) {
 
   useEffect(() => {
     if (open && !prevOpenRef.current) {
+      // Bump the key on every open to retrigger the CSS entry animation on
+      // .pp-modal (keyed elements get a fresh DOM node, restarting @keyframes).
       setModalKey((k) => k + 1);
       setActiveTab("overview");
     }

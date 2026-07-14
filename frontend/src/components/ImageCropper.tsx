@@ -64,7 +64,7 @@ export function ImageCropper({
 }) {
   const frameRef = useRef<HTMLDivElement>(null);
   const drag = useRef<{ x: number; y: number } | null>(null);
-  // Latest values so pointermove reads fresh numbers without re-binding.
+  // Ref-mirror of props lets onPointerMove close over fresh values without being re-registered on every render.
   const latest = useRef({ x: focalX, y: focalY, z: zoom });
   latest.current = { x: focalX, y: focalY, z: zoom };
 
@@ -97,7 +97,7 @@ export function ImageCropper({
     const { overflowX, overflowY } = coverMetrics(imgRatio, ratio, latest.current.z);
     const ovX = overflowX * el.clientWidth;
     const ovY = overflowY * el.clientHeight;
-    // Dragging the image right reveals its left side → focal decreases.
+    // Invert dx/dy: dragging right pans left (focal decreases); guard ovX===0 to avoid division by zero when no horizontal overflow.
     const nx = ovX > 0 ? clamp01(latest.current.x - dx / ovX) : latest.current.x;
     const ny = ovY > 0 ? clamp01(latest.current.y - dy / ovY) : latest.current.y;
     onChange(nx, ny, latest.current.z);

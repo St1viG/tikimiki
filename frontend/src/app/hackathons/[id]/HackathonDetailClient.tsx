@@ -201,8 +201,12 @@ export function HackathonDetailClient({ hackathonId }: { hackathonId: string }) 
   const isOwner = user?.userId === hack.organizationId;
   const hasCoords = hack.latitude != null && hack.longitude != null;
   const deadlinePassed = new Date(hack.registrationDeadline).getTime() < Date.now();
+  // canApply combines all four guards: not the owner, status "upcoming", deadline not
+  // passed, and no existing application — any one disqualifies the CTA.
   const canApply = !isOwner && hack.status === "upcoming" && !deadlinePassed && !existing;
 
+  // Use lat/lng when set (precise pin); fall back to the human-readable location
+  // string as a keyword search so the Maps URL still resolves without coordinates.
   const mapsQuery = hasCoords
     ? `${hack.latitude},${hack.longitude}`
     : encodeURIComponent(hack.location ?? "");

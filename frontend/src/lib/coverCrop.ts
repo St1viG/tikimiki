@@ -34,6 +34,7 @@ export function coverStyle(
   zoom: number,
 ): CSSProperties {
   const { dispW, dispH, overflowX, overflowY } = coverMetrics(imgRatio, frameRatio, zoom);
+  // Negative left/top shifts the image so focalX/focalY of the overflow sits before the visible window.
   return {
     position: "absolute",
     width: `${dispW * 100}%`,

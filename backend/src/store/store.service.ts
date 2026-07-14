@@ -125,6 +125,8 @@ export class StoreService {
 
     if (items.length === 0) return [];
 
+    // Variants are fetched in a separate query and joined in JS to avoid a
+    // GROUP BY + JSON agg round-trip that Drizzle can't express cleanly.
     const variants = await this.db
       .select({
         variantId: merchVariants.variantId,
@@ -251,6 +253,7 @@ export class StoreService {
         throw new ConflictException("Cosmetic already owned");
       }
 
+      // null pointCost means the cosmetic is not for sale (drop/reward only).
       if (cosmetic.pointCost === null) {
         throw new BadRequestException("Cosmetic is not purchasable");
       }

@@ -182,6 +182,8 @@ export function PostCard({
 
   const saveEdit = async () => {
     const content = editDraft.trim();
+    // Allow empty text only when the post still has attachments — an image-only
+    // post with a cleared caption is still a valid post.
     if (savingEdit || (!content && (post.attachments?.length ?? 0) === 0)) return;
     setSavingEdit(true);
     try {
@@ -242,6 +244,7 @@ export function PostCard({
   // not while editing, and not during a text selection).
   const onCardClick = (e: React.MouseEvent) => {
     if (!clickable || !onOpenDetail || editing) return;
+    // Don't open the modal when the user just finished selecting text in the card.
     if (window.getSelection()?.toString()) return;
     if ((e.target as HTMLElement).closest("button, a, [role='button'], input, textarea")) return;
     onOpenDetail(post.postId);
@@ -349,6 +352,8 @@ export function PostCard({
                       className="md-btn"
                       title={t(tool.key)}
                       aria-label={t(tool.key)}
+                      // Prevent the toolbar button from stealing focus out of the
+                      // textarea and losing the active text selection.
                       onMouseDown={(e) => e.preventDefault()}
                       onClick={() => applyMd(tool.opts)}
                     >

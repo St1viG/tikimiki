@@ -60,6 +60,7 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 function isActive(pathname: string, href: string): boolean {
+  // "/" must be an exact match — startsWith would mark every route as active.
   if (href === "/") return pathname === "/";
   return pathname === href || pathname.startsWith(`${href}/`);
 }

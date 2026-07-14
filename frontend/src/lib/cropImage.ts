@@ -37,6 +37,7 @@ export async function cropImageToRatio(
     }
     cropW = Math.round(cropW);
     cropH = Math.round(cropH);
+    // (sw - cropW) is the total horizontal overflow; focalX says what share sits before the crop window.
     const sx = Math.round((sw - cropW) * clamp01(focalX));
     const sy = Math.round((sh - cropH) * clamp01(focalY));
 
@@ -53,10 +54,11 @@ export async function cropImageToRatio(
       canvas.toBlob(
         (blob) => (blob ? resolve(blob) : reject(new Error("toBlob failed"))),
         "image/jpeg",
-        0.9,
+        0.9, // quality 0.9 keeps file size reasonable while avoiding visible JPEG artefacts
       ),
     );
   } finally {
+    // Revoke in finally so the object URL is freed even if the canvas or toBlob throws.
     URL.revokeObjectURL(url);
   }
 }

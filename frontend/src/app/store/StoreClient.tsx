@@ -208,6 +208,8 @@ export function StoreClient() {
       } else if (item.source === "merch" && item.merchId) {
         // Map the chosen size label back to its variant id (if any).
         const variantId = item.variants?.find((v) => v.label === selectedSize)?.variantId;
+        // Re-fetch the profile at confirm time so shippingName uses the
+        // current username — the user may have renamed since the page loaded.
         const profile = await api.getMyProfile();
         const res = await api.orderMerch(item.merchId, {
           variantId,

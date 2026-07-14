@@ -176,7 +176,8 @@ export class VotingService {
     }
 
     return this.db.transaction(async (tx) => {
-      // One vote per member per hackathon (any project).
+      // The unique index on (hackathon_id, voter_id) enforces this at the DB
+      // level too, but we check first to return a 409 rather than a 500.
       const [existing] = await tx
         .select({ voteId: votes.voteId })
         .from(votes)

@@ -9,6 +9,7 @@
  * Returns a de-duplicated list of **lowercased** usernames; resolving them to
  * real accounts (and dropping invalid ones) is the caller's job.
  */
+// Capture up to 33 chars so trailing-punctuation trimming (below) can never shorten a 32-char handle.
 const MENTION_RE = /(?<![\w@./-])@([a-zA-Z0-9_.-]{3,33})/g;
 
 export function extractMentions(content: string): string[] {

@@ -43,10 +43,11 @@ const THEMES: readonly Theme[] = [
 const C = 40; // center of the 80×80 box
 
 export function OrbitAvatar({ seed, size = 64, className }: AvatarArtProps) {
+  // Namespace the seed so OrbitAvatar draws a different sequence than other styles for the same user.
   const rng = makeRng(`orbit:${seed}`);
   const theme = rng.pick(THEMES);
 
-  // Satellites: even sectors + jitter so they never bunch up
+  // Even sector spacing prevents clustering; the ±24% jitter adds organic feel without collision.
   const count = rng.int(4, 6);
   const base = rng.range(0, Math.PI * 2);
   const sector = (Math.PI * 2) / count;

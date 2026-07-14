@@ -246,7 +246,8 @@ export class ModerationService implements OnModuleInit {
   async deleteRole(serverId: string, roleId: string, userId: string): Promise<{ success: true }> {
     await this.authz.assertServerPermission(serverId, userId, "manage_roles");
     await this.assertRoleInServer(serverId, roleId);
-    // user_roles + server_role_permissions cascade off server_roles.
+    // ON DELETE CASCADE on user_roles and server_role_permissions means the
+    // database removes all member assignments and permission links automatically.
     await this.db.delete(serverRoles).where(eq(serverRoles.serverRoleId, roleId));
 
     this.realtime.emitServerEvent(serverId, "rolesChanged", {
@@ -359,8 +360,8 @@ export class ModerationService implements OnModuleInit {
     await this.assertServerExists(serverId);
 
     const roleId = await this.findModeratorRole(serverId);
-    // No Moderator role on the server ⇒ the target already isn't one; the
-    // removal is a no-op success, mirroring the DELETE-membership semantics.
+    // If no Moderator role exists yet the user provably isn't a moderator, so
+    // the removal is a no-op success — consistent with DELETE-returning-0-rows.
     if (roleId) {
       await this.db
         .delete(userRoles)
@@ -401,6 +402,7 @@ export class ModerationService implements OnModuleInit {
       } catch (err) {
         if (!isUniqueViolation(err)) throw err;
         roleId = await this.findModeratorRole(serverId);
+        // Race: another request created the role between our check and insert; re-read it.
         if (!roleId) throw err;
       }
     }

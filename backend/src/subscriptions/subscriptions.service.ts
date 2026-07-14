@@ -191,9 +191,10 @@ export class SubscriptionsService {
       throw new NotFoundException("No active subscription to cancel");
     }
 
-    // Premium-only personalization reverts when premium ends: the banner
-    // (Premium feature) is always cleared, and an animated GIF avatar (also
-    // Premium) is cleared too — a static avatar is kept.
+    // Eagerly clean up Premium-gated content on cancellation rather than on
+    // expiry, so the downgrade takes effect as soon as the user opts out.
+    // Banner is always cleared; GIF avatar is cleared only if the current
+    // avatar is animated (a static avatar is a free feature and is kept).
     const [u] = await this.db
       .select({ avatarUrl: users.avatarUrl })
       .from(users)

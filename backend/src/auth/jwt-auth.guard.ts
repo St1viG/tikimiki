@@ -22,6 +22,7 @@ export class JwtAuthGuard implements CanActivate {
       const payload = await this.jwt.verifyAsync<{ sub: string; typ: string }>(token, {
         secret: env.JWT_ACCESS_SECRET,
       });
+      // Reject refresh, email_verify, and password_reset tokens presented as access tokens.
       if (payload.typ !== "access") throw new Error("wrong token type");
       req.user = { userId: payload.sub };
       return true;

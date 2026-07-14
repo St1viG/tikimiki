@@ -77,6 +77,7 @@ export class RateLimitGuard implements CanActivate {
 
   /** Drop expired windows once the map grows large, so it can't leak forever. */
   private sweep(now: number) {
+    // Only sweep when the map is large enough that the iteration cost is worth it.
     if (this.windows.size < 10_000) return;
     for (const [key, state] of this.windows) {
       if (state.resetAt <= now) this.windows.delete(key);

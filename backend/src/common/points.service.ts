@@ -40,6 +40,8 @@ export class PointsService {
     delta: number,
     meta: PointsLedgerMeta,
   ): Promise<PointsMutationResult> {
+    // Math.abs guards against a caller accidentally passing a negative delta,
+    // which would silently debit the account instead of crediting it.
     return this.apply(tx, userId, Math.abs(delta), meta);
   }
 

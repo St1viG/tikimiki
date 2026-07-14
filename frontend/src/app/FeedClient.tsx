@@ -171,8 +171,8 @@ export function FeedClient() {
   // Media attached to the new post (uploaded as picked, max 10).
   const [media, setMedia] = useState<MediaDraft[]>([]);
   const mediaInputRef = useRef<HTMLInputElement>(null);
-  // Opening the OS file dialog blurs the composer; this flag keeps that blur
-  // from collapsing it (the user is mid-attach, not walking away).
+  // Opening the OS file dialog steals focus from the composer; this flag
+  // prevents that blur from collapsing it while the picker is active.
   const pickingMediaRef = useRef(false);
   const composerTextRef = useRef<HTMLTextAreaElement>(null);
   // The post's aspect ratio (all attachments share it); auto-set from the first
@@ -327,7 +327,8 @@ export function FeedClient() {
     };
   }, []);
 
-  // Deep-link: /?post=<id> opens that post's detail modal (once per link).
+  // /?post=<id> deep-link: open the modal immediately so a shared URL takes the
+  // viewer straight into the thread without having to scroll to find the post.
   useEffect(() => {
     const pid = searchParams.get("post");
     if (!pid) return;
@@ -336,8 +337,8 @@ export function FeedClient() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
-  // …and pull the shared post into the list if it isn't on this feed page, so
-  // the detail modal (which reads from `posts`) can render it.
+  // If the linked post isn't on the current feed page, fetch it individually
+  // so the detail modal (which reads from `posts`) can render it.
   useEffect(() => {
     const pid = searchParams.get("post");
     if (!pid || posts === null || posts.some((p) => p.postId === pid)) return;
@@ -421,8 +422,8 @@ export function FeedClient() {
     loadComments(postId);
   };
 
-  // Matches a leading "@handle " token so switching/cancelling a reply target
-  // doesn't stack mentions in the composer.
+  // Strip a leading "@handle " when switching or cancelling a reply target
+  // to avoid stacking @-mentions when the user changes who they are replying to.
   const LEADING_TAG = /^@[a-zA-Z0-9_.-]+\s+/;
 
   // Start a reply: tag the author in the composer (so they get pinged + it's
@@ -573,7 +574,8 @@ export function FeedClient() {
       const { deletedCount } = await deleteComment(commentId);
       setComments((c) => {
         const thread = c[postId] ?? [];
-        // Collect the deleted comment + every descendant reply.
+        // BFS-style iterative expansion: avoids stack overflow on deeply-nested
+        // reply threads and correctly removes all descendants in one pass.
         const removed = new Set<string>([commentId]);
         for (let grew = true; grew;) {
           grew = false;
@@ -788,10 +790,9 @@ export function FeedClient() {
     const commentMap: Record<string, Comment> = {};
     if (thread) for (const c of thread) commentMap[c.commentId] = c;
 
-    // Resolve the top-level (root) comment a reply belongs to. Robust to a
-    // missing ancestor (e.g. an intermediate reply that was deleted): we stop at
-    // the highest still-existing ancestor instead of returning a dangling id,
-    // so orphaned replies keep rendering instead of vanishing.
+    // Resolve the root of a reply chain. The `seen` Set detects cycles and the
+    // `!parent` break stops at the highest surviving ancestor when an intermediate
+    // reply has been deleted, so orphaned replies still render under their visible parent.
     const getRootId = (commentId: string): string => {
       let cur = commentMap[commentId];
       let topId = commentId;
@@ -1116,8 +1117,8 @@ export function FeedClient() {
 
   const openPost = posts?.find((p) => p.postId === openPostId) ?? null;
 
-  // Explore shows every post; Following shows only posts from accounts the
-  // viewer follows (reflecting live follow/unfollow toggles via followedAuthors).
+  // Following tab is filtered locally from `followedAuthors` so live
+  // follow/unfollow actions update the list without re-fetching the feed.
   const visiblePosts =
     tab === "following" ? (posts ?? []).filter((p) => followedAuthors.has(p.authorId)) : posts;
 

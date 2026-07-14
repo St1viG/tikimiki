@@ -305,6 +305,8 @@ export class OAuthService {
     }
 
     // 2. An account with the same verified email exists → link the provider.
+    // We trust the provider has already verified the email address, so merging
+    // on it does not let an attacker claim someone else's account.
     if (profile.email) {
       const [byEmail] = await this.db
         .select({ userId: users.userId })
@@ -322,6 +324,8 @@ export class OAuthService {
 
     // 3. Brand-new user (+ members row). OAuth users never sign in with a
     // password, but the column is NOT NULL, so store an unusable hash.
+    // Synthetic email satisfies the NOT NULL / unique constraint for providers
+    // that can return no email (e.g. a GitHub user with all emails private).
     const email = profile.email ?? `${provider}_${profile.providerId}@users.tikimiki.local`;
     const username = await this.uniqueUsername(profile.username);
     const passwordHash = await hash(`oauth:${provider}:${profile.providerId}`);

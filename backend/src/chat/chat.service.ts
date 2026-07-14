@@ -1172,8 +1172,9 @@ export class ChatService {
   ): Promise<MessageDto> {
     const { serverId, type } = await this.assertChannelAccess(channelId, userId);
 
-    // `project` / `kanban` channels are app surfaces (submission form, board),
-    // not text channels — they never accept messages.
+    // `project` and `kanban` channels are embedded app surfaces rendered by the
+    // frontend (submission form, board view) — the channel record exists only
+    // to anchor permissions, not to hold messages.
     if (type === "project" || type === "kanban") {
       throw new BadRequestException("This channel does not accept messages");
     }
@@ -1183,6 +1184,8 @@ export class ChatService {
       await this.authz.assertServerPermission(serverId, userId, "manage_messages");
     }
 
+    // Expired mutes are lifted lazily on send rather than by a background job,
+    // so a user whose mute expired can post immediately without waiting for cleanup.
     // Mute check — auto-lift expired mutes.
     const [mute] = await this.db
       .select({ muteId: serverMutes.muteId, expiresAt: serverMutes.expiresAt })
@@ -1310,7 +1313,8 @@ export class ChatService {
     const count = Number(symbolCount);
     const payload = { messageId, symbol, count };
 
-    // Broadcast the new count to whichever room this message lives in.
+    // The message may be in a channel or a DM; we look up which room it belongs
+    // to here rather than requiring the client to pass it, avoiding spoofing.
     const [chan] = await this.db
       .select({ channelId: channelMessages.channelId })
       .from(channelMessages)
@@ -1464,6 +1468,8 @@ export class ChatService {
       });
     }
 
+    // isNull(lastReadAt) means the user has never marked the conversation read,
+    // so every message in it counts as unread.
     // Unread = messages from OTHER members sent after this user's lastReadAt.
     const unreadRows = await this.db
       .select({
@@ -1760,7 +1766,8 @@ export class ChatService {
           entityId: message.messageId,
         })),
       );
-      // Live notification ping so badges update without a refresh.
+      // The DB insert persists for badge counters; the realtime emit updates the
+      // badge in the currently open session without requiring a page refresh.
       for (const o of others) {
         this.realtime.emitNotification(o.userId, {
           type: "new_direct_message",

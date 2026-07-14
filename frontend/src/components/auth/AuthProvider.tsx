@@ -50,6 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
     (async () => {
       try {
+        // Skip the round-trip when an in-memory token already exists (hot reload / SSR hand-off).
         if (!api.getAccessToken()) await api.refreshSession();
         const me = await api.me();
         if (!cancelled) {
@@ -88,6 +89,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await api.logout();
     } finally {
+      // Always clear local state even when the API call fails — the user is
+      // signed out on this device regardless of the server response.
       setUser(null);
       setStatus("unauthenticated");
     }
@@ -136,6 +139,8 @@ export function useRequireRole(role: AppRole): AuthContextValue {
       return;
     }
     if (auth.status === "authenticated" && auth.user) {
+      // "member" is the else-branch — checked last, so any unrecognised role
+      // string would silently pass as member.  Keep the ordering intentional.
       const ok =
         role === "admin"
           ? auth.user.roles.isAdmin

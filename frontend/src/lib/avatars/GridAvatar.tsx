@@ -45,10 +45,11 @@ export function GridAvatar({ seed, size = 64, className }: AvatarArtProps) {
       if (!rng.bool(density)) continue;
       const light = rng.bool(0.22); // a few brighter pixels for gentle variety
       cells.push({ col, row, light });
+      // Mirror the same light value so both halves appear symmetrically lit.
       if (col < 2) cells.push({ col: COLS - 1 - col, row, light });
     }
   }
-  // Never render empty for degenerate seeds.
+  // A degenerate seed could produce no lit pixels; guarantee at least a center dot.
   if (cells.length === 0) cells.push({ col: 2, row: 2, light: true });
 
   const x = (col: number) => PAD + col * CELL + GAP / 2;

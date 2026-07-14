@@ -73,7 +73,7 @@ export function useMentionAutocomplete({
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(async () => {
       const res = await Promise.resolve(search(query));
-      if (reqId !== reqRef.current) return; // a newer keystroke superseded this
+      if (reqId !== reqRef.current) return; // discard stale async results so fast typing never shows old candidates
       setItems(res);
       setIndex(0);
       setOpen(res.length > 0);
@@ -139,7 +139,7 @@ export function useMentionAutocomplete({
             <button
               type="button"
               className={`mention-opt${i === index ? " is-active" : ""}`}
-              // mousedown (not click) so the input doesn't blur before we splice.
+              // mousedown fires before the textarea's blur, keeping focus so setSelectionRange works.
               onMouseDown={(e) => {
                 e.preventDefault();
                 accept(c);

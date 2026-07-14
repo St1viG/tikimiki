@@ -200,7 +200,7 @@ export function GrupeGame({ open, onClose, onComplete }: GameModalProps) {
 
   /* Finish: fire onComplete exactly once, then flip to the result screen.
      `perfect` marks a flawless win (all 4 groups, zero mistakes) — the backend
-     awards the "Grupe bez greške" badge for it. */
+     awards the "Grupe bez greške" badge only for perfect === true. */
   const finish = useCallback(
     (solved: number, perfect = false) => {
       if (!completedRef.current) {
@@ -273,7 +273,7 @@ export function GrupeGame({ open, onClose, onComplete }: GameModalProps) {
     }
   }, [phase, selected, puzzle.board, solvedKeys, mistakes, finish, t]);
 
-  // Ephemeral shuffle order (player convenience only; never affects the daily puzzle).
+  // An ever-incrementing nonce drives a fresh deterministic shuffle without touching the daily seed.
   const [shuffleNonce, setShuffleNonce] = useState(0);
 
   const shuffleRemaining = useCallback(() => {

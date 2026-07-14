@@ -58,7 +58,8 @@ export class CosmeticsService {
       if (r.slot === "username_effect") {
         entry.usernameEffect = dto;
       } else if (r.slot === "avatar_decoration" || entry.profileDecoration === null) {
-        // avatar_decoration wins over a legacy banner_effect when both exist.
+        // avatar_decoration wins over a legacy banner_effect when both exist;
+        // the first non-avatar_decoration row only fills the slot if it's still empty.
         entry.profileDecoration = dto;
       }
       map.set(r.userId, entry);

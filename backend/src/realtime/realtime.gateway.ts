@@ -46,6 +46,7 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
       const payload = await this.jwt.verifyAsync<{ sub: string; typ: string }>(token, {
         secret: env.JWT_ACCESS_SECRET,
       });
+      // Reject refresh tokens if one is accidentally sent during handshake.
       if (payload.typ !== "access") throw new Error("wrong token type");
       const userId = payload.sub;
       client.data.userId = userId;
@@ -126,6 +127,8 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
 
   /* ── Emit helpers (called by ChatService after persisting) ── */
 
+  // Optional chaining guards against the brief window before the WebSocket
+  // server is initialized (e.g. during unit tests or early-startup calls).
   emitChannelMessage(channelId: string, message: unknown): void {
     this.server?.to(`channel:${channelId}`).emit("channelMessage", message);
   }

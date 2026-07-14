@@ -25,6 +25,7 @@ export class SocialService {
     private readonly notifications: NotificationsService,
   ) {}
 
+  // Ensures a unique (userIdA, userIdB) row per pair regardless of who initiated.
   private order(a: string, b: string): [string, string] {
     return a < b ? [a, b] : [b, a];
   }
@@ -197,6 +198,7 @@ export class SocialService {
       displayName: string | null;
       avatarUrl: string | null;
     }[] = [];
+    // Re-iterate `otherIds` to preserve the original friendship-row order.
     for (const id of otherIds) {
       const u = byId.get(id);
       if (u) out.push(u);

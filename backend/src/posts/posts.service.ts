@@ -104,6 +104,7 @@ export class PostsService {
     list: FeedPostWithDisplayName[],
   ): Promise<FeedPostWithDisplayName[]> {
     if (list.length === 0) return list;
+    // Deduplicate author ids so a prolific author doesn't cause redundant lookups.
     const equipped = await this.cosmetics.equippedForUsers([
       ...new Set(list.map((p) => p.authorId)),
     ]);

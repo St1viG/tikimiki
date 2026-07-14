@@ -116,6 +116,7 @@ export function LeaderboardClient() {
     };
   }, [period, hackFilter]);
 
+  // Ranked without the search filter so the podium and "your position" card always show true rankings.
   const rankedFull = useMemo<RankedEntry[]>(
     () => entries.map((r, i) => ({ ...r, rank: i + 1 })),
     [entries],
@@ -264,6 +265,7 @@ export function LeaderboardClient() {
 
             {ranked.map((r) => {
               const isMe = user?.userId === r.userId;
+              // Clamp: ranks beyond index 4 reuse the last palette class.
               const avClass = AV_BY_RANK[Math.min(r.rank - 1, AV_BY_RANK.length - 1)];
               return (
                 <div className={`lb-grid lb-row${isMe ? " lb-me" : ""}`} key={r.userId}>

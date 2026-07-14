@@ -83,7 +83,7 @@ export function HexAvatar({ seed, size = 64, className }: AvatarArtProps) {
     const [bx, by] = verts[(i + 1) % 6];
     return [(ax + bx) / 2, (ay + by) / 2] as [number, number];
   });
-  // Pull the inner ring toward the center so outer facets stay slim and bright.
+  // Randomising innerScale in a narrow band keeps the "cut gem" lattice recognisable while varying per seed.
   const innerScale = rng.range(0.5, 0.62);
   const innerVerts = verts.map(([x, y]) => [
     CX + (x - CX) * innerScale,
@@ -96,7 +96,7 @@ export function HexAvatar({ seed, size = 64, className }: AvatarArtProps) {
      axis: wedge pairs (0,5), (1,4), (2,3) share a lightness so the gem reads as
      one symmetric cut. We derive 3 base values + a couple of accents. */
   const baseL = [rng.range(0.18, 0.42), rng.range(0.4, 0.7), rng.range(0.3, 0.55)];
-  // wedge i -> mirror partner; same-color pairs across the vertical axis.
+  // Indices 0..5 map to pairs (0,5), (1,4), (2,3) to enforce left-right symmetry.
   const wedgeL = [baseL[0], baseL[1], baseL[2], baseL[2], baseL[1], baseL[0]];
   // Outer ring a touch brighter than its wedge (light grazes the cut edges).
   const outerBoost = rng.range(0.14, 0.26);

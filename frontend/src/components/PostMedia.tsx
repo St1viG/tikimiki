@@ -93,6 +93,8 @@ export function PostMedia({
   // ONE stable frame for the whole post: the snapped ratio of the first item
   // (or the lowest-index item measured so far). Fixed across slides → no morph,
   // arrows stay put, no letterbox.
+  // Always use the first item's ratio; if it hasn't loaded yet, fall back to
+  // the lowest-indexed item that has, to avoid an empty/unsized frame.
   const keys = Object.keys(ratios)
     .map(Number)
     .sort((a, b) => a - b);

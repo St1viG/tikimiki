@@ -36,6 +36,7 @@ function xmur3(str: string): () => number {
   };
 }
 
+// sfc32: a 128-bit state small-fast counter PRNG with a long period and good avalanche.
 function sfc32(a: number, b: number, c: number, d: number): () => number {
   return () => {
     a |= 0;
@@ -67,6 +68,7 @@ export interface Rng {
 
 /** Build a deterministic RNG from any seed string. */
 export function makeRng(seed: string): Rng {
+  // Empty seed would produce a degenerate hash; fall back to a stable placeholder.
   const s = xmur3(seed || "tikimiki");
   const r = sfc32(s(), s(), s(), s());
   return {

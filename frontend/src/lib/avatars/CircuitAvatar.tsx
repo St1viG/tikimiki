@@ -18,6 +18,7 @@ import {
 } from "@/lib/avatars/core";
 
 /** Stable, collision-free id suffix from the seed (for gradient/filter ids). */
+// FNV-1a 32-bit: each SVG rendered on the same page needs unique <defs> ids or gradients bleed across avatars.
 function seedHash(seed: string): string {
   let h = 2166136261 >>> 0;
   for (let i = 0; i < seed.length; i++) {
@@ -52,8 +53,7 @@ export function CircuitAvatar({ seed, size = 64, className }: AvatarArtProps) {
   const rng = makeRng(seed);
   const id = seedHash(seed);
 
-  // Bias the dominant accent toward electric lemon (the brand "voltage"),
-  // but still allow the full cohesive palette for variety.
+  // Lemon is AVATAR_ACCENTS[0]; a 60% probability gives it outsized presence without monopolising the set.
   const accent: AvatarAccent = rng.bool(0.6)
     ? AVATAR_ACCENTS[0] // lemon
     : rng.pick(AVATAR_ACCENTS);

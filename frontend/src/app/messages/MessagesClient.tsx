@@ -75,9 +75,12 @@ export function MessagesClient() {
       .catch(() => !cancelled && setMessages([]));
 
     const s = getSocket();
+    // Subscribe to server-push events for this thread only; unsubscribe on cleanup.
     s?.emit("joinConversation", activeId);
     const onDm = (msg: ChatMessage) => {
       if (msg.conversationId !== activeId) return;
+      // A message may arrive via both the REST response and the socket push —
+      // deduplicate by messageId to avoid double-rendering.
       setMessages((prev) =>
         prev && prev.some((m) => m.messageId === msg.messageId) ? prev : [...(prev ?? []), msg],
       );
