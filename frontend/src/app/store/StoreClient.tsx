@@ -88,6 +88,9 @@ export function StoreClient() {
   const [submitting, setSubmitting] = useState(false);
   const [selectedSize, setSelectedSize] = useState("L");
   const [deliveryAddress, setDeliveryAddress] = useState("");
+  const [deliveryCity, setDeliveryCity] = useState("");
+  const [deliveryZip, setDeliveryZip] = useState("");
+  const [deliveryCountry, setDeliveryCountry] = useState("RS");
   const [deliveryPhone, setDeliveryPhone] = useState("");
 
   // Toast
@@ -160,6 +163,9 @@ export function StoreClient() {
       const firstVariant = item.variants?.[0]?.label;
       setSelectedSize(firstVariant ?? "L");
       setDeliveryAddress("");
+      setDeliveryCity("");
+      setDeliveryZip("");
+      setDeliveryCountry("RS");
       setDeliveryPhone("");
     }
   }
@@ -201,24 +207,13 @@ export function StoreClient() {
         // Map the chosen size label back to its variant id (if any).
         const variantId = item.variants?.find((v) => v.label === selectedSize)?.variantId;
         const profile = await api.getMyProfile();
-        // NOTE: the BuyModal currently collects a single free-text delivery
-        // line ("street, city, postal code"), but MerchOrderBody requires
-        // separate shippingCity / shippingCountry / shippingZip. Until the
-        // modal exposes discrete fields, we send the whole typed line as
-        // shippingAddress and leave the structured fields blank rather than
-        // emit "—" sentinel glyphs. FLAGGED for backend/UX follow-up: either
-        // split the address form or relax the backend to a single address.
-        console.warn(
-          "[store] merch order sent with unstructured address — " +
-            "shippingCity/Country/Zip not collected by the modal (FLAGGED).",
-        );
         const res = await api.orderMerch(item.merchId, {
           variantId,
           shippingName: profile.username,
           shippingAddress: deliveryAddress.trim(),
-          shippingCity: "",
-          shippingCountry: "",
-          shippingZip: "",
+          shippingCity: deliveryCity.trim(),
+          shippingCountry: deliveryCountry.trim(),
+          shippingZip: deliveryZip.trim(),
         });
         setXp(res.newBalance);
         closeModal();
@@ -402,6 +397,12 @@ export function StoreClient() {
         onSelectSize={setSelectedSize}
         deliveryAddress={deliveryAddress}
         onDeliveryAddress={setDeliveryAddress}
+        deliveryCity={deliveryCity}
+        onDeliveryCity={setDeliveryCity}
+        deliveryZip={deliveryZip}
+        onDeliveryZip={setDeliveryZip}
+        deliveryCountry={deliveryCountry}
+        onDeliveryCountry={setDeliveryCountry}
         deliveryPhone={deliveryPhone}
         onDeliveryPhone={setDeliveryPhone}
         onClose={closeModal}

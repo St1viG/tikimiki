@@ -27,11 +27,16 @@ const M = {
     sr: "Da li si siguran/na da želiš da kupiš ovaj artikal?",
   },
   sizeLabel: { en: "Choose size", sr: "Izaberi veličinu" },
-  deliveryAddr: { en: "Delivery address", sr: "Adresa dostave" },
+  deliveryAddr: { en: "Street address", sr: "Ulica i broj" },
   deliveryAddrPh: {
-    en: "Street and number, city, postal code",
-    sr: "Ulica i broj, grad, poštanski broj",
+    en: "Street and number",
+    sr: "Ulica i broj",
   },
+  deliveryCity: { en: "City", sr: "Grad" },
+  deliveryCityPh: { en: "e.g. Belgrade", sr: "npr. Beograd" },
+  deliveryZip: { en: "Postal code", sr: "Poštanski broj" },
+  deliveryZipPh: { en: "e.g. 11000", sr: "npr. 11000" },
+  deliveryCountry: { en: "Country", sr: "Država" },
   deliveryPhone: { en: "Contact phone", sr: "Kontakt telefon" },
   deficitTitle: { en: "You are missing", sr: "Nedostaje ti" },
   deficitSub1: { en: "You have", sr: "Imaš" },
@@ -48,8 +53,20 @@ const M = {
   confirmBtn: { en: "Confirm purchase", sr: "Potvrdi kupovinu" },
   earnBtn: { en: "Earn XP", sr: "Zaradi XP" },
   warnAddr: { en: "Enter delivery address.", sr: "Unesi adresu dostave." },
+  warnCity: { en: "Enter your city.", sr: "Unesi grad." },
+  warnZip: { en: "Enter your postal code.", sr: "Unesi poštanski broj." },
   warnPhone: { en: "Enter contact phone.", sr: "Unesi kontakt telefon." },
 } as const;
+
+/** Countries offered in the delivery form, 2-letter codes as required by the backend. */
+const COUNTRIES = [
+  { code: "RS", label: "Srbija" },
+  { code: "BA", label: "Bosna i Hercegovina" },
+  { code: "HR", label: "Hrvatska" },
+  { code: "ME", label: "Crna Gora" },
+  { code: "MK", label: "Severna Makedonija" },
+  { code: "SI", label: "Slovenija" },
+] as const;
 
 export type ModalState =
   | { open: false }
@@ -71,6 +88,12 @@ type Props = {
   onSelectSize: (s: string) => void;
   deliveryAddress: string;
   onDeliveryAddress: (v: string) => void;
+  deliveryCity: string;
+  onDeliveryCity: (v: string) => void;
+  deliveryZip: string;
+  onDeliveryZip: (v: string) => void;
+  deliveryCountry: string;
+  onDeliveryCountry: (v: string) => void;
   deliveryPhone: string;
   onDeliveryPhone: (v: string) => void;
   onClose: () => void;
@@ -86,6 +109,12 @@ export function BuyModal({
   onSelectSize,
   deliveryAddress,
   onDeliveryAddress,
+  deliveryCity,
+  onDeliveryCity,
+  deliveryZip,
+  onDeliveryZip,
+  deliveryCountry,
+  onDeliveryCountry,
   deliveryPhone,
   onDeliveryPhone,
   onClose,
@@ -116,9 +145,19 @@ export function BuyModal({
     // Only physical merch collects/validates a shipping address.
     if (requiresDelivery) {
       const addr = deliveryAddress.trim();
+      const city = deliveryCity.trim();
+      const zip = deliveryZip.trim();
       const phone = deliveryPhone.trim();
       if (!addr) {
         onWarnToast(t("warnAddr"));
+        return;
+      }
+      if (!city) {
+        onWarnToast(t("warnCity"));
+        return;
+      }
+      if (!zip) {
+        onWarnToast(t("warnZip"));
         return;
       }
       if (!phone) {
@@ -196,6 +235,55 @@ export function BuyModal({
               value={deliveryAddress}
               onChange={(e) => onDeliveryAddress(e.target.value)}
             />
+            <div
+              className="modal-field-row"
+              style={{ display: "flex", gap: "12px", marginTop: "12px" }}
+            >
+              <div style={{ flex: 2 }}>
+                <div className="modal-size-label">
+                  <label htmlFor="delivery-city">{t("deliveryCity")}</label>
+                </div>
+                <input
+                  type="text"
+                  className="modal-field-input"
+                  id="delivery-city"
+                  placeholder={t("deliveryCityPh")}
+                  aria-label={t("deliveryCity")}
+                  value={deliveryCity}
+                  onChange={(e) => onDeliveryCity(e.target.value)}
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <div className="modal-size-label">
+                  <label htmlFor="delivery-zip">{t("deliveryZip")}</label>
+                </div>
+                <input
+                  type="text"
+                  className="modal-field-input"
+                  id="delivery-zip"
+                  placeholder={t("deliveryZipPh")}
+                  aria-label={t("deliveryZip")}
+                  value={deliveryZip}
+                  onChange={(e) => onDeliveryZip(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="modal-size-label" style={{ marginTop: "12px" }}>
+              <label htmlFor="delivery-country">{t("deliveryCountry")}</label>
+            </div>
+            <select
+              className="modal-field-input"
+              id="delivery-country"
+              aria-label={t("deliveryCountry")}
+              value={deliveryCountry}
+              onChange={(e) => onDeliveryCountry(e.target.value)}
+            >
+              {COUNTRIES.map((c) => (
+                <option key={c.code} value={c.code}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
             <div className="modal-size-label" style={{ marginTop: "12px" }}>
               <label htmlFor="delivery-phone">{t("deliveryPhone")}</label>
             </div>
