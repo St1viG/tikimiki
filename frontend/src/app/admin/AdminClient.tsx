@@ -84,7 +84,8 @@ const M = {
   roleAll: { en: "Role: All", sr: "Uloga: Svi" },
   status: { en: "Status", sr: "Status" },
   regDate: { en: "Registration date", sr: "Datum registracije" },
-  sortMostActive: { en: "Most active", sr: "Najaktivniji" },
+  sortNewest: { en: "Newest", sr: "Najnovije" },
+  sortOldest: { en: "Oldest", sr: "Najstarije" },
   colUser: { en: "User", sr: "Korisnik" },
   colEmail: { en: "Email", sr: "Email" },
   colRole: { en: "Role", sr: "Uloga" },
@@ -299,6 +300,9 @@ export function AdminClient() {
   });
   const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
   const [userSearch, setUserSearch] = useState("");
+  const [userRoleFilter, setUserRoleFilter] = useState<"all" | AdminUser["role"]>("all");
+  const [userStatusFilter, setUserStatusFilter] = useState<"all" | "active" | "banned">("all");
+  const [userRegDateSort, setUserRegDateSort] = useState<"newest" | "oldest">("newest");
   const [orgs, setOrgs] = useState<{
     pending: AdminOrg[];
     verified: AdminOrg[];
@@ -636,6 +640,33 @@ export function AdminClient() {
         return "adm-role-clan";
     }
   };
+
+  // Users-tab filter chips — cycle through states on click (same pattern as
+  // the Hackathons page's type/sort chips), applied client-side over the
+  // already-fetched page of users.
+  const cycleUserRoleFilter = () =>
+    setUserRoleFilter((r) =>
+      r === "all"
+        ? "admin"
+        : r === "admin"
+          ? "organization"
+          : r === "organization"
+            ? "member"
+            : "all",
+    );
+  const cycleUserStatusFilter = () =>
+    setUserStatusFilter((s) => (s === "all" ? "active" : s === "active" ? "banned" : "all"));
+  const toggleUserRegDateSort = () =>
+    setUserRegDateSort((s) => (s === "newest" ? "oldest" : "newest"));
+
+  const displayedUsers = adminUsers
+    .filter((u) => userRoleFilter === "all" || u.role === userRoleFilter)
+    .filter((u) => userStatusFilter === "all" || u.banned === (userStatusFilter === "banned"))
+    .slice()
+    .sort((a, b) => {
+      const diff = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      return userRegDateSort === "newest" ? -diff : diff;
+    });
 
   const orgInitials = (name: string): string => {
     const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -1044,26 +1075,33 @@ export function AdminClient() {
               />
             </div>
             <div className="hk-chips-row">
-              <button className="hk-chip hk-chip-active">
-                {t("roleAll")}{" "}
+              <button
+                className={`hk-chip${userRoleFilter !== "all" ? " hk-chip-active" : ""}`}
+                aria-pressed={userRoleFilter !== "all"}
+                onClick={cycleUserRoleFilter}
+              >
+                {userRoleFilter === "all"
+                  ? t("roleAll")
+                  : `${t("colRole")}: ${roleLabel(userRoleFilter)}`}{" "}
                 <span className="hk-chip-arrow">
                   <Icon name="chevron-down" />
                 </span>
               </button>
-              <button className="hk-chip">
-                {t("status")}{" "}
+              <button
+                className={`hk-chip${userStatusFilter !== "all" ? " hk-chip-active" : ""}`}
+                aria-pressed={userStatusFilter !== "all"}
+                onClick={cycleUserStatusFilter}
+              >
+                {userStatusFilter === "all"
+                  ? t("status")
+                  : `${t("status")}: ${userStatusFilter === "active" ? t("statusActive") : t("statusBanned")}`}{" "}
                 <span className="hk-chip-arrow">
                   <Icon name="chevron-down" />
                 </span>
               </button>
-              <button className="hk-chip">
+              <button className="hk-chip-sort" onClick={toggleUserRegDateSort}>
                 {t("regDate")}{" "}
-                <span className="hk-chip-arrow">
-                  <Icon name="chevron-down" />
-                </span>
-              </button>
-              <button className="hk-chip-sort">
-                {t("sortLabel")} <strong>{t("sortMostActive")}</strong>{" "}
+                <strong>{userRegDateSort === "newest" ? t("sortNewest") : t("sortOldest")}</strong>{" "}
                 <span className="hk-chip-arrow">
                   <Icon name="chevron-down" />
                 </span>
@@ -1086,14 +1124,14 @@ export function AdminClient() {
                 </tr>
               </thead>
               <tbody>
-                {adminUsers.length === 0 ? (
+                {displayedUsers.length === 0 ? (
                   <tr>
                     <td colSpan={6} style={{ color: "var(--muted)" }}>
                       {t("noUsers")}
                     </td>
                   </tr>
                 ) : (
-                  adminUsers.map((user) => (
+                  displayedUsers.map((user) => (
                     <tr key={user.userId}>
                       <td>
                         <div className="adm-user-cell">
@@ -1146,7 +1184,7 @@ export function AdminClient() {
           </div>
 
           <div className="adm-empty-foot">
-            {adminUsers.length} <a>{t("nextPage")}</a>
+            {displayedUsers.length} <a>{t("nextPage")}</a>
           </div>
         </section>
 

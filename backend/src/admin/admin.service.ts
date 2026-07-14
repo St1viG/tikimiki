@@ -1,5 +1,6 @@
 import { ConflictException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { and, eq, gte, ilike, inArray, isNull, or, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import { AuthzService } from "../common/authz.service";
 import { DAY_MS } from "../common/constants";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
@@ -250,26 +251,33 @@ export class AdminService {
   async listUsers(callerId: string, query: ListUsersQuery): Promise<UserRowDto[]> {
     await this.authz.assertAdmin(callerId);
 
-    const conditions = [isNull(users.deletedAt)];
+    // Aliased so the correlated EXISTS subqueries below qualify the outer
+    // user_id as "u"."user_id" — left unaliased, drizzle emits a bare
+    // "user_id" that Postgres resolves against the subquery's OWN table
+    // (which also has a user_id column), turning e.g. "does this admin row
+    // belong to this user" into "does any admin row exist" for every user.
+    const u = alias(users, "u");
+
+    const conditions = [isNull(u.deletedAt)];
     if (query.search) {
       const pattern = `%${query.search}%`;
-      const searchClause = or(ilike(users.username, pattern), ilike(users.email, pattern));
+      const searchClause = or(ilike(u.username, pattern), ilike(u.email, pattern));
       if (searchClause) conditions.push(searchClause);
     }
 
     const rows = await this.db
       .select({
-        userId: users.userId,
-        username: users.username,
-        email: users.email,
-        createdAt: users.createdAt,
-        isAdmin: sql<boolean>`exists (select 1 from administrators a where a.user_id = ${users.userId})`,
-        isOrg: sql<boolean>`exists (select 1 from organizations o where o.user_id = ${users.userId})`,
-        banned: sql<boolean>`exists (select 1 from user_bans b where b.user_id = ${users.userId} and b.lifted_at is null)`,
+        userId: u.userId,
+        username: u.username,
+        email: u.email,
+        createdAt: u.createdAt,
+        isAdmin: sql<boolean>`exists (select 1 from administrators a where a.user_id = u.user_id)`,
+        isOrg: sql<boolean>`exists (select 1 from organizations o where o.user_id = u.user_id)`,
+        banned: sql<boolean>`exists (select 1 from user_bans b where b.user_id = u.user_id and b.lifted_at is null)`,
       })
-      .from(users)
+      .from(u)
       .where(and(...conditions))
-      .orderBy(users.username)
+      .orderBy(u.username)
       .limit(100);
 
     return rows.map((r) => ({
