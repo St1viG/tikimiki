@@ -695,6 +695,12 @@
 .pm-scroll > .post > .pm-wrap {
   margin-left: 0;
 }
+/* Keep the post's own "⋯" menu (and follow button) clear of the modal's
+   fixed close button, which sits absolutely at top:12/right:12 above the
+   scrollable content and would otherwise overlap/hide it. */
+.pm-scroll .post-head-actions {
+  margin-right: 36px;
+}
 /* Pull the like/comment row left by the first button's padding (.act has 12px
    left padding) so the like icon lines up with the content's left edge. */
 .pm-scroll > .post > .post-actions {
