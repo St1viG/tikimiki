@@ -175,7 +175,7 @@ export class NotificationsService {
         userId: r.userId,
         type: "mention",
         title: "Pomenuti ste",
-        body: `${opts.actorUsername} vas je pomenuo.`,
+        body: `@${opts.actorUsername} vas je pomenuo.`,
         entityType: opts.entityType,
         entityId: opts.entityId,
       });

@@ -203,7 +203,7 @@ export class EngagementService {
         userId,
         "post_comment",
         "Novi komentar",
-        `${dto.authorUsername} je komentarisao tvoju objavu.`,
+        `@${dto.authorUsername} je komentarisao tvoju objavu.`,
         postId,
       );
     }
@@ -346,7 +346,7 @@ export class EngagementService {
           userId,
           "post_reaction",
           "Nova reakcija",
-          `${u?.username ?? "Neko"} je lajkovao tvoju objavu.`,
+          `${u ? `@${u.username}` : "Neko"} je lajkovao tvoju objavu.`,
           postId,
         );
       }

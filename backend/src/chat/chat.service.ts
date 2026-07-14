@@ -1755,7 +1755,7 @@ export class ChatService {
           userId: o.userId,
           type: "new_direct_message" as const,
           title: "Nova poruka",
-          body: `${sender.username}: ${content.slice(0, 80)}`,
+          body: `@${sender.username}: ${content.slice(0, 80)}`,
           entityType: "message" as const,
           entityId: message.messageId,
         })),
@@ -1765,7 +1765,7 @@ export class ChatService {
         this.realtime.emitNotification(o.userId, {
           type: "new_direct_message",
           title: "Nova poruka",
-          body: `${sender.username}: ${content.slice(0, 80)}`,
+          body: `@${sender.username}: ${content.slice(0, 80)}`,
         });
       }
     }
