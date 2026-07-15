@@ -3895,16 +3895,17 @@ img.msg-att {
 
 .kanban-board {
   display: flex;
+  flex-wrap: wrap;
   gap: 14px;
   padding: 0 28px 28px;
   flex: 1;
-  overflow-x: auto;
+  overflow-y: auto;
   align-items: flex-start;
+  align-content: flex-start;
 }
 .kanban-col {
-  flex: 1;
-  min-width: 230px;
-  max-width: 320px;
+  flex: 0 0 260px;
+  width: 260px;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--r);
@@ -3914,15 +3915,35 @@ img.msg-att {
 .kanban-col-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 6px;
   padding: 13px 14px 9px;
 }
 .kanban-col-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 13px;
   font-weight: 700;
   color: var(--ink);
+  cursor: pointer;
+}
+.kanban-col-rename-input {
+  flex: 1;
+  min-width: 0;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--violet-light);
+  border-radius: 6px;
+  padding: 2px 6px;
+  outline: none;
 }
 .kanban-col-count {
+  flex-shrink: 0;
   font-size: 11px;
   font-weight: 700;
   color: var(--muted);
@@ -3931,6 +3952,44 @@ img.msg-att {
   border-radius: 10px;
   padding: 1px 8px;
 }
+.kanban-col-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.kanban-col-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background: transparent;
+  color: var(--muted);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    background 0.15s;
+}
+.kanban-col-btn .ic-sm {
+  width: 13px;
+  height: 13px;
+}
+.kanban-col-btn:hover {
+  color: var(--ink);
+  background: var(--surface-2);
+}
+.kanban-col-btn-danger:hover {
+  color: var(--red);
+  background: color-mix(in srgb, var(--red) 15%, transparent);
+}
+.kanban-col-btn-confirm,
+.kanban-col-btn-confirm:hover {
+  color: #fff;
+  background: var(--red);
+}
 .kanban-cards {
   padding: 0 10px 12px;
   display: flex;
@@ -3938,10 +3997,11 @@ img.msg-att {
   gap: 8px;
 }
 .kanban-card {
+  position: relative;
   background: var(--surface-2);
   border: 1px solid var(--line);
   border-radius: var(--r-sm);
-  padding: 11px 12px;
+  padding: 11px 30px 11px 12px;
   cursor: grab;
   transition:
     border-color 0.15s,
@@ -3965,12 +4025,29 @@ img.msg-att {
   font-weight: 700;
   color: var(--ink);
   margin-bottom: 4px;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+.kanban-card-title-input {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--violet-light);
+  border-radius: 6px;
+  padding: 2px 6px;
+  margin-bottom: 4px;
+  outline: none;
 }
 .kanban-card-desc {
   font-size: 11.5px;
   color: var(--muted);
   line-height: 1.5;
   margin-bottom: 9px;
+  overflow-wrap: anywhere;
 }
 .kanban-card-footer {
   display: flex;
@@ -4013,6 +4090,49 @@ img.msg-att {
   font-size: 9px;
   font-weight: 800;
   flex-shrink: 0;
+}
+.kanban-card-del {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  background: transparent;
+  color: var(--muted);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    background 0.15s;
+}
+.kanban-card-del:hover {
+  color: var(--red);
+  background: color-mix(in srgb, var(--red) 15%, transparent);
+}
+.kanban-assign-select {
+  width: 100%;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 3px 6px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.kanban-assign-select:hover {
+  border-color: var(--violet-light);
+}
+.kanban-assign-select-set {
+  color: var(--violet-light);
+  background: color-mix(in srgb, var(--violet) 28%, var(--surface));
+  border-color: color-mix(in srgb, var(--violet) 40%, var(--surface));
 }
 .kanban-add-task {
   width: 100%;
@@ -4120,6 +4240,64 @@ img.msg-att {
 .kanban-add-cancel:hover {
   color: var(--ink);
   border-color: var(--ink);
+}
+
+/* "Add column" tile at the end of the board. */
+.kanban-add-col {
+  flex: 0 0 260px;
+  width: 260px;
+}
+.kanban-add-col-btn {
+  width: 100%;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: transparent;
+  color: var(--muted);
+  border: 1px dashed var(--line);
+  border-radius: var(--r);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    border-color 0.15s;
+}
+.kanban-add-col-btn .ic-sm {
+  width: 14px;
+  height: 14px;
+}
+.kanban-add-col-btn:hover {
+  color: var(--violet-light);
+  border-color: var(--violet-light);
+}
+.kanban-add-col-form {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  background: var(--surface);
+  border: 1px solid var(--violet-light);
+  border-radius: var(--r);
+  padding: 9px;
+}
+.kanban-add-col-input {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 9px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.kanban-add-col-input:focus {
+  border-color: var(--violet-light);
 }
 
 /* Right-click context menus — hover highlight on items. The items carry an

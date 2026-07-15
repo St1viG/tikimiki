@@ -51,6 +51,9 @@ import {
   createKanbanCard,
   deleteKanbanCard,
   updateKanbanCard,
+  addKanbanColumn,
+  updateKanbanColumn,
+  deleteKanbanColumn,
   getVotingStatus,
   setVotingWindow,
   createConversation,
@@ -100,6 +103,7 @@ import {
   type ProjectVote,
   type KanbanBoard,
   type KanbanCard,
+  type KanbanColumn,
   type Bounty,
   type HackathonResults,
   type ServerMember,
@@ -596,6 +600,9 @@ export function CohorClient() {
   // Real Kanban board for the user's first team.
   const [myTeamId, setMyTeamId] = useState<string | null>(null);
   const [myTeamName, setMyTeamName] = useState<string | null>(null);
+  const [myTeamMembers, setMyTeamMembers] = useState<
+    { userId: string; username: string; displayName?: string | null }[]
+  >([]);
   const [board, setBoard] = useState<KanbanBoard | null>(null);
   const [dragCardId, setDragCardId] = useState<string | null>(null);
   const [dragOverCol, setDragOverCol] = useState<string | null>(null);
@@ -604,6 +611,18 @@ export function CohorClient() {
   const [newCardTitle, setNewCardTitle] = useState("");
   const [newCardDesc, setNewCardDesc] = useState("");
   const [newCardBusy, setNewCardBusy] = useState(false);
+  // Column rename (click title → inline input).
+  const [renamingColId, setRenamingColId] = useState<string | null>(null);
+  const [renameColValue, setRenameColValue] = useState("");
+  // Column delete: inline two-step confirm (no browser confirm()).
+  const [colConfirmDelete, setColConfirmDelete] = useState<string | null>(null);
+  // Inline "add column" composer.
+  const [addingColumn, setAddingColumn] = useState(false);
+  const [newColName, setNewColName] = useState("");
+  const [newColBusy, setNewColBusy] = useState(false);
+  // Card title rename (click title → inline input).
+  const [renamingCardId, setRenamingCardId] = useState<string | null>(null);
+  const [renameCardValue, setRenameCardValue] = useState("");
 
   // Group-DM creation modal.
   const [showGroupModal, setShowGroupModal] = useState(false);
@@ -1226,6 +1245,7 @@ export function CohorClient() {
   useEffect(() => {
     setMyTeamId(null);
     setMyTeamName(null);
+    setMyTeamMembers([]);
     if (!hackathonId) return;
     let cancelled = false;
     (async () => {
@@ -1236,6 +1256,7 @@ export function CohorClient() {
         if (mine) {
           setMyTeamId(mine.teamId);
           setMyTeamName(mine.name);
+          setMyTeamMembers(mine.members);
         }
       } catch {
         /* ignore — fall back to the static fallback board */
@@ -1409,6 +1430,108 @@ export function CohorClient() {
       }
     },
     [t],
+  );
+
+  // Assign (or unassign) a card to a team member.
+  const assignCard = useCallback(
+    (cardId: string, userId: string | null) => {
+      setBoard((prev) => {
+        if (!prev) return prev;
+        const assignee = userId ? myTeamMembers.find((m) => m.userId === userId) : null;
+        return {
+          ...prev,
+          columns: prev.columns.map((c) => ({
+            ...c,
+            cards: c.cards.map((card) =>
+              card.cardId === cardId
+                ? {
+                    ...card,
+                    assignedTo: userId,
+                    assignedToUsername: assignee ? assignee.username : null,
+                  }
+                : card,
+            ),
+          })),
+        };
+      });
+      updateKanbanCard(cardId, { assignedTo: userId }).catch(() => refreshBoard());
+    },
+    [myTeamMembers, refreshBoard],
+  );
+
+  // Open the inline "add column" composer.
+  const openAddColumn = useCallback(() => {
+    setAddingColumn(true);
+    setNewColName("");
+  }, []);
+
+  // Submit the inline column composer → create the column, refetch, reset.
+  const submitNewColumn = useCallback(() => {
+    if (!myTeamId || newColBusy) return;
+    const name = newColName.trim();
+    if (!name) return;
+    setNewColBusy(true);
+    addKanbanColumn(myTeamId, name)
+      .then(() => refreshBoard())
+      .then(() => {
+        setAddingColumn(false);
+        setNewColName("");
+      })
+      .catch(() => {
+        /* keep the composer open on error */
+      })
+      .finally(() => setNewColBusy(false));
+  }, [myTeamId, newColName, newColBusy, refreshBoard]);
+
+  // Start renaming a column (click its title).
+  const startRenameColumn = useCallback((col: KanbanColumn) => {
+    setRenamingColId(col.columnId);
+    setRenameColValue(col.name);
+  }, []);
+
+  // Commit a column rename on blur/Enter; no-op if unchanged or emptied.
+  const commitRenameColumn = useCallback(
+    (columnId: string) => {
+      const name = renameColValue.trim();
+      setRenamingColId(null);
+      const col = board?.columns.find((c) => c.columnId === columnId);
+      if (!col || !name || col.name === name) return;
+      updateKanbanColumn(columnId, name)
+        .then(() => refreshBoard())
+        .catch(() => refreshBoard());
+    },
+    [board, renameColValue, refreshBoard],
+  );
+
+  // Delete a column (cards are migrated to the first remaining column server-side).
+  const confirmDeleteColumn = useCallback(
+    (columnId: string) => {
+      setColConfirmDelete(null);
+      deleteKanbanColumn(columnId)
+        .then(() => refreshBoard())
+        .catch(() => refreshBoard());
+    },
+    [refreshBoard],
+  );
+
+  // Start renaming a card's title (click its title).
+  const startRenameCard = useCallback((card: KanbanCard) => {
+    setRenamingCardId(card.cardId);
+    setRenameCardValue(card.title);
+  }, []);
+
+  // Commit a card title rename on blur/Enter; no-op if unchanged or emptied.
+  const commitRenameCard = useCallback(
+    (cardId: string) => {
+      const title = renameCardValue.trim();
+      setRenamingCardId(null);
+      const card = board?.columns.flatMap((c) => c.cards).find((cc) => cc.cardId === cardId);
+      if (!card || !title || card.title === title) return;
+      updateKanbanCard(cardId, { title })
+        .then(() => refreshBoard())
+        .catch(() => refreshBoard());
+    },
+    [board, renameCardValue, refreshBoard],
   );
 
   // Close the create-group modal and clear its draft fields.
@@ -4721,145 +4844,273 @@ export function CohorClient() {
                     <div className="kanban-head-sub">{t("kanbanSub")}</div>
                   </div>
                 </div>
-                {/* "Board settings" placeholder removed: kanban columns are fixed
-                  server-side; no column-CRUD API exists. Flagged for backend. */}
               </div>
 
               <div className="kanban-board">
                 {board ? (
-                  [...board.columns]
-                    .sort((a, b) => a.position - b.position)
-                    .map((col) => {
-                      const cards: KanbanCard[] = [...col.cards].sort(
-                        (a, b) => a.position - b.position,
-                      );
-                      return (
-                        <div
-                          className="kanban-col"
-                          key={col.columnId}
-                          onDragOver={(e) => {
-                            e.preventDefault();
-                            if (dragOverCol !== col.columnId) setDragOverCol(col.columnId);
-                          }}
-                          onDragLeave={() => {
-                            if (dragOverCol === col.columnId) setDragOverCol(null);
-                          }}
-                          onDrop={(e) => {
-                            e.preventDefault();
-                            const id = e.dataTransfer.getData("text/plain") || dragCardId;
-                            onDropCard(id, col.columnId);
-                            setDragCardId(null);
-                            setDragOverCol(null);
-                          }}
-                          style={
-                            dragOverCol === col.columnId
-                              ? { outline: "2px dashed var(--violet-light)" }
-                              : undefined
-                          }
-                        >
-                          <div className="kanban-col-header">
-                            <span className="kanban-col-title">{kanbanColLabel(col.name)}</span>
-                            <span className="kanban-col-count">{cards.length}</span>
-                          </div>
-                          <div className="kanban-cards">
-                            {cards.map((card) => (
-                              <div
-                                className="kanban-card"
-                                key={card.cardId}
-                                draggable
-                                onDragStart={(e) => {
-                                  e.dataTransfer.setData("text/plain", card.cardId);
-                                  e.dataTransfer.effectAllowed = "move";
-                                  setDragCardId(card.cardId);
-                                }}
-                                onDragEnd={() => {
-                                  setDragCardId(null);
-                                  setDragOverCol(null);
-                                }}
-                                style={{ cursor: "grab" }}
-                              >
-                                <div className="kanban-card-title">
-                                  {card.title}
+                  <>
+                    {[...board.columns]
+                      .sort((a, b) => a.position - b.position)
+                      .map((col) => {
+                        const cards: KanbanCard[] = [...col.cards].sort(
+                          (a, b) => a.position - b.position,
+                        );
+                        return (
+                          <div
+                            className="kanban-col"
+                            key={col.columnId}
+                            onDragOver={(e) => {
+                              e.preventDefault();
+                              if (dragOverCol !== col.columnId) setDragOverCol(col.columnId);
+                            }}
+                            onDragLeave={() => {
+                              if (dragOverCol === col.columnId) setDragOverCol(null);
+                            }}
+                            onDrop={(e) => {
+                              e.preventDefault();
+                              const id = e.dataTransfer.getData("text/plain") || dragCardId;
+                              onDropCard(id, col.columnId);
+                              setDragCardId(null);
+                              setDragOverCol(null);
+                            }}
+                            style={
+                              dragOverCol === col.columnId
+                                ? { outline: "2px dashed var(--violet-light)" }
+                                : undefined
+                            }
+                          >
+                            <div className="kanban-col-header">
+                              {renamingColId === col.columnId ? (
+                                <input
+                                  className="kanban-col-rename-input"
+                                  autoFocus
+                                  maxLength={100}
+                                  value={renameColValue}
+                                  onChange={(e) => setRenameColValue(e.target.value)}
+                                  onBlur={() => commitRenameColumn(col.columnId)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter") commitRenameColumn(col.columnId);
+                                    if (e.key === "Escape") setRenamingColId(null);
+                                  }}
+                                />
+                              ) : (
+                                <span
+                                  className="kanban-col-title"
+                                  title={t("kanbanRenameColumn")}
+                                  onClick={() => startRenameColumn(col)}
+                                >
+                                  {kanbanColLabel(col.name)}
+                                </span>
+                              )}
+                              <span className="kanban-col-count">{cards.length}</span>
+                              <div className="kanban-col-actions">
+                                {colConfirmDelete === col.columnId ? (
+                                  <button
+                                    type="button"
+                                    className="kanban-col-btn kanban-col-btn-danger kanban-col-btn-confirm"
+                                    title={t("kanbanDeleteColumnConfirm")}
+                                    onClick={() => confirmDeleteColumn(col.columnId)}
+                                  >
+                                    <Icon name="check" className="ic-sm" />
+                                  </button>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    className="kanban-col-btn kanban-col-btn-danger"
+                                    aria-label={t("kanbanDeleteColumn")}
+                                    title={t("kanbanDeleteColumn")}
+                                    onClick={() => setColConfirmDelete(col.columnId)}
+                                  >
+                                    <Icon name="trash" className="ic-sm" />
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                            <div className="kanban-cards">
+                              {cards.map((card) => (
+                                <div
+                                  className="kanban-card"
+                                  key={card.cardId}
+                                  draggable
+                                  onDragStart={(e) => {
+                                    e.dataTransfer.setData("text/plain", card.cardId);
+                                    e.dataTransfer.effectAllowed = "move";
+                                    setDragCardId(card.cardId);
+                                  }}
+                                  onDragEnd={() => {
+                                    setDragCardId(null);
+                                    setDragOverCol(null);
+                                  }}
+                                  style={{ cursor: "grab" }}
+                                >
                                   <button
                                     className="kanban-card-del"
                                     type="button"
                                     aria-label={t("kanbanRemoveCard")}
                                     title={t("kanbanRemoveCard")}
-                                    onClick={() => removeCard(card.cardId)}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      removeCard(card.cardId);
+                                    }}
                                   >
                                     <Icon name="x" className="ic-sm" />
                                   </button>
+                                  {renamingCardId === card.cardId ? (
+                                    <input
+                                      className="kanban-card-title-input"
+                                      autoFocus
+                                      maxLength={200}
+                                      value={renameCardValue}
+                                      onChange={(e) => setRenameCardValue(e.target.value)}
+                                      onBlur={() => commitRenameCard(card.cardId)}
+                                      onKeyDown={(e) => {
+                                        if (e.key === "Enter") commitRenameCard(card.cardId);
+                                        if (e.key === "Escape") setRenamingCardId(null);
+                                      }}
+                                      onClick={(e) => e.stopPropagation()}
+                                    />
+                                  ) : (
+                                    <div
+                                      className="kanban-card-title"
+                                      title={t("kanbanRenameCard")}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        startRenameCard(card);
+                                      }}
+                                    >
+                                      {card.title}
+                                    </div>
+                                  )}
+                                  {card.description && (
+                                    <div className="kanban-card-desc">{card.description}</div>
+                                  )}
+                                  {myTeamMembers.length > 0 && (
+                                    <div className="kanban-card-footer">
+                                      <select
+                                        className={`kanban-assign-select${
+                                          card.assignedToUsername ? " kanban-assign-select-set" : ""
+                                        }`}
+                                        value={card.assignedTo ?? ""}
+                                        aria-label={t("kanbanAssignAria")}
+                                        onClick={(e) => e.stopPropagation()}
+                                        onChange={(e) =>
+                                          assignCard(card.cardId, e.target.value || null)
+                                        }
+                                      >
+                                        <option value="">{t("kanbanUnassigned")}</option>
+                                        {myTeamMembers.map((m) => (
+                                          <option key={m.userId} value={m.userId}>
+                                            {m.displayName ?? m.username}
+                                          </option>
+                                        ))}
+                                      </select>
+                                    </div>
+                                  )}
                                 </div>
-                                {card.description && (
-                                  <div className="kanban-card-desc">{card.description}</div>
-                                )}
-                                {card.assignedToUsername && (
-                                  <div className="kanban-card-footer">
-                                    <span className="kanban-tag kanban-tag-dev">
-                                      {card.assignedToUsername}
-                                    </span>
+                              ))}
+                              {addingCol === col.columnId ? (
+                                <div className="kanban-add-form">
+                                  <input
+                                    className="kanban-add-input"
+                                    type="text"
+                                    autoFocus
+                                    maxLength={200}
+                                    placeholder={t("kanbanCardTitlePh")}
+                                    value={newCardTitle}
+                                    onChange={(e) => setNewCardTitle(e.target.value)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter" && !e.shiftKey) {
+                                        e.preventDefault();
+                                        submitNewCard();
+                                      } else if (e.key === "Escape") {
+                                        setAddingCol(null);
+                                      }
+                                    }}
+                                  />
+                                  <textarea
+                                    className="kanban-add-textarea"
+                                    rows={2}
+                                    maxLength={10000}
+                                    placeholder={t("kanbanCardDescPh")}
+                                    value={newCardDesc}
+                                    onChange={(e) => setNewCardDesc(e.target.value)}
+                                  />
+                                  <div className="kanban-add-actions">
+                                    <button
+                                      type="button"
+                                      className="kanban-add-submit"
+                                      disabled={newCardBusy || !newCardTitle.trim()}
+                                      onClick={submitNewCard}
+                                    >
+                                      {t("kanbanCreate")}
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className="kanban-add-cancel"
+                                      onClick={() => setAddingCol(null)}
+                                    >
+                                      {t("kanbanCancel")}
+                                    </button>
                                   </div>
-                                )}
-                              </div>
-                            ))}
-                            {addingCol === col.columnId ? (
-                              <div className="kanban-add-form">
-                                <input
-                                  className="kanban-add-input"
-                                  type="text"
-                                  autoFocus
-                                  maxLength={200}
-                                  placeholder={t("kanbanCardTitlePh")}
-                                  value={newCardTitle}
-                                  onChange={(e) => setNewCardTitle(e.target.value)}
-                                  onKeyDown={(e) => {
-                                    if (e.key === "Enter" && !e.shiftKey) {
-                                      e.preventDefault();
-                                      submitNewCard();
-                                    } else if (e.key === "Escape") {
-                                      setAddingCol(null);
-                                    }
-                                  }}
-                                />
-                                <textarea
-                                  className="kanban-add-textarea"
-                                  rows={2}
-                                  maxLength={10000}
-                                  placeholder={t("kanbanCardDescPh")}
-                                  value={newCardDesc}
-                                  onChange={(e) => setNewCardDesc(e.target.value)}
-                                />
-                                <div className="kanban-add-actions">
-                                  <button
-                                    type="button"
-                                    className="kanban-add-submit"
-                                    disabled={newCardBusy || !newCardTitle.trim()}
-                                    onClick={submitNewCard}
-                                  >
-                                    {t("kanbanCreate")}
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className="kanban-add-cancel"
-                                    onClick={() => setAddingCol(null)}
-                                  >
-                                    {t("kanbanCancel")}
-                                  </button>
                                 </div>
-                              </div>
-                            ) : (
-                              <button
-                                className="kanban-add-task"
-                                type="button"
-                                onClick={() => openAddCard(col.columnId)}
-                              >
-                                <Icon name="plus" className="ic-sm" /> {t("kanbanAddTask")}
-                              </button>
-                            )}
+                              ) : (
+                                <button
+                                  className="kanban-add-task"
+                                  type="button"
+                                  onClick={() => openAddCard(col.columnId)}
+                                >
+                                  <Icon name="plus" className="ic-sm" /> {t("kanbanAddTask")}
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    <div className="kanban-add-col">
+                      {addingColumn ? (
+                        <div className="kanban-add-col-form">
+                          <input
+                            className="kanban-add-col-input"
+                            type="text"
+                            autoFocus
+                            maxLength={100}
+                            placeholder={t("kanbanColumnNamePh")}
+                            value={newColName}
+                            onChange={(e) => setNewColName(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") submitNewColumn();
+                              if (e.key === "Escape") setAddingColumn(false);
+                            }}
+                          />
+                          <div className="kanban-add-actions">
+                            <button
+                              type="button"
+                              className="kanban-add-submit"
+                              disabled={newColBusy || !newColName.trim()}
+                              onClick={submitNewColumn}
+                            >
+                              {t("kanbanCreate")}
+                            </button>
+                            <button
+                              type="button"
+                              className="kanban-add-cancel"
+                              onClick={() => setAddingColumn(false)}
+                            >
+                              {t("kanbanCancel")}
+                            </button>
                           </div>
                         </div>
-                      );
-                    })
+                      ) : (
+                        <button
+                          className="kanban-add-col-btn"
+                          type="button"
+                          onClick={openAddColumn}
+                        >
+                          <Icon name="plus" className="ic-sm" /> {t("kanbanAddColumn")}
+                        </button>
+                      )}
+                    </div>
+                  </>
                 ) : (
                   <div className="kanban-empty">{t("kanbanEmpty")}</div>
                 )}
