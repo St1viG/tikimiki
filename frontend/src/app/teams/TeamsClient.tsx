@@ -63,6 +63,9 @@ const M = {
   tablistLabel: { en: "Filter teams", sr: "Filter timova" },
   tabMine: { en: "My teams", sr: "Moji timovi" },
   tabInvites: { en: "Invites", sr: "Pozivi" },
+  tabOpen: { en: "Open teams", sr: "Otvoreni timovi" },
+  tabSolo: { en: "Free agents", sr: "Slobodni igrači" },
+  tabBoard: { en: "Leaderboard", sr: "Rang lista" },
   createTeam: { en: "Create team", sr: "Kreiraj tim" },
   sectionMine: { en: "My teams", sr: "Moji timovi" },
   members: { en: "members", sr: "člana" },
@@ -366,6 +369,33 @@ export function TeamsClient() {
                 onClick={() => handleTabClick("invites")}
               >
                 {t("tabInvites")} <span className="tm-tab-count">{invitations.length}</span>
+              </button>
+              <button
+                className={`tm-tab${filter === "open" ? " tm-tab-active" : ""}`}
+                data-filter="open"
+                role="tab"
+                aria-selected={filter === "open"}
+                onClick={() => handleTabClick("open")}
+              >
+                {t("tabOpen")}
+              </button>
+              <button
+                className={`tm-tab${filter === "solo" ? " tm-tab-active" : ""}`}
+                data-filter="solo"
+                role="tab"
+                aria-selected={filter === "solo"}
+                onClick={() => handleTabClick("solo")}
+              >
+                {t("tabSolo")}
+              </button>
+              <button
+                className={`tm-tab${filter === "board" ? " tm-tab-active" : ""}`}
+                data-filter="board"
+                role="tab"
+                aria-selected={filter === "board"}
+                onClick={() => handleTabClick("board")}
+              >
+                {t("tabBoard")}
               </button>
             </div>
             <button className="btn btn-primary" onClick={() => setCreateOpen(true)}>

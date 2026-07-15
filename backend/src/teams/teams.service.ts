@@ -27,7 +27,11 @@ import {
 } from "../db/schema";
 import { NotificationsService } from "../notifications/notifications.service";
 
-type TeamNotifType = "team_invitation_received" | "team_request_received" | "team_request_accepted";
+type TeamNotifType =
+  | "team_invitation_received"
+  | "team_invitation_declined"
+  | "team_request_received"
+  | "team_request_accepted";
 import type { CreateTeamInput, InviteInput, JoinRequestInput } from "./dto";
 
 /* ── response shapes ──────────────────────────────────────── */
@@ -947,6 +951,32 @@ export class TeamsService {
       .update(teamInvitations)
       .set({ status: accept ? "accepted" : "declined", respondedAt: new Date() })
       .where(eq(teamInvitations.invitationId, invitationId));
+
+    // Let the leader know so they can invite someone else instead (SSU12 alt-flow 4).
+    if (!accept) {
+      const [u] = await this.db
+        .select({ username: users.username })
+        .from(users)
+        .where(eq(users.userId, userId))
+        .limit(1);
+      const [lead] = await this.db
+        .select({ leaderId: teamMembers.userId, teamName: teams.name })
+        .from(teamMembers)
+        .innerJoin(teams, eq(teams.teamId, teamMembers.teamId))
+        .where(
+          and(eq(teamMembers.teamId, inv.teamId), eq(teamMembers.role, "leader"), activeTeamMember),
+        )
+        .limit(1);
+      if (lead) {
+        await this.notifyTeam(
+          lead.leaderId,
+          "team_invitation_declined",
+          "Poziv odbijen",
+          `${u ? `@${u.username}` : "Pozvani korisnik"} je odbio/la poziv u tim ${lead.teamName}.`,
+          inv.teamId,
+        );
+      }
+    }
 
     return { success: true, status: accept ? "accepted" : "declined" };
   }

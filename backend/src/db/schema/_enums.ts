@@ -139,6 +139,7 @@ export const notificationType = pgEnum("notification_type", [
   "friend_request_received",
   "friend_request_accepted",
   "team_invitation_received",
+  "team_invitation_declined",
   "team_request_received",
   "team_request_accepted",
   "post_comment",

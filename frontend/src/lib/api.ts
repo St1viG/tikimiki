@@ -774,6 +774,19 @@ export interface TeamSuggestions {
 export const getTeamSuggestions = (hackathonId: string) =>
   GET<TeamSuggestions>(`/hackathons/${hackathonId}/team-suggestions`);
 
+// AI team proposal (SSU12 — one concrete combination, not the ongoing "Suggested" list above)
+export interface TeamProposal {
+  members: TeammateSuggestion[];
+  noCandidates: boolean;
+}
+export const getTeamProposal = (hackathonId: string, excludeUserIds: string[] = []) =>
+  POST<TeamProposal>(`/hackathons/${hackathonId}/team-proposal`, { excludeUserIds });
+export const acceptTeamProposal = (
+  hackathonId: string,
+  teamName: string,
+  memberUserIds: string[],
+) => POST<Team>(`/hackathons/${hackathonId}/team-proposal/accept`, { teamName, memberUserIds });
+
 // Applications
 export interface Application {
   applicationId: string;

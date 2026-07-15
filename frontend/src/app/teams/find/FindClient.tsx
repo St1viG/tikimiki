@@ -66,6 +66,9 @@ const M = {
   tabMine: { en: "My teams", sr: "Moji timovi" },
   tabInvites: { en: "Invites", sr: "Pozivi" },
   tabSuggested: { en: "Suggested", sr: "Predlozi" },
+  tabOpen: { en: "Open teams", sr: "Otvoreni timovi" },
+  tabSolo: { en: "Free agents", sr: "Slobodni igrači" },
+  tabBoard: { en: "Leaderboard", sr: "Rang lista" },
   createTeam: { en: "Create team", sr: "Kreiraj tim" },
   emptyTitle: { en: "You're not in a team yet", sr: "Nisi još u timu" },
   emptyDesc: {
@@ -298,6 +301,27 @@ export function FindClient() {
                 {suggestedTeammates.length > 0 && (
                   <span className="tm-tab-count">{suggestedTeammates.length}</span>
                 )}
+              </button>
+              <button
+                className={`tm-tab${filter === "open" ? " tm-tab-active" : ""}`}
+                data-filter="open"
+                onClick={() => switchTab("open")}
+              >
+                {t("tabOpen")}
+              </button>
+              <button
+                className={`tm-tab${filter === "solo" ? " tm-tab-active" : ""}`}
+                data-filter="solo"
+                onClick={() => switchTab("solo")}
+              >
+                {t("tabSolo")}
+              </button>
+              <button
+                className={`tm-tab${filter === "board" ? " tm-tab-active" : ""}`}
+                data-filter="board"
+                onClick={() => switchTab("board")}
+              >
+                {t("tabBoard")}
               </button>
             </div>
             <button className="btn btn-violet" onClick={() => setCreateOpen(true)}>

@@ -9,6 +9,7 @@ import { RailRight } from "@/components/shell/RailRight";
 import { useT } from "@/components/i18n/LanguageProvider";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { CalendarPopup } from "@/components/popups/CalendarPopup";
+import { TeamProposalPopup } from "@/components/popups/TeamProposalPopup";
 import { initials } from "@/lib/format";
 import {
   castVote,
@@ -16,6 +17,7 @@ import {
   getHackathonProjects,
   getHackathonResults,
   getMyApplications,
+  getMyTeams,
   getMyVote,
   getVotingStatus,
   type Application,
@@ -93,6 +95,7 @@ const M = {
   manageApps: { en: "Manage applications", sr: "Upravljaj prijavama" },
   editHackathon: { en: "Edit", sr: "Izmeni" },
   deadlinePassed: { en: "Applications are closed.", sr: "Prijave su zatvorene." },
+  findTeamBtn: { en: "Find a team", sr: "Pronađi tim" },
 
   statusPending: { en: "Pending review", sr: "Na čekanju" },
   statusApproved: { en: "Approved", sr: "Odobreno" },
@@ -145,6 +148,8 @@ export function HackathonDetailClient({ hackathonId }: { hackathonId: string }) 
   const [hack, setHack] = useState<HackathonSummary | null>(null);
   const [loadFailed, setLoadFailed] = useState(false);
   const [existing, setExisting] = useState<Application | null>(null);
+  const [hasTeam, setHasTeam] = useState<boolean | null>(null); // null = no team yet / still loading
+  const [findTeamOpen, setFindTeamOpen] = useState(false);
   const [calOpen, setCalOpen] = useState(false);
   const [results, setResults] = useState<HackathonResults | null>(null);
   const [votingOpen, setVotingOpen] = useState(false);
@@ -221,6 +226,23 @@ export function HackathonDetailClient({ hackathonId }: { hackathonId: string }) 
       cancelled = true;
     };
   }, [user, hackathonId]);
+
+  const [teamCheckToken, setTeamCheckToken] = useState(0);
+  useEffect(() => {
+    if (!user) {
+      setHasTeam(null);
+      return;
+    }
+    let cancelled = false;
+    getMyTeams()
+      .then((teams) => {
+        if (!cancelled) setHasTeam(teams.some((tm) => tm.hackathonId === hackathonId));
+      })
+      .catch(() => !cancelled && setHasTeam(null));
+    return () => {
+      cancelled = true;
+    };
+  }, [user, hackathonId, teamCheckToken]);
 
   const header = (
     <header className="page-head hd-head">
@@ -415,6 +437,15 @@ export function HackathonDetailClient({ hackathonId }: { hackathonId: string }) 
               <Link className="btn btn-ghost" href={`/hackathons/${hack.hackathonId}/apply`}>
                 {t("viewApplication")}
               </Link>
+              {existing.status === "approved" && hasTeam === false && (
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => setFindTeamOpen(true)}
+                >
+                  <Icon name="teams" /> {t("findTeamBtn")}
+                </button>
+              )}
             </div>
           ) : !user ? (
             <Link className="btn btn-primary hd-cta-btn" href="/login">
@@ -593,6 +624,13 @@ export function HackathonDetailClient({ hackathonId }: { hackathonId: string }) 
             )}
           </section>
         ) : null}
+
+        <TeamProposalPopup
+          open={findTeamOpen}
+          hackathonId={hackathonId}
+          onClose={() => setFindTeamOpen(false)}
+          onTeamCreated={() => setTeamCheckToken((n) => n + 1)}
+        />
       </main>
     </AppShell>
   );

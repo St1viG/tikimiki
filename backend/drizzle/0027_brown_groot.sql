@@ -1,0 +1,1 @@
+ALTER TYPE "public"."notification_type" ADD VALUE 'team_invitation_declined' BEFORE 'team_request_received';

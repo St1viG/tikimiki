@@ -1,12 +1,13 @@
 /**
  * Autor: Dimitrije Pesic (2023/0014)
  */
-import { Inject, Injectable } from "@nestjs/common";
+import { BadRequestException, ForbiddenException, Inject, Injectable } from "@nestjs/common";
 import { and, asc, eq, inArray, isNull, ne, sql } from "drizzle-orm";
 import { activeTeamMember } from "../common/team.predicates";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import {
   applications,
+  hackathons,
   memberSkills,
   members,
   skills,
@@ -14,7 +15,7 @@ import {
   teams,
   users,
 } from "../db/schema";
-import { TeamsService, type OpenTeamDto } from "../teams/teams.service";
+import { TeamsService, type OpenTeamDto, type TeamDto } from "../teams/teams.service";
 
 /** A platform member available to team up for a hackathon. */
 export interface FreeAgentDto {
@@ -38,6 +39,12 @@ export interface ScoredOpenTeamDto extends OpenTeamDto {
 export interface TeamSuggestionsDto {
   teammates: ScoredFreeAgentDto[];
   teams: ScoredOpenTeamDto[];
+}
+
+/** Response of `POST /hackathons/:id/team-proposal` (SSU12 — one AI-assembled combination). */
+export interface TeamProposalDto {
+  members: ScoredFreeAgentDto[];
+  noCandidates: boolean;
 }
 
 const TEAMMATE_SUGGESTION_LIMIT = 10;
@@ -234,5 +241,96 @@ export class MatchingService {
     scoredTeams.sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
 
     return { teammates, teams: scoredTeams.slice(0, TEAM_SUGGESTION_LIMIT) };
+  }
+
+  /** Throws unless `userId` is approved for `hackathonId` and has no team there yet. */
+  private async assertApprovedAndTeamless(hackathonId: string, userId: string): Promise<void> {
+    const [app] = await this.db
+      .select({ status: applications.status })
+      .from(applications)
+      .where(and(eq(applications.hackathonId, hackathonId), eq(applications.userId, userId)))
+      .limit(1);
+    if (!app || app.status !== "approved") {
+      throw new ForbiddenException("You must be approved for this hackathon first");
+    }
+    if (await this.myActiveTeamId(hackathonId, userId)) {
+      throw new BadRequestException("You already have a team for this hackathon");
+    }
+  }
+
+  /**
+   * `POST /hackathons/:id/team-proposal` (SSU12). Greedily assembles ONE
+   * concrete team combination — up to `maxTeamSize - 1` free agents — by
+   * repeatedly picking whoever best complements the skills covered so far
+   * (caller's own skills, then each pick's skills). `excludeUserIds` lets the
+   * caller re-roll (alt-flow 2) without repeating a rejected combination.
+   */
+  async proposeTeam(
+    hackathonId: string,
+    userId: string,
+    excludeUserIds: string[],
+  ): Promise<TeamProposalDto> {
+    await this.assertApprovedAndTeamless(hackathonId, userId);
+
+    const [hackathon] = await this.db
+      .select({ maxTeamSize: hackathons.maxTeamSize })
+      .from(hackathons)
+      .where(eq(hackathons.hackathonId, hackathonId))
+      .limit(1);
+    if (!hackathon) throw new BadRequestException("Hackathon not found");
+
+    const excluded = new Set(excludeUserIds);
+    const remaining = (await this.freeAgentsForHackathon(hackathonId, userId)).filter(
+      (a) => !excluded.has(a.userId),
+    );
+    if (remaining.length === 0) return { members: [], noCandidates: true };
+
+    const targetSize = Math.max(0, hackathon.maxTeamSize - 1);
+    const covered = new Set(await this.skillsForUser(userId));
+    const picked: ScoredFreeAgentDto[] = [];
+
+    while (picked.length < targetSize && remaining.length > 0) {
+      const best = this.rankByComplementarity(remaining, covered)[0];
+      picked.push(best);
+      best.skills.forEach((s) => covered.add(s));
+      remaining.splice(
+        remaining.findIndex((a) => a.userId === best.userId),
+        1,
+      );
+    }
+
+    return { members: picked, noCandidates: false };
+  }
+
+  /**
+   * `POST /hackathons/:id/team-proposal/accept` (SSU12). Creates the team
+   * (caller becomes leader — reuses `TeamsService.create`, which also wires
+   * up the hackathon server's team channel) and sends a normal team
+   * invitation to each proposed member; the team is only ever as "formed" as
+   * however many of those invitations get accepted, same as a manually
+   * created team. A member who can no longer be invited (e.g. they grabbed a
+   * team in the meantime) is skipped rather than aborting the whole request.
+   */
+  async acceptProposal(
+    hackathonId: string,
+    userId: string,
+    teamName: string,
+    memberUserIds: string[],
+  ): Promise<TeamDto> {
+    await this.assertApprovedAndTeamless(hackathonId, userId);
+
+    const team = await this.teamsService.create(userId, { name: teamName, hackathonId });
+
+    for (const memberId of memberUserIds) {
+      if (memberId === userId) continue;
+      await this.teamsService
+        .invite(team.teamId, userId, {
+          userId: memberId,
+          message: "AI predlog: tvoje veštine dobro dopunjuju ovaj tim.",
+        })
+        .catch(() => undefined);
+    }
+
+    return team;
   }
 }
