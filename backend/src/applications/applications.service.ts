@@ -10,6 +10,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { gatedAvatarUrl } from "../subscriptions/premium-personalization";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import {
   applicationQuestions,
@@ -29,7 +30,8 @@ import {
 import { activeTeamMember } from "../common/team.predicates";
 import { AuthzService } from "../common/authz.service";
 import { MailService } from "../mail/mail.service";
-import { NotificationsService } from "../notifications/notifications.service";
+import { NotificationsService, renderFallbackText } from "../notifications/notifications.service";
+import type { NotificationTemplateRef } from "@tikimiki/types";
 import type {
   ApplicantFilterInput,
   CreateApplicationInput,
@@ -216,8 +218,7 @@ export class ApplicationsService {
       .create({
         userId: hackathon.organizationId,
         type: "new_application",
-        title: "Nova prijava",
-        body: `Novi korisnik je aplicirao na vaš hakaton „${hackathon.title}".`,
+        template: { key: "new_application", params: { hackathonTitle: hackathon.title } },
         entityType: "application",
         entityId: applicationId,
       })
@@ -341,8 +342,10 @@ export class ApplicationsService {
       .create({
         userId: hackathon.organizationId,
         type: "new_application",
-        title: "Nova timska prijava",
-        body: `Tim je aplicirao na vaš hakaton „${hackathon.title}" (${createdIds.length} ${createdIds.length === 1 ? "član" : "člana/članova"}).`,
+        template: {
+          key: "new_team_application",
+          params: { hackathonTitle: hackathon.title, memberCount: createdIds.length },
+        },
         entityType: "hackathon",
         entityId: input.hackathonId,
       })
@@ -646,7 +649,7 @@ export class ApplicationsService {
         applicationId: applications.applicationId,
         userId: applications.userId,
         username: users.username,
-        avatarUrl: users.avatarUrl,
+        avatarUrl: gatedAvatarUrl(users.userId, users.avatarUrl),
         bio: users.bio,
         teamId: applications.teamId,
         teamName: teams.name,
@@ -972,17 +975,17 @@ export class ApplicationsService {
       .where(eq(hackathons.hackathonId, hackathonId))
       .limit(1);
     const title = hk?.title ?? "hakaton";
-    const subject = decision === "approved" ? "Prijava odobrena" : "Prijava odbijena";
-    const body =
+    const template: NotificationTemplateRef =
       decision === "approved"
-        ? `Tvoja prijava za ${title} je odobrena. 🎉`
-        : `Tvoja prijava za ${title} je odbijena.${reason ? ` Razlog: ${reason}` : ""}`;
+        ? { key: "application_approved", params: { hackathonTitle: title } }
+        : reason
+          ? { key: "application_rejected_reason", params: { hackathonTitle: title, reason } }
+          : { key: "application_rejected", params: { hackathonTitle: title } };
 
     await this.notifications.create({
       userId,
       type: decision === "approved" ? "application_approved" : "application_rejected",
-      title: subject,
-      body,
+      template,
       entityType: "hackathon",
       entityId: hackathonId,
     });
@@ -994,6 +997,7 @@ export class ApplicationsService {
         .where(eq(users.userId, userId))
         .limit(1);
       if (user?.email) {
+        const { title: subject, body } = renderFallbackText(template);
         await this.mail.sendMail(user.email, subject, `<p>${body}</p>`);
       }
     } catch (err) {

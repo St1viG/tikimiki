@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import { Icon } from "@/components/Icon";
 import { AppShell } from "@/components/shell/AppShell";
-import { useT } from "@/components/i18n/LanguageProvider";
+import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
 import { useRequireAuth } from "@/components/auth/AuthProvider";
 import * as api from "@/lib/api";
 import { PRICING, priceAmount, priceLabel } from "@/lib/pricing";
@@ -17,8 +17,10 @@ import { PRICING, priceAmount, priceLabel } from "@/lib/pricing";
  *    the annual savings note, and re-triggers the lemon price-flash animation
  *    on each toggle.
  *  - FAQ accordion: each item tracks open/closed; aria-expanded on the button.
- *  - Activate Premium: one-shot; the button becomes "Activated!" and is
- *    rendered disabled/inert afterward.
+ *  - Plan CTAs reflect the caller's subscription: Basic shows "Current plan"
+ *    (or "Switch to Basic" when Premium, which fully cancels via a confirm
+ *    modal), Premium shows Activate / Current plan + cancel-renewal /
+ *    resume-renewal depending on status and cancelAtPeriodEnd.
  *
  * Supplies its own `<main className="premium-page" id="main">`.
  */
@@ -69,11 +71,30 @@ const M = {
   activateBtn: { en: "Activate Premium", sr: "Aktiviraj Premium" },
   activatedBtn: { en: "Activated!", sr: "Aktivirano!" },
   activatingBtn: { en: "Activating…", sr: "Aktiviranje…" },
-  alreadyPremium: { en: "You're Premium", sr: "Već si Premium" },
+  workingBtn: { en: "Working…", sr: "U toku…" },
   activateError: {
     en: "Couldn't activate Premium. Please try again.",
     sr: "Aktivacija Premiuma nije uspela. Pokušaj ponovo.",
   },
+  cancelError: {
+    en: "Something went wrong. Please try again.",
+    sr: "Nešto je pošlo po zlu. Pokušaj ponovo.",
+  },
+  switchToBasic: { en: "Switch to Basic", sr: "Pređi na Osnovni" },
+  cancelRenewal: { en: "Cancel auto-renewal", sr: "Otkaži automatsku obnovu" },
+  resumeRenewal: { en: "Resume auto-renewal", sr: "Nastavi automatsku obnovu" },
+  premiumUntil: { en: "Premium active until {date}", sr: "Premium aktivan do {date}" },
+  premiumEndsOn: {
+    en: "Auto-renewal is off — Premium ends {date}",
+    sr: "Automatska obnova je isključena — Premium ističe {date}",
+  },
+  confirmDowngradeTitle: { en: "Cancel Premium immediately?", sr: "Odmah otkazati Premium?" },
+  confirmDowngradeDesc: {
+    en: "You'll return to the Basic plan right away and lose Premium benefits for the rest of the paid period.",
+    sr: "Odmah se vraćaš na Osnovni plan i gubiš Premium pogodnosti do kraja plaćenog perioda.",
+  },
+  confirmDowngradeKeep: { en: "Keep Premium", sr: "Zadrži Premium" },
+  confirmDowngradeConfirm: { en: "Cancel Premium", sr: "Otkaži Premium" },
   comparePlans: { en: "Plan comparison", sr: "Poređenje planova" },
   colFeature: { en: "Feature", sr: "Funkcija" },
   colBasic: { en: "Basic", sr: "Osnovni" },
@@ -125,16 +146,21 @@ type FaqId = 0 | 1 | 2 | 3;
 export function PremiumClient() {
   useRequireAuth();
   const t = useT(M);
+  const { locale } = useLanguage();
   const [isAnnual, setIsAnnual] = useState(false);
   // flashKey increments on each toggle to force React to remount the element
   // and re-trigger the CSS animation (equivalent to the offsetWidth reflow).
   const [flashKey, setFlashKey] = useState(0);
   const [openFaq, setOpenFaq] = useState<Set<FaqId>>(new Set());
-  // `activated` becomes true once this user holds an active subscription —
-  // either loaded on mount via getMySubscription() or just activated here.
-  const [activated, setActivated] = useState(false);
-  const [activating, setActivating] = useState(false);
-  const [activateError, setActivateError] = useState<string | null>(null);
+  // The caller's active subscription (null = Basic). Loaded on mount and
+  // refreshed after every activate/cancel/resume action.
+  const [sub, setSub] = useState<api.Subscription | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
+  const activated = sub?.status === "active";
+  const renewalCancelled = sub?.status === "active" && sub.cancelAtPeriodEnd;
 
   // On mount, learn whether the user is already Premium so the CTA can be
   // relabelled/disabled. Plan pricing/features stay static in the markup
@@ -146,7 +172,7 @@ export function PremiumClient() {
       try {
         const { subscription } = await api.getMySubscription();
         if (!cancelled && subscription && subscription.status === "active") {
-          setActivated(true);
+          setSub(subscription);
         }
       } catch (err) {
         console.error("Failed to load subscription", err);
@@ -174,10 +200,12 @@ export function PremiumClient() {
     });
   }, []);
 
+  // Activate Premium, or resume auto-renewal when a period-end cancel is
+  // pending (the backend lifts the flag without billing a new period).
   const handleActivate = useCallback(async () => {
-    if (activated || activating) return;
-    setActivating(true);
-    setActivateError(null);
+    if ((activated && !renewalCancelled) || busy) return;
+    setBusy(true);
+    setActionError(null);
     const billingCycle: "monthly" | "annual" = isAnnual ? "annual" : "monthly";
     try {
       // FLAGGED (mock payment): this activates the subscription with NO real
@@ -189,18 +217,56 @@ export function PremiumClient() {
         `[premium] activateSubscription("${billingCycle}") called WITHOUT a ` +
           "real payment step — MOCK PAYMENT, flagged for manual review.",
       );
-      await api.activateSubscription(billingCycle);
-      setActivated(true);
+      const next = await api.activateSubscription(billingCycle);
+      setSub(next);
     } catch (err) {
       console.error("Failed to activate subscription", err);
-      setActivateError(t("activateError"));
+      setActionError(t("activateError"));
     } finally {
-      setActivating(false);
+      setBusy(false);
     }
-  }, [activated, activating, isAnnual, t]);
+  }, [activated, renewalCancelled, busy, isAnnual, t]);
+
+  // Stop auto-renewal: Premium stays active until endsAt, then lapses.
+  const handleCancelRenewal = useCallback(async () => {
+    if (!activated || busy) return;
+    setBusy(true);
+    setActionError(null);
+    try {
+      await api.cancelSubscription();
+      const { subscription } = await api.getMySubscription();
+      setSub(subscription);
+    } catch (err) {
+      console.error("Failed to cancel renewal", err);
+      setActionError(t("cancelError"));
+    } finally {
+      setBusy(false);
+    }
+  }, [activated, busy, t]);
+
+  // Full cancel: close the subscription on the spot and return to Basic.
+  const handleDowngrade = useCallback(async () => {
+    if (!activated || busy) return;
+    setBusy(true);
+    setActionError(null);
+    try {
+      await api.cancelSubscription(true);
+      setSub(null);
+      setConfirmOpen(false);
+    } catch (err) {
+      console.error("Failed to cancel subscription", err);
+      setActionError(t("cancelError"));
+      setConfirmOpen(false);
+    } finally {
+      setBusy(false);
+    }
+  }, [activated, busy, t]);
 
   // Price values — single-sourced from PRICING (no hard-coded copies).
   const premiumPrice = priceAmount(isAnnual ? PRICING.annualPerMonth : PRICING.monthly);
+  const endsAtLabel = sub
+    ? new Date(sub.endsAt).toLocaleDateString(locale === "sr" ? "sr-Latn" : "en")
+    : "";
   const savePill = t("savePill").replace("{save}", String(PRICING.savePercent));
   const faqA3 = t("faqA3")
     .replace("{save}", String(PRICING.savePercent))
@@ -315,7 +381,17 @@ export function PremiumClient() {
               </li>
             </ul>
 
-            <button className="btn btn-ghost btn-premium-cta">{t("currentPlan")}</button>
+            {activated ? (
+              <button
+                className="btn btn-ghost btn-premium-cta"
+                onClick={() => setConfirmOpen(true)}
+                disabled={busy}
+              >
+                {t("switchToBasic")}
+              </button>
+            ) : (
+              <button className="btn btn-ghost btn-premium-cta">{t("currentPlan")}</button>
+            )}
           </div>
 
           {/* PREMIUM */}
@@ -392,22 +468,92 @@ export function PremiumClient() {
               </li>
             </ul>
 
-            <button
-              className={`btn btn-primary btn-premium-cta btn-cta-crystal${
-                activated || activating ? " is-busy" : ""
-              }`}
-              onClick={handleActivate}
-              disabled={activated || activating}
-            >
-              {activated ? t("alreadyPremium") : activating ? t("activatingBtn") : t("activateBtn")}
-            </button>
-            {activateError && (
+            {activated && !renewalCancelled ? (
+              <>
+                <button
+                  className="btn btn-primary btn-premium-cta btn-cta-crystal is-busy"
+                  disabled
+                >
+                  {t("currentPlan")}
+                </button>
+                <p className="plan-sub-note">{t("premiumUntil").replace("{date}", endsAtLabel)}</p>
+                <button
+                  type="button"
+                  className="plan-cancel-link"
+                  onClick={handleCancelRenewal}
+                  disabled={busy}
+                >
+                  {busy ? t("workingBtn") : t("cancelRenewal")}
+                </button>
+              </>
+            ) : activated && renewalCancelled ? (
+              <>
+                <button
+                  className={`btn btn-primary btn-premium-cta btn-cta-crystal${busy ? " is-busy" : ""}`}
+                  onClick={handleActivate}
+                  disabled={busy}
+                >
+                  {busy ? t("workingBtn") : t("resumeRenewal")}
+                </button>
+                <p className="plan-sub-note">{t("premiumEndsOn").replace("{date}", endsAtLabel)}</p>
+              </>
+            ) : (
+              <button
+                className={`btn btn-primary btn-premium-cta btn-cta-crystal${busy ? " is-busy" : ""}`}
+                onClick={handleActivate}
+                disabled={busy}
+              >
+                {busy ? t("activatingBtn") : t("activateBtn")}
+              </button>
+            )}
+            {actionError && (
               <p className="plan-price-annual" role="alert">
-                {activateError}
+                {actionError}
               </p>
             )}
           </div>
         </div>
+
+        {/* Immediate-downgrade confirm (shared .confirm-overlay/.confirm-box pattern) */}
+        {confirmOpen && (
+          <div
+            className="confirm-overlay"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="confirm-downgrade-title"
+            onClick={(e) => {
+              if (e.target === e.currentTarget && !busy) setConfirmOpen(false);
+            }}
+          >
+            <div className="confirm-box">
+              <div className="confirm-ic" aria-hidden="true">
+                <Icon name="premium" />
+              </div>
+              <h2 className="confirm-title" id="confirm-downgrade-title">
+                {t("confirmDowngradeTitle")}
+              </h2>
+              <p className="confirm-desc">{t("confirmDowngradeDesc")}</p>
+              <div className="confirm-actions">
+                <button
+                  type="button"
+                  className="btn btn-ghost"
+                  onClick={() => setConfirmOpen(false)}
+                  disabled={busy}
+                >
+                  {t("confirmDowngradeKeep")}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={handleDowngrade}
+                  disabled={busy}
+                >
+                  {busy ? t("workingBtn") : t("confirmDowngradeConfirm")}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* COMPARE */}
         <section className="compare-section">

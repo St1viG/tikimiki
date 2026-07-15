@@ -11,6 +11,7 @@
 export * from "./auth";
 export * from "./hackathon";
 export * from "./feed";
+export * from "./notifications";
 
 const tuple = <T extends readonly string[]>(...v: T): T => v;
 

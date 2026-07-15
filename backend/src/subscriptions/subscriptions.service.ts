@@ -209,16 +209,24 @@ export class SubscriptionsService {
   }
 
   /**
-   * Cancel the caller's active subscription — Premium stays until the end of
-   * the paid period. The row is only flagged `cancelAtPeriodEnd`; the expiry
-   * scheduler moves it to "cancelled" once `endsAt` passes. Personalization
+   * Cancel the caller's active subscription.
+   *
+   * Default: Premium stays until the end of the paid period — the row is only
+   * flagged `cancelAtPeriodEnd`; the expiry scheduler moves it to "cancelled"
+   * once `endsAt` passes. With `immediate` the row is closed on the spot
+   * (status "cancelled" + `cancelledAt`), so the member returns to Basic right
+   * away — mock payment, so there is nothing to refund. Personalization
    * (banner, GIF avatar) is kept in the database for a later reactivation;
    * its display is gated by `isPremium` wherever it is served.
    */
-  async cancel(userId: string): Promise<CancelSubscriptionResponse> {
+  async cancel(userId: string, immediate = false): Promise<CancelSubscriptionResponse> {
     const updated = await this.db
       .update(subscriptions)
-      .set({ cancelAtPeriodEnd: true })
+      .set(
+        immediate
+          ? { status: "cancelled" as const, cancelledAt: new Date(), cancelAtPeriodEnd: false }
+          : { cancelAtPeriodEnd: true },
+      )
       .where(and(eq(subscriptions.userId, userId), eq(subscriptions.status, "active")))
       .returning({ subscriptionId: subscriptions.subscriptionId });
 

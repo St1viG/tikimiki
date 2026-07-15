@@ -7,6 +7,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import type { NotificationTemplateRef } from "@tikimiki/types";
 import { ApplicationsService } from "../applications/applications.service";
 import { activeTeamMember } from "../common/team.predicates";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
@@ -624,15 +625,13 @@ export class TeamsService {
   private async notifyTeam(
     userId: string,
     type: TeamNotifType,
-    title: string,
-    body: string,
+    template: NotificationTemplateRef,
     teamId: string,
   ): Promise<void> {
     await this.notifications.create({
       userId,
       type,
-      title,
-      body,
+      template,
       entityType: "team",
       entityId: teamId,
     });
@@ -746,8 +745,12 @@ export class TeamsService {
       await this.notifyTeam(
         lead.leaderId,
         "team_request_received",
-        "Novi zahtev za tim",
-        `${u ? `@${u.username}` : "Neko"} želi da se priključi timu ${lead.teamName}.`,
+        u
+          ? {
+              key: "team_request_received",
+              params: { username: u.username, teamName: lead.teamName },
+            }
+          : { key: "team_request_received_anon", params: { teamName: lead.teamName } },
         teamId,
       );
     }
@@ -838,8 +841,7 @@ export class TeamsService {
       await this.notifyTeam(
         req.userId,
         "team_request_accepted",
-        "Zahtev prihvaćen",
-        `Tvoj zahtev za tim ${tm?.name ?? ""} je prihvaćen. 🎉`,
+        { key: "team_request_accepted", params: { teamName: tm?.name ?? "" } },
         req.teamId,
       );
     }
@@ -889,8 +891,12 @@ export class TeamsService {
     await this.notifyTeam(
       input.userId,
       "team_invitation_received",
-      "Poziv u tim",
-      `${dto.invitedByUsername ?? "Vođa tima"} te poziva u tim ${dto.teamName}.`,
+      dto.invitedByUsername
+        ? {
+            key: "team_invitation_received",
+            params: { username: dto.invitedByUsername, teamName: dto.teamName },
+          }
+        : { key: "team_invitation_received_anon", params: { teamName: dto.teamName } },
       teamId,
     );
     return dto;

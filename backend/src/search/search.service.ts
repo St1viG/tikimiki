@@ -6,6 +6,7 @@
  */
 import { Inject, Injectable } from "@nestjs/common";
 import { type SQL, and, eq, ilike, inArray, isNull, or, sql } from "drizzle-orm";
+import { gatedAvatarUrl } from "../subscriptions/premium-personalization";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import {
   hackathonPrizes,
@@ -146,7 +147,7 @@ export class SearchService {
           id: users.userId,
           username: users.username,
           displayName: users.displayName,
-          avatarUrl: users.avatarUrl,
+          avatarUrl: gatedAvatarUrl(users.userId, users.avatarUrl),
         })
         .from(users)
         .where(and(...userConditions))

@@ -252,8 +252,7 @@ export class GamesService {
       await this.notifications.create({
         userId,
         type: "badge_awarded",
-        title: `Osvojen bedž: ${GRUPE_PERFECT_BADGE}`,
-        body: "Rešio/la si sve četiri grupe bez ijedne greške!",
+        template: { key: "badge_awarded_grupe", params: { badgeName: GRUPE_PERFECT_BADGE } },
         entityType: "badge",
         entityId: awardedBadgeId,
       });

@@ -90,12 +90,20 @@ const RELATIVE_UNITS: Array<[Intl.RelativeTimeFormatUnit, number]> = [
   ["second", 1],
 ];
 
-/* Relative time in Serbian, e.g. "pre 2 sata". Accepts an ISO string or Date. */
-export function formatRelativeTime(input: string | Date, now: Date = new Date()): string {
+/* Locale-aware relative time, e.g. "2 hours ago" (en) / "pre 2 sata" (sr).
+   Accepts an ISO string or Date. */
+export function formatRelativeTime(
+  input: string | Date,
+  locale: Locale = "sr",
+  now: Date = new Date(),
+): string {
   const then = typeof input === "string" ? new Date(input) : input;
   const seconds = Math.round((then.getTime() - now.getTime()) / 1000);
   if (Number.isNaN(seconds)) return "";
-  const rtf = new Intl.RelativeTimeFormat("sr", { numeric: "auto" });
+  // Plain "sr" formats in Cyrillic; the app's Serbian copy is Latin script.
+  const rtf = new Intl.RelativeTimeFormat(locale === "sr" ? "sr-Latn" : locale, {
+    numeric: "auto",
+  });
   for (const [unit, secondsInUnit] of RELATIVE_UNITS) {
     if (Math.abs(seconds) >= secondsInUnit || unit === "second") {
       return rtf.format(Math.round(seconds / secondsInUnit), unit);

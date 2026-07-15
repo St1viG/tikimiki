@@ -6,6 +6,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { and, count, desc, eq, gte, inArray } from "drizzle-orm";
+import type { NotificationTemplateKey } from "@tikimiki/types";
 import { AdminService } from "../admin/admin.service";
 import { AuthzService } from "../common/authz.service";
 import { ChatService } from "../chat/chat.service";
@@ -415,8 +416,7 @@ export class ReportsService {
     await this.notifications.create({
       userId: report.reporterId,
       type: input.status === "resolved" ? "report_resolved" : "report_dismissed",
-      title: input.status === "resolved" ? "Prijava rešena" : "Prijava odbačena",
-      body: this.notificationBody(input),
+      template: { key: this.notificationTemplateKey(input) },
       entityType: report.targetType,
       entityId: report.targetId,
     });
@@ -431,19 +431,11 @@ export class ReportsService {
     return toReportDto(row);
   }
 
-  private notificationBody(input: ResolveReportInput): string {
-    if (input.status === "dismissed") {
-      return "Vaša prijava je pregledana. Nije pronađena povreda pravila.";
-    }
-    if (input.removeContent && input.banUser) {
-      return "Prijavljeni sadržaj je uklonjen, a korisnik je banovan.";
-    }
-    if (input.removeContent) {
-      return "Prijavljeni sadržaj je uklonjen.";
-    }
-    if (input.banUser) {
-      return "Prijavljeni korisnik je banovan.";
-    }
-    return "Vaša prijava je pregledana i rešena.";
+  private notificationTemplateKey(input: ResolveReportInput): NotificationTemplateKey {
+    if (input.status === "dismissed") return "report_dismissed";
+    if (input.removeContent && input.banUser) return "report_resolved_removed_banned";
+    if (input.removeContent) return "report_resolved_removed";
+    if (input.banUser) return "report_resolved_banned";
+    return "report_resolved";
   }
 }

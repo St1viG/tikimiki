@@ -1,5 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { and, eq, gte, sql } from "drizzle-orm";
+import { gatedAvatarUrl } from "../subscriptions/premium-personalization";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import { members, pointTransactions, teamMembers, teams, userBadges, users } from "../db/schema";
 
@@ -36,7 +37,7 @@ export class LeaderboardService {
             userId: users.userId,
             username: users.username,
             displayName: users.displayName,
-            avatarUrl: users.avatarUrl,
+            avatarUrl: gatedAvatarUrl(users.userId, users.avatarUrl),
             allTimePoints: members.points,
           })
           .from(members)

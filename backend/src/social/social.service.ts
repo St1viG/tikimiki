@@ -1,5 +1,6 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { and, eq, inArray, or } from "drizzle-orm";
+import { gatedAvatarUrl } from "../subscriptions/premium-personalization";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import { friendships, members, userBlocks, users } from "../db/schema";
 import { NotificationsService } from "../notifications/notifications.service";
@@ -110,7 +111,7 @@ export class SocialService {
         .update(friendships)
         .set({ status: "accepted", respondedAt: new Date() })
         .where(and(eq(friendships.userIdA, lo), eq(friendships.userIdB, hi)));
-      await this.notifyFriend(other, me, "friend_request_accepted", "Zahtev prihvaćen");
+      await this.notifyFriend(other, me, "friend_request_accepted");
       return { friendStatus: "friends", isBlocked: false };
     }
 
@@ -120,7 +121,7 @@ export class SocialService {
       requesterId: me,
       status: "pending",
     });
-    await this.notifyFriend(other, me, "friend_request_received", "Novi zahtev za prijateljstvo");
+    await this.notifyFriend(other, me, "friend_request_received");
     return { friendStatus: "outgoing", isBlocked: false };
   }
 
@@ -186,7 +187,7 @@ export class SocialService {
         userId: users.userId,
         username: users.username,
         displayName: users.displayName,
-        avatarUrl: users.avatarUrl,
+        avatarUrl: gatedAvatarUrl(users.userId, users.avatarUrl),
       })
       .from(users)
       .where(inArray(users.userId, otherIds));
@@ -210,8 +211,8 @@ export class SocialService {
     recipientId: string,
     actorId: string,
     type: "friend_request_received" | "friend_request_accepted",
-    title: string,
   ): Promise<void> {
+    // The actor is the authenticated caller, so their row always exists.
     const [actor] = await this.db
       .select({ username: users.username })
       .from(users)
@@ -220,11 +221,7 @@ export class SocialService {
     await this.notifications.create({
       userId: recipientId,
       type,
-      title,
-      body:
-        type === "friend_request_received"
-          ? `${actor ? `@${actor.username}` : "Neko"} ti je poslao zahtev za prijateljstvo.`
-          : `${actor ? `@${actor.username}` : "Neko"} je prihvatio tvoj zahtev.`,
+      template: { key: type, params: { username: actor?.username ?? "" } },
       entityType: "user",
       entityId: actorId,
     });

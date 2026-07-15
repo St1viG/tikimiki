@@ -617,13 +617,20 @@ export class BountiesService {
           await this.notifications.create({
             userId: memberUserId,
             type: "hackathon_result_posted",
-            title:
-              rank && rank <= 3
-                ? `Osvojili ste ${rank}. mesto!`
-                : "Rezultati hakatona su objavljeni",
-            body: won
-              ? `${project.teamName} je osvojio/la ${rank}. mesto — dobili ste ${won} poena i bedž "${WINNER_BADGE_NAME}".`
-              : "Pogledaj svoj plasman i rezultate na profilu.",
+            template:
+              won && rank
+                ? {
+                    key: "hackathon_result_won",
+                    params: {
+                      rank,
+                      teamName: project.teamName,
+                      points: won,
+                      badgeName: WINNER_BADGE_NAME,
+                    },
+                  }
+                : rank && rank <= 3
+                  ? { key: "hackathon_result_top3", params: { rank } }
+                  : { key: "hackathon_result_posted" },
             entityType: "hackathon",
             entityId: hackathonId,
           });
@@ -720,8 +727,15 @@ export class BountiesService {
       await this.notifications.create({
         userId: memberUserId,
         type: "bounty_result_posted",
-        title: `Osvojili ste sponzorsku nagradu: ${bounty.title}`,
-        body: `${bounty.sponsorName} vas je nagradio/la za "${bounty.title}" — dobili ste ${BOUNTY_WINNER_POINTS} poena i bedž "${WINNER_BADGE_NAME}".`,
+        template: {
+          key: "bounty_result_posted",
+          params: {
+            bountyTitle: bounty.title,
+            sponsorName: bounty.sponsorName,
+            points: BOUNTY_WINNER_POINTS,
+            badgeName: WINNER_BADGE_NAME,
+          },
+        },
         entityType: "bounty",
         entityId: bountyId,
       });

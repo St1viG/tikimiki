@@ -276,8 +276,11 @@ export const toggleCommentLike = (commentId: string) =>
 export interface Notification {
   notificationId: string;
   type: string;
+  /** Serbian fallback text; prefer `template` for locale-aware rendering. */
   title: string;
   body: string | null;
+  /** i18n payload — null on rows created before templates existed. */
+  template: { key: string; params?: Record<string, string | number> } | null;
   entityType: string | null;
   entityId: string | null;
   readAt: string | null;
@@ -1034,7 +1037,10 @@ export const getMySubscription = () =>
   GET<{ subscription: Subscription | null }>("/subscriptions/me");
 export const activateSubscription = (billingCycle: "monthly" | "annual") =>
   POST<Subscription>("/subscriptions/activate", { billingCycle });
-export const cancelSubscription = () => POST<{ success: true }>("/subscriptions/cancel");
+/** Default cancels at period end (Premium stays until endsAt); `immediate: true`
+ *  closes the subscription on the spot and returns the user to Basic. */
+export const cancelSubscription = (immediate = false) =>
+  POST<{ success: true }>("/subscriptions/cancel", { immediate });
 
 // Reports (moderation)
 export type ReportTargetType = "user" | "post" | "comment" | "message" | "hackathon";
