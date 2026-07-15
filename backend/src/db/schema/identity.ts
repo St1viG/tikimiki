@@ -149,6 +149,8 @@ export const userBans = pgTable(
       .references(() => administrators.userId, { onDelete: "restrict" }),
     reason: text("reason").notNull(),
     bannedAt: timestamp("banned_at", tz).notNull().defaultNow(),
+    /** When the ban expires on its own; null = permanent ban (SSU21). */
+    expiresAt: timestamp("expires_at", tz),
     liftedAt: timestamp("lifted_at", tz),
     liftedBy: uuid("lifted_by").references(() => administrators.userId, {
       onDelete: "set null",
@@ -159,7 +161,12 @@ export const userBans = pgTable(
     uniqueIndex("uq_user_bans_active_per_user")
       .on(t.userId)
       .where(sql`${t.liftedAt} is null`),
-    check("chk_user_bans_lift_consistency", sql`(${t.liftedAt} is null) = (${t.liftedBy} is null)`),
+    // lifted_by may be null on a lifted ban (auto-expiry sweep), but a manual
+    // lifter must always come with a lift timestamp.
+    check(
+      "chk_user_bans_lift_consistency",
+      sql`${t.liftedBy} is null or ${t.liftedAt} is not null`,
+    ),
   ],
 );
 

@@ -2,7 +2,7 @@ import { ConflictException, Inject, Injectable, NotFoundException } from "@nestj
 import { and, desc, eq, gt, inArray } from "drizzle-orm";
 import { DAY_MS } from "../common/constants";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
-import { subscriptions, users } from "../db/schema";
+import { subscriptions } from "../db/schema";
 import type { ActivateSubscriptionInput } from "./dto";
 
 /* ── response types ───────────────────────────────────────── */
@@ -26,6 +26,8 @@ export interface SubscriptionView {
   startedAt: string;
   endsAt: string;
   cancelledAt: string | null;
+  /** True when the member cancelled: Premium stays until endsAt, then no renewal. */
+  cancelAtPeriodEnd: boolean;
 }
 
 export interface MySubscriptionResponse {
@@ -111,6 +113,7 @@ export class SubscriptionsService {
     startedAt: Date;
     endsAt: Date;
     cancelledAt: Date | null;
+    cancelAtPeriodEnd: boolean;
   }): SubscriptionView {
     return {
       subscriptionId: row.subscriptionId,
@@ -119,6 +122,7 @@ export class SubscriptionsService {
       startedAt: row.startedAt.toISOString(),
       endsAt: row.endsAt.toISOString(),
       cancelledAt: row.cancelledAt ? row.cancelledAt.toISOString() : null,
+      cancelAtPeriodEnd: row.cancelAtPeriodEnd,
     };
   }
 
@@ -132,6 +136,7 @@ export class SubscriptionsService {
         startedAt: subscriptions.startedAt,
         endsAt: subscriptions.endsAt,
         cancelledAt: subscriptions.cancelledAt,
+        cancelAtPeriodEnd: subscriptions.cancelAtPeriodEnd,
       })
       .from(subscriptions)
       .where(and(eq(subscriptions.userId, userId), eq(subscriptions.status, "active")))
@@ -141,16 +146,40 @@ export class SubscriptionsService {
     return { subscription: row ? this.toView(row) : null };
   }
 
-  /** Create an active subscription for the caller (mock payment). */
+  /**
+   * Create an active subscription for the caller (mock payment).
+   *
+   * Re-subscribing while a cancel-at-period-end is pending simply lifts the
+   * flag (auto-renew resumes) — the running period is kept, nothing is billed.
+   */
   async activate(userId: string, input: ActivateSubscriptionInput): Promise<SubscriptionView> {
     const [existing] = await this.db
-      .select({ subscriptionId: subscriptions.subscriptionId })
+      .select({
+        subscriptionId: subscriptions.subscriptionId,
+        cancelAtPeriodEnd: subscriptions.cancelAtPeriodEnd,
+      })
       .from(subscriptions)
       .where(and(eq(subscriptions.userId, userId), eq(subscriptions.status, "active")))
       .limit(1);
 
     if (existing) {
-      throw new ConflictException("An active subscription already exists");
+      if (!existing.cancelAtPeriodEnd) {
+        throw new ConflictException("An active subscription already exists");
+      }
+      const [reactivated] = await this.db
+        .update(subscriptions)
+        .set({ cancelAtPeriodEnd: false })
+        .where(eq(subscriptions.subscriptionId, existing.subscriptionId))
+        .returning({
+          subscriptionId: subscriptions.subscriptionId,
+          plan: subscriptions.plan,
+          status: subscriptions.status,
+          startedAt: subscriptions.startedAt,
+          endsAt: subscriptions.endsAt,
+          cancelledAt: subscriptions.cancelledAt,
+          cancelAtPeriodEnd: subscriptions.cancelAtPeriodEnd,
+        });
+      return this.toView(reactivated);
     }
 
     const now = new Date();
@@ -173,41 +202,29 @@ export class SubscriptionsService {
         startedAt: subscriptions.startedAt,
         endsAt: subscriptions.endsAt,
         cancelledAt: subscriptions.cancelledAt,
+        cancelAtPeriodEnd: subscriptions.cancelAtPeriodEnd,
       });
 
     return this.toView(row);
   }
 
-  /** Cancel the caller's active subscription. */
+  /**
+   * Cancel the caller's active subscription — Premium stays until the end of
+   * the paid period. The row is only flagged `cancelAtPeriodEnd`; the expiry
+   * scheduler moves it to "cancelled" once `endsAt` passes. Personalization
+   * (banner, GIF avatar) is kept in the database for a later reactivation;
+   * its display is gated by `isPremium` wherever it is served.
+   */
   async cancel(userId: string): Promise<CancelSubscriptionResponse> {
-    const now = new Date();
     const updated = await this.db
       .update(subscriptions)
-      .set({ status: "cancelled", cancelledAt: now })
+      .set({ cancelAtPeriodEnd: true })
       .where(and(eq(subscriptions.userId, userId), eq(subscriptions.status, "active")))
       .returning({ subscriptionId: subscriptions.subscriptionId });
 
     if (updated.length === 0) {
       throw new NotFoundException("No active subscription to cancel");
     }
-
-    // Premium-only personalization reverts when premium ends: the banner
-    // (Premium feature) is always cleared, and an animated GIF avatar (also
-    // Premium) is cleared too — a static avatar is kept.
-    const [u] = await this.db
-      .select({ avatarUrl: users.avatarUrl })
-      .from(users)
-      .where(eq(users.userId, userId))
-      .limit(1);
-    const clearGifAvatar = u?.avatarUrl != null && /\.gif$/i.test(u.avatarUrl);
-    await this.db
-      .update(users)
-      .set({
-        bannerUrl: null,
-        ...(clearGifAvatar ? { avatarUrl: null } : {}),
-        updatedAt: new Date(),
-      })
-      .where(eq(users.userId, userId));
 
     return { success: true };
   }

@@ -103,13 +103,14 @@ export async function refreshSession(): Promise<void> {
 // Auth
 export async function register(body: RegisterBody): Promise<AuthResponse> {
   const data = await POST<AuthResponse>("/auth/register", body);
-  setAccessToken(data.accessToken);
+  // SSU1: org registrations carry no token until an admin approves them.
+  setAccessToken(data.accessToken ?? null);
   return data;
 }
 
 export async function login(body: LoginBody): Promise<AuthResponse> {
   const data = await POST<AuthResponse>("/auth/login", body);
-  setAccessToken(data.accessToken);
+  setAccessToken(data.accessToken ?? null);
   return data;
 }
 
@@ -639,6 +640,9 @@ export const updateMyProfile = (body: UpdateProfileBody) =>
   PATCH<MyProfile>("/users/me/profile", body);
 export const changePassword = (currentPassword: string, newPassword: string) =>
   PATCH<{ success: true }>("/users/me/password", { currentPassword, newPassword });
+/** GDPR account deletion (SSU21): soft-delete + anonymize; password-confirmed. */
+export const deleteMyAccount = (password: string) =>
+  POST<{ success: true }>("/users/me/delete", { password });
 export const getPublicProfile = (username: string) => GET<PublicProfile>(`/users/${username}`);
 export const toggleFollow = (userId: string) =>
   POST<{ following: boolean; followerCount: number }>(`/users/${userId}/follow`);
@@ -836,6 +840,11 @@ export interface AnswerInput {
 
 export const applyToHackathon = (hackathonId: string, teamId?: string, answers?: AnswerInput[]) =>
   POST<Application>("/applications", { hackathonId, teamId, answers });
+export const applyToHackathonAsTeam = (
+  hackathonId: string,
+  teamId: string,
+  answers?: AnswerInput[],
+) => POST<Application[]>("/applications/team", { hackathonId, teamId, answers });
 export const getApplicationQuestions = (hackathonId: string) =>
   GET<ApplicationQuestion[]>(`/applications/hackathon/${hackathonId}/questions`);
 export const createApplicationQuestion = (
@@ -879,8 +888,13 @@ export function getHackathonApplicants(
 export const getApplicationStats = (hackathonId: string) =>
   GET<ApplicationStats>(`/applications/hackathon/${hackathonId}/stats`);
 export const approveApplication = (id: string) => PATCH<Application>(`/applications/${id}/approve`);
+export const approveTeamApplication = (id: string) =>
+  PATCH<Application[]>(`/applications/${id}/approve-team`);
 export const rejectApplication = (id: string, reason?: string) =>
   PATCH<Application>(`/applications/${id}/reject`, { reason });
+/** Applicant withdraws their own (pending or approved) application (SSU10). */
+export const withdrawApplication = (id: string) =>
+  PATCH<Application>(`/applications/${id}/withdraw`, {});
 
 // Games (gamehub)
 export interface Game {
@@ -1008,6 +1022,8 @@ export interface Subscription {
   startedAt: string;
   endsAt: string;
   cancelledAt: string | null;
+  /** True when auto-renew is cancelled: Premium stays active until endsAt. */
+  cancelAtPeriodEnd: boolean;
 }
 
 export const getSubscriptionPlans = () =>
@@ -1137,8 +1153,12 @@ export const verifyOrganization = (userId: string) =>
   POST<AdminOrg>(`/admin/organizations/${userId}/verify`);
 export const rejectOrganization = (userId: string, reason: string) =>
   POST<AdminOrg>(`/admin/organizations/${userId}/reject`, { reason });
-export const banUser = (userId: string, reason: string) =>
-  POST<{ success: true }>(`/admin/users/${userId}/ban`, { reason });
+/** `expiresAt` (ISO) makes the ban time-limited; omitted = permanent (SSU21). */
+export const banUser = (userId: string, reason: string, expiresAt?: string) =>
+  POST<{ success: true }>(`/admin/users/${userId}/ban`, {
+    reason,
+    ...(expiresAt ? { expiresAt } : {}),
+  });
 export const unbanUser = (userId: string) =>
   POST<{ success: true }>(`/admin/users/${userId}/unban`);
 
@@ -1191,12 +1211,26 @@ export interface ProjectVote {
 }
 export const getHackathonProjects = (hackathonId: string) =>
   GET<ProjectVote[]>(`/hackathons/${hackathonId}/projects`);
-export const castVote = (hackathonId: string, projectId: string) =>
+export const castVote = (hackathonId: string, projectId: string, fingerprint?: string) =>
   POST<{ success: true; voteCount: number }>(
     `/hackathons/${hackathonId}/projects/${projectId}/vote`,
+    fingerprint ? { fingerprint } : {},
   );
-export const getMyVote = (hackathonId: string) =>
-  GET<{ projectId: string | null }>(`/hackathons/${hackathonId}/my-vote`);
+export const getMyVote = (hackathonId: string, fingerprint?: string) =>
+  GET<{ projectId: string | null }>(
+    `/hackathons/${hackathonId}/my-vote${
+      fingerprint ? `?fingerprint=${encodeURIComponent(fingerprint)}` : ""
+    }`,
+  );
+export const setVotingWindow = (
+  hackathonId: string,
+  opensAt: string | null,
+  closesAt: string | null,
+) =>
+  PATCH<{ isOpen: boolean; opensAt: string | null; closesAt: string | null; serverTime: string }>(
+    `/hackathons/${hackathonId}/voting-window`,
+    { opensAt, closesAt },
+  );
 
 // Kanban (per-team board)
 export interface KanbanCard {

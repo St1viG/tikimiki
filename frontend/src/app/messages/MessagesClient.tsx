@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { Icon } from "@/components/Icon";
 import { AppShell } from "@/components/shell/AppShell";
 import { GenerativeAvatar } from "@/components/ui/GenerativeAvatar";
+import { ReportPopup } from "@/components/popups/ReportPopup";
 import { useT } from "@/components/i18n/LanguageProvider";
 import { useAuth, useRequireAuth } from "@/components/auth/AuthProvider";
 import {
@@ -29,6 +30,8 @@ const M = {
   noMessages: { en: "No messages yet — say hi 👋", sr: "Još nema poruka — pozdravi se 👋" },
   placeholder: { en: "Write a message…", sr: "Napiši poruku…" },
   send: { en: "Send", sr: "Pošalji" },
+  report: { en: "Report", sr: "Prijavi" },
+  reportSubmitted: { en: "Report submitted", sr: "Prijava poslata" },
 } as const;
 
 export function MessagesClient() {
@@ -42,6 +45,9 @@ export function MessagesClient() {
   const [messages, setMessages] = useState<ChatMessage[] | null>(null);
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
+  // Message being reported (drives the ReportPopup) + brief confirmation.
+  const [reportMsgId, setReportMsgId] = useState<string | null>(null);
+  const [reportSent, setReportSent] = useState(false);
   const streamRef = useRef<HTMLDivElement>(null);
 
   // Load conversations; preselect ?c= or the first one.
@@ -229,6 +235,7 @@ export function MessagesClient() {
                   {messages?.map((m) => (
                     <div
                       key={m.messageId}
+                      className="dm-msg-row"
                       style={{ display: "flex", gap: 10, alignItems: "flex-start" }}
                     >
                       <Link
@@ -238,7 +245,7 @@ export function MessagesClient() {
                       >
                         <GenerativeAvatar seed={m.senderUsername} className="orb-art" />
                       </Link>
-                      <div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
                         <div>
                           <Link
                             className="name"
@@ -256,9 +263,26 @@ export function MessagesClient() {
                         </div>
                         <div className="post-body">{m.content}</div>
                       </div>
+                      {user && m.senderId !== user.userId && (
+                        <button
+                          type="button"
+                          className="post-menu-btn dm-msg-report"
+                          aria-label={t("report")}
+                          title={t("report")}
+                          onClick={() => setReportMsgId(m.messageId)}
+                        >
+                          <Icon name="flag" />
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>
+
+                {reportSent && (
+                  <p className="time" style={{ marginTop: 8 }}>
+                    {t("reportSubmitted")}
+                  </p>
+                )}
 
                 <div className="composer" style={{ marginTop: 12 }}>
                   <input
@@ -283,6 +307,17 @@ export function MessagesClient() {
           </div>
         </div>
       </main>
+
+      <ReportPopup
+        open={reportMsgId !== null}
+        targetType="message"
+        targetId={reportMsgId ?? ""}
+        onClose={() => setReportMsgId(null)}
+        onSubmitted={() => {
+          setReportSent(true);
+          setTimeout(() => setReportSent(false), 2500);
+        }}
+      />
     </AppShell>
   );
 }

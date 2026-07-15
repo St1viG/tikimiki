@@ -33,10 +33,15 @@ export interface MeOrganization {
   rejectionReason: string | null;
 }
 
-/** POST /auth/register, /auth/login → access token in body, refresh in cookie. */
+/**
+ * POST /auth/register, /auth/login → access token in body, refresh in cookie.
+ * SSU1: organization registrations return NO tokens — the account waits for
+ * administrator approval (`pendingApproval` is set instead).
+ */
 export interface AuthResponse {
   user: PublicUser;
-  accessToken: string;
+  accessToken?: string;
+  pendingApproval?: boolean;
 }
 
 /** POST /auth/refresh */

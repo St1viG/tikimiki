@@ -12,6 +12,8 @@ export type RejectOrgInput = z.infer<typeof rejectOrgSchema>;
 
 export const banUserSchema = z.object({
   reason: z.string().trim().min(1).max(2000),
+  /** ISO timestamp the ban auto-expires at; omitted = permanent ban (SSU21). */
+  expiresAt: z.string().datetime({ offset: true }).optional(),
 });
 export type BanUserInput = z.infer<typeof banUserSchema>;
 

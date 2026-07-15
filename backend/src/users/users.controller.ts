@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from "@nestjs/common";
 import { CurrentUser } from "../auth/current-user.decorator";
 import { JwtAuthGuard } from "../auth/jwt-auth.guard";
 import { OptionalJwtAuthGuard } from "../auth/optional-jwt-auth.guard";
@@ -7,6 +17,8 @@ import { ZodValidationPipe } from "../common/zod.pipe";
 import {
   changePasswordSchema,
   type ChangePasswordInput,
+  deleteAccountSchema,
+  type DeleteAccountInput,
   updateProfileSchema,
   type UpdateProfileInput,
 } from "./dto";
@@ -47,6 +59,17 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   getMyPoints(@CurrentUser() userId: string) {
     return this.users.getMyPoints(userId);
+  }
+
+  /** GDPR account deletion (SSU21): soft-delete + anonymize, password-confirmed. */
+  @Post("me/delete")
+  @HttpCode(200)
+  @UseGuards(JwtAuthGuard)
+  deleteMyAccount(
+    @CurrentUser() userId: string,
+    @Body(new ZodValidationPipe(deleteAccountSchema)) body: DeleteAccountInput,
+  ) {
+    return this.users.deleteMyAccount(userId, body);
   }
 
   /** Username/display-name prefix search — powers the @-mention autocomplete. */

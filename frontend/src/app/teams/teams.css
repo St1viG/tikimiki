@@ -282,6 +282,60 @@
   background: color-mix(in srgb, var(--red) 16%, transparent);
 }
 
+/* Leader-side pending join requests (SSU10 team formation) */
+.tm-joinreqs {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.tm-joinreqs-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.tm-joinreq {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.tm-joinreq-info {
+  font-size: 13px;
+  min-width: 0;
+}
+.tm-joinreq-name {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--violet-light);
+}
+.tm-joinreq-name:hover {
+  text-decoration: underline;
+}
+.tm-joinreq-sub {
+  color: var(--muted);
+}
+.tm-joinreq-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.btn-sm {
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
 .tm-tc-side {
   display: flex;
   flex-direction: column;

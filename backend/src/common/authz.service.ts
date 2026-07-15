@@ -1,5 +1,5 @@
 import { ForbiddenException, Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { and, eq, isNull } from "drizzle-orm";
+import { and, eq, gt, isNull, or } from "drizzle-orm";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import {
   administrators,
@@ -15,10 +15,13 @@ import {
   userRoles,
 } from "../db/schema";
 
-/** An active (not-yet-lifted) ban row. */
+/** An active (not-yet-lifted, not-yet-expired) ban row. */
 export interface ActiveBan {
   banId: string;
   reason: string;
+  bannedAt: Date;
+  /** When the ban auto-expires; null = permanent ban (SSU21). */
+  expiresAt: Date | null;
 }
 
 /**
@@ -54,15 +57,27 @@ export class AuthzService {
   }
 
   /**
-   * The user's active (not-yet-lifted) ban, or `null` if none. The single
-   * source of truth for the `user_bans where user_id = … and lifted_at is null`
-   * lookup used across auth / account flows.
+   * The user's active ban, or `null` if none. Active means not yet lifted AND
+   * not yet past its optional `expires_at` (SSU21: a time-limited ban unlocks
+   * on its own even before the expiry sweep marks it lifted). The single
+   * source of truth for this lookup across auth / account flows.
    */
   async getActiveBan(userId: string): Promise<ActiveBan | null> {
     const [row] = await this.db
-      .select({ banId: userBans.banId, reason: userBans.reason })
+      .select({
+        banId: userBans.banId,
+        reason: userBans.reason,
+        bannedAt: userBans.bannedAt,
+        expiresAt: userBans.expiresAt,
+      })
       .from(userBans)
-      .where(and(eq(userBans.userId, userId), isNull(userBans.liftedAt)))
+      .where(
+        and(
+          eq(userBans.userId, userId),
+          isNull(userBans.liftedAt),
+          or(isNull(userBans.expiresAt), gt(userBans.expiresAt, new Date())),
+        ),
+      )
       .limit(1);
     return row ?? null;
   }

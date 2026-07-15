@@ -6,6 +6,8 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
+import { unlink } from "fs/promises";
+import { basename, join } from "path";
 import { and, asc, eq, isNull } from "drizzle-orm";
 import { activeTeamMember } from "../common/team.predicates";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
@@ -47,11 +49,30 @@ interface ProjectRow {
   endsAt: Date;
 }
 
+/** Absolute path to the directory served statically at "/uploads". */
+const UPLOAD_DIR = join(process.cwd(), "uploads");
+
 @Injectable()
 export class ProjectsService {
   constructor(@Inject(DRIZZLE) private readonly db: DrizzleDB) {}
 
   /* ── helpers ──────────────────────────────────────────────── */
+
+  /**
+   * Best-effort removal of a replaced project video from disk so stale files
+   * don't pile up in the uploads dir. Only locally-served "/uploads/<file>"
+   * urls are touched; failures (already gone, locked, …) are ignored.
+   */
+  private async deleteUploadedVideo(videoUrl: string): Promise<void> {
+    if (!videoUrl.startsWith("/uploads/")) return;
+    try {
+      // basename() strips any path segments so only files directly inside
+      // UPLOAD_DIR can ever be unlinked.
+      await unlink(join(UPLOAD_DIR, basename(videoUrl)));
+    } catch {
+      /* best-effort — ignore missing/locked files */
+    }
+  }
 
   private toDto(r: ProjectRow): ProjectDto {
     return {
@@ -232,6 +253,11 @@ export class ProjectsService {
     if (input.videoUrl !== undefined) patch.videoUrl = input.videoUrl;
 
     await this.db.update(projects).set(patch).where(eq(projects.projectId, projectId));
+
+    // The old presentation video was replaced (or removed) — clean up its file.
+    if (input.videoUrl !== undefined && row.videoUrl && row.videoUrl !== input.videoUrl) {
+      await this.deleteUploadedVideo(row.videoUrl);
+    }
 
     return this.toDto(await this.loadProject(projectId));
   }

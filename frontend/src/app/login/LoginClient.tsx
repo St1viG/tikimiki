@@ -9,7 +9,8 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { Captcha } from "@/components/auth/Captcha";
 import { OAuthButtons } from "@/components/auth/OAuthButtons";
-import { ApiError, forgotPassword, me, refreshSession, submitBanAppeal } from "@/lib/api";
+import { ApiError, forgotPassword, me, refreshSession } from "@/lib/api";
+import { storeBanInfo } from "@/lib/banInfo";
 
 /**
  * LoginClient — interactive login page.
@@ -40,32 +41,14 @@ const M = {
   signIn: { en: "Sign in", sr: "Prijavi se" },
   signingIn: { en: "Signing in…", sr: "Prijavljivanje…" },
   invalidCreds: { en: "Invalid email or password.", sr: "Pogrešan email ili lozinka." },
+  orgPending: {
+    en: "Your organization account is awaiting administrator approval. You'll get an email once it's decided.",
+    sr: "Nalog tvoje organizacije čeka odobrenje administratora. Dobićeš email kada odluka bude doneta.",
+  },
   genericError: {
     en: "Something went wrong. Try again.",
     sr: "Nešto je pošlo naopako. Pokušaj ponovo.",
   },
-  bannedTitle: { en: "Your account is suspended", sr: "Tvoj nalog je suspendovan" },
-  bannedReason: { en: "Reason:", sr: "Razlog:" },
-  appealLabel: { en: "Submit an appeal", sr: "Podnesi žalbu" },
-  appealPlaceholder: {
-    en: "Explain why this ban should be lifted…",
-    sr: "Objasni zašto ovaj ban treba ukinuti…",
-  },
-  appealSubmit: { en: "Submit appeal", sr: "Pošalji žalbu" },
-  appealSubmitting: { en: "Submitting…", sr: "Slanje…" },
-  appealSubmitted: {
-    en: "Appeal submitted. We'll review it soon.",
-    sr: "Žalba je poslata. Pregledaćemo je uskoro.",
-  },
-  appealPending: {
-    en: "You already have an appeal pending review.",
-    sr: "Već imaš žalbu na čekanju.",
-  },
-  appealError: {
-    en: "Could not submit your appeal. Try again.",
-    sr: "Slanje žalbe nije uspelo. Pokušaj ponovo.",
-  },
-  appealNeedReason: { en: "Please describe your appeal first.", sr: "Prvo opiši svoju žalbu." },
   forgotNeedEmail: { en: "Enter your email first.", sr: "Prvo unesi email." },
   forgotSent: {
     en: "If that email is registered, a reset link is on its way.",
@@ -96,11 +79,6 @@ export function LoginClient() {
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [bannedReason, setBannedReason] = useState<string | null>(null);
-  const [appealReason, setAppealReason] = useState("");
-  const [appealLoading, setAppealLoading] = useState(false);
-  const [appealError, setAppealError] = useState<string | null>(null);
-  const [appealDone, setAppealDone] = useState(false);
 
   const togglePw = () => setPwVisible((v) => !v);
 
@@ -134,18 +112,36 @@ export function LoginClient() {
     e.preventDefault();
     setError(null);
     setInfo(null);
-    setBannedReason(null);
-    setAppealDone(false);
-    setAppealError(null);
     setLoading(true);
     try {
       await login({ email: identifier, password });
       router.push("/");
     } catch (err) {
       if (err instanceof ApiError && err.status === 403) {
-        const details = err.details as { banned?: boolean; reason?: string } | undefined;
+        const details = err.details as
+          | {
+              banned?: boolean;
+              reason?: string;
+              bannedAt?: string;
+              expiresAt?: string | null;
+              pendingApproval?: boolean;
+            }
+          | undefined;
         if (details?.banned) {
-          setBannedReason(details.reason ?? "");
+          // Hand the real ban info to /suspended (SSU21) — that page shows
+          // the reason/unlock date and hosts the appeal form.
+          storeBanInfo({
+            reason: details.reason ?? null,
+            bannedAt: details.bannedAt ?? null,
+            expiresAt: details.expiresAt ?? null,
+            identifier: identifier.trim() || null,
+          });
+          router.push("/suspended");
+          return;
+        }
+        // SSU1: org account exists but the admins have not approved it yet.
+        if (details?.pendingApproval) {
+          setError(t("orgPending"));
           return;
         }
       }
@@ -154,26 +150,6 @@ export function LoginClient() {
       );
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleAppeal = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setAppealError(null);
-    if (!appealReason.trim()) {
-      setAppealError(t("appealNeedReason"));
-      return;
-    }
-    setAppealLoading(true);
-    try {
-      await submitBanAppeal(identifier, password, appealReason.trim());
-      setAppealDone(true);
-    } catch (err) {
-      setAppealError(
-        err instanceof ApiError && err.status === 409 ? t("appealPending") : t("appealError"),
-      );
-    } finally {
-      setAppealLoading(false);
     }
   };
 
@@ -271,69 +247,6 @@ export function LoginClient() {
           {error && (
             <div className="auth-error" role="alert">
               {error}
-            </div>
-          )}
-
-          {bannedReason !== null && (
-            <div
-              className="auth-banned"
-              role="alert"
-              style={{
-                marginBottom: "0.9rem",
-                padding: "0.85rem",
-                border: "1px solid var(--red)",
-                borderRadius: "10px",
-                fontSize: "0.85rem",
-              }}
-            >
-              <strong style={{ color: "var(--red)", display: "block", marginBottom: "0.35rem" }}>
-                {t("bannedTitle")}
-              </strong>
-              {bannedReason && (
-                <p style={{ margin: "0 0 0.65rem", opacity: 0.9 }}>
-                  {t("bannedReason")} {bannedReason}
-                </p>
-              )}
-
-              {appealDone ? (
-                <p className="auth-success" style={{ margin: 0 }}>
-                  {t("appealSubmitted")}
-                </p>
-              ) : (
-                <div className="field-group" style={{ marginBottom: 0 }}>
-                  <label className="field-label" htmlFor="appeal-reason">
-                    {t("appealLabel")}
-                  </label>
-                  <textarea
-                    className="field-input"
-                    id="appeal-reason"
-                    name="appeal-reason"
-                    rows={3}
-                    placeholder={t("appealPlaceholder")}
-                    value={appealReason}
-                    onChange={(e) => setAppealReason(e.target.value)}
-                    style={{ resize: "vertical" }}
-                  />
-                  {appealError && (
-                    <div
-                      className="auth-error"
-                      role="alert"
-                      style={{ fontSize: "0.8rem", marginTop: "0.4rem", marginBottom: 0 }}
-                    >
-                      {appealError}
-                    </div>
-                  )}
-                  <button
-                    type="button"
-                    className="btn btn-primary btn-block"
-                    style={{ marginTop: "0.6rem" }}
-                    disabled={appealLoading}
-                    onClick={handleAppeal}
-                  >
-                    {appealLoading ? t("appealSubmitting") : t("appealSubmit")}
-                  </button>
-                </div>
-              )}
             </div>
           )}
 

@@ -132,6 +132,11 @@ export class ApplicationsController {
     return this.svc.approve(id, userId);
   }
 
+  @Patch(":id/approve-team")
+  approveTeam(@CurrentUser() userId: string, @Param("id", new ParseUUIDPipe()) id: string) {
+    return this.svc.approveTeam(id, userId);
+  }
+
   @Patch(":id/reject")
   reject(
     @CurrentUser() userId: string,

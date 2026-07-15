@@ -44,9 +44,12 @@ export class AuthController {
     @Body(new ZodValidationPipe(registerSchema)) body: RegisterInput,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { user, accessToken, refreshToken, verifyDevLink } = await this.auth.register(body);
-    this.setRefreshCookie(res, refreshToken);
-    return { user, accessToken, verifyDevLink };
+    const { user, accessToken, refreshToken, verifyDevLink, pendingApproval } =
+      await this.auth.register(body);
+    // SSU1: organization registrations get no session until approved — there
+    // is no refresh token to set in that case.
+    if (refreshToken) this.setRefreshCookie(res, refreshToken);
+    return { user, accessToken, verifyDevLink, pendingApproval };
   }
 
   @Post("login")

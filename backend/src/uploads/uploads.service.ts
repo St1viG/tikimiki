@@ -120,7 +120,8 @@ export class UploadsService {
    * Save a new banner image and update users.bannerUrl.
    *
    * The profile banner is a Premium feature — a non-premium user is rejected.
-   * (When premium ends, the banner is cleared in SubscriptionsService.cancel.)
+   * (When premium ends, the banner stays stored but its display is gated by
+   * `isPremium` — see subscriptions/premium-personalization.ts.)
    */
   async setBanner(userId: string, file: UploadedImage | undefined): Promise<BannerUploadDto> {
     if (!file) throw new BadRequestException("No file uploaded");

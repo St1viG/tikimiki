@@ -12,6 +12,7 @@ import { initials } from "@/lib/format";
 import {
   ApiError,
   applyToHackathon,
+  applyToHackathonAsTeam,
   getApplicationQuestions,
   getHackathon,
   getMyApplications,
@@ -246,7 +247,13 @@ export function ApplyHackathonClient({ hackathonId }: { hackathonId: string }) {
       .filter((a) => a.answer !== "");
     const teamId = teamChoice === "solo" ? undefined : teamChoice;
     try {
-      await applyToHackathon(hackathonId, teamId, payload);
+      // SSU10: applying with a team submits one application per active team
+      // member through the dedicated team endpoint; solo keeps the single one.
+      if (teamId) {
+        await applyToHackathonAsTeam(hackathonId, teamId, payload);
+      } else {
+        await applyToHackathon(hackathonId, teamId, payload);
+      }
       setDone(true);
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) setError(t("already"));

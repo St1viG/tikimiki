@@ -13,7 +13,7 @@ interface CapturedUpdate {
   where: SQL | undefined;
 }
 
-/** Stands in for DrizzleDB: captures the single `update().set().where().returning()` call. */
+/** Stands in for DrizzleDB: captures every `update().set().where().returning()` call. */
 function fakeDb(returningRows: Row[] = []) {
   const updates: CapturedUpdate[] = [];
   const db = {
@@ -38,28 +38,42 @@ function fakeDb(returningRows: Row[] = []) {
 const dialect = new PgDialect();
 
 describe("HackathonsStatusScheduler (unit)", () => {
-  it("flips ongoing hackathons past their endsAt to finished", async () => {
+  it("starts due upcoming hackathons and finishes expired ones in one sweep", async () => {
     const { db, updates } = fakeDb([{ hackathonId: "h1" }]);
     const scheduler = new HackathonsStatusScheduler(db as never);
 
-    await scheduler.finishExpiredHackathons();
+    await scheduler.syncHackathonStatuses();
 
-    expect(updates).toHaveLength(1);
-    expect(updates[0].values).toMatchObject({ status: "finished" });
-    expect(updates[0].values.updatedAt).toBeInstanceOf(Date);
+    // One update per transition: upcoming→ongoing, ongoing→finished, and the
+    // stale upcoming→finished backstop.
+    expect(updates).toHaveLength(3);
 
-    const { sql } = dialect.sqlToQuery(updates[0].where!);
-    expect(sql).toContain('"status" =');
-    expect(sql).toContain('"ends_at" <=');
-    expect(sql).toContain('"deleted_at" is null');
+    const [started, finished, expired] = updates;
+
+    expect(started.values).toMatchObject({ status: "ongoing" });
+    expect(started.values.updatedAt).toBeInstanceOf(Date);
+    const startedSql = dialect.sqlToQuery(started.where!).sql;
+    expect(startedSql).toContain('"status" =');
+    expect(startedSql).toContain('"starts_at" <=');
+    expect(startedSql).toContain('"ends_at" >');
+    expect(startedSql).toContain('"deleted_at" is null');
+
+    for (const u of [finished, expired]) {
+      expect(u.values).toMatchObject({ status: "finished" });
+      expect(u.values.updatedAt).toBeInstanceOf(Date);
+      const { sql } = dialect.sqlToQuery(u.where!);
+      expect(sql).toContain('"status" =');
+      expect(sql).toContain('"ends_at" <=');
+      expect(sql).toContain('"deleted_at" is null');
+    }
   });
 
   it("still issues the sweep (a no-op update) when nothing is due", async () => {
     const { db, updates } = fakeDb([]);
     const scheduler = new HackathonsStatusScheduler(db as never);
 
-    await scheduler.finishExpiredHackathons();
+    await scheduler.syncHackathonStatuses();
 
-    expect(updates).toHaveLength(1);
+    expect(updates).toHaveLength(3);
   });
 });

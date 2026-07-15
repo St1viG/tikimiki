@@ -185,8 +185,8 @@ export const M = {
     sr: "Tim još nije otpremio video",
   },
   videoDropSub: {
-    en: "Click here or drag a video file (MP4, MOV, AVI · max. 500 MB)",
-    sr: "Klikni ovde ili prevuci video fajl (MP4, MOV, AVI · maks. 500 MB)",
+    en: "Click here or drag a video file (MP4, MOV, AVI · max. 50 MB)",
+    sr: "Klikni ovde ili prevuci video fajl (MP4, MOV, AVI · maks. 50 MB)",
   },
   videoUpload: { en: "Upload video", sr: "Otpremi video" },
   videoReplace: { en: "Replace", sr: "Zameni" },
@@ -200,8 +200,8 @@ export const M = {
     sr: "Format fajla nije podržan. Koristite MP4, MOV ili AVI.",
   },
   videoErrSize: {
-    en: "File is too large. The maximum allowed size is 500 MB.",
-    sr: "Fajl je prevelik. Maksimalna dozvoljena veličina je 500 MB.",
+    en: "File is too large. The maximum allowed size is 50 MB.",
+    sr: "Fajl je prevelik. Maksimalna dozvoljena veličina je 50 MB.",
   },
   videoMetaSuffix: { en: " MB · uploaded just now", sr: " MB · otpremljeno upravo" },
   githubLabel: { en: "GitHub repository", sr: "GitHub repozitorijum" },
@@ -230,6 +230,10 @@ export const M = {
   projectStatusJudged: { en: "Judged", sr: "Ocenjeno" },
   projectSubmit: { en: "Submit project", sr: "Predaj projekat" },
   projectSubmitting: { en: "Submitting…", sr: "Predajem…" },
+  projectDeadlinePassed: {
+    en: "The submission period has ended",
+    sr: "Rok za predaju projekta je istekao",
+  },
   projectWithdraw: { en: "Withdraw to draft", sr: "Vrati u nacrt" },
   projectWithdrawing: { en: "Withdrawing…", sr: "Vraćam…" },
   projectGenericError: {
@@ -318,6 +322,23 @@ export const M = {
     sr: "Organizator otvara glasanje u poslednjih 2h hakathona. Možete pregledati projekte, ali glasanje još uvek nije dostupno.",
   },
   votingOpensAtLabel: { en: "Opens at ", sr: "Otvara se u " },
+  // Organizer voting-window control (SSU14)
+  votingOrgTitle: { en: "Audience voting", sr: "Glasanje publike" },
+  votingOrgHint: {
+    en: "Open voting so members and guests can vote for the projects. You can close it at any time.",
+    sr: "Otvori glasanje da članovi i gosti mogu da glasaju za projekte. Možeš ga zatvoriti u bilo kom trenutku.",
+  },
+  votingOrgOpenBtn: { en: "Open voting", sr: "Otvori glasanje" },
+  votingOrgCloseBtn: { en: "Close voting", sr: "Zatvori glasanje" },
+  votingOrgWorking: { en: "Working…", sr: "Obrada…" },
+  votingOrgOpenState: { en: "Voting is open", sr: "Glasanje je otvoreno" },
+  votingOrgClosedState: { en: "Voting is closed", sr: "Glasanje je zatvoreno" },
+  votingOpenedToast: { en: "Audience voting opened", sr: "Glasanje publike otvoreno" },
+  votingClosedToast: { en: "Audience voting closed", sr: "Glasanje publike zatvoreno" },
+  votingWindowFailToast: {
+    en: "Couldn't update voting — try again",
+    sr: "Ažuriranje glasanja nije uspelo — pokušaj ponovo",
+  },
   projectsLabelPre: { en: "Projects: ", sr: "Projekti: " },
   projectsLabelPost: { en: " teams", sr: " timova" },
   votesLabel: { en: "votes", sr: "glasova" },
@@ -679,6 +700,8 @@ export const M = {
   ctxDelete: { en: "Delete", sr: "Obriši" },
   ctxDeleteConfirm: { en: "Delete message?", sr: "Obriši poruku?" },
   ctxDeleteFailed: { en: "Could not delete message", sr: "Brisanje poruke nije uspelo" },
+  ctxReport: { en: "Report", sr: "Prijavi" },
+  ctxReportSubmitted: { en: "Report submitted", sr: "Prijava poslata" },
 
   // Channel management (manage_channels)
   chCreateChannel: { en: "Create channel", sr: "Kreiraj kanal" },

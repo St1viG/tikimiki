@@ -1,6 +1,8 @@
 import type { INestApplication } from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
 import { and, eq } from "drizzle-orm";
 import request from "supertest";
+import { env } from "../../src/config/env";
 import {
   administrators,
   hackathons,
@@ -34,6 +36,20 @@ export interface TestUser {
 
 function http(app: INestApplication) {
   return request(app.getHttpServer());
+}
+
+/**
+ * Mint an access token straight from the app's JwtService — same payload the
+ * JwtAuthGuard expects (`{ sub, typ: "access" }`). Organization registration no
+ * longer returns a session (SSU1: an org waits for admin approval), so tests
+ * that must act AS an org — pending or approved — can't read a token off the
+ * register response and pending orgs can't log in either. This bypasses that
+ * gate for fixture setup without weakening the production flow.
+ */
+export function mintAccessToken(app: INestApplication, userId: string): string {
+  return app
+    .get(JwtService)
+    .sign({ sub: userId, typ: "access" }, { secret: env.JWT_ACCESS_SECRET });
 }
 
 /** Register a plain member account through the real API; returns its token. */
@@ -73,12 +89,15 @@ export async function registerPendingOrganization(app: INestApplication): Promis
       organizationName: `Org ${username}`,
     })
     .expect(201);
+  const userId = res.body.user.userId as string;
+  // SSU1: org registration files a verification request and returns NO session,
+  // so `res.body.accessToken` is undefined. Mint one directly for the fixture.
   return {
-    userId: res.body.user.userId,
+    userId,
     username,
     email,
     password,
-    token: res.body.accessToken,
+    token: mintAccessToken(app, userId),
   };
 }
 

@@ -1,5 +1,11 @@
-import { ConflictException, Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { and, eq, gte, ilike, inArray, isNull, or, sql } from "drizzle-orm";
+import {
+  BadRequestException,
+  ConflictException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
+import { and, eq, gte, ilike, inArray, isNull, lte, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { AuthzService } from "../common/authz.service";
 import { DAY_MS } from "../common/constants";
@@ -239,7 +245,12 @@ export class AdminService {
     const [bannedUsersRow] = await this.db
       .select({ value: sql<number>`count(*)::int` })
       .from(userBans)
-      .where(isNull(userBans.liftedAt));
+      .where(
+        and(
+          isNull(userBans.liftedAt),
+          or(isNull(userBans.expiresAt), gte(userBans.expiresAt, new Date())),
+        ),
+      );
 
     return {
       totalUsers: totalUsersRow?.value ?? 0,
@@ -283,7 +294,7 @@ export class AdminService {
         createdAt: u.createdAt,
         isAdmin: sql<boolean>`exists (select 1 from administrators a where a.user_id = u.user_id)`,
         isOrg: sql<boolean>`exists (select 1 from organizations o where o.user_id = u.user_id)`,
-        banned: sql<boolean>`exists (select 1 from user_bans b where b.user_id = u.user_id and b.lifted_at is null)`,
+        banned: sql<boolean>`exists (select 1 from user_bans b where b.user_id = u.user_id and b.lifted_at is null and (b.expires_at is null or b.expires_at > now()))`,
       })
       .from(u)
       .where(and(...conditions))
@@ -497,6 +508,26 @@ export class AdminService {
       throw new NotFoundException("User not found");
     }
 
+    // Optional time-limited ban (SSU21): the expiry must lie in the future.
+    const now = new Date();
+    const expiresAt = body.expiresAt ? new Date(body.expiresAt) : null;
+    if (expiresAt && expiresAt.getTime() <= now.getTime()) {
+      throw new BadRequestException("Ban expiry must be in the future");
+    }
+
+    // An expired-but-not-yet-swept ban still holds the "one active ban per
+    // user" partial unique index; mark it lifted so a new ban can be issued.
+    await this.db
+      .update(userBans)
+      .set({ liftedAt: now })
+      .where(
+        and(
+          eq(userBans.userId, targetUserId),
+          isNull(userBans.liftedAt),
+          lte(userBans.expiresAt, now),
+        ),
+      );
+
     const [existing] = await this.db
       .select({ banId: userBans.banId })
       .from(userBans)
@@ -510,9 +541,16 @@ export class AdminService {
       userId: targetUserId,
       bannedBy: callerId,
       reason: body.reason,
+      expiresAt,
     });
 
-    await this.audit(callerId, "user.ban", "user", targetUserId, `Banned user: ${body.reason}`);
+    await this.audit(
+      callerId,
+      "user.ban",
+      "user",
+      targetUserId,
+      `Banned user${expiresAt ? ` until ${expiresAt.toISOString()}` : " permanently"}: ${body.reason}`,
+    );
 
     return { success: true };
   }

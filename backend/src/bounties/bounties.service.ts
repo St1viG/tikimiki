@@ -18,7 +18,7 @@ import {
 import { AuthzService } from "../common/authz.service";
 import { PointsService, type DrizzleTx } from "../common/points.service";
 import { NotificationsService } from "../notifications/notifications.service";
-import type { PublishResultsInput } from "./dto";
+import type { CreateBountyInput, PublishResultsInput, UpdateBountyInput } from "./dto";
 
 /** Placement → XP points by hackathon podium rank. Only the top 3 earn points/badges. */
 const PLACEMENT_POINTS: Record<number, number> = { 1: 5000, 2: 3000, 3: 1500 };
@@ -307,6 +307,157 @@ export class BountiesService {
     };
   }
 
+  /* ── Bounty CRUD (organizer/admin, SSU16) ────────────────── */
+
+  async createBounty(
+    hackathonId: string,
+    userId: string,
+    input: CreateBountyInput,
+  ): Promise<BountyDto> {
+    await this.authz.assertHackathonOwnerOrAdmin(hackathonId, userId);
+
+    let bountyId = "";
+    await this.db.transaction(async (tx) => {
+      const [row] = await tx
+        .insert(bounties)
+        .values({
+          hackathonId,
+          sponsorName: input.sponsorName,
+          title: input.title,
+          theme: input.theme ?? null,
+          description: input.description ?? null,
+        })
+        .returning({ bountyId: bounties.bountyId });
+      bountyId = row.bountyId;
+
+      // A prizeAward mirrors the bounty into hackathon_prizes (same shape the
+      // seed uses), so results/prize surfaces see the sponsor award too.
+      if (input.prizeAward !== undefined) {
+        await tx.insert(hackathonPrizes).values({
+          hackathonId,
+          bountyId: row.bountyId,
+          sponsorName: input.sponsorName,
+          title: input.title,
+          description: input.description ?? null,
+          awardValue: input.prizeAward,
+        });
+      }
+    });
+
+    return {
+      bountyId,
+      sponsorName: input.sponsorName,
+      title: input.title,
+      theme: input.theme ?? null,
+      description: input.description ?? null,
+      prizeAward: input.prizeAward ?? null,
+      applicantCount: 0,
+      hasApplied: false,
+    };
+  }
+
+  async updateBounty(
+    hackathonId: string,
+    bountyId: string,
+    userId: string,
+    input: UpdateBountyInput,
+  ): Promise<BountyDto> {
+    await this.authz.assertHackathonOwnerOrAdmin(hackathonId, userId);
+
+    const [existing] = await this.db
+      .select({
+        sponsorName: bounties.sponsorName,
+        title: bounties.title,
+        theme: bounties.theme,
+        description: bounties.description,
+      })
+      .from(bounties)
+      .where(and(eq(bounties.bountyId, bountyId), eq(bounties.hackathonId, hackathonId)))
+      .limit(1);
+    if (!existing) {
+      throw new NotFoundException("Bounty not found");
+    }
+
+    // Merge the patch over the current row so the mirrored prize row can be
+    // kept in sync with the final field values.
+    const next = {
+      sponsorName: input.sponsorName ?? existing.sponsorName,
+      title: input.title ?? existing.title,
+      theme: input.theme === undefined ? existing.theme : input.theme,
+      description: input.description === undefined ? existing.description : input.description,
+    };
+
+    await this.db.transaction(async (tx) => {
+      await tx
+        .update(bounties)
+        .set({ ...next, updatedAt: new Date() })
+        .where(eq(bounties.bountyId, bountyId));
+
+      if (input.prizeAward === null) {
+        // Clearing the award removes the mirrored prize row entirely.
+        await tx.delete(hackathonPrizes).where(eq(hackathonPrizes.bountyId, bountyId));
+      } else {
+        // Keep the mirrored prize row in sync with the bounty fields; a new
+        // prizeAward updates the existing row or inserts one if missing.
+        const updated = await tx
+          .update(hackathonPrizes)
+          .set({
+            sponsorName: next.sponsorName,
+            title: next.title,
+            description: next.description,
+            ...(input.prizeAward !== undefined ? { awardValue: input.prizeAward } : {}),
+          })
+          .where(eq(hackathonPrizes.bountyId, bountyId))
+          .returning({ prizeId: hackathonPrizes.prizeId });
+        if (updated.length === 0 && input.prizeAward !== undefined) {
+          await tx.insert(hackathonPrizes).values({
+            hackathonId,
+            bountyId,
+            sponsorName: next.sponsorName,
+            title: next.title,
+            description: next.description,
+            awardValue: input.prizeAward,
+          });
+        }
+      }
+    });
+
+    const [prize] = await this.db
+      .select({ awardValue: hackathonPrizes.awardValue })
+      .from(hackathonPrizes)
+      .where(eq(hackathonPrizes.bountyId, bountyId))
+      .limit(1);
+
+    return {
+      bountyId,
+      sponsorName: next.sponsorName,
+      title: next.title,
+      theme: next.theme,
+      description: next.description,
+      prizeAward: prize?.awardValue ?? null,
+      applicantCount: await this.bountyApplicantCount(bountyId),
+      hasApplied: false,
+    };
+  }
+
+  /**
+   * Delete a bounty. Its prize row, submissions and results all cascade via
+   * FK (`on delete cascade` on hackathon_prizes / bounty_submissions /
+   * hackathon_results), so a single delete suffices.
+   */
+  async deleteBounty(
+    hackathonId: string,
+    bountyId: string,
+    userId: string,
+  ): Promise<{ success: true }> {
+    await this.authz.assertHackathonOwnerOrAdmin(hackathonId, userId);
+    await this.getBountyInHackathon(hackathonId, bountyId);
+
+    await this.db.delete(bounties).where(eq(bounties.bountyId, bountyId));
+
+    return { success: true };
+  }
+
   /* ── Results ─────────────────────────────────────────────── */
 
   async getResults(hackathonId: string): Promise<ResultsDto> {
@@ -518,6 +669,17 @@ export class BountiesService {
         throw new BadRequestException(
           "The winning project must belong to a team in this hackathon",
         );
+      }
+      // The winner must have actually applied to this bounty (SSU16).
+      const [applied] = await this.db
+        .select({ bountyId: bountySubmissions.bountyId })
+        .from(bountySubmissions)
+        .where(
+          and(eq(bountySubmissions.bountyId, bountyId), eq(bountySubmissions.projectId, projectId)),
+        )
+        .limit(1);
+      if (!applied) {
+        throw new BadRequestException("The winning project has not applied to this bounty");
       }
       winningTeam = { teamId: valid.teamId, teamName: valid.teamName };
     }

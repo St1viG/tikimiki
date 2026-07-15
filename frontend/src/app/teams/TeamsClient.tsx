@@ -29,6 +29,7 @@ import type {
   SoloPlayer,
   LeaderboardEntry,
   TeamInvitation,
+  TeamJoinRequest,
   Project,
 } from "@/lib/api";
 
@@ -104,6 +105,11 @@ const M = {
     sr: "Čeka odobrenje organizatora",
   },
   appRejected: { en: "Application rejected", sr: "Prijava odbijena" },
+  // Incoming join requests (leader side)
+  joinReqTitle: { en: "Join requests", sr: "Zahtevi za pridruživanje" },
+  joinReqWantsTo: { en: "wants to join", sr: "želi da se pridruži" },
+  joinReqAccept: { en: "Accept", sr: "Prihvati" },
+  joinReqDecline: { en: "Decline", sr: "Odbij" },
 } as const;
 
 type Filter = "mine" | "invites" | "open" | "solo" | "board";
@@ -134,6 +140,11 @@ export function TeamsClient() {
   const [invitationBusyId, setInvitationBusyId] = useState<string | null>(null);
   // The caller's project per team (drives the "Add project"/"Edit draft"/"Submitted" label).
   const [projectsByTeam, setProjectsByTeam] = useState<Record<string, Project | null>>({});
+  // Pending join requests per team the caller leads + per-request busy flag.
+  const [joinRequestsByTeam, setJoinRequestsByTeam] = useState<Record<string, TeamJoinRequest[]>>(
+    {},
+  );
+  const [joinReqBusyId, setJoinReqBusyId] = useState<string | null>(null);
 
   const loadAll = useCallback(async () => {
     try {
@@ -184,6 +195,65 @@ export function TeamsClient() {
     if (p.status === "draft") return t("editDraft");
     if (p.status === "submitted") return t("submittedLabel");
     return t("projectLabel");
+  };
+
+  // Teams the caller leads may have pending join requests to approve; the
+  // backend gates listing on leadership, so only fetch for those.
+  const leadsTeam = useCallback(
+    (team: Team) => team.members.some((m) => m.userId === user?.userId && m.role === "leader"),
+    [user?.userId],
+  );
+
+  useEffect(() => {
+    const led = myTeams.filter(leadsTeam);
+    if (led.length === 0) return;
+    let cancelled = false;
+    void Promise.all(
+      led.map((tm) =>
+        api
+          .getTeamJoinRequests(tm.teamId)
+          .then((reqs) => [tm.teamId, reqs] as const)
+          .catch(() => [tm.teamId, [] as TeamJoinRequest[]] as const),
+      ),
+    ).then((entries) => {
+      if (!cancelled) setJoinRequestsByTeam(Object.fromEntries(entries));
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [myTeams, leadsTeam]);
+
+  // Leader accepts a join request → member joins; refresh that team's requests
+  // and my teams (member count changes). Optimistically drop the row.
+  const handleAcceptJoinRequest = async (req: TeamJoinRequest) => {
+    setJoinReqBusyId(req.requestId);
+    try {
+      await api.acceptJoinRequest(req.requestId);
+      const [reqs, mine] = await Promise.all([
+        api.getTeamJoinRequests(req.teamId),
+        api.getMyTeams(),
+      ]);
+      setJoinRequestsByTeam((prev) => ({ ...prev, [req.teamId]: reqs }));
+      setMyTeams(mine);
+    } catch (err) {
+      console.error("Failed to accept join request", err);
+    } finally {
+      setJoinReqBusyId(null);
+    }
+  };
+
+  // Leader declines a join request → refresh that team's requests.
+  const handleDeclineJoinRequest = async (req: TeamJoinRequest) => {
+    setJoinReqBusyId(req.requestId);
+    try {
+      await api.declineJoinRequest(req.requestId);
+      const reqs = await api.getTeamJoinRequests(req.teamId);
+      setJoinRequestsByTeam((prev) => ({ ...prev, [req.teamId]: reqs }));
+    } catch (err) {
+      console.error("Failed to decline join request", err);
+    } finally {
+      setJoinReqBusyId(null);
+    }
   };
 
   // The caller's primary team — used as the inviting team for free agents.
@@ -380,6 +450,53 @@ export function TeamsClient() {
                         {team.applicationStatus === "rejected" && (
                           <div className="tm-tc-appbadge tm-tc-appbadge--rejected">
                             <Icon name="x" /> {t("appRejected")}
+                          </div>
+                        )}
+                        {/* Leader-only: pending join requests to approve/decline. */}
+                        {(joinRequestsByTeam[team.teamId]?.length ?? 0) > 0 && (
+                          <div className="tm-joinreqs">
+                            <div className="tm-joinreqs-title">
+                              <Icon name="teams" className="ic-sm" /> {t("joinReqTitle")}
+                              <span className="tm-tab-count">
+                                {joinRequestsByTeam[team.teamId].length}
+                              </span>
+                            </div>
+                            {joinRequestsByTeam[team.teamId].map((req) => (
+                              <div key={req.requestId} className="tm-joinreq">
+                                <div className="tm-joinreq-info">
+                                  <button
+                                    type="button"
+                                    className="tm-joinreq-name"
+                                    onClick={() => setPopupUser(req.username)}
+                                  >
+                                    {req.displayName || req.username}
+                                  </button>
+                                  <span className="tm-joinreq-sub">
+                                    {" "}
+                                    {t("joinReqWantsTo")}
+                                    {req.message ? <> · “{req.message}”</> : null}
+                                  </span>
+                                </div>
+                                <div className="tm-joinreq-actions">
+                                  <button
+                                    type="button"
+                                    className="btn btn-primary btn-sm"
+                                    disabled={joinReqBusyId === req.requestId}
+                                    onClick={() => handleAcceptJoinRequest(req)}
+                                  >
+                                    <Icon name="check" className="ic-sm" /> {t("joinReqAccept")}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="btn btn-ghost btn-sm"
+                                    disabled={joinReqBusyId === req.requestId}
+                                    onClick={() => handleDeclineJoinRequest(req)}
+                                  >
+                                    <Icon name="x" className="ic-sm" /> {t("joinReqDecline")}
+                                  </button>
+                                </div>
+                              </div>
+                            ))}
                           </div>
                         )}
                       </div>

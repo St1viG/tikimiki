@@ -77,6 +77,14 @@ const M = {
     sr: "Registruješ se kao pojedinac?",
   },
   createUserAccount: { en: "Create user account", sr: "Kreiraj korisnički nalog" },
+
+  // Post-registration confirmation (SSU1: no session until admin approval)
+  pendingTitle: { en: "Request submitted", sr: "Zahtev je poslat" },
+  pendingBody: {
+    en: "Your organization registration was forwarded to the administrators. You will receive the outcome by email — you can sign in once the account is approved.",
+    sr: "Registracija tvoje organizacije je prosleđena administratorima. Ishod stiže na email — prijava je moguća čim nalog bude odobren.",
+  },
+  backToLogin: { en: "Back to sign in", sr: "Nazad na prijavu" },
 } as const;
 
 export function SignupOrganizationClient() {
@@ -99,6 +107,8 @@ export function SignupOrganizationClient() {
   const [termsMsg, setTermsMsg] = useState("");
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  // SSU1: set when registration succeeded but the account awaits approval.
+  const [pendingApproval, setPendingApproval] = useState(false);
 
   // Derived confirm-match state
   const matchVisible = confirmPw.length > 0;
@@ -135,13 +145,19 @@ export function SignupOrganizationClient() {
 
     setLoading(true);
     try {
-      await register({
+      const res = await register({
         username,
         email,
         password,
         accountType: "organization",
         organizationName: orgName.trim(),
       });
+      // SSU1: org accounts get no session until an administrator approves
+      // them — show the confirmation instead of entering the app.
+      if (!res.accessToken) {
+        setPendingApproval(true);
+        return;
+      }
       router.push("/");
     } catch (err) {
       setSubmitError(
@@ -150,6 +166,29 @@ export function SignupOrganizationClient() {
     } finally {
       setLoading(false);
     }
+  }
+
+  // SSU1: after a successful org registration there is no session — show the
+  // confirmation that the request went to the administrators.
+  if (pendingApproval) {
+    return (
+      <AuthShell wrapWordmark>
+        <div className="auth-card">
+          <h1 className="auth-heading">{t("pendingTitle")}</h1>
+          <div className="auth-info-banner">
+            <Icon name="shield" />
+            <div className="auth-info-banner-text">{t("pendingBody")}</div>
+          </div>
+          <Link
+            className="auth-submit-btn"
+            href="/login"
+            style={{ display: "block", textAlign: "center", textDecoration: "none", marginTop: 16 }}
+          >
+            {t("backToLogin")}
+          </Link>
+        </div>
+      </AuthShell>
+    );
   }
 
   return (

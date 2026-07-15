@@ -1318,6 +1318,15 @@ article.post:not(.promo) > .post-head {
   outline: 2px solid var(--violet-light);
   outline-offset: 2px;
 }
+/* DM message report (flag) — revealed only while its message row is hovered. */
+.dm-msg-row .dm-msg-report {
+  opacity: 0;
+  transition: opacity var(--dur-1) var(--ease-out);
+}
+.dm-msg-row:hover .dm-msg-report,
+.dm-msg-row .dm-msg-report:focus-visible {
+  opacity: 1;
+}
 .post-menu-pop {
   position: absolute;
   top: calc(100% + 4px);

@@ -151,6 +151,19 @@ const M = {
   browseHackathons: { en: "Browse hackathons", sr: "Pregledaj hackathone" },
   appliedOn: { en: "Applied", sr: "Prijavljen" },
   rejReasonLabel: { en: "Reason:", sr: "Razlog:" },
+  withdrawBtn: { en: "Withdraw", sr: "Povuci prijavu" },
+  withdrawConfirm: {
+    en: "Withdraw this application?",
+    sr: "Povući ovu prijavu?",
+  },
+  withdrawConfirmYes: { en: "Withdraw", sr: "Povuci" },
+  withdrawCancel: { en: "Cancel", sr: "Odustani" },
+  withdrawnPill: { en: "Withdrawn", sr: "Povučena" },
+  toastWithdrawn: { en: "Application withdrawn", sr: "Prijava povučena" },
+  toastWithdrawFailed: {
+    en: "Couldn't withdraw — try again",
+    sr: "Povlačenje nije uspelo — pokušaj ponovo",
+  },
 
   // Form builder
   fbHeading: { en: "Application form", sr: "Forma za prijavu" },
@@ -301,7 +314,7 @@ export function ApplicationsClient() {
           showToast={showToast}
         />
       ) : (
-        <MemberSurface locale={locale} t={t} />
+        <MemberSurface locale={locale} t={t} showToast={showToast} />
       )}
 
       {/* toast */}
@@ -320,8 +333,18 @@ export function ApplicationsClient() {
 /*
  * MEMBER SURFACE — the signed-in member's own applications (read-only).
  * */
-function MemberSurface({ locale, t }: { locale: Locale; t: (k: keyof typeof M) => string }) {
+function MemberSurface({
+  locale,
+  t,
+  showToast,
+}: {
+  locale: Locale;
+  t: (k: keyof typeof M) => string;
+  showToast: (msg: string, type: "green" | "red") => void;
+}) {
   const [apps, setApps] = useState<Application[] | null>(null);
+  const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -337,6 +360,30 @@ function MemberSurface({ locale, t }: { locale: Locale; t: (k: keyof typeof M) =
       cancelled = true;
     };
   }, []);
+
+  // Withdraw a pending/approved application (SSU10). Optimistic: flip the row to
+  // "withdrawn" locally, roll back on failure.
+  const withdraw = useCallback(
+    async (id: string) => {
+      setConfirmId(null);
+      setBusyId(id);
+      const prev = apps;
+      setApps((list) =>
+        (list ?? []).map((a) => (a.applicationId === id ? { ...a, status: "withdrawn" } : a)),
+      );
+      try {
+        await api.withdrawApplication(id);
+        showToast(t("toastWithdrawn"), "green");
+      } catch (err) {
+        console.error("withdrawApplication failed", err);
+        setApps(prev ?? null);
+        showToast(t("toastWithdrawFailed"), "red");
+      } finally {
+        setBusyId(null);
+      }
+    },
+    [apps, showToast, t],
+  );
 
   const pillClass = (status: CandidateStatus) =>
     status === "approved"
@@ -388,7 +435,9 @@ function MemberSurface({ locale, t }: { locale: Locale; t: (k: keyof typeof M) =
         )}
 
         {apps?.map((a) => {
+          const isWithdrawn = a.status === "withdrawn";
           const status = toCandidateStatus(a.status);
+          const canWithdraw = a.status === "pending" || a.status === "approved";
           return (
             <div
               key={a.applicationId}
@@ -410,7 +459,11 @@ function MemberSurface({ locale, t }: { locale: Locale; t: (k: keyof typeof M) =
                     {t("appliedOn")} {relTime(a.createdAt, locale)}
                   </div>
                 </div>
-                <span className={pillClass(status)}>{PILL_LABEL[status]}</span>
+                {isWithdrawn ? (
+                  <span className="status-pill s-rejected">{t("withdrawnPill")}</span>
+                ) : (
+                  <span className={pillClass(status)}>{PILL_LABEL[status]}</span>
+                )}
               </div>
               {status === "rejected" && a.rejectionReason ? (
                 <div className="app-answers" style={{ padding: "0 16px 14px" }}>
@@ -420,6 +473,37 @@ function MemberSurface({ locale, t }: { locale: Locale; t: (k: keyof typeof M) =
                   </div>
                 </div>
               ) : null}
+              {canWithdraw && (
+                <div className="app-answers" style={{ padding: "0 16px 14px" }}>
+                  {confirmId === a.applicationId ? (
+                    <div className="fb-confirm" role="alertdialog">
+                      <p className="fb-confirm-warn">
+                        <Icon name="flag" /> {t("withdrawConfirm")}
+                      </p>
+                      <div className="fb-confirm-actions">
+                        <button className="btn btn-ghost" onClick={() => setConfirmId(null)}>
+                          {t("withdrawCancel")}
+                        </button>
+                        <button
+                          className="btn btn-danger"
+                          disabled={busyId === a.applicationId}
+                          onClick={() => withdraw(a.applicationId)}
+                        >
+                          <Icon name="x" /> {t("withdrawConfirmYes")}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      className="btn btn-ghost"
+                      disabled={busyId === a.applicationId}
+                      onClick={() => setConfirmId(a.applicationId)}
+                    >
+                      <Icon name="x" /> {t("withdrawBtn")}
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           );
         })}
@@ -705,6 +789,35 @@ function ApplicantsReview({
 
   const openCard = cards.find((c) => c.id === openId) ?? null;
 
+  // The popup's team roster is derived from the loaded applicant list — every
+  // application that shares the anchor's team, with its live review status.
+  const openCardWithTeam: AppCard | null = openCard
+    ? {
+        ...openCard,
+        teamMembers: openCard.team
+          ? cards
+              .filter((c) => c.team === openCard.team)
+              .map((c) => ({
+                av: c.av,
+                cls: c.avClass,
+                name: c.name,
+                status:
+                  c.status === "approved"
+                    ? t("pillApproved")
+                    : c.status === "rejected"
+                      ? t("pillRejected")
+                      : t("pillPending"),
+                col:
+                  c.status === "approved"
+                    ? "var(--green)"
+                    : c.status === "rejected"
+                      ? "var(--red)"
+                      : "var(--lemon)",
+              }))
+          : undefined,
+      }
+    : null;
+
   /* Esc closes the topmost layer */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -743,6 +856,30 @@ function ApplicantsReview({
     api.approveApplication(id).catch((err) => {
       console.error("approveApplication failed", err);
       if (prev) setStatus(id, prev.status, prev);
+      showToast(t("toastActionFailed"), "red");
+    });
+  };
+
+  // "Odobri tim" — one action approves every open application of the card's
+  // team via PATCH /applications/:id/approve-team (single approve otherwise).
+  const applyApproveTeam = (id: string) => {
+    const anchor = snapshot(id);
+    if (!anchor?.team) {
+      applyApprove(id);
+      return;
+    }
+    const prevCards = cards;
+    setCards((prev) =>
+      prev.map((c) =>
+        c.team === anchor.team && c.status === "pending"
+          ? { ...c, status: "approved", actionHint: t("hintApproved") }
+          : c,
+      ),
+    );
+    showToast(t("toastApproved"), "green");
+    api.approveTeamApplication(id).catch((err) => {
+      console.error("approveTeamApplication failed", err);
+      setCards(prevCards);
       showToast(t("toastActionFailed"), "red");
     });
   };
@@ -1074,11 +1211,12 @@ function ApplicantsReview({
       </aside>
 
       {/* Candidate popup */}
-      {openCard && (
+      {openCardWithTeam && (
         <CandidatePopup
-          candidate={openCard}
+          candidate={openCardWithTeam}
           onClose={() => setOpenId(null)}
-          onApprove={() => applyApprove(openCard.id)}
+          onApprove={() => applyApprove(openCardWithTeam.id)}
+          onApproveTeam={() => applyApproveTeam(openCardWithTeam.id)}
           onReject={() => setRejectOpen(true)}
         />
       )}

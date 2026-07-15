@@ -106,30 +106,35 @@ async function main() {
   const cols = await db
     .insert(schema.kanbanColumns)
     .values([
-      { boardId: boardDig.boardId, name: "To do", position: 0 },
-      { boardId: boardDig.boardId, name: "In progress", position: 1 },
-      { boardId: boardDig.boardId, name: "Done", position: 2 },
+      { boardId: boardDig.boardId, name: "Za uraditi", position: 0 },
+      { boardId: boardDig.boardId, name: "U toku", position: 1 },
+      { boardId: boardDig.boardId, name: "Završeno", position: 2 },
     ])
     .returning();
   const colId = (name: string) => cols.find((c) => c.name === name)!.columnId;
   await db.insert(schema.kanbanCards).values([
-    { columnId: colId("To do"), createdBy: andrej, title: "Design the event-map UI", position: 0 },
     {
-      columnId: colId("To do"),
+      columnId: colId("Za uraditi"),
+      createdBy: andrej,
+      title: "Design the event-map UI",
+      position: 0,
+    },
+    {
+      columnId: colId("Za uraditi"),
       createdBy: andrej,
       assignedTo: mohammed,
       title: "Set up push notifications",
       position: 1,
     },
     {
-      columnId: colId("In progress"),
+      columnId: colId("U toku"),
       createdBy: mohammed,
       assignedTo: mohammed,
       title: "Check-in API endpoint",
       position: 0,
     },
     {
-      columnId: colId("Done"),
+      columnId: colId("Završeno"),
       createdBy: andrej,
       assignedTo: andrej,
       title: "Repo + CI scaffolding",

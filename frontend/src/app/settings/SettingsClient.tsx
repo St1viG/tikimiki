@@ -15,6 +15,7 @@ import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
 import { useAuth, useRequireAuth } from "@/components/auth/AuthProvider";
 import * as api from "@/lib/api";
 import { profileDecorationStyle, usernameEffectStyle, withDecorationClass } from "@/lib/cosmetics";
+import { PRICING, priceLabel } from "@/lib/pricing";
 
 /**
  * SettingsClient — the interactive settings surface.
@@ -502,6 +503,19 @@ const M = {
     en: "Permanently delete your account? This action cannot be undone.",
     sr: "Trajno obrisati nalog? Ova akcija ne može biti poništena.",
   },
+  deletePwPrompt: {
+    en: "Confirm with your password to permanently delete the account.",
+    sr: "Potvrdi lozinkom da trajno obrišeš nalog.",
+  },
+  deletePwLabel: { en: "Password", sr: "Lozinka" },
+  deletePwRequired: { en: "Enter your password.", sr: "Unesi lozinku." },
+  deleteWrongPassword: { en: "Password is incorrect.", sr: "Lozinka nije tačna." },
+  deleteFailed: {
+    en: "Could not delete the account. Try again.",
+    sr: "Brisanje naloga nije uspelo. Pokušaj ponovo.",
+  },
+  deleteDone: { en: "Account deleted.", sr: "Nalog je obrisan." },
+  deleting: { en: "Deleting…", sr: "Brisanje…" },
   requestReceived: { en: "Request received.", sr: "Zahtev je primljen." },
 
   // premium panel
@@ -550,7 +564,7 @@ const M = {
   },
   selected: { en: "Selected", sr: "Izabrano" },
   choose: { en: "Choose", sr: "Izaberi" },
-  save33: { en: "SAVE 33%", sr: "UŠTEDI 33%" },
+  savePct: { en: "SAVE {save}%", sr: "UŠTEDI {save}%" },
   cardData: { en: "Card details", sr: "Podaci o kartici" },
   cardNumber: { en: "Card number", sr: "Broj kartice" },
   expiryDate: { en: "Expiry date", sr: "Datum isteka" },
@@ -587,12 +601,15 @@ const M = {
     en: "Cancel auto-renew? Premium stays active until the expiry date.",
     sr: "Otkazati automatsku obnovu? Premium ostaje aktivan do datuma isteka.",
   },
-  removePremium: { en: "Remove Premium", sr: "Ukloni premium" },
-  confirmRemovePremium: {
-    en: "Remove Premium now? Benefits end immediately and your banner and animated (GIF) avatar will be removed.",
-    sr: "Ukloniti premium sada? Pogodnosti prestaju odmah, a baner i animirana (GIF) profilna biće uklonjeni.",
+  autoRenewCancelled: {
+    en: "Auto-renew cancelled — Premium stays active until the expiry date.",
+    sr: "Automatska obnova otkazana — Premium ostaje aktivan do datuma isteka.",
   },
-  premiumRemoved: { en: "Premium removed", sr: "Premium uklonjen" },
+  resumeAutoRenew: { en: "Resume auto-renew", sr: "Uključi automatsku obnovu" },
+  autoRenewResumed: {
+    en: "Auto-renew is back on.",
+    sr: "Automatska obnova je ponovo uključena.",
+  },
   cancelRenewFailed: {
     en: "Could not cancel auto-renew. Please try again.",
     sr: "Otkazivanje automatske obnove nije uspelo. Pokušaj ponovo.",
@@ -738,6 +755,12 @@ export function SettingsClient() {
     danger?: boolean;
   } | null>(null);
 
+  // GDPR account deletion (SSU21) — password-confirmed modal.
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deletePw, setDeletePw] = useState("");
+  const [deleteBusy, setDeleteBusy] = useState(false);
+  const [deleteErr, setDeleteErr] = useState<string | null>(null);
+
   useEffect(() => {
     const timers = saveTimers.current;
     return () => {
@@ -772,7 +795,7 @@ export function SettingsClient() {
         if (cancelled || !subscription) return;
         setPremiumActive(subscription.status === "active");
         setActivePlanName(subscription.plan);
-        setAutoRenewOn(!subscription.cancelledAt);
+        setAutoRenewOn(!subscription.cancelAtPeriodEnd);
         const exp = new Date(subscription.endsAt);
         if (!Number.isNaN(exp.getTime())) {
           setActivePlanExpiry(
@@ -1223,10 +1246,8 @@ export function SettingsClient() {
   }
 
   // Danger / confirm
-  // NOTE: there is no api.ts endpoint for deactivate / delete-data /
-  // delete-account, so these still only acknowledge the request. The native
-  // confirm()/alert() are replaced by the in-app confirm dialog + toast.
-  // TODO(api): wire to real account-deletion endpoints once they exist.
+  // NOTE: deactivate and delete-data still have no api.ts endpoint, so those
+  // two only acknowledge the request. Account deletion is real (below).
   const confirmDanger = (msg: string) => {
     setConfirmDialog({
       message: msg,
@@ -1234,11 +1255,43 @@ export function SettingsClient() {
       onConfirm: () => {
         console.warn(
           "[settings] Danger-zone action acknowledged but NOT persisted — " +
-            "no account deletion/deactivation API exists yet.",
+            "no deactivation/delete-data API exists yet.",
         );
         showToast(t("requestReceived"), "ok");
       },
     });
+  };
+
+  // GDPR account deletion (SSU21): password-confirmed POST /users/me/delete,
+  // then sign out and land on /login (all sessions are revoked server-side).
+  const openDeleteAccount = () => {
+    setDeletePw("");
+    setDeleteErr(null);
+    setDeleteOpen(true);
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!deletePw) {
+      setDeleteErr(t("deletePwRequired"));
+      return;
+    }
+    setDeleteBusy(true);
+    setDeleteErr(null);
+    try {
+      await api.deleteMyAccount(deletePw);
+      setDeleteOpen(false);
+      showToast(t("deleteDone"), "ok");
+      await logout();
+      router.push("/login");
+    } catch (err) {
+      setDeleteErr(
+        err instanceof api.ApiError && err.status === 401
+          ? t("deleteWrongPassword")
+          : t("deleteFailed"),
+      );
+    } finally {
+      setDeleteBusy(false);
+    }
   };
 
   const handleLogout = () => {
@@ -1271,7 +1324,7 @@ export function SettingsClient() {
       const sub = await api.activateSubscription(selectedPlan === "mesecno" ? "monthly" : "annual");
       setPremiumActive(sub.status === "active");
       setActivePlanName(sub.plan);
-      setAutoRenewOn(!sub.cancelledAt);
+      setAutoRenewOn(!sub.cancelAtPeriodEnd);
       const exp = new Date(sub.endsAt);
       if (!Number.isNaN(exp.getTime())) {
         setActivePlanExpiry(
@@ -1287,34 +1340,41 @@ export function SettingsClient() {
     }
   };
 
-  // Remove Premium immediately. The server also clears the banner (a Premium
-  // feature) and an animated GIF avatar, so we re-read the profile to reflect
-  // whatever it wiped and drop the local premium flags/badges.
-  const removePremium = () => {
+  // Cancel auto-renew: Premium stays active until the paid period ends. The
+  // server only flags the subscription (cancel-at-period-end) and keeps the
+  // banner / GIF avatar stored for a later reactivation, so no local premium
+  // state changes besides the auto-renew toggle.
+  const cancelAutoRenew = () => {
     setConfirmDialog({
-      message: t("confirmRemovePremium"),
+      message: t("confirmCancelRenew"),
       danger: true,
       onConfirm: async () => {
         try {
           await api.cancelSubscription();
-          setPremiumActive(false);
           setAutoRenewOn(false);
-          setIsPremium(false);
-          try {
-            const profile = await api.getMyProfile();
-            setAvatarUrl(profile.avatarUrl);
-            setBannerUrl(profile.bannerUrl);
-            setIsPremium(profile.isPremium);
-          } catch (err) {
-            console.error("Failed to refresh profile after removing premium", err);
-          }
-          showToast(t("premiumRemoved"), "ok");
+          showToast(t("autoRenewCancelled"), "ok");
         } catch (err) {
-          console.error("Failed to remove premium", err);
+          console.error("Failed to cancel auto-renew", err);
           showToast(err instanceof api.ApiError ? err.message : t("cancelRenewFailed"), "err");
         }
       },
     });
+  };
+
+  // Resume auto-renew while the cancelled period is still running: the server
+  // just lifts the cancel-at-period-end flag (nothing is billed again).
+  const resumeAutoRenew = async () => {
+    setPremiumBusy(true);
+    try {
+      const sub = await api.activateSubscription(selectedPlan === "mesecno" ? "monthly" : "annual");
+      setAutoRenewOn(!sub.cancelAtPeriodEnd);
+      showToast(t("autoRenewResumed"), "ok");
+    } catch (err) {
+      console.error("Failed to resume auto-renew", err);
+      showToast(err instanceof api.ApiError ? err.message : t("cancelRenewFailed"), "err");
+    } finally {
+      setPremiumBusy(false);
+    }
   };
 
   const SaveStatus = ({ id, children }: { id: string; children: React.ReactNode }) => (
@@ -2588,10 +2648,7 @@ export function SettingsClient() {
                   <div className="ep-toggle-title">{t("deleteAccountTitle")}</div>
                   <div className="ep-toggle-sub ep-danger-sub-red">{t("deleteAccountSub")}</div>
                 </div>
-                <button
-                  className="ep-btn-danger strong"
-                  onClick={() => confirmDanger(t("confirmDeleteAccount"))}
-                >
+                <button className="ep-btn-danger strong" onClick={openDeleteAccount}>
                   <Icon name="x" /> {t("deleteAccount")}
                 </button>
               </div>
@@ -2658,7 +2715,7 @@ export function SettingsClient() {
                     onClick={() => setSelectedPlan("mesecno")}
                   >
                     <div className="ep-plan-tier">{t("monthly")}</div>
-                    <div className="ep-plan-price">€4.99</div>
+                    <div className="ep-plan-price">{priceLabel(PRICING.monthly)}</div>
                     <div className="ep-plan-note">{t("perMonth")}</div>
                     <div className="ep-plan-state">
                       {selectedPlan === "mesecno" ? t("selected") : t("choose")}
@@ -2670,9 +2727,11 @@ export function SettingsClient() {
                     id="plan-godisnje"
                     onClick={() => setSelectedPlan("godisnje")}
                   >
-                    <span className="ep-plan-save">{t("save33")}</span>
+                    <span className="ep-plan-save">
+                      {t("savePct").replace("{save}", String(PRICING.savePercent))}
+                    </span>
                     <div className="ep-plan-tier">{t("yearly")}</div>
-                    <div className="ep-plan-price">€39.99</div>
+                    <div className="ep-plan-price">{priceLabel(PRICING.annualTotal)}</div>
                     <div className="ep-plan-note">{t("perYear")}</div>
                     <div className="ep-plan-state">
                       {selectedPlan === "godisnje" ? t("selected") : t("choose")}
@@ -2799,13 +2858,24 @@ export function SettingsClient() {
                     </strong>
                   </div>
                 </div>
-                <button
-                  className="ep-btn-danger"
-                  style={{ width: "fit-content" }}
-                  onClick={removePremium}
-                >
-                  <Icon name="x" /> {t("removePremium")}
-                </button>
+                {autoRenewOn ? (
+                  <button
+                    className="ep-btn-danger"
+                    style={{ width: "fit-content" }}
+                    onClick={cancelAutoRenew}
+                  >
+                    <Icon name="x" /> {t("cancelAutoRenew")}
+                  </button>
+                ) : (
+                  <button
+                    className="btn btn-violet"
+                    style={{ width: "fit-content" }}
+                    onClick={resumeAutoRenew}
+                    disabled={premiumBusy}
+                  >
+                    <Icon name="premium" /> {t("resumeAutoRenew")}
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -2894,6 +2964,69 @@ export function SettingsClient() {
                   }}
                 >
                   {t("confirm")}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* GDPR account deletion — password-confirmed modal (SSU21) */}
+        {deleteOpen && (
+          <div
+            className="set-modal-overlay"
+            role="presentation"
+            onClick={() => !deleteBusy && setDeleteOpen(false)}
+          >
+            <div
+              className="set-modal"
+              role="alertdialog"
+              aria-modal="true"
+              aria-label={t("confirmDeleteAccount")}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="set-modal-msg">{t("confirmDeleteAccount")}</div>
+              <div style={{ margin: "10px 0 0" }}>
+                <div style={{ fontSize: "13px", color: "var(--muted)", marginBottom: "8px" }}>
+                  {t("deletePwPrompt")}
+                </div>
+                <label className="sr-only" htmlFor="delete-account-pw">
+                  {t("deletePwLabel")}
+                </label>
+                <input
+                  id="delete-account-pw"
+                  className="ep-input"
+                  type="password"
+                  autoComplete="current-password"
+                  placeholder={t("deletePwLabel")}
+                  value={deletePw}
+                  onChange={(e) => setDeletePw(e.target.value)}
+                  disabled={deleteBusy}
+                />
+                {deleteErr && (
+                  <div
+                    role="alert"
+                    style={{ color: "var(--red)", fontSize: "13px", marginTop: "6px" }}
+                  >
+                    {deleteErr}
+                  </div>
+                )}
+              </div>
+              <div className="set-modal-actions">
+                <button
+                  className="btn btn-ghost"
+                  type="button"
+                  disabled={deleteBusy}
+                  onClick={() => setDeleteOpen(false)}
+                >
+                  {t("cancel")}
+                </button>
+                <button
+                  className="ep-btn-danger strong"
+                  type="button"
+                  disabled={deleteBusy}
+                  onClick={handleDeleteAccount}
+                >
+                  {deleteBusy ? t("deleting") : t("deleteAccount")}
                 </button>
               </div>
             </div>

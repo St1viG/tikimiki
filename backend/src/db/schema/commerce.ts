@@ -186,6 +186,9 @@ export const subscriptions = pgTable(
     startedAt: timestamp("started_at", tz).notNull().defaultNow(),
     endsAt: timestamp("ends_at", tz).notNull(),
     cancelledAt: timestamp("cancelled_at", tz),
+    // Cancel keeps Premium until endsAt: the flag marks "do not renew" while
+    // status stays "active"; the expiry scheduler flips status once endsAt passes.
+    cancelAtPeriodEnd: boolean("cancel_at_period_end").notNull().default(false),
   },
   (t) => [
     check("chk_subscriptions_dates", sql`${t.startedAt} < ${t.endsAt}`),

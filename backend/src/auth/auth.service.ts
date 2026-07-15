@@ -149,11 +149,21 @@ export class AuthService {
         user.username,
         user.email,
       );
+      // SSU1: an organization gets NO session until an administrator approves
+      // it — registration only files the request.
+      return {
+        user: this.toPublicUser(user),
+        verifyDevLink,
+        pendingApproval: true as const,
+        accessToken: undefined,
+        refreshToken: undefined,
+      };
     }
 
     return {
       user: this.toPublicUser(user),
       verifyDevLink,
+      pendingApproval: false as const,
       ...(await this.issueTokens(user.userId, user.tokenVersion)),
     };
   }
@@ -212,6 +222,24 @@ export class AuthService {
         message: "This account is banned",
         banned: true,
         reason: ban.reason,
+        bannedAt: ban.bannedAt.toISOString(),
+        // null = permanent ban; otherwise the FE shows when access returns.
+        expiresAt: ban.expiresAt ? ban.expiresAt.toISOString() : null,
+      });
+    }
+
+    // SSU1: an organization account is usable only after an administrator
+    // approves its verification request. Rejected orgs may still sign in —
+    // they need a session to read the reason and resubmit (SSU2).
+    const [org] = await this.db
+      .select({ verificationStatus: organizations.verificationStatus })
+      .from(organizations)
+      .where(eq(organizations.userId, u.userId))
+      .limit(1);
+    if (org?.verificationStatus === "pending") {
+      throw new ForbiddenException({
+        message: "Organization account is awaiting administrator approval",
+        pendingApproval: true,
       });
     }
 

@@ -10,7 +10,7 @@ import {
   type ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
-import type { LoginBody, MeResponse, RegisterBody } from "@tikimiki/types";
+import type { AuthResponse, LoginBody, MeResponse, RegisterBody } from "@tikimiki/types";
 import * as api from "@/lib/api";
 
 type AuthStatus = "loading" | "authenticated" | "unauthenticated";
@@ -19,7 +19,7 @@ interface AuthContextValue {
   user: MeResponse | null;
   status: AuthStatus;
   login: (body: LoginBody) => Promise<void>;
-  register: (body: RegisterBody) => Promise<void>;
+  register: (body: RegisterBody) => Promise<AuthResponse>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
 }
@@ -78,8 +78,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = useCallback(
     async (body: RegisterBody) => {
-      await api.register(body);
-      await loadMe();
+      const res = await api.register(body);
+      // SSU1: org registrations return no token (pending admin approval) —
+      // there is no session to load in that case.
+      if (res.accessToken) await loadMe();
+      return res;
     },
     [loadMe],
   );

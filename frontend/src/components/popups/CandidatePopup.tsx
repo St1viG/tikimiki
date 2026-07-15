@@ -76,11 +76,14 @@ export function CandidatePopup({
   candidate,
   onClose,
   onApprove,
+  onApproveTeam,
   onReject,
 }: {
   candidate: Candidate;
   onClose: () => void;
   onApprove: () => void;
+  /** Approves the whole team's applications; falls back to onApprove. */
+  onApproveTeam?: () => void;
   onReject: () => void;
 }) {
   const t = useT(M);
@@ -271,7 +274,7 @@ export function CandidatePopup({
                   <Icon name="x" /> {t("rejectBtn")}
                 </button>
                 {d.team && (
-                  <button className="btn-approve-team" onClick={onApprove}>
+                  <button className="btn-approve-team" onClick={onApproveTeam ?? onApprove}>
                     <Icon name="teams" /> {t("approveTeamBtn")}
                   </button>
                 )}

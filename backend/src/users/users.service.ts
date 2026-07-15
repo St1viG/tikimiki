@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import {
   BadRequestException,
   ConflictException,
@@ -32,8 +33,9 @@ import {
 } from "../db/schema";
 import { CosmeticsService, type EquippedCosmeticDto } from "../common/cosmetics.service";
 import { NotificationsService } from "../notifications/notifications.service";
+import { gatePremiumPersonalization } from "../subscriptions/premium-personalization";
 import { SubscriptionsService } from "../subscriptions/subscriptions.service";
-import type { ChangePasswordInput, UpdateProfileInput } from "./dto";
+import type { ChangePasswordInput, DeleteAccountInput, UpdateProfileInput } from "./dto";
 
 /** The transaction handle passed to db.transaction callbacks. */
 type Tx = Parameters<Parameters<DrizzleDB["transaction"]>[0]>[0];
@@ -177,14 +179,18 @@ export class UsersService {
       this.subscriptions.isPremium(userId),
     ]);
 
+    // Banner and GIF avatar are Premium-only: kept in the DB after premium
+    // lapses (for reactivation) but hidden from display until then.
+    const personalization = gatePremiumPersonalization(user, isPremium);
+
     return {
       userId: user.userId,
       username: user.username,
       displayName: user.displayName,
       email: user.email,
       bio: user.bio,
-      avatarUrl: user.avatarUrl,
-      bannerUrl: user.bannerUrl,
+      avatarUrl: personalization.avatarUrl,
+      bannerUrl: personalization.bannerUrl,
       points,
       skills: skillRows.map((s) => s.name),
       verifiedSkillNames: skillRows.filter((s) => s.verified).map((s) => s.name),
@@ -324,6 +330,58 @@ export class UsersService {
     return { success: true };
   }
 
+  /**
+   * GDPR account deletion (SSU21): soft-delete + anonymization. The row is
+   * kept (FKs and anonymized hackathon history survive) but every personal
+   * field is wiped or replaced with a non-identifying placeholder, and
+   * tokenVersion is bumped so every outstanding refresh token dies (same
+   * mechanism as changePassword). Login already excludes deleted accounts
+   * (`is null deleted_at`), and the cleared OAuth ids make sure a later
+   * OAuth sign-in creates a fresh account instead of reviving this one.
+   */
+  async deleteMyAccount(userId: string, input: DeleteAccountInput): Promise<{ success: true }> {
+    const [user] = await this.db
+      .select({ passwordHash: users.passwordHash })
+      .from(users)
+      .where(and(eq(users.userId, userId), isNull(users.deletedAt)))
+      .limit(1);
+    if (!user) throw new NotFoundException("User not found");
+
+    // Deletion is irreversible — confirm it is really the account owner.
+    const valid = await verify(user.passwordHash, input.password);
+    if (!valid) {
+      throw new UnauthorizedException("Password is incorrect");
+    }
+
+    // An unusable random hash keeps the NOT NULL column filled while making
+    // password login impossible (mirrors how OAuth signups store theirs).
+    const unusableHash = await hash(randomBytes(32).toString("hex"));
+
+    await this.db
+      .update(users)
+      .set({
+        deletedAt: new Date(),
+        email: `deleted-${userId}@deleted.local`,
+        username: `deleted_${randomBytes(4).toString("hex")}`,
+        displayName: null,
+        bio: null,
+        avatarUrl: null,
+        bannerUrl: null,
+        passwordHash: unusableHash,
+        googleId: null,
+        githubId: null,
+        githubUsername: null,
+        githubAccessToken: null,
+        linkedinId: null,
+        isEmailVerified: false,
+        tokenVersion: sql`${users.tokenVersion} + 1`,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.userId, userId));
+
+    return { success: true };
+  }
+
   /** The target's privacy-relevant settings (defaults when no row exists). */
   private async profilePrivacy(
     targetUserId: string,
@@ -425,14 +483,18 @@ export class UsersService {
         this.cosmetics.equippedForUser(user.userId),
       ]);
 
+    // Banner and GIF avatar are Premium-only: kept in the DB after premium
+    // lapses (for reactivation) but hidden from display until then.
+    const personalization = gatePremiumPersonalization(user, isPremium);
+
     return {
       userId: user.userId,
       username: user.username,
       displayName: user.displayName,
       email: privacy.showEmail ? user.email : null,
       bio: user.bio,
-      avatarUrl: user.avatarUrl,
-      bannerUrl: user.bannerUrl,
+      avatarUrl: personalization.avatarUrl,
+      bannerUrl: personalization.bannerUrl,
       points,
       skills: skillRows.map((s) => s.name),
       verifiedSkillNames: skillRows.filter((s) => s.verified).map((s) => s.name),

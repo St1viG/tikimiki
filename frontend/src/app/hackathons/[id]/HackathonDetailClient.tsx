@@ -10,7 +10,35 @@ import { useT } from "@/components/i18n/LanguageProvider";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { CalendarPopup } from "@/components/popups/CalendarPopup";
 import { initials } from "@/lib/format";
-import { getHackathon, getMyApplications, type Application } from "@/lib/api";
+import {
+  castVote,
+  getHackathon,
+  getHackathonProjects,
+  getHackathonResults,
+  getMyApplications,
+  getMyVote,
+  getVotingStatus,
+  type Application,
+  type HackathonResults,
+  type ProjectVote,
+} from "@/lib/api";
+
+/**
+ * SSU14: guests vote with a stable, client-generated fingerprint instead of
+ * an account. Kept in localStorage so a guest can't re-vote from the same
+ * browser; created lazily on first use.
+ */
+function guestFingerprint(): string {
+  const KEY = "tikimiki_guest_fp";
+  let fp = localStorage.getItem(KEY);
+  if (!fp) {
+    fp = Array.from(crypto.getRandomValues(new Uint8Array(16)))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+    localStorage.setItem(KEY, fp);
+  }
+  return fp;
+}
 
 /**
  * HackathonDetailClient — full hackathon profile on a dedicated route.
@@ -74,6 +102,24 @@ const M = {
   typePhysical: { en: "Physical", sr: "Fizički" },
   typeVirtual: { en: "Virtual", sr: "Virtuelni" },
   typeHybrid: { en: "Hybrid", sr: "Hibridni" },
+
+  // Official results (published podium + sponsor bounty winners)
+  resultsTitle: { en: "Results", sr: "Rezultati" },
+  resultsSponsor: { en: "Sponsor awards", sr: "Sponzorske nagrade" },
+  resultsPlace1: { en: "1st place", sr: "1. mesto" },
+  resultsPlace2: { en: "2nd place", sr: "2. mesto" },
+  resultsPlace3: { en: "3rd place", sr: "3. mesto" },
+  resultsPlaceN: { en: ". place", sr: ". mesto" },
+
+  // Audience voting (open to guests too — SSU14)
+  votingTitle: { en: "Audience voting", sr: "Glasanje publike" },
+  votingOpenHint: {
+    en: "Voting is open — pick your favourite project. No account needed.",
+    sr: "Glasanje je otvoreno — izaberi omiljeni projekat. Nalog nije potreban.",
+  },
+  voteBtn: { en: "Vote", sr: "Glasaj" },
+  votedBadge: { en: "Your vote", sr: "Tvoj glas" },
+  votesLabel: { en: "votes", sr: "glasova" },
 } as const;
 
 function pad(n: number): string {
@@ -100,16 +146,65 @@ export function HackathonDetailClient({ hackathonId }: { hackathonId: string }) 
   const [loadFailed, setLoadFailed] = useState(false);
   const [existing, setExisting] = useState<Application | null>(null);
   const [calOpen, setCalOpen] = useState(false);
+  const [results, setResults] = useState<HackathonResults | null>(null);
+  const [votingOpen, setVotingOpen] = useState(false);
+  const [projects, setProjects] = useState<ProjectVote[]>([]);
+  const [votedProjectId, setVotedProjectId] = useState<string | null>(null);
+  const [voteBusy, setVoteBusy] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     getHackathon(hackathonId)
       .then((h) => !cancelled && setHack(h))
       .catch(() => !cancelled && setLoadFailed(true));
+    // Official results are public — shown once the organizer publishes them.
+    getHackathonResults(hackathonId)
+      .then((r) => !cancelled && setResults(r))
+      .catch(() => !cancelled && setResults(null));
+    // Audience voting is public too (guests vote via fingerprint — SSU14).
+    getVotingStatus(hackathonId)
+      .then((s) => {
+        if (cancelled) return;
+        setVotingOpen(s.isOpen);
+        if (!s.isOpen) return;
+        getHackathonProjects(hackathonId)
+          .then((p) => !cancelled && setProjects(p))
+          .catch(() => undefined);
+      })
+      .catch(() => undefined);
     return () => {
       cancelled = true;
     };
   }, [hackathonId]);
+
+  // The caller's existing vote: by account when signed in, else by the
+  // guest fingerprint stored in this browser.
+  useEffect(() => {
+    if (!votingOpen) return;
+    let cancelled = false;
+    getMyVote(hackathonId, user ? undefined : guestFingerprint())
+      .then((v) => !cancelled && setVotedProjectId(v.projectId))
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [votingOpen, user, hackathonId]);
+
+  const onVote = async (projectId: string) => {
+    if (voteBusy || votedProjectId) return;
+    setVoteBusy(true);
+    try {
+      const res = await castVote(hackathonId, projectId, user ? undefined : guestFingerprint());
+      setVotedProjectId(projectId);
+      setProjects((prev) =>
+        prev.map((p) => (p.projectId === projectId ? { ...p, voteCount: res.voteCount } : p)),
+      );
+    } catch {
+      /* backend governs the voting window / duplicate votes */
+    } finally {
+      setVoteBusy(false);
+    }
+  };
 
   useEffect(() => {
     if (!user) {
@@ -373,6 +468,83 @@ export function HackathonDetailClient({ hackathonId }: { hackathonId: string }) 
             <div className="hd-meta-val">{fmtDMY(new Date(hack.registrationDeadline))}</div>
           </div>
         </div>
+
+        {/* Official results — public once the organizer publishes them */}
+        {results?.published && (
+          <section className="hd-section" id="hd-results">
+            <h3 className="hd-section-title">
+              <Icon name="trophy" className="ic-sm" /> {t("resultsTitle")}
+            </h3>
+            <ol className="hd-podium">
+              {results.podium.map((p) => (
+                <li key={p.projectId} className={`hd-podium-row hd-podium-${p.rank ?? "x"}`}>
+                  <span className="hd-podium-rank">
+                    {p.rank === 1
+                      ? `🥇 ${t("resultsPlace1")}`
+                      : p.rank === 2
+                        ? `🥈 ${t("resultsPlace2")}`
+                        : p.rank === 3
+                          ? `🥉 ${t("resultsPlace3")}`
+                          : `${p.rank ?? "—"}${t("resultsPlaceN")}`}
+                  </span>
+                  <span className="hd-podium-team">{p.teamName}</span>
+                  <span className="hd-podium-project">{p.title}</span>
+                </li>
+              ))}
+            </ol>
+            {results.bountyWinners.length > 0 && (
+              <>
+                <h4 className="hd-section-sub">{t("resultsSponsor")}</h4>
+                <ul className="hd-bounty-winners">
+                  {results.bountyWinners.map((w) => (
+                    <li key={w.bountyId} className="hd-podium-row">
+                      <span className="hd-podium-rank">🏅 {w.sponsorName}</span>
+                      <span className="hd-podium-team">{w.teamName}</span>
+                      <span className="hd-podium-project">
+                        {w.bountyTitle} — {w.title}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </section>
+        )}
+
+        {/* Audience voting — open to signed-in members AND guests (SSU14) */}
+        {votingOpen && projects.length > 0 && (
+          <section className="hd-section" id="hd-voting">
+            <h3 className="hd-section-title">
+              <Icon name="leaderboard" className="ic-sm" /> {t("votingTitle")}
+            </h3>
+            <p className="hd-about">{t("votingOpenHint")}</p>
+            <ul className="hd-vote-list">
+              {projects.map((p) => (
+                <li key={p.projectId} className="hd-podium-row">
+                  <span className="hd-podium-team">{p.teamName}</span>
+                  <span className="hd-podium-project">{p.title}</span>
+                  <span className="hd-vote-count">
+                    {p.voteCount} {t("votesLabel")}
+                  </span>
+                  {votedProjectId === p.projectId ? (
+                    <span className="hd-vote-badge">
+                      <Icon name="check" className="ic-sm" /> {t("votedBadge")}
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      className="btn btn-primary hd-vote-btn"
+                      onClick={() => onVote(p.projectId)}
+                      disabled={voteBusy || votedProjectId !== null}
+                    >
+                      {t("voteBtn")}
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {/* About */}
         {hack.description && (

@@ -3181,6 +3181,56 @@ img.msg-att {
   height: 14px;
 }
 
+/* Organizer open/close voting control (SSU14) */
+.voting-org-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  background: var(--surface-2, var(--surface));
+  border: 1px solid var(--violet-deep);
+  border-radius: var(--r);
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+.voting-org-control-info {
+  flex: 1;
+  min-width: 220px;
+}
+.voting-org-control-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.voting-org-control-hint {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.voting-org-state {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.voting-org-state.is-open {
+  color: var(--green);
+  background: color-mix(in srgb, var(--green) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--green) 45%, transparent);
+}
+.voting-org-state.is-closed {
+  color: var(--muted);
+  background: var(--surface-3);
+  border: 1px solid var(--line);
+}
+
 .projects-list {
   display: flex;
   flex-direction: column;

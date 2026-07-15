@@ -763,6 +763,7 @@ export class ApplicationsService {
         applicationId: applications.applicationId,
         userId: applications.userId,
         hackathonId: applications.hackathonId,
+        status: applications.status,
       })
       .from(applications)
       .where(and(eq(applications.applicationId, applicationId), isNull(applications.deletedAt)))
@@ -772,6 +773,34 @@ export class ApplicationsService {
     }
 
     await this.authz.assertHackathonOwnerOrAdmin(existing.hackathonId, reviewerId);
+
+    // SSU11: approvals must respect the hackathon's participant cap — the cap
+    // is enforced at application time too, but approvals can outnumber spots
+    // when more applications arrive than the hackathon can take.
+    if (existing.status !== "approved") {
+      const [hackathon] = await this.db
+        .select({ maxParticipants: hackathons.maxParticipants })
+        .from(hackathons)
+        .where(eq(hackathons.hackathonId, existing.hackathonId))
+        .limit(1);
+      if (hackathon?.maxParticipants != null) {
+        const [{ approvedCount }] = await this.db
+          .select({ approvedCount: sql<number>`count(*)::int` })
+          .from(applications)
+          .where(
+            and(
+              eq(applications.hackathonId, existing.hackathonId),
+              eq(applications.status, "approved"),
+              isNull(applications.deletedAt),
+            ),
+          );
+        if (Number(approvedCount) >= hackathon.maxParticipants) {
+          throw new BadRequestException(
+            "Hackathon is full — the maximum number of participants has been approved",
+          );
+        }
+      }
+    }
 
     await this.db
       .update(applications)
@@ -789,6 +818,101 @@ export class ApplicationsService {
 
     await this.notifyDecision(existing.userId, existing.hackathonId, "approved");
     return this.getOwnApplication(applicationId);
+  }
+
+  /**
+   * SSU11 "Odobri tim": approves every active (pending/waitlisted) application
+   * that shares the given application's team in one action. Falls back to a
+   * single approve when the application has no team. The hackathon's
+   * `maxParticipants` cap counts the whole batch, so a team never squeezes
+   * past the limit member-by-member.
+   */
+  async approveTeam(applicationId: string, reviewerId: string): Promise<ApplicationDto[]> {
+    const [anchor] = await this.db
+      .select({
+        applicationId: applications.applicationId,
+        userId: applications.userId,
+        hackathonId: applications.hackathonId,
+        teamId: applications.teamId,
+      })
+      .from(applications)
+      .where(and(eq(applications.applicationId, applicationId), isNull(applications.deletedAt)))
+      .limit(1);
+    if (!anchor) {
+      throw new NotFoundException("Application not found");
+    }
+
+    await this.authz.assertHackathonOwnerOrAdmin(anchor.hackathonId, reviewerId);
+
+    if (!anchor.teamId) {
+      return [await this.approve(applicationId, reviewerId)];
+    }
+
+    // Every still-open application from this team on this hackathon.
+    const teamApps = await this.db
+      .select({
+        applicationId: applications.applicationId,
+        userId: applications.userId,
+        status: applications.status,
+      })
+      .from(applications)
+      .where(
+        and(
+          eq(applications.hackathonId, anchor.hackathonId),
+          eq(applications.teamId, anchor.teamId),
+          isNull(applications.deletedAt),
+        ),
+      );
+    const toApprove = teamApps.filter((a) => a.status === "pending" || a.status === "waitlisted");
+    if (toApprove.length === 0) {
+      throw new BadRequestException("Team has no open applications to approve");
+    }
+
+    const [hackathon] = await this.db
+      .select({ maxParticipants: hackathons.maxParticipants })
+      .from(hackathons)
+      .where(eq(hackathons.hackathonId, anchor.hackathonId))
+      .limit(1);
+    if (hackathon?.maxParticipants != null) {
+      const [{ approvedCount }] = await this.db
+        .select({ approvedCount: sql<number>`count(*)::int` })
+        .from(applications)
+        .where(
+          and(
+            eq(applications.hackathonId, anchor.hackathonId),
+            eq(applications.status, "approved"),
+            isNull(applications.deletedAt),
+          ),
+        );
+      if (Number(approvedCount) + toApprove.length > hackathon.maxParticipants) {
+        throw new BadRequestException(
+          "Approving the whole team would exceed the hackathon's participant limit",
+        );
+      }
+    }
+
+    await this.db
+      .update(applications)
+      .set({
+        status: "approved",
+        rejectionReason: null,
+        reviewedBy: reviewerId,
+        reviewedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(
+        inArray(
+          applications.applicationId,
+          toApprove.map((a) => a.applicationId),
+        ),
+      );
+
+    for (const app of toApprove) {
+      await this.grantServerMembership(anchor.hackathonId, app.userId);
+      await this.notifyDecision(app.userId, anchor.hackathonId, "approved");
+    }
+
+    return Promise.all(toApprove.map((a) => this.getOwnApplication(a.applicationId)));
   }
 
   /**

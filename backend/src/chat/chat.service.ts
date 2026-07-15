@@ -13,6 +13,7 @@ import { activeTeamMember } from "../common/team.predicates";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import { NotificationsService } from "../notifications/notifications.service";
 import { RealtimeGateway } from "../realtime/realtime.gateway";
+import { gatePremiumPersonalization } from "../subscriptions/premium-personalization";
 import { SubscriptionsService } from "../subscriptions/subscriptions.service";
 import {
   channelGroups,
@@ -497,6 +498,12 @@ export class ChatService {
           e.profileDecoration = equipped.profileDecoration;
         }
       }
+
+      // Premium-only personalization (banner, GIF avatar) is hidden for
+      // members whose premium lapsed — the data stays stored for reactivation.
+      for (const [id, e] of byUser) {
+        byUser.set(id, gatePremiumPersonalization(e, e.isPremium));
+      }
     }
 
     return [...byUser.values()];
@@ -517,16 +524,22 @@ export class ChatService {
       this.subscriptions.premiumUserIds(ids),
       this.cosmetics.equippedForUsers(ids),
     ]);
-    return rows.map((r) => ({
-      userId: r.userId,
-      username: r.username,
-      displayName: r.displayName,
-      avatarUrl: r.avatarUrl,
-      bannerUrl: r.bannerUrl,
-      isPremium: premium.has(r.userId),
-      usernameEffect: equippedMap.get(r.userId)?.usernameEffect ?? null,
-      profileDecoration: equippedMap.get(r.userId)?.profileDecoration ?? null,
-    }));
+    // Banner / GIF avatar are Premium-only and hidden once premium lapses.
+    return rows.map((r) =>
+      gatePremiumPersonalization(
+        {
+          userId: r.userId,
+          username: r.username,
+          displayName: r.displayName,
+          avatarUrl: r.avatarUrl,
+          bannerUrl: r.bannerUrl,
+          isPremium: premium.has(r.userId),
+          usernameEffect: equippedMap.get(r.userId)?.usernameEffect ?? null,
+          profileDecoration: equippedMap.get(r.userId)?.profileDecoration ?? null,
+        },
+        premium.has(r.userId),
+      ),
+    );
   }
 
   async getServerDetail(serverId: string, userId: string): Promise<ServerDetailDto> {
@@ -1424,16 +1437,22 @@ export class ChatService {
     const membersByConvo = new Map<string, ConversationMemberDto[]>();
     for (const m of memberRows) {
       const list = membersByConvo.get(m.conversationId) ?? [];
-      list.push({
-        userId: m.userId,
-        username: m.username,
-        displayName: m.displayName,
-        avatarUrl: m.avatarUrl,
-        bannerUrl: m.bannerUrl,
-        isPremium: premiumMembers.has(m.userId),
-        usernameEffect: equippedByUser.get(m.userId)?.usernameEffect ?? null,
-        profileDecoration: equippedByUser.get(m.userId)?.profileDecoration ?? null,
-      });
+      // Banner / GIF avatar are Premium-only and hidden once premium lapses.
+      list.push(
+        gatePremiumPersonalization(
+          {
+            userId: m.userId,
+            username: m.username,
+            displayName: m.displayName,
+            avatarUrl: m.avatarUrl,
+            bannerUrl: m.bannerUrl,
+            isPremium: premiumMembers.has(m.userId),
+            usernameEffect: equippedByUser.get(m.userId)?.usernameEffect ?? null,
+            profileDecoration: equippedByUser.get(m.userId)?.profileDecoration ?? null,
+          },
+          premiumMembers.has(m.userId),
+        ),
+      );
       membersByConvo.set(m.conversationId, list);
     }
 

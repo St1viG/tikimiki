@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   UseGuards,
 } from "@nestjs/common";
@@ -15,10 +16,14 @@ import { OptionalUser } from "../auth/optional-user.decorator";
 import { ZodValidationPipe } from "../common/zod.pipe";
 import { BountiesService } from "./bounties.service";
 import {
+  createBountySchema,
   publishResultsSchema,
   setBountyWinnerSchema,
+  updateBountySchema,
+  type CreateBountyInput,
   type PublishResultsInput,
   type SetBountyWinnerInput,
+  type UpdateBountyInput,
 } from "./dto";
 
 @Controller("hackathons/:hackathonId")
@@ -32,6 +37,39 @@ export class BountiesController {
     @OptionalUser() userId: string | null,
   ) {
     return this.svc.listBounties(hackathonId, userId);
+  }
+
+  @Post("bounties")
+  @UseGuards(JwtAuthGuard)
+  createBounty(
+    @Param("hackathonId", new ParseUUIDPipe()) hackathonId: string,
+    @CurrentUser() userId: string,
+    @Body(new ZodValidationPipe(createBountySchema))
+    body: CreateBountyInput,
+  ) {
+    return this.svc.createBounty(hackathonId, userId, body);
+  }
+
+  @Patch("bounties/:bountyId")
+  @UseGuards(JwtAuthGuard)
+  updateBounty(
+    @Param("hackathonId", new ParseUUIDPipe()) hackathonId: string,
+    @Param("bountyId", new ParseUUIDPipe()) bountyId: string,
+    @CurrentUser() userId: string,
+    @Body(new ZodValidationPipe(updateBountySchema))
+    body: UpdateBountyInput,
+  ) {
+    return this.svc.updateBounty(hackathonId, bountyId, userId, body);
+  }
+
+  @Delete("bounties/:bountyId")
+  @UseGuards(JwtAuthGuard)
+  deleteBounty(
+    @Param("hackathonId", new ParseUUIDPipe()) hackathonId: string,
+    @Param("bountyId", new ParseUUIDPipe()) bountyId: string,
+    @CurrentUser() userId: string,
+  ) {
+    return this.svc.deleteBounty(hackathonId, bountyId, userId);
   }
 
   @Post("bounties/:bountyId/apply")

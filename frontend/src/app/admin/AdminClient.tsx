@@ -11,8 +11,7 @@ import {
   type AppealAction,
   type AppealRequest,
 } from "@/components/popups/AdminAppealPopup";
-import { AdminProfilePopup } from "@/components/popups/AdminProfilePopup";
-import { USER_PROFILES } from "@/app/admin/_mockProfiles";
+import { AdminProfilePopup, type UserProfile } from "@/components/popups/AdminProfilePopup";
 import { useT, useLanguage } from "@/components/i18n/LanguageProvider";
 import { useRequireRole } from "@/components/auth/AuthProvider";
 import {
@@ -25,6 +24,7 @@ import {
   getAdminUsers,
   getAdminOrganizations,
   getAdminModerationServers,
+  getPublicProfile,
   verifyOrganization,
   rejectOrganization,
   banUser,
@@ -145,6 +145,12 @@ const M = {
   defaultBanReason: { en: "Violation of platform rules", sr: "Kršenje pravila platforme" },
   toastUserBanned: { en: "User banned.", sr: "Korisnik je banovan." },
   toastUserUnbanned: { en: "User unbanned.", sr: "Ban je ukinut." },
+  banDurationLabel: { en: "Duration", sr: "Trajanje" },
+  banDuration7: { en: "7 days", sr: "7 dana" },
+  banDuration30: { en: "30 days", sr: "30 dana" },
+  banDurationPermanent: { en: "Permanent", sr: "Trajno" },
+  profileBadgeEarned: { en: "Earned a badge", sr: "Osvojen bedž" },
+  profileLoadError: { en: "Could not load the profile.", sr: "Nije moguće učitati profil." },
   toastUserError: { en: "Could not update the user.", sr: "Nije moguće ažurirati korisnika." },
   noPendingOrgs: {
     en: "No organizations awaiting verification.",
@@ -282,6 +288,9 @@ function isTabFilter(v: string | null): v is TabFilter {
 
 type ModalId = "modal-remove" | "modal-suspend" | "modal-reject" | "modal-revoke";
 
+/** Ban length options offered in the suspend modal (SSU21). */
+type BanDuration = "7" | "30" | "permanent";
+
 type ToastType = "green" | "red";
 
 interface ToastState {
@@ -304,7 +313,14 @@ export function AdminClient() {
   const modalActionRef = useRef<((reason: string) => void) | null>(null);
   const [appeal, setAppeal] = useState<AppealRequest | null>(null);
   const [appealId, setAppealId] = useState<string | null>(null);
+  // Username whose profile modal is open + the real profile mapped for the
+  // popup (fetched from GET /users/:username — no more mock fixtures).
   const [profileUser, setProfileUser] = useState<string | null>(null);
+  const [profileData, setProfileData] = useState<UserProfile | null>(null);
+  // Ban duration picked inside the suspend modal. Mirrored into a ref so the
+  // openModal onConfirm closure (created before the pick) reads the latest.
+  const [banDuration, setBanDuration] = useState<BanDuration>("permanent");
+  const banDurationRef = useRef<BanDuration>("permanent");
   const [toast, setToast] = useState<ToastState>({ msg: "", type: "green", show: false });
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -559,6 +575,11 @@ export function AdminClient() {
   };
 
   // Users
+  const pickBanDuration = (d: BanDuration) => {
+    banDurationRef.current = d;
+    setBanDuration(d);
+  };
+
   const handleBanUser = (user: AdminUser) => {
     if (user.banned) {
       unbanUser(user.userId)
@@ -577,9 +598,17 @@ export function AdminClient() {
         });
       return;
     }
-    // Route the ban reason through the styled suspend/ban modal (no native prompt).
+    // Route the ban reason + duration through the styled suspend/ban modal
+    // (no native prompt). The duration ref carries the value picked while the
+    // modal was open; "permanent" sends no expiry.
+    pickBanDuration("permanent");
     openModal("modal-suspend", (reason) => {
-      banUser(user.userId, reason || t("defaultBanReason"))
+      const duration = banDurationRef.current;
+      const expiresAt =
+        duration === "permanent"
+          ? undefined
+          : new Date(Date.now() + Number(duration) * 24 * 60 * 60 * 1000).toISOString();
+      banUser(user.userId, reason || t("defaultBanReason"), expiresAt)
         .then(() => {
           setAdminUsers((list) =>
             list.map((u) => (u.userId === user.userId ? { ...u, banned: true } : u)),
@@ -712,7 +741,53 @@ export function AdminClient() {
     return (parts[0][0] + parts[1][0]).toUpperCase();
   };
 
-  const openProfileModal = (userId: string) => setProfileUser(userId);
+  const openProfileModal = (username: string) => setProfileUser(username);
+
+  // Resolve the opened username into real profile data (GET /users/:username)
+  // mapped onto the popup's props. Role/status come from the admin users list
+  // when the row is loaded; anything the API does not expose renders as "—".
+  useEffect(() => {
+    if (!profileUser) {
+      setProfileData(null);
+      return;
+    }
+    let cancelled = false;
+    getPublicProfile(profileUser)
+      .then((p) => {
+        if (cancelled) return;
+        const row = adminUsers.find((u) => u.username === p.username);
+        setProfileData({
+          avCls: "av-v",
+          name: p.displayName ?? p.username,
+          handle: `@${p.username}`,
+          email: p.email ?? row?.email ?? "—",
+          role: row ? roleLabel(row.role) : "—",
+          roleCls: row ? rolePillClass(row.role) : "adm-role-clan",
+          status: row ? (row.banned ? t("statusBanned") : t("statusActive")) : "—",
+          statusCls: row?.banned ? "adm-status-suspended" : "adm-status-active",
+          joined: fmtDateTime(p.createdAt),
+          reports: null,
+          bio: p.bio,
+          points: p.points,
+          activity: p.badges.map((b) => ({
+            time: fmtDateTime(b.awardedAt),
+            action: `${t("profileBadgeEarned")}: ${b.name}`,
+            detail: b.description,
+          })),
+          measures: [],
+        });
+      })
+      .catch(() => {
+        if (cancelled) return;
+        showToast(t("profileLoadError"), "red");
+        setProfileUser(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+    // roleLabel/rolePillClass/t are stable per render and derived from locale.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profileUser, adminUsers, fmtDateTime, showToast]);
 
   const tabs: { id: TabFilter; labelKey: keyof typeof M; count?: number }[] = [
     { id: "pregled", labelKey: "tabOverview" },
@@ -1122,7 +1197,7 @@ export function AdminClient() {
                   <button
                     className="adm-btn-xs"
                     style={{ marginLeft: "auto" }}
-                    onClick={() => openProfileModal(rep.reporterId)}
+                    onClick={() => openProfileModal(rep.reporterUsername)}
                   >
                     {t("viewProfile")}
                   </button>
@@ -1240,7 +1315,7 @@ export function AdminClient() {
                         <div className="adm-table-actions">
                           <button
                             className="adm-btn-xs"
-                            onClick={() => openProfileModal(user.userId)}
+                            onClick={() => openProfileModal(user.username)}
                           >
                             {t("profileBtn")}
                           </button>
@@ -1679,6 +1754,32 @@ export function AdminClient() {
             {t("modalSuspendTitle")}
           </div>
           <div className="modal-sub">{t("modalSuspendSub")}</div>
+          {/* Ban duration (SSU21): 7/30 days auto-expire; permanent has no expiry. */}
+          <div
+            role="radiogroup"
+            aria-label={t("banDurationLabel")}
+            style={{ display: "flex", alignItems: "center", gap: "8px", margin: "10px 0" }}
+          >
+            <span style={{ fontSize: "12px", color: "var(--muted)" }}>
+              {t("banDurationLabel")}:
+            </span>
+            {(["7", "30", "permanent"] as const).map((d) => (
+              <button
+                key={d}
+                type="button"
+                className={`adm-btn-xs${banDuration === d ? " ok" : ""}`}
+                role="radio"
+                aria-checked={banDuration === d}
+                onClick={() => pickBanDuration(d)}
+              >
+                {d === "7"
+                  ? t("banDuration7")
+                  : d === "30"
+                    ? t("banDuration30")
+                    : t("banDurationPermanent")}
+              </button>
+            ))}
+          </div>
           <textarea
             aria-label={t("modalSuspendTextAria")}
             placeholder={t("modalSuspendTextPh")}
@@ -1765,12 +1866,9 @@ export function AdminClient() {
       {/* Appeal approve/reject modal (component) */}
       <AdminAppealPopup request={appeal} onClose={closeAppealModal} onConfirm={confirmAppeal} />
 
-      {/* User profile modal — resolves the key into the admin fixtures; a miss
-          renders the empty modal shell. */}
-      <AdminProfilePopup
-        profile={profileUser ? (USER_PROFILES[profileUser] ?? null) : null}
-        onClose={() => setProfileUser(null)}
-      />
+      {/* User profile modal — real data from GET /users/:username (the modal
+          stays closed until the fetch resolves). */}
+      <AdminProfilePopup profile={profileData} onClose={() => setProfileUser(null)} />
 
       {/* TOAST */}
       <div

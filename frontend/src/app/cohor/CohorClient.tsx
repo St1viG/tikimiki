@@ -52,6 +52,7 @@ import {
   deleteKanbanCard,
   updateKanbanCard,
   getVotingStatus,
+  setVotingWindow,
   createConversation,
   updateConversation,
   uploadGroupIcon,
@@ -112,6 +113,7 @@ import {
 import type { HackathonSummary } from "@tikimiki/types";
 import { getSocket } from "@/lib/socket";
 import { ProfilePopup } from "@/components/popups/ProfilePopup";
+import { ReportPopup } from "@/components/popups/ReportPopup";
 import { personName } from "@/lib/displayName";
 import { M } from "./strings";
 import {
@@ -178,6 +180,8 @@ export function CohorClient() {
     opensAt: string | null;
     closesAt: string | null;
   } | null>(null);
+  // Organizer's open/close-voting action is in flight (SSU14).
+  const [votingWindowBusy, setVotingWindowBusy] = useState(false);
   /* Timer (driven by the real hackathon's startsAt / endsAt)
    * `hackathon` is fetched from getHackathon(hackathonId) below. While it is
    * null we have no real numbers, so the timer card contents stay hidden and
@@ -380,6 +384,8 @@ export function CohorClient() {
   const [ctxConfirmDelete, setCtxConfirmDelete] = useState(false);
   // Forward picker.
   const [forwardMsg, setForwardMsg] = useState<ApiMessage | null>(null);
+  // Message being reported (drives the ReportPopup).
+  const [reportMsgId, setReportMsgId] = useState<string | null>(null);
   // Inline editing of a message.
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState("");
@@ -1384,6 +1390,27 @@ export function CohorClient() {
     [board, refreshBoard],
   );
 
+  // Localize the default kanban column names (covers both the legacy English
+  // seeds and the Serbian ones); custom column names render as-is.
+  const kanbanColLabel = useCallback(
+    (name: string): string => {
+      switch (name.trim().toLowerCase()) {
+        case "to do":
+        case "za uraditi":
+          return t("kanbanColTodo");
+        case "in progress":
+        case "u toku":
+          return t("kanbanColDoing");
+        case "done":
+        case "završeno":
+          return t("kanbanColDone");
+        default:
+          return name;
+      }
+    },
+    [t],
+  );
+
   // Close the create-group modal and clear its draft fields.
   const closeGroupModal = useCallback(() => {
     setShowGroupModal(false);
@@ -1978,6 +2005,15 @@ export function CohorClient() {
     [forwardMsg, closeCtxMenu, showToast, t, buildForwarded],
   );
 
+  // Open the report modal for someone else's message.
+  const ctxReport = useCallback(
+    (m: ApiMessage) => {
+      closeCtxMenu();
+      setReportMsgId(m.messageId);
+    },
+    [closeCtxMenu],
+  );
+
   // Copy a message's content to the clipboard.
   const ctxCopy = useCallback(
     (content: string) => {
@@ -2035,6 +2071,39 @@ export function CohorClient() {
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [hackathonId, myVotedProjectId, realProjects],
+  );
+
+  // Organizer opens or closes the audience-voting window (SSU14). Opening sets
+  // the window to [now, hackathon end] (or +24h when no end is known); closing
+  // clears it. The returned status refreshes the participant-facing UI at once.
+  const applyVotingWindow = useCallback(
+    async (open: boolean) => {
+      if (!hackathonId || votingWindowBusy) return;
+      setVotingWindowBusy(true);
+      try {
+        const opensAt = open ? new Date().toISOString() : null;
+        const closesAt = open
+          ? new Date(hackEndMs > Date.now() ? hackEndMs : Date.now() + 86_400_000).toISOString()
+          : null;
+        const status = await setVotingWindow(hackathonId, opensAt, closesAt);
+        setVotingStatus({
+          isOpen: status.isOpen,
+          opensAt: status.opensAt,
+          closesAt: status.closesAt,
+        });
+        showToast(
+          open ? "lemon" : "violet",
+          open ? "leaderboard" : "lock",
+          open ? t("votingOpenedToast") : t("votingClosedToast"),
+          3000,
+        );
+      } catch {
+        showToast("red", "flag", t("votingWindowFailToast"), 3000);
+      } finally {
+        setVotingWindowBusy(false);
+      }
+    },
+    [hackathonId, votingWindowBusy, hackEndMs, showToast, t],
   );
 
   /* Rezultati form */
@@ -2445,22 +2514,24 @@ export function CohorClient() {
   }
 
   /* Rezultati form */
+  // Team names offered in the rezultati dropdowns — the hackathon's real
+  // submitted teams; the demo names only remain as RezSelect's fallback when
+  // no projects are loaded.
+  const realTeamOptions = Array.from(new Set(realProjects.map((p) => p.teamName).filter(Boolean)));
   function onRankChange(field: keyof typeof rezForm, value: string) {
     setRezForm((f) => ({ ...f, [field]: value }));
     setRezError(null);
   }
   async function submitRezultati() {
     const { rank1, rank2, rank3, publike } = rezForm;
-    if (!rank1 || !rank2 || !rank3 || !publike) {
+    // 1st place is mandatory; lower ranks / audience award only exist when
+    // the hackathon has enough submitted teams to fill them.
+    if (!rank1) {
       setRezError(t("rezErrAllFields"));
       return;
     }
-    // Every loaded sponsor bounty needs a winning team selected.
-    if (bounties.length > 0 && bounties.some((b) => !bountyWinners[b.bountyId])) {
-      setRezError(t("rezErrAllFields"));
-      return;
-    }
-    if (new Set([rank1, rank2, rank3]).size !== 3) {
+    const picked = [rank1, rank2, rank3].filter(Boolean);
+    if (new Set(picked).size !== picked.length) {
       setRezError(t("rezErrDuplicate"));
       return;
     }
@@ -2585,7 +2656,8 @@ export function CohorClient() {
       "video/webm",
       "video/ogg",
     ];
-    const maxBytes = 500 * 1024 * 1024;
+    // Matches the backend VIDEO_MAX_BYTES limit (uploads.service.ts).
+    const maxBytes = 50 * 1024 * 1024;
     if (!f.type.startsWith("video/") && !allowed.includes(f.type)) {
       flashVideoError(t("videoErrFormat"));
       return;
@@ -3490,7 +3562,7 @@ export function CohorClient() {
                     </div>
                     <div className="panel-spec">
                       <div className="panel-spec-label">{t("specMaxSize")}</div>
-                      <div className="panel-spec-val">500 MB</div>
+                      <div className="panel-spec-val">50 MB</div>
                     </div>
                     <div className="panel-spec">
                       <div className="panel-spec-label">{t("specFormats")}</div>
@@ -3772,7 +3844,13 @@ export function CohorClient() {
                               type="button"
                               className="btn-violet-sm"
                               onClick={handleSubmitProject}
-                              disabled={projectBusy !== null}
+                              // Submission closes with the hackathon window —
+                              // mirrors the backend's endsAt check instead of
+                              // letting the click fail server-side.
+                              disabled={projectBusy !== null || (!!hackathon && !isHackathonActive)}
+                              title={
+                                hackathon && !isHackathonActive ? t("projectDeadlinePassed") : ""
+                              }
                             >
                               {projectBusy === "submit"
                                 ? t("projectSubmitting")
@@ -3887,6 +3965,50 @@ export function CohorClient() {
                     </div>
                   </div>
                 </div>
+
+                {/* Organizer control: open / close audience voting (SSU14) */}
+                {can("manage_messages") && (
+                  <div className="voting-org-control">
+                    <div className="voting-org-control-info">
+                      <div className="voting-org-control-title">
+                        <Icon name="leaderboard" className="ic-sm" /> {t("votingOrgTitle")}
+                        <span
+                          className={
+                            (votingStatus ? votingStatus.isOpen : isVotingOpen)
+                              ? "voting-org-state is-open"
+                              : "voting-org-state is-closed"
+                          }
+                        >
+                          {(votingStatus ? votingStatus.isOpen : isVotingOpen)
+                            ? t("votingOrgOpenState")
+                            : t("votingOrgClosedState")}
+                        </span>
+                      </div>
+                      <div className="voting-org-control-hint">{t("votingOrgHint")}</div>
+                    </div>
+                    {(votingStatus ? votingStatus.isOpen : isVotingOpen) ? (
+                      <button
+                        type="button"
+                        className="btn btn-ghost"
+                        disabled={votingWindowBusy}
+                        onClick={() => applyVotingWindow(false)}
+                      >
+                        <Icon name="lock" className="ic-sm" />{" "}
+                        {votingWindowBusy ? t("votingOrgWorking") : t("votingOrgCloseBtn")}
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        className="btn btn-violet"
+                        disabled={votingWindowBusy}
+                        onClick={() => applyVotingWindow(true)}
+                      >
+                        <Icon name="leaderboard" className="ic-sm" />{" "}
+                        {votingWindowBusy ? t("votingOrgWorking") : t("votingOrgOpenBtn")}
+                      </button>
+                    )}
+                  </div>
+                )}
 
                 {/* Status baner: glasanje nije aktivno */}
                 <div
@@ -4158,6 +4280,7 @@ export function CohorClient() {
                       <div style={{ flex: 1 }}>
                         <div className="rez-row-label">{t("rezPlace1")}</div>
                         <RezSelect
+                          options={realTeamOptions}
                           id="rank1-select"
                           ariaLabel={t("rezPlace1")}
                           value={rezForm.rank1}
@@ -4176,6 +4299,7 @@ export function CohorClient() {
                       <div style={{ flex: 1 }}>
                         <div className="rez-row-label">{t("rezPlace2")}</div>
                         <RezSelect
+                          options={realTeamOptions}
                           id="rank2-select"
                           ariaLabel={t("rezPlace2")}
                           value={rezForm.rank2}
@@ -4194,6 +4318,7 @@ export function CohorClient() {
                       <div style={{ flex: 1 }}>
                         <div className="rez-row-label">{t("rezPlace3")}</div>
                         <RezSelect
+                          options={realTeamOptions}
                           id="rank3-select"
                           ariaLabel={t("rezPlace3")}
                           value={rezForm.rank3}
@@ -4216,6 +4341,7 @@ export function CohorClient() {
                       <div style={{ flex: 1 }}>
                         <div className="rez-row-label">{t("rezAudienceRowLabel")}</div>
                         <RezSelect
+                          options={realTeamOptions}
                           id="publike-select"
                           ariaLabel={t("rezAudienceLabel")}
                           value={rezForm.publike}
@@ -4250,6 +4376,7 @@ export function CohorClient() {
                               </div>
                               {b.theme && <div className="rez-spon-sub">{b.theme}</div>}
                               <RezSelect
+                                options={realTeamOptions}
                                 id={`bounty-${b.bountyId}-select`}
                                 ariaLabel={`${b.sponsorName} — ${b.title}`}
                                 placeholder={t("selectWinner")}
@@ -4631,7 +4758,7 @@ export function CohorClient() {
                           }
                         >
                           <div className="kanban-col-header">
-                            <span className="kanban-col-title">{col.name}</span>
+                            <span className="kanban-col-title">{kanbanColLabel(col.name)}</span>
                             <span className="kanban-col-count">{cards.length}</span>
                           </div>
                           <div className="kanban-cards">
@@ -5209,6 +5336,13 @@ export function CohorClient() {
         username={profileUsername}
         onClose={() => setProfileUsername(null)}
       />
+      <ReportPopup
+        open={reportMsgId !== null}
+        targetType="message"
+        targetId={reportMsgId ?? ""}
+        onClose={() => setReportMsgId(null)}
+        onSubmitted={() => showToast("violet", "flag", <>{t("ctxReportSubmitted")}</>, 2500)}
+      />
       {miniProfile && (
         <div
           ref={measureMiniCard}
@@ -5692,6 +5826,18 @@ export function CohorClient() {
           >
             {t("ctxCopy")}
           </button>
+
+          {/* Report — only other users' messages */}
+          {ctxMenu.m.senderId !== user?.userId && (
+            <button
+              type="button"
+              role="menuitem"
+              style={CTX_MENU_ITEM_STYLE}
+              onClick={() => ctxReport(ctxMenu.m)}
+            >
+              {t("ctxReport")}
+            </button>
+          )}
 
           {/* Delete — own messages always; others' CHANNEL messages with
               manage_messages. DM messages: author only. Destructive, two-step. */}

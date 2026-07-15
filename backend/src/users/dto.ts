@@ -44,3 +44,14 @@ export const changePasswordSchema = z
   })
   .strict();
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+
+/** POST /users/me/delete body (SSU21 GDPR account deletion).
+ *  Every account carries a password hash (OAuth signups get an unusable
+ *  random one — see OauthService), so the confirmation password is always
+ *  required; OAuth-only users first set one via the reset-password flow. */
+export const deleteAccountSchema = z
+  .object({
+    password: z.string().min(1),
+  })
+  .strict();
+export type DeleteAccountInput = z.infer<typeof deleteAccountSchema>;

@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import {
   type OnGatewayConnection,
@@ -9,8 +9,24 @@ import {
   MessageBody,
   ConnectedSocket,
 } from "@nestjs/websockets";
+import { and, eq, isNull } from "drizzle-orm";
 import type { Server, Socket } from "socket.io";
+import { activeTeamMember } from "../common/team.predicates";
 import { env } from "../config/env";
+import { DRIZZLE, type DrizzleDB } from "../db/db.module";
+import {
+  administrators,
+  channelGroups,
+  channels,
+  conversationMembers,
+  hackathons,
+  kanbanBoards,
+  serverRoles,
+  servers,
+  teamMembers,
+  teams,
+  userRoles,
+} from "../db/schema";
 
 /**
  * RealtimeGateway — Socket.io gateway powering live chat.
@@ -20,6 +36,10 @@ import { env } from "../config/env";
  * socket to its personal room `user:<id>`. Clients then join channel rooms
  * (`channel:<id>`) / conversation rooms (`conversation:<id>`) to receive live
  * messages. ChatService calls the `emit*` helpers after persisting a message.
+ *
+ * Every join request is membership-checked (SSU8/9): a socket may only enter
+ * rooms of servers/conversations/boards its user actually belongs to.
+ * Unauthorized joins are silently ignored — the connection stays up.
  */
 @Injectable()
 @WebSocketGateway({
@@ -31,7 +51,10 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
   /** userId → number of live connections (one user may have several tabs). */
   private readonly online = new Map<string, number>();
 
-  constructor(private readonly jwt: JwtService) {}
+  constructor(
+    private readonly jwt: JwtService,
+    @Inject(DRIZZLE) private readonly db: DrizzleDB,
+  ) {}
 
   async handleConnection(client: Socket): Promise<void> {
     const token =
@@ -78,9 +101,108 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
     client.emit("presence", { online: [...this.online.keys()] });
   }
 
+  /* ── Room membership checks (SSU8/9) ─────────────────────── */
+
+  /**
+   * True iff the user may access the server: they hold ANY role on it
+   * (user_roles → server_roles) or they are the organizing account of the
+   * server's hackathon — the same rule as ChatService.isServerMember.
+   */
+  private async isServerMember(serverId: string, userId: string): Promise<boolean> {
+    const [role] = await this.db
+      .select({ userId: userRoles.userId })
+      .from(userRoles)
+      .innerJoin(serverRoles, eq(serverRoles.serverRoleId, userRoles.serverRoleId))
+      .where(and(eq(serverRoles.serverId, serverId), eq(userRoles.userId, userId)))
+      .limit(1);
+    if (role) return true;
+
+    const [own] = await this.db
+      .select({ orgId: hackathons.organizationId })
+      .from(servers)
+      .innerJoin(hackathons, eq(hackathons.hackathonId, servers.hackathonId))
+      .where(eq(servers.serverId, serverId))
+      .limit(1);
+    return own?.orgId === userId;
+  }
+
+  /** Owning server of a channel (channels → channel_groups), or null if unknown. */
+  private async serverIdForChannel(channelId: string): Promise<string | null> {
+    const [row] = await this.db
+      .select({ serverId: channelGroups.serverId })
+      .from(channels)
+      .innerJoin(channelGroups, eq(channelGroups.groupId, channels.groupId))
+      .where(eq(channels.channelId, channelId))
+      .limit(1);
+    return row?.serverId ?? null;
+  }
+
+  /** True iff the user is a current (not-left) participant of the conversation. */
+  private async isConversationMember(conversationId: string, userId: string): Promise<boolean> {
+    const [row] = await this.db
+      .select({ userId: conversationMembers.userId })
+      .from(conversationMembers)
+      .where(
+        and(
+          eq(conversationMembers.conversationId, conversationId),
+          eq(conversationMembers.userId, userId),
+          isNull(conversationMembers.leftAt),
+        ),
+      )
+      .limit(1);
+    return Boolean(row);
+  }
+
+  /**
+   * True iff the user may watch a kanban board: active member of the board's
+   * team, the organizing account of the team's hackathon, or a platform
+   * admin — the same rule as KanbanService.assertBoardReadAccess.
+   */
+  private async canAccessBoard(boardId: string, userId: string): Promise<boolean> {
+    const [board] = await this.db
+      .select({ teamId: kanbanBoards.teamId })
+      .from(kanbanBoards)
+      .where(eq(kanbanBoards.boardId, boardId))
+      .limit(1);
+    if (!board) return false;
+
+    const [member] = await this.db
+      .select({ userId: teamMembers.userId })
+      .from(teamMembers)
+      .where(
+        and(eq(teamMembers.teamId, board.teamId), eq(teamMembers.userId, userId), activeTeamMember),
+      )
+      .limit(1);
+    if (member) return true;
+
+    const [org] = await this.db
+      .select({ organizationId: hackathons.organizationId })
+      .from(teams)
+      .innerJoin(hackathons, eq(hackathons.hackathonId, teams.hackathonId))
+      .where(eq(teams.teamId, board.teamId))
+      .limit(1);
+    if (org?.organizationId === userId) return true;
+
+    const [admin] = await this.db
+      .select({ userId: administrators.userId })
+      .from(administrators)
+      .where(eq(administrators.userId, userId))
+      .limit(1);
+    return Boolean(admin);
+  }
+
+  /* ── Room join/leave handlers ─────────────────────────────── */
+
   @SubscribeMessage("joinChannel")
-  joinChannel(@ConnectedSocket() client: Socket, @MessageBody() channelId: string): void {
-    if (typeof channelId === "string") void client.join(`channel:${channelId}`);
+  async joinChannel(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() channelId: string,
+  ): Promise<void> {
+    const userId = client.data.userId as string | undefined;
+    if (typeof channelId !== "string" || !userId) return;
+    const serverId = await this.serverIdForChannel(channelId);
+    if (!serverId || !(await this.isServerMember(serverId, userId))) return;
+    await client.join(`channel:${channelId}`);
   }
 
   @SubscribeMessage("leaveChannel")
@@ -89,8 +211,14 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
   }
 
   @SubscribeMessage("joinServer")
-  joinServer(@ConnectedSocket() client: Socket, @MessageBody() serverId: string): void {
-    if (typeof serverId === "string") void client.join(`server:${serverId}`);
+  async joinServer(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() serverId: string,
+  ): Promise<void> {
+    const userId = client.data.userId as string | undefined;
+    if (typeof serverId !== "string" || !userId) return;
+    if (!(await this.isServerMember(serverId, userId))) return;
+    await client.join(`server:${serverId}`);
   }
 
   @SubscribeMessage("leaveServer")
@@ -99,8 +227,14 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
   }
 
   @SubscribeMessage("joinConversation")
-  joinConversation(@ConnectedSocket() client: Socket, @MessageBody() conversationId: string): void {
-    if (typeof conversationId === "string") void client.join(`conversation:${conversationId}`);
+  async joinConversation(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() conversationId: string,
+  ): Promise<void> {
+    const userId = client.data.userId as string | undefined;
+    if (typeof conversationId !== "string" || !userId) return;
+    if (!(await this.isConversationMember(conversationId, userId))) return;
+    await client.join(`conversation:${conversationId}`);
   }
 
   @SubscribeMessage("leaveConversation")
@@ -183,8 +317,14 @@ export class RealtimeGateway implements OnGatewayConnection, OnGatewayDisconnect
   }
 
   @SubscribeMessage("joinKanban")
-  joinKanban(@ConnectedSocket() client: Socket, @MessageBody() boardId: string): void {
-    if (typeof boardId === "string") void client.join(`board:${boardId}`);
+  async joinKanban(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() boardId: string,
+  ): Promise<void> {
+    const userId = client.data.userId as string | undefined;
+    if (typeof boardId !== "string" || !userId) return;
+    if (!(await this.canAccessBoard(boardId, userId))) return;
+    await client.join(`board:${boardId}`);
   }
 
   @SubscribeMessage("leaveKanban")

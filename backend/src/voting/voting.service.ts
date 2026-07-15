@@ -9,6 +9,8 @@ import {
 import { and, asc, eq, isNull, sql } from "drizzle-orm";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import { hackathons, members, projects, teams, votes } from "../db/schema";
+import { AuthzService } from "../common/authz.service";
+import type { VotingWindowInput } from "./dto";
 
 /** One project entry in the audience-voting list. */
 export interface ProjectVoteDto {
@@ -52,7 +54,30 @@ type ProjectVoteRow = {
 
 @Injectable()
 export class VotingService {
-  constructor(@Inject(DRIZZLE) private readonly db: DrizzleDB) {}
+  constructor(
+    @Inject(DRIZZLE) private readonly db: DrizzleDB,
+    private readonly authz: AuthzService,
+  ) {}
+
+  /** PATCH /hackathons/:id/voting-window — organizer/admin only (SSU14). */
+  async setVotingWindow(
+    hackathonId: string,
+    userId: string,
+    input: VotingWindowInput,
+  ): Promise<VotingStatusDto> {
+    await this.authz.assertHackathonOwnerOrAdmin(hackathonId, userId);
+    const updated = await this.db
+      .update(hackathons)
+      .set({
+        votingOpensAt: input.opensAt ? new Date(input.opensAt) : null,
+        votingClosesAt: input.closesAt ? new Date(input.closesAt) : null,
+        updatedAt: new Date(),
+      })
+      .where(eq(hackathons.hackathonId, hackathonId))
+      .returning({ hackathonId: hackathons.hackathonId });
+    if (updated.length === 0) throw new NotFoundException("Hackathon not found");
+    return this.votingStatus(hackathonId);
+  }
 
   /**
    * Voting is open only when the organizer has configured a window AND now is
@@ -132,15 +157,27 @@ export class VotingService {
     return rows.map((r) => this.toProjectVoteDto(r));
   }
 
-  async castVote(hackathonId: string, projectId: string, voterId: string): Promise<CastVoteResult> {
-    // Caller must be a member to participate in audience voting.
-    const [member] = await this.db
-      .select({ userId: members.userId })
-      .from(members)
-      .where(eq(members.userId, voterId))
-      .limit(1);
-    if (!member) {
-      throw new BadRequestException("Only members can vote");
+  async castVote(
+    hackathonId: string,
+    projectId: string,
+    voterId: string | null,
+    fingerprint: string | null,
+  ): Promise<CastVoteResult> {
+    // SSU14: a vote is identified by exactly one of member id / guest
+    // fingerprint (mirrors the chk_votes_voter_identity DB check).
+    if (!voterId && !fingerprint) {
+      throw new BadRequestException("A guest vote requires a fingerprint");
+    }
+    if (voterId) {
+      // Signed-in voters must be member accounts (orgs/admins don't vote).
+      const [member] = await this.db
+        .select({ userId: members.userId })
+        .from(members)
+        .where(eq(members.userId, voterId))
+        .limit(1);
+      if (!member) {
+        throw new BadRequestException("Only members can vote");
+      }
     }
 
     // Enforce the organizer's voting window.
@@ -176,17 +213,25 @@ export class VotingService {
     }
 
     return this.db.transaction(async (tx) => {
-      // One vote per member per hackathon (any project).
+      // One vote per member (or per guest fingerprint) per hackathon.
+      const identity = voterId
+        ? eq(votes.voterId, voterId)
+        : eq(votes.voterFingerprint, fingerprint!);
       const [existing] = await tx
         .select({ voteId: votes.voteId })
         .from(votes)
-        .where(and(eq(votes.hackathonId, hackathonId), eq(votes.voterId, voterId)))
+        .where(and(eq(votes.hackathonId, hackathonId), identity))
         .limit(1);
       if (existing) {
         throw new ConflictException("Already voted in this hackathon");
       }
 
-      await tx.insert(votes).values({ hackathonId, projectId, voterId });
+      await tx.insert(votes).values({
+        hackathonId,
+        projectId,
+        voterId: voterId ?? null,
+        voterFingerprint: voterId ? null : fingerprint,
+      });
 
       const [{ voteCount }] = await tx
         .select({ voteCount: sql<number>`count(*)::int` })
@@ -197,11 +242,19 @@ export class VotingService {
     });
   }
 
-  async myVote(hackathonId: string, voterId: string): Promise<MyVoteResult> {
+  async myVote(
+    hackathonId: string,
+    voterId: string | null,
+    fingerprint: string | null,
+  ): Promise<MyVoteResult> {
+    if (!voterId && !fingerprint) return { projectId: null };
+    const identity = voterId
+      ? eq(votes.voterId, voterId)
+      : eq(votes.voterFingerprint, fingerprint!);
     const [row] = await this.db
       .select({ projectId: votes.projectId })
       .from(votes)
-      .where(and(eq(votes.hackathonId, hackathonId), eq(votes.voterId, voterId)))
+      .where(and(eq(votes.hackathonId, hackathonId), identity))
       .limit(1);
     return { projectId: row?.projectId ?? null };
   }

@@ -584,15 +584,19 @@ export function RezSelect({
   value,
   onChange,
   placeholder,
+  options,
 }: {
   id: string;
   ariaLabel: string;
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
+  /** Team names to offer — real submitted teams; demo names as a fallback. */
+  options?: string[];
 }) {
   const t = useT(M);
   const ph = placeholder ?? t("selectTeam");
+  const opts = options && options.length > 0 ? options : TEAM_OPTIONS;
   return (
     <select
       id={id}
@@ -602,7 +606,7 @@ export function RezSelect({
       onChange={(e) => onChange(e.target.value)}
     >
       <option value="">{ph}</option>
-      {TEAM_OPTIONS.map((t) => (
+      {opts.map((t) => (
         <option value={t} key={t}>
           {t}
         </option>

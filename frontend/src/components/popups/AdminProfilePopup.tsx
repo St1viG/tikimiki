@@ -4,16 +4,46 @@ import { useEffect } from "react";
 import "@/app/admin/admin.css";
 import { GenerativeAvatar } from "@/components/ui/GenerativeAvatar";
 import { useT } from "@/components/i18n/LanguageProvider";
-import type { UserProfile } from "@/app/admin/_mockProfiles";
 
 /**
  * AdminProfilePopup — presentational user-profile modal.
  *
- * Prop-driven: the caller resolves the profile (e.g. from the admin mock
- * fixtures) and passes it in. This component owns no data of its own.
+ * Prop-driven: the caller resolves the profile (mapped from the real
+ * `GET /users/:username` public-profile endpoint) and passes it in. This
+ * component owns no data of its own. Fields without a backing API value are
+ * passed as null and rendered as "—".
  */
 
-export type { UserProfile } from "@/app/admin/_mockProfiles";
+export interface ActivityItem {
+  time: string;
+  action: string;
+  detail: string;
+}
+
+export interface MeasureItem {
+  time: string;
+  type: string;
+  detail: string;
+  by: string;
+}
+
+export interface UserProfile {
+  avCls: string;
+  name: string;
+  handle: string;
+  email: string;
+  role: string;
+  roleCls: string;
+  status: string;
+  statusCls: string;
+  joined: string;
+  /** Open reports against the user; null when the API exposes no such count. */
+  reports: number | null;
+  bio?: string | null;
+  points?: number | null;
+  activity: ActivityItem[];
+  measures: MeasureItem[];
+}
 
 const M = {
   modalTitle: { en: "User profile", sr: "Profil korisnika" },
@@ -24,10 +54,12 @@ const M = {
   issuedBy: { en: "Issued by:", sr: "Izdao:" },
   closeBtn: { en: "Close", sr: "Zatvori" },
   registeredLabel: { en: "Registered", sr: "Registrovan" },
+  pointsLabel: { en: "Points", sr: "Poeni" },
   reportsLabel: { en: "Reports", sr: "Prijave" },
 } as const;
 
-function reportsColor(reports: number): string {
+function reportsColor(reports: number | null): string {
+  if (reports === null) return "var(--muted)";
   return reports >= 5 ? "var(--red)" : reports > 0 ? "var(--lemon-vivid)" : "var(--muted)";
 }
 
@@ -119,13 +151,28 @@ export function AdminProfilePopup({ profile, onClose }: AdminProfilePopupProps) 
                   {u.joined}
                 </div>
                 <div className="adm-prof-side-label" style={{ marginTop: "6px" }}>
+                  {t("pointsLabel")}
+                </div>
+                <div className="adm-prof-side-val" id="prof-points">
+                  {u.points ?? "—"}
+                </div>
+                <div className="adm-prof-side-label" style={{ marginTop: "6px" }}>
                   {t("reportsLabel")}
                 </div>
                 <div style={{ fontWeight: 700, color: reportsColor(u.reports) }} id="prof-reports">
-                  {u.reports}
+                  {u.reports ?? "—"}
                 </div>
               </div>
             </div>
+
+            {u.bio && (
+              <div
+                id="prof-bio"
+                style={{ margin: "10px 0 0", fontSize: "13px", color: "var(--muted)" }}
+              >
+                {u.bio}
+              </div>
+            )}
 
             <div className="adm-prof-section-label">{t("activityHistory")}</div>
             <div className="adm-timeline" id="prof-activity" style={{ margin: "0 0 4px" }}>
