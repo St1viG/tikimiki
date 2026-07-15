@@ -493,6 +493,8 @@ export class BountiesService {
       .where(eq(bounties.hackathonId, hackathonId))
       .orderBy(asc(bounties.title), asc(hackathonResults.rank));
 
+    // `published` is derived from whether any podium rows exist — there is no
+    // separate boolean column; publishing results means inserting result rows.
     return {
       published: podiumRows.length > 0,
       podium: podiumRows.map((r) => ({
@@ -551,6 +553,8 @@ export class BountiesService {
     const newlyAwarded = new Map<string, number>();
 
     await this.db.transaction(async (tx) => {
+      // Delete only the overall-podium rows for this hackathon; bounty-winner
+      // rows (bountyId IS NOT NULL) are untouched so setBountyWinner state is preserved.
       if (hackathonProjectIds.length > 0) {
         await tx
           .delete(hackathonResults)

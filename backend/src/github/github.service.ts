@@ -58,6 +58,7 @@ export class GithubService {
    */
   async deriveAndStoreSkills(userId: string, topLanguages: string[]): Promise<void> {
     for (const language of topLanguages) {
+      // Case-insensitive match so "TypeScript" and "typescript" resolve to the same skill row.
       const [existing] = await this.db
         .select({ skillId: skills.skillId })
         .from(skills)
@@ -109,6 +110,7 @@ export class GithubService {
       }
     }
 
+    // For repos outside the detailed set, a repo count is a rough but cheap proxy for usage.
     for (const r of repos) {
       if (!r.language || detailedNames.has(r.full_name)) continue;
       languageScore.set(r.language, (languageScore.get(r.language) ?? 0) + 1);

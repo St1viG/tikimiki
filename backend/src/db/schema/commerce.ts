@@ -79,6 +79,8 @@ export const userEquippedCosmetics = pgTable(
   },
   (t) => [
     primaryKey({ columns: [t.userId, t.slot] }),
+    // Composite FK to user_cosmetics ensures you can only equip a cosmetic you
+    // own; a plain FK to cosmetic_items alone would not enforce ownership.
     foreignKey({
       columns: [t.userId, t.cosmeticId],
       foreignColumns: [userCosmetics.userId, userCosmetics.cosmeticId],
@@ -138,6 +140,7 @@ export const merchOrders = pgTable(
     shippingName: varchar("shipping_name", { length: 200 }).notNull(),
     shippingAddress: text("shipping_address").notNull(),
     shippingCity: varchar("shipping_city", { length: 100 }).notNull(),
+    // ISO 3166-1 alpha-2 country code (e.g. "RS", "DE") — char(2) enforces length at the DB level.
     shippingCountry: char("shipping_country", { length: 2 }).notNull(),
     shippingZip: varchar("shipping_zip", { length: 20 }).notNull(),
     trackingNumber: varchar("tracking_number", { length: 100 }),

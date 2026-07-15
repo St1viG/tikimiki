@@ -49,6 +49,8 @@ export const users = pgTable(
   (t) => [
     uniqueIndex("uq_users_username").on(t.username),
     uniqueIndex("uq_users_email").on(t.email),
+    // Partial unique indexes on OAuth IDs exclude NULL so multiple users can
+    // have no linked account without colliding on the unique constraint.
     uniqueIndex("uq_users_github_id_nn")
       .on(t.githubId)
       .where(sql`${t.githubId} is not null`),
@@ -208,6 +210,8 @@ export const friendships = pgTable(
   },
   (t) => [
     primaryKey({ columns: [t.userIdA, t.userIdB] }),
+    // Canonical ordering (A < B) ensures there is exactly one row per pair,
+    // preventing both (X,Y) and (Y,X) from existing as separate friendships.
     check("chk_friendships_canonical_order", sql`${t.userIdA} < ${t.userIdB}`),
     check(
       "chk_friendships_requester",

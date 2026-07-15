@@ -61,6 +61,7 @@ export function SignupClient() {
 
   // Password value + strength
   const [password, setPassword] = useState("");
+  // Derived on every render — avoids a separate state value that would lag by one render.
   const strength = passwordStrength(password);
 
   // Confirm password
@@ -76,7 +77,7 @@ export function SignupClient() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // derived match state
+  // Only show the match/mismatch message once the user starts typing in the confirm field.
   const matchVisible = confirmPw.length > 0;
   const matchOk = password === confirmPw;
 

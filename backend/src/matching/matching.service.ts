@@ -132,6 +132,7 @@ export class MatchingService {
 
   /**
    * Distinct skill names covered by `teamId`'s active members.
+   * `selectDistinct` collapses duplicate skill names when two members share one.
    */
   async teamSkills(teamId: string): Promise<string[]> {
     const rows = await this.db
@@ -205,6 +206,8 @@ export class MatchingService {
     const freeAgents = await this.freeAgentsForHackathon(hackathonId, userId);
     const myTeamId = await this.myActiveTeamId(hackathonId, userId);
 
+    // Members who already have a team only see teammate suggestions (free agents
+    // that fill the team's skill gaps), never open-team suggestions.
     if (myTeamId) {
       const teammates = this.rankByComplementarity(
         freeAgents,

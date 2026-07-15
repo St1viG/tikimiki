@@ -257,6 +257,8 @@ export function TeamsClient() {
   };
 
   // The caller's primary team — used as the inviting team for free agents.
+  // (Handling multiple teams per user — selecting which one to invite from —
+  // is not yet implemented.)
   const myTeam = myTeams[0] ?? null;
 
   const handleTabClick = (f: Filter) => {
@@ -311,6 +313,8 @@ export function TeamsClient() {
   // "Invited"; revert on failure. Callers without a team open JoinTeamPopup.
   const handleInviteSolo = async (player: SoloPlayerCardPlayer) => {
     if (!myTeam) {
+      // No team yet: open JoinTeamPopup as a workaround — there is no inviteToTeam
+      // endpoint to call without a real teamId, so we capture the intent instead.
       setJoinTarget(player.username);
       return;
     }

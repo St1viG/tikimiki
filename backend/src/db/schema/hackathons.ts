@@ -175,6 +175,8 @@ export const teams = pgTable(
     deletedAt: timestamp("deleted_at", tz),
   },
   (t) => [
+    // Only enforce name uniqueness among active teams; a deleted team's name
+    // should not block a new team from reusing it in the same hackathon.
     uniqueIndex("uq_teams_name_per_hackathon")
       .on(t.hackathonId, t.name)
       .where(sql`${t.deletedAt} is null`),
@@ -199,6 +201,8 @@ export const teamMembers = pgTable(
   },
   (t) => [
     primaryKey({ columns: [t.teamId, t.userId] }),
+    // leftAt and deletedAt are mutually exclusive exit paths: leftAt = voluntary
+    // departure, deletedAt = admin/kick removal; both set at once is an invalid state.
     check(
       "chk_team_members_exit_consistency",
       sql`not (${t.leftAt} is not null and ${t.deletedAt} is not null)`,
@@ -347,6 +351,8 @@ export const votes = pgTable(
     createdAt: timestamp("created_at", tz).notNull().defaultNow(),
   },
   (t) => [
+    // Exactly one of voterId (logged-in member) or voterFingerprint (guest) must
+    // be set — the XOR ensures anonymous votes and member votes are tracked uniformly.
     check(
       "chk_votes_voter_identity",
       sql`(${t.voterId} is null) <> (${t.voterFingerprint} is null)`,

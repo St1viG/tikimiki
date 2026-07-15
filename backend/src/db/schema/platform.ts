@@ -31,15 +31,15 @@ export const reports = pgTable(
       .references(() => users.userId, { onDelete: "cascade" }),
     targetType: reportTargetType("target_type").notNull(),
     targetId: uuid("target_id").notNull(),
-    // Default exists only so the migration can add this NOT NULL column to a
-    // table that may already have rows — the application layer always sends
-    // an explicit category via createReportSchema.
+    // Default "other" exists only to satisfy NOT NULL during the migration that
+    // added this column to an existing table; the app layer always sends an
+    // explicit value via createReportSchema and never relies on this default.
     category: reportCategory("category").notNull().default("other"),
     reason: text("reason"),
     status: reportStatus("status").notNull().default("pending"),
-    // References users (not administrators): message reports can now also be
-    // resolved by a hackathon organizer or an assigned server "Moderator",
-    // not just a platform admin — see ReportsService.resolve().
+    // reviewedBy references users (not administrators) because message reports
+    // can be resolved by a hackathon organizer or server Moderator, not only
+    // by platform admins — see ReportsService.resolve() for the access check.
     reviewedBy: uuid("reviewed_by").references(() => users.userId, {
       onDelete: "set null",
     }),

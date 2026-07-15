@@ -120,7 +120,11 @@ export const pointTransactions = pgTable(
     createdAt: timestamp("created_at", tz).notNull().defaultNow(),
   },
   (t) => [
+    // Zero-delta entries would corrupt aggregate balance queries without adding
+    // information; the non-zero check prevents them at the DB level.
     check("chk_point_transactions_delta", sql`${t.delta} <> 0`),
+    // balanceAfter is denormalised here so queries can read the current balance
+    // from the latest row without summing the entire ledger.
     check("chk_point_transactions_balance_after", sql`${t.balanceAfter} >= 0`),
     index("idx_point_transactions_user_id").on(t.userId, t.createdAt.desc()),
   ],

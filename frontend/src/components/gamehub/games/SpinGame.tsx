@@ -288,6 +288,7 @@ export function SpinGame({ open, onClose, onComplete }: GameModalProps) {
       const prize = PRIZES[winIdx];
       setWonPrize(prize);
       setPhase("result");
+      // raw is the XP integer so the backend can record it; non-XP prizes send 0 and are handled by prize.type.
       onComplete?.({
         kind: "reward",
         display: prize.type === "miss" ? "Promašaj" : prize.label,
@@ -300,10 +301,11 @@ export function SpinGame({ open, onClose, onComplete }: GameModalProps) {
     if (phase !== "idle") return;
     setPhase("spinning");
 
-    // Compute target angle so that winIdx segment lands under the top pointer.
+    // Compute target angle so that winIdx segment lands under the top pointer (12 o'clock = -π/2 in canvas coords).
     const segMid = winIdx * SEG + SEG / 2;
     const extraSpins = 6 * 2 * Math.PI;
     const rawTarget = -segMid - Math.PI / 2;
+    // Double modulo keeps delta positive regardless of the current angle, so the wheel always spins forward.
     const delta =
       (((rawTarget - currentAngleRef.current) % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
 

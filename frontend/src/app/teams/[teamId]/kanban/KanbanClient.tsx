@@ -103,6 +103,8 @@ export function KanbanClient({ teamId }: { teamId: string }) {
     if (!socket) return;
 
     socket.emit("joinKanban", boardId);
+    // Full reload on every board event keeps state simple; the extra round-trip
+    // is acceptable because board edits are infrequent.
     const handler = () => void loadBoard();
     socket.on("kanban:update", handler);
 
@@ -170,7 +172,9 @@ export function KanbanClient({ teamId }: { teamId: string }) {
     try {
       await api.updateKanbanCard(card.cardId, { columnId: colId });
     } catch {
-      void loadBoard(); // Revert on error
+      // Reload to revert the optimistic move — cheaper than tracking the
+      // previous column and splicing the card back manually.
+      void loadBoard();
     }
   };
 
@@ -247,6 +251,7 @@ export function KanbanClient({ teamId }: { teamId: string }) {
     if (activeCards > 0) {
       setConfirm({ columnId: col.columnId, columnName: col.name, cardCount: activeCards });
     } else {
+      // Empty column — skip the confirmation dialog and delete immediately.
       void doDeleteColumn(col.columnId);
     }
   };

@@ -213,7 +213,9 @@ export class VotingService {
     }
 
     return this.db.transaction(async (tx) => {
-      // One vote per member (or per guest fingerprint) per hackathon.
+      // One vote per member (or per guest fingerprint) per hackathon. The
+      // unique index on (hackathon_id, voter_id) enforces this at the DB
+      // level too, but we check first to return a 409 rather than a 500.
       const identity = voterId
         ? eq(votes.voterId, voterId)
         : eq(votes.voterFingerprint, fingerprint!);

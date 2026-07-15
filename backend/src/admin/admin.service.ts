@@ -193,6 +193,8 @@ export class AdminService {
       .from(reports)
       .where(eq(reports.status, "pending"));
 
+    // Activity rows come back sparse (days with 0 registrations are absent),
+    // so we fill the full 7-day window from JS to guarantee a fixed-length array.
     // ── Activity: new registrations bucketed by day (last 7 days) ──
     const activityRows = await this.db
       .select({
@@ -672,7 +674,7 @@ export class AdminService {
     const approve = body.decision === "approve";
     const now = new Date();
 
-    // Approving an appeal lifts the user's active ban (if any).
+    // Approving an appeal lifts the user's active ban (if any); rejecting does not.
     if (approve) {
       await this.db
         .update(userBans)

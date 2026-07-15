@@ -76,6 +76,8 @@ export function ReportPopup({
       setReason("");
       setError(null);
       setSubmitting(false);
+      // showModal() gives browser-native Escape-to-close and backdrop behaviour
+      // without any manual overlay DOM or focus-trap wiring.
       el.showModal();
     } else {
       el.close();
@@ -97,6 +99,8 @@ export function ReportPopup({
       onClose();
     } catch (err) {
       setSubmitting(false);
+      // 409 means the user has already submitted a report for this content
+      // (backend enforces one report per user per target).
       if (err instanceof ApiError && err.status === 409) {
         setError(t("errorDuplicate"));
       } else {

@@ -385,6 +385,8 @@ export class KanbanService {
 
     const card = await this.loadCard(cardId);
 
+    // Only notify on a real change — skip if the assignee didn't change or if the
+    // actor is assigning themselves (they already know).
     // Notify the newly assigned member (skip if assigning to self).
     if (
       input.assignedTo !== undefined &&
@@ -532,6 +534,8 @@ export class KanbanService {
       throw new BadRequestException("Cannot delete the only column");
     }
 
+    // Cards are migrated to the first surviving column (lowest position) rather
+    // than being deleted, to avoid silent data loss on accidental column removal.
     const target = allCols.find((c) => c.columnId !== columnId)!;
 
     const activeCards = await this.db

@@ -152,6 +152,7 @@ function fmtTime(ms: number): string {
   return `${String(m).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
 }
 
+// Standard WPM definition: every 5 characters = 1 "word", regardless of actual word boundaries.
 function calcWpm(text: string, elapsedMs: number): number {
   if (elapsedMs <= 0) return 0;
   const words = text.length / 5;
@@ -302,8 +303,8 @@ export function TempoGame({ open, onClose, onComplete }: GameModalProps) {
     [commitValue],
   );
 
-  /* Tab would move focus out of the hidden textarea (and off the modal
-     entirely); swallow it and insert the indentation the snippet expects. */
+  /* Tab would move focus out of the hidden textarea (and off the modal entirely);
+     swallow it and insert exactly the whitespace the next un-typed target character(s) expect. */
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
       if (e.key !== "Tab") return;
@@ -421,8 +422,8 @@ export function TempoGame({ open, onClose, onComplete }: GameModalProps) {
               <pre className="tg-pre">
                 {charMap.map((ci, idx) =>
                   ci.char === "\n" ? (
-                    /* newline spans must not get tg-ch--cursor: the ::before bar
-                       would stretch across both line boxes */
+                    /* Newlines are rendered as <br> to avoid the ::before cursor bar
+                     stretching across both line boxes in the multi-line pre. */
                     <span key={idx} className="tg-ch">
                       {ci.state === "cursor" && <span className="tg-cursor-line" />}
                       <br />

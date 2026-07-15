@@ -222,6 +222,7 @@ export class NotificationsService {
       throw new NotFoundException("Notification not found");
     }
 
+    // Already read — return early to avoid a no-op UPDATE.
     if (existing.readAt) {
       return toDto(existing);
     }

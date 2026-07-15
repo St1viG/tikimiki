@@ -74,6 +74,7 @@ export function initials(name: string): string {
 }
 
 /* Stable 32-bit hash of a string (deterministic palette/variant pickers). */
+// Bitwise OR 0 keeps the accumulator in the 32-bit signed range; Math.abs turns the sign bit into a usable positive index.
 export function hashString(seed: string): number {
   let h = 0;
   for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) | 0;

@@ -26,6 +26,7 @@ export class AuthController {
       httpOnly: true,
       sameSite: "lax",
       secure: env.NODE_ENV === "production",
+      // Narrow path so the cookie is only sent to the auth subtree, not every API route.
       path: "/api/v1/auth",
       maxAge: env.JWT_REFRESH_TTL * 1000,
     });
@@ -70,6 +71,8 @@ export class AuthController {
   async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const fromCookie = (req.cookies as Record<string, string> | undefined)?.[REFRESH_COOKIE];
     const { accessToken, refreshToken } = await this.auth.refresh(fromCookie);
+    // Rotate the refresh cookie on every use; the old token is implicitly invalidated
+    // by the tokenVersion check in AuthService once a password change occurs.
     this.setRefreshCookie(res, refreshToken);
     return { accessToken };
   }
@@ -77,6 +80,7 @@ export class AuthController {
   @Post("logout")
   @HttpCode(204)
   logout(@Res({ passthrough: true }) res: Response) {
+    // Path must match the one used when the cookie was set, or clearCookie is a no-op.
     res.clearCookie(REFRESH_COOKIE, { path: "/api/v1/auth" });
   }
 

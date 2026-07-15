@@ -265,6 +265,7 @@ export class EngagementService {
 
     // Cascade: soft-delete this comment AND its entire reply subtree, so a
     // deleted comment never leaves orphaned replies still counted/visible.
+    // Raw SQL is necessary because Drizzle has no built-in recursive CTE helper.
     const subtree = (await this.db.execute(sql`
       WITH RECURSIVE subtree AS (
         SELECT comment_id FROM comments WHERE comment_id = ${commentId}
@@ -288,6 +289,8 @@ export class EngagementService {
   async togglePostLike(userId: string, postId: string): Promise<LikeResult> {
     await this.assertPostExists(postId);
 
+    // Transaction keeps the insert/delete and the count query atomic so the
+    // returned reactionCount always reflects the write that just happened.
     const result = await this.db.transaction(async (tx) => {
       const [existing] = await tx
         .select({ userId: postReactions.userId })

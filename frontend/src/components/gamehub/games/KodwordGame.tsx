@@ -131,14 +131,14 @@ function scoreGuess(guess: string, answer: string): LetterState[] {
   const res: LetterState[] = Array(COLS).fill("absent");
   const counts: Record<string, number> = {};
   for (const ch of answer) counts[ch] = (counts[ch] ?? 0) + 1;
-  // Pass 1 — exact matches.
+  // Pass 1 — exact matches consume their letter from counts so pass 2 can't double-mark them yellow.
   for (let i = 0; i < COLS; i++) {
     if (guess[i] === answer[i]) {
       res[i] = "correct";
       counts[guess[i]]! -= 1;
     }
   }
-  // Pass 2 — present-but-misplaced, honoring remaining letter counts.
+  // Pass 2 — present-but-misplaced, honoring remaining letter counts to avoid over-marking duplicates.
   for (let i = 0; i < COLS; i++) {
     if (res[i] === "correct") continue;
     const ch = guess[i];
@@ -150,7 +150,7 @@ function scoreGuess(guess: string, answer: string): LetterState[] {
   return res;
 }
 
-/** Stronger state wins so a key never downgrades green -> yellow -> grey. */
+// Keys can be guessed in multiple rows; STATE_RANK ensures the keyboard only upgrades (never downgrades) a key's colour.
 const STATE_RANK: Record<LetterState, number> = {
   empty: 0,
   absent: 1,
@@ -222,7 +222,7 @@ export function KodwordGame({ open, onClose, onComplete }: GameModalProps) {
         raw: solved ? used : 7,
       };
       onComplete?.(result);
-      // Let the final flip play before sliding in the result screen.
+      // Wait for the flip CSS animation (staggered: 5 tiles × 0.28s delay + ~0.5s duration ≈ 1.9s max) to finish before revealing.
       if (resultTimer.current) clearTimeout(resultTimer.current);
       resultTimer.current = setTimeout(() => setShowResult(true), 1700);
     },

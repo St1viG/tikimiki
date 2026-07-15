@@ -11,6 +11,8 @@ import { MentionLink } from "@/components/mentions/MentionLink";
  * blocks (where newlines are significant) untouched.
  */
 function preserveLineBreaks(src: string): string {
+  // split(capture) puts fenced code blocks at odd indices — those are passed
+  // through unchanged; only even (non-code) parts get the single-newline fix.
   return src
     .split(/(```[\s\S]*?```)/g)
     .map((part, i) => (i % 2 === 1 ? part : part.replace(/([^\n])\n(?!\n)/g, "$1  \n")))

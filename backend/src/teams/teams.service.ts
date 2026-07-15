@@ -313,6 +313,8 @@ export class TeamsService {
       .where(isNull(teams.deletedAt))
       .orderBy(desc(teams.createdAt));
 
+    // Filter in JS instead of SQL to reuse the two correlated subquery results
+    // computed above without a second round-trip.
     const open = rows.filter(
       (r) => !r.callerIsMember && Number(r.memberCount) < Number(r.maxTeamSize),
     );
@@ -511,6 +513,7 @@ export class TeamsService {
         .orderBy(asc(channelGroups.position));
       if (groupRows.length === 0) return;
 
+      // Fall back to the last channel group if the expected "TIMOVI" group was renamed/removed.
       const targetGroup =
         groupRows.find((g) => g.name === "TIMOVI") ?? groupRows[groupRows.length - 1];
 
@@ -814,6 +817,7 @@ export class TeamsService {
       throw new BadRequestException("Request already handled");
     }
 
+    // Join before updating status so a cap-full or conflict error aborts cleanly.
     if (accept) await this.join(req.userId, req.teamId);
 
     await this.db
@@ -936,6 +940,7 @@ export class TeamsService {
       throw new BadRequestException("Invitation already handled");
     }
 
+    // Same ordering as respondJoinRequest: join first so a full-team error aborts cleanly.
     if (accept) await this.join(userId, inv.teamId);
 
     await this.db

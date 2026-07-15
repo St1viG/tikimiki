@@ -503,8 +503,8 @@ export class ApplicationsService {
       }
       nextOptions = options;
     } else {
-      // Text types never carry options (DB CHECK forbids non-null here only
-      // implicitly — we normalise to null so the column stays clean).
+      // Clear stale options when a choice question is changed to a text type;
+      // there is no DB CHECK enforcing this so we normalise proactively.
       nextOptions = null;
     }
 
@@ -713,7 +713,8 @@ export class ApplicationsService {
       );
     }
 
-    // Stable sort — ties keep the query's most-recent-first order.
+    // JS sort is stable in V8; ties preserve the DB result's most-recent-first
+    // order because the rows were fetched with orderBy(desc(createdAt)) above.
     const skillScore = (a: (typeof applicants)[number]) =>
       wantedSkills.size > 0 ? a.matchedSkillCount : a.skills.length;
     if (filter?.sortBy === "skills") {
@@ -813,7 +814,8 @@ export class ApplicationsService {
       })
       .where(eq(applications.applicationId, applicationId));
 
-    // Approval grants cohor server access (role-based, not status-derived).
+    // Server access is an explicit role grant made at approval time; it is NOT
+    // re-derived from application.status on each request (see isServerMember).
     await this.grantServerMembership(existing.hackathonId, existing.userId);
 
     await this.notifyDecision(existing.userId, existing.hackathonId, "approved");

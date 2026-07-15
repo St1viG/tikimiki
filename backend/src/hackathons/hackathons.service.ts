@@ -55,6 +55,7 @@ const columns = {
   minTeamSize: hackathons.minTeamSize,
   maxTeamSize: hackathons.maxTeamSize,
   location: hackathons.location,
+  // PostGIS stores coords as (longitude, latitude) — Y extracts lat, X extracts lng.
   latitude: sql<number | null>`ST_Y(${hackathons.coordinates}::geometry)`,
   longitude: sql<number | null>`ST_X(${hackathons.coordinates}::geometry)`,
   logoUrl: hackathons.logoUrl,
@@ -69,6 +70,8 @@ const columns = {
     select count(*)::int from teams t
     where t.hackathon_id = ${hackathons.hackathonId} and t.deleted_at is null
   )`,
+  // Prefer hackathon-owned prizes (bountyId IS NULL) over sponsor bounties; within
+  // that, pick the highest-ranked (lowest rank number) to surface the top prize.
   prizePool: sql<string | null>`(
     select p.award_value from hackathon_prizes p
     where p.hackathon_id = ${hackathons.hackathonId}
@@ -107,6 +110,7 @@ function toSummary(r: HackathonRow): HackathonSummary {
     endsAt: r.endsAt.toISOString(),
     registrationDeadline: r.registrationDeadline.toISOString(),
     createdAt: r.createdAt.toISOString(),
+    // Drizzle returns count(*) as a string in some drivers; coerce to number.
     participantCount: Number(r.participantCount),
     teamCount: Number(r.teamCount),
     prizePool: r.prizePool ?? null,
@@ -543,6 +547,7 @@ export class HackathonsService {
     const from = existing.status;
     const to = input.status;
 
+    // Finite state machine: finished and cancelled are terminal states.
     const allowed: Record<string, string[]> = {
       upcoming: ["ongoing", "cancelled"],
       ongoing: ["finished", "cancelled"],
@@ -760,6 +765,7 @@ export class HackathonsService {
       .limit(1);
 
     if (!role) {
+      // Lazy-create the "Moderator" role the first time any moderator is added.
       [role] = await this.db
         .insert(serverRoles)
         .values({ serverId: server.serverId, name: "Moderator" })
@@ -864,6 +870,8 @@ export class HackathonsService {
         .replace(/[-:]/g, "")
         .replace(/\.\d{3}/, "");
 
+    // RFC 5545 §3.1: iCalendar lines must be folded at 75 octets, continuation
+    // lines begin with a single SP.
     const fold = (line: string): string => {
       const parts: string[] = [];
       while (line.length > 75) {

@@ -191,6 +191,8 @@ export function GamehubClient() {
    * card maps this onto its existing "played / result" markup via `freshResult`.
    */
   function cardResult(card: (typeof GAMES)[number]): GameResult | undefined {
+    // Prefer the session-fresh result so a just-played card reflects its outcome
+    // immediately, before the next `getGamesToday` refresh arrives from the server.
     if (freshResults[card.id]) return freshResults[card.id];
     const state = todayBySlug[card.id];
     if (!state || !state.playedToday) return undefined;

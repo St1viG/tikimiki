@@ -65,6 +65,7 @@ export class GamesService {
   /** UTC start-of-today, used for daily-limit comparisons. */
   private startOfTodayUtc(): Date {
     const now = new Date();
+    // Construct from UTC parts so the boundary never drifts with the server's local timezone.
     return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
   }
 

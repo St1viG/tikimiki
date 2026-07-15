@@ -44,6 +44,7 @@ interface NotifItem {
   unread: boolean;
 }
 
+// Placeholder data — this component is not yet wired to the real notifications API.
 const INITIAL_NOTIFS: NotifItem[] = [
   {
     id: "n1",
@@ -110,6 +111,8 @@ export function NotificationPopup() {
   };
 
   const closeNotif = () => {
+    // `closing` adds the exit CSS class; the 140ms timeout matches its duration
+    // so the dropdown only unmounts after the animation completes.
     setClosing(true);
     setTimeout(() => {
       setIsOpen(false);
