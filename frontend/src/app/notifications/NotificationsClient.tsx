@@ -5,7 +5,8 @@ import Link from "next/link";
 import { Icon } from "@/components/Icon";
 import { AppShell } from "@/components/shell/AppShell";
 import { RailRight } from "@/components/shell/RailRight";
-import { useT } from "@/components/i18n/LanguageProvider";
+import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
+import { renderNotification } from "@tikimiki/types";
 import { MentionText } from "@/components/mentions/MentionText";
 import { useRequireAuth } from "@/components/auth/AuthProvider";
 import { formatRelativeTime } from "@/lib/format";
@@ -97,6 +98,7 @@ function isToday(iso: string): boolean {
 export function NotificationsClient() {
   useRequireAuth();
   const t = useT(M);
+  const { locale } = useLanguage();
   const [filter, setFilter] = useState<FilterMode>("sve");
   const [notifs, setNotifs] = useState<NotifVM[] | null>(null);
 
@@ -200,8 +202,19 @@ export function NotificationsClient() {
     );
   }
 
+  // Notifications carry a template ({ key, params }); render it in the active
+  // locale. Rows without one (pre-i18n) fall back to their stored Serbian text.
+  function localizedTexts(n: NotifVM): { title: string; body: string | null } {
+    if (n.template) {
+      const rendered = renderNotification(n.template.key, n.template.params, locale);
+      if (rendered) return rendered;
+    }
+    return { title: n.title, body: n.body };
+  }
+
   function renderNotif(n: NotifVM) {
     const { name, cls } = iconFor(n.type);
+    const { title, body } = localizedTexts(n);
     const showDot = n.readAt === null || n.dotFading;
     return (
       <div
@@ -217,15 +230,15 @@ export function NotificationsClient() {
         </span>
         <div className="notif-body">
           <div className="notif-text">
-            <b>{n.title}</b>
-            {n.body ? (
+            <b>{title}</b>
+            {body ? (
               <>
                 {" "}
-                <MentionText>{n.body}</MentionText>
+                <MentionText>{body}</MentionText>
               </>
             ) : null}
           </div>
-          <div className="notif-time">{formatRelativeTime(n.createdAt)}</div>
+          <div className="notif-time">{formatRelativeTime(n.createdAt, locale)}</div>
         </div>
         {showDot ? (
           <span

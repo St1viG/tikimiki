@@ -321,6 +321,34 @@
   opacity: 0.7;
   cursor: default;
 }
+/* "Premium active until …" / "Premium ends …" note under the plan CTA. */
+.plan-sub-note {
+  margin-top: 10px;
+  font-size: 12.5px;
+  color: var(--muted);
+  text-align: center;
+}
+/* Quiet destructive action under the Premium CTA (stop auto-renewal). */
+.plan-cancel-link {
+  display: block;
+  margin: 8px auto 0;
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.plan-cancel-link:hover:not(:disabled) {
+  color: var(--ink);
+}
+.plan-cancel-link:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
 
 /* Compare table */
 .compare-section {

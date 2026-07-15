@@ -1,5 +1,6 @@
 import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { and, desc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { renderNotification, type NotificationTemplateRef } from "@tikimiki/types";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import { notifications, users } from "../db/schema";
 import { extractMentions } from "../common/mentions";
@@ -51,8 +52,11 @@ export type NotificationEntityType =
 export interface NotificationDto {
   notificationId: string;
   type: NotificationType;
+  /** Serbian fallback rendering; clients with the template catalogue prefer `template`. */
   title: string;
   body: string | null;
+  /** i18n payload ({ key, params }) — null on rows created before templates existed. */
+  template: NotificationTemplateRef | null;
   entityType: NotificationEntityType | null;
   entityId: string | null;
   readAt: string | null;
@@ -73,8 +77,8 @@ export interface MarkAllReadDto {
 export interface CreateNotificationInput {
   userId: string;
   type: NotificationType;
-  title: string;
-  body?: string | null;
+  /** Which catalogue entry to render, plus its dynamic values. */
+  template: NotificationTemplateRef;
   entityType?: NotificationEntityType | null;
   entityId?: string | null;
 }
@@ -84,6 +88,7 @@ type NotificationRow = {
   type: NotificationType;
   title: string;
   body: string | null;
+  template: NotificationTemplateRef | null;
   entityType: NotificationEntityType | null;
   entityId: string | null;
   readAt: Date | null;
@@ -95,11 +100,26 @@ const selection = {
   type: notifications.type,
   title: notifications.title,
   body: notifications.body,
+  template: notifications.template,
   entityType: notifications.entityType,
   entityId: notifications.entityId,
   readAt: notifications.readAt,
   createdAt: notifications.createdAt,
 };
+
+/**
+ * Render the stored Serbian fallback strings for a template. The title column
+ * is varchar(100), so the rendered title is clamped to fit.
+ */
+export function renderFallbackText(template: NotificationTemplateRef): {
+  title: string;
+  body: string | null;
+} {
+  const rendered = renderNotification(template.key, template.params, "sr");
+  // The catalogue always knows its own keys; guard only against future drift.
+  if (!rendered) return { title: template.key, body: null };
+  return { title: rendered.title.slice(0, 100), body: rendered.body };
+}
 
 function toDto(r: NotificationRow): NotificationDto {
   return {
@@ -107,6 +127,7 @@ function toDto(r: NotificationRow): NotificationDto {
     type: r.type,
     title: r.title,
     body: r.body,
+    template: r.template,
     entityType: r.entityType,
     entityId: r.entityId,
     readAt: r.readAt ? r.readAt.toISOString() : null,
@@ -127,13 +148,15 @@ export class NotificationsService {
    * chokepoint every feature service should use instead of inserting directly.
    */
   async create(input: CreateNotificationInput): Promise<NotificationDto> {
+    const fallback = renderFallbackText(input.template);
     const [row] = await this.db
       .insert(notifications)
       .values({
         userId: input.userId,
         type: input.type,
-        title: input.title,
-        body: input.body ?? null,
+        title: fallback.title,
+        body: fallback.body,
+        template: input.template,
         entityType: input.entityType ?? null,
         entityId: input.entityId ?? null,
       })
@@ -175,8 +198,7 @@ export class NotificationsService {
       await this.create({
         userId: r.userId,
         type: "mention",
-        title: "Pomenuti ste",
-        body: `@${opts.actorUsername} vas je pomenuo.`,
+        template: { key: "mention", params: { username: opts.actorUsername } },
         entityType: opts.entityType,
         entityId: opts.entityId,
       });

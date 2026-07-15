@@ -397,8 +397,7 @@ export class KanbanService {
       void this.notifications.create({
         userId: input.assignedTo,
         type: "position_assigned",
-        title: "Dodeljen vam je zadatak",
-        body: card.title,
+        template: { key: "task_assigned", params: { cardTitle: card.title } },
         entityType: "team",
         entityId: prev.teamId,
       });

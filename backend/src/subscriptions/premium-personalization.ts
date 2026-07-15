@@ -10,9 +10,30 @@
  * Autor: Dimitrije Pesic (2023/0014)
  */
 
+import { sql, type SQL } from "drizzle-orm";
+import type { PgColumn } from "drizzle-orm/pg-core";
+
 /** True when the avatar is an animated GIF — a Premium-only personalization. */
 export function isGifAvatar(avatarUrl: string | null): boolean {
   return avatarUrl != null && /\.gif$/i.test(avatarUrl);
+}
+
+/**
+ * SQL variant of the gate for list queries that join the users table: selects
+ * the avatar as-is unless it is a GIF owned by someone without an active
+ * Premium subscription, in which case it selects NULL. Use this instead of a
+ * bare `users.avatarUrl` in any DTO the client renders.
+ */
+export function gatedAvatarUrl(ownerId: PgColumn, avatarUrl: PgColumn): SQL<string | null> {
+  return sql<string | null>`case
+    when ${avatarUrl} ~* '\.gif$' and not exists (
+      select 1 from subscriptions s
+      where s.user_id = ${ownerId}
+        and s.status = 'active'
+        and s.ends_at > now()
+    ) then null
+    else ${avatarUrl}
+  end`;
 }
 
 /**

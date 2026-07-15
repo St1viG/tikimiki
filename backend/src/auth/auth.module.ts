@@ -3,6 +3,7 @@ import { JwtModule } from "@nestjs/jwt";
 import { CosmeticsService } from "../common/cosmetics.service";
 import { RateLimitGuard } from "../common/rate-limit.guard";
 import { MailModule } from "../mail/mail.module";
+import { SubscriptionsModule } from "../subscriptions/subscriptions.module";
 import { AccountController } from "./account.controller";
 import { AccountService } from "./account.service";
 import { AuthController } from "./auth.controller";
@@ -12,7 +13,7 @@ import { OAuthController } from "./oauth.controller";
 import { OAuthService } from "./oauth.service";
 
 @Module({
-  imports: [JwtModule.register({ global: true }), MailModule],
+  imports: [JwtModule.register({ global: true }), MailModule, SubscriptionsModule],
   controllers: [AuthController, OAuthController, AccountController],
   providers: [
     AuthService,

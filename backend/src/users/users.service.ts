@@ -33,7 +33,10 @@ import {
 } from "../db/schema";
 import { CosmeticsService, type EquippedCosmeticDto } from "../common/cosmetics.service";
 import { NotificationsService } from "../notifications/notifications.service";
-import { gatePremiumPersonalization } from "../subscriptions/premium-personalization";
+import {
+  gatedAvatarUrl,
+  gatePremiumPersonalization,
+} from "../subscriptions/premium-personalization";
 import { SubscriptionsService } from "../subscriptions/subscriptions.service";
 import type { ChangePasswordInput, DeleteAccountInput, UpdateProfileInput } from "./dto";
 
@@ -538,7 +541,7 @@ export class UsersService {
         userId: users.userId,
         username: users.username,
         displayName: users.displayName,
-        avatarUrl: users.avatarUrl,
+        avatarUrl: gatedAvatarUrl(users.userId, users.avatarUrl),
       })
       .from(follows)
       .innerJoin(users, eq(users.userId, follows.followerId))
@@ -557,7 +560,7 @@ export class UsersService {
         userId: users.userId,
         username: users.username,
         displayName: users.displayName,
-        avatarUrl: users.avatarUrl,
+        avatarUrl: gatedAvatarUrl(users.userId, users.avatarUrl),
       })
       .from(follows)
       .innerJoin(users, eq(users.userId, follows.followeeId))
@@ -580,7 +583,7 @@ export class UsersService {
         authorId: posts.userId,
         authorUsername: users.username,
         authorDisplayName: users.displayName,
-        authorAvatarUrl: users.avatarUrl,
+        authorAvatarUrl: gatedAvatarUrl(users.userId, users.avatarUrl),
         content: posts.content,
         createdAt: posts.createdAt,
         reactionCount: sql<number>`(
@@ -663,7 +666,7 @@ export class UsersService {
         userId: users.userId,
         username: users.username,
         displayName: users.displayName,
-        avatarUrl: users.avatarUrl,
+        avatarUrl: gatedAvatarUrl(users.userId, users.avatarUrl),
       })
       .from(users)
       .where(
@@ -717,8 +720,9 @@ export class UsersService {
       await this.notifications.create({
         userId: followeeId,
         type: "new_follower",
-        title: "Novi pratilac",
-        body: `${follower ? `@${follower.username}` : "Neko"} te sada prati.`,
+        template: follower
+          ? { key: "new_follower", params: { username: follower.username } }
+          : { key: "new_follower_anon" },
         entityType: "user",
         entityId: followerId,
       });

@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import {
   check,
   index,
+  jsonb,
   pgTable,
   text,
   timestamp,
@@ -9,6 +10,7 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
+import type { NotificationTemplateRef } from "@tikimiki/types";
 import {
   appealStatus,
   entityType,
@@ -74,6 +76,9 @@ export const notifications = pgTable(
     type: notificationType("type").notNull(),
     title: varchar("title", { length: 100 }).notNull(),
     body: text("body"),
+    // Structured i18n payload ({ key, params }); title/body above hold the
+    // Serbian rendering as a fallback for rows/clients without a template.
+    template: jsonb("template").$type<NotificationTemplateRef>(),
     entityType: entityType("entity_type"),
     entityId: uuid("entity_id"),
     readAt: timestamp("read_at", tz),

@@ -1,5 +1,7 @@
 import { ForbiddenException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
+import type { NotificationTemplateRef } from "@tikimiki/types";
+import { gatedAvatarUrl } from "../subscriptions/premium-personalization";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import { commentReactions, comments, postReactions, posts, users } from "../db/schema";
 import { LIKE } from "../common/constants";
@@ -67,7 +69,7 @@ export class EngagementService {
       authorId: comments.userId,
       authorUsername: users.username,
       authorDisplayName: users.displayName,
-      authorAvatarUrl: users.avatarUrl,
+      authorAvatarUrl: gatedAvatarUrl(users.userId, users.avatarUrl),
       parentCommentId: comments.parentCommentId,
       content: comments.content,
       createdAt: comments.createdAt,
@@ -111,16 +113,14 @@ export class EngagementService {
     recipientId: string,
     actorId: string,
     type: "post_comment" | "post_reaction",
-    title: string,
-    body: string,
+    template: NotificationTemplateRef,
     postId: string,
   ): Promise<void> {
     if (recipientId === actorId) return;
     await this.notifications.create({
       userId: recipientId,
       type,
-      title,
-      body,
+      template,
       entityType: "post",
       entityId: postId,
     });
@@ -202,8 +202,7 @@ export class EngagementService {
         post.authorId,
         userId,
         "post_comment",
-        "Novi komentar",
-        `@${dto.authorUsername} je komentarisao tvoju objavu.`,
+        { key: "post_comment", params: { username: dto.authorUsername } },
         postId,
       );
     }
@@ -348,8 +347,9 @@ export class EngagementService {
           post.authorId,
           userId,
           "post_reaction",
-          "Nova reakcija",
-          `${u ? `@${u.username}` : "Neko"} je lajkovao tvoju objavu.`,
+          u
+            ? { key: "post_reaction", params: { username: u.username } }
+            : { key: "post_reaction_anon" },
           postId,
         );
       }

@@ -11,9 +11,13 @@ import { AuthzService } from "../common/authz.service";
 import { CosmeticsService, type EquippedCosmeticDto } from "../common/cosmetics.service";
 import { activeTeamMember } from "../common/team.predicates";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
-import { NotificationsService } from "../notifications/notifications.service";
+import { NotificationsService, renderFallbackText } from "../notifications/notifications.service";
+import type { NotificationTemplateRef } from "@tikimiki/types";
 import { RealtimeGateway } from "../realtime/realtime.gateway";
-import { gatePremiumPersonalization } from "../subscriptions/premium-personalization";
+import {
+  gatedAvatarUrl,
+  gatePremiumPersonalization,
+} from "../subscriptions/premium-personalization";
 import { SubscriptionsService } from "../subscriptions/subscriptions.service";
 import {
   channelGroups,
@@ -401,7 +405,7 @@ export class ChatService {
         userId: users.userId,
         username: users.username,
         displayName: users.displayName,
-        avatarUrl: users.avatarUrl,
+        avatarUrl: gatedAvatarUrl(users.userId, users.avatarUrl),
         bannerUrl: users.bannerUrl,
         roleName: serverRoles.name,
         roleHasPerm: sql<boolean>`exists (
@@ -440,7 +444,7 @@ export class ChatService {
         .select({
           username: users.username,
           displayName: users.displayName,
-          avatarUrl: users.avatarUrl,
+          avatarUrl: gatedAvatarUrl(users.userId, users.avatarUrl),
           bannerUrl: users.bannerUrl,
         })
         .from(users)
@@ -831,7 +835,7 @@ export class ChatService {
         senderId: messages.senderId,
         senderUsername: users.username,
         senderDisplayName: users.displayName,
-        senderAvatarUrl: users.avatarUrl,
+        senderAvatarUrl: gatedAvatarUrl(users.userId, users.avatarUrl),
         content: messages.content,
         sentAt: messages.sentAt,
         editedAt: messages.editedAt,
@@ -1017,7 +1021,7 @@ export class ChatService {
         userId: channelMembers.userId,
         username: users.username,
         displayName: users.displayName,
-        avatarUrl: users.avatarUrl,
+        avatarUrl: gatedAvatarUrl(users.userId, users.avatarUrl),
         addedAt: channelMembers.addedAt,
         addedBy: channelMembers.addedBy,
       })
@@ -1148,7 +1152,7 @@ export class ChatService {
         senderId: messages.senderId,
         senderUsername: users.username,
         senderDisplayName: users.displayName,
-        senderAvatarUrl: users.avatarUrl,
+        senderAvatarUrl: gatedAvatarUrl(users.userId, users.avatarUrl),
         content: messages.content,
         sentAt: messages.sentAt,
         editedAt: messages.editedAt,
@@ -1235,7 +1239,7 @@ export class ChatService {
       .select({
         username: users.username,
         displayName: users.displayName,
-        avatarUrl: users.avatarUrl,
+        avatarUrl: gatedAvatarUrl(users.userId, users.avatarUrl),
       })
       .from(users)
       .where(eq(users.userId, userId))
@@ -1421,7 +1425,7 @@ export class ChatService {
         userId: users.userId,
         username: users.username,
         displayName: users.displayName,
-        avatarUrl: users.avatarUrl,
+        avatarUrl: gatedAvatarUrl(users.userId, users.avatarUrl),
         bannerUrl: users.bannerUrl,
       })
       .from(conversationMembers)
@@ -1580,7 +1584,7 @@ export class ChatService {
         userId: users.userId,
         username: users.username,
         displayName: users.displayName,
-        avatarUrl: users.avatarUrl,
+        avatarUrl: gatedAvatarUrl(users.userId, users.avatarUrl),
         bannerUrl: users.bannerUrl,
       })
       .from(conversationMembers)
@@ -1699,7 +1703,7 @@ export class ChatService {
         senderId: messages.senderId,
         senderUsername: users.username,
         senderDisplayName: users.displayName,
-        senderAvatarUrl: users.avatarUrl,
+        senderAvatarUrl: gatedAvatarUrl(users.userId, users.avatarUrl),
         content: messages.content,
         sentAt: messages.sentAt,
         editedAt: messages.editedAt,
@@ -1757,7 +1761,7 @@ export class ChatService {
       .select({
         username: users.username,
         displayName: users.displayName,
-        avatarUrl: users.avatarUrl,
+        avatarUrl: gatedAvatarUrl(users.userId, users.avatarUrl),
       })
       .from(users)
       .where(eq(users.userId, userId))
@@ -1775,12 +1779,18 @@ export class ChatService {
         ),
       );
     if (others.length > 0) {
+      const template: NotificationTemplateRef = {
+        key: "new_direct_message",
+        params: { username: sender.username, preview: content.slice(0, 80) },
+      };
+      const fallback = renderFallbackText(template);
       await this.db.insert(notifications).values(
         others.map((o) => ({
           userId: o.userId,
           type: "new_direct_message" as const,
-          title: "Nova poruka",
-          body: `@${sender.username}: ${content.slice(0, 80)}`,
+          title: fallback.title,
+          body: fallback.body,
+          template,
           entityType: "message" as const,
           entityId: message.messageId,
         })),
@@ -1790,8 +1800,9 @@ export class ChatService {
       for (const o of others) {
         this.realtime.emitNotification(o.userId, {
           type: "new_direct_message",
-          title: "Nova poruka",
-          body: `@${sender.username}: ${content.slice(0, 80)}`,
+          title: fallback.title,
+          body: fallback.body,
+          template,
         });
       }
     }

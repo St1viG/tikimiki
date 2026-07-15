@@ -4,6 +4,7 @@ import type { FeedPost } from "@tikimiki/types";
 import { LIKE } from "../common/constants";
 import { AuthzService } from "../common/authz.service";
 import { CosmeticsService } from "../common/cosmetics.service";
+import { gatedAvatarUrl } from "../subscriptions/premium-personalization";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import { postAttachments, posts, users } from "../db/schema";
 import { NotificationsService } from "../notifications/notifications.service";
@@ -31,7 +32,7 @@ function buildColumns(userId: string | null) {
     authorId: posts.userId,
     authorUsername: users.username,
     authorDisplayName: users.displayName,
-    authorAvatarUrl: users.avatarUrl,
+    authorAvatarUrl: gatedAvatarUrl(users.userId, users.avatarUrl),
     content: posts.content,
     createdAt: posts.createdAt,
     editedAt: posts.editedAt,
@@ -166,7 +167,7 @@ export class PostsService {
       .select({
         username: users.username,
         displayName: users.displayName,
-        avatarUrl: users.avatarUrl,
+        avatarUrl: gatedAvatarUrl(users.userId, users.avatarUrl),
       })
       .from(users)
       .where(eq(users.userId, userId))

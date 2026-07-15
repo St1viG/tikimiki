@@ -1,6 +1,6 @@
 {
-  "id": "d09b7359-3b42-486f-a077-6583654fb7c2",
-  "prevId": "db2c63dc-36f1-4dbd-8f01-2c99a695b5c1",
+  "id": "7ce806dc-054e-4927-badf-fdc4eea1cc9c",
+  "prevId": "d09b7359-3b42-486f-a077-6583654fb7c2",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -8156,6 +8156,7 @@
         "friend_request_received",
         "friend_request_accepted",
         "team_invitation_received",
+        "team_invitation_declined",
         "team_request_received",
         "team_request_accepted",
         "post_comment",

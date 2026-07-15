@@ -13,6 +13,8 @@ import { CosmeticsService, type EquippedCosmeticDto } from "../common/cosmetics.
 import { env } from "../config/env";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import { administrators, members, organizations, users } from "../db/schema";
+import { SubscriptionsService } from "../subscriptions/subscriptions.service";
+import { gatePremiumPersonalization } from "../subscriptions/premium-personalization";
 import { AccountService } from "./account.service";
 import type { LoginInput, RegisterInput } from "./dto";
 
@@ -50,17 +52,20 @@ export class AuthService {
     private readonly authz: AuthzService,
     private readonly account: AccountService,
     private readonly cosmetics: CosmeticsService,
+    private readonly subscriptions: SubscriptionsService,
   ) {}
 
-  private toPublicUser(u: UserRow): PublicUser {
+  /** `isPremium` gates Premium-only personalization (banner, GIF avatar). */
+  private toPublicUser(u: UserRow, isPremium: boolean): PublicUser {
+    const { avatarUrl, bannerUrl } = gatePremiumPersonalization(u, isPremium);
     return {
       userId: u.userId,
       username: u.username,
       displayName: u.displayName,
       email: u.email,
       isEmailVerified: u.isEmailVerified,
-      avatarUrl: u.avatarUrl,
-      bannerUrl: u.bannerUrl,
+      avatarUrl,
+      bannerUrl,
       bio: u.bio,
       createdAt: u.createdAt.toISOString(),
     };
@@ -152,7 +157,8 @@ export class AuthService {
       // SSU1: an organization gets NO session until an administrator approves
       // it — registration only files the request.
       return {
-        user: this.toPublicUser(user),
+        // A freshly registered account can't be Premium yet.
+        user: this.toPublicUser(user, false),
         verifyDevLink,
         pendingApproval: true as const,
         accessToken: undefined,
@@ -161,7 +167,7 @@ export class AuthService {
     }
 
     return {
-      user: this.toPublicUser(user),
+      user: this.toPublicUser(user, false),
       verifyDevLink,
       pendingApproval: false as const,
       ...(await this.issueTokens(user.userId, user.tokenVersion)),
@@ -245,7 +251,10 @@ export class AuthService {
 
     await this.db.update(users).set({ lastLoginAt: new Date() }).where(eq(users.userId, u.userId));
 
-    return { user: this.toPublicUser(u), ...(await this.issueTokens(u.userId, u.tokenVersion)) };
+    return {
+      user: this.toPublicUser(u, await this.subscriptions.isPremium(u.userId)),
+      ...(await this.issueTokens(u.userId, u.tokenVersion)),
+    };
   }
 
   /**
@@ -312,7 +321,7 @@ export class AuthService {
       .limit(1);
     if (!u) throw new UnauthorizedException();
 
-    const [admin, member, org, equipped] = await Promise.all([
+    const [admin, member, org, equipped, isPremium] = await Promise.all([
       this.db
         .select({ id: administrators.userId })
         .from(administrators)
@@ -333,10 +342,11 @@ export class AuthService {
         .where(eq(organizations.userId, userId))
         .limit(1),
       this.cosmetics.equippedForUser(userId),
+      this.subscriptions.isPremium(userId),
     ]);
 
     return {
-      ...this.toPublicUser(u),
+      ...this.toPublicUser(u, isPremium),
       usernameEffect: equipped.usernameEffect,
       roles: {
         isAdmin: admin.length > 0,

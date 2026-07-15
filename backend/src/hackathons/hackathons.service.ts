@@ -7,6 +7,7 @@ import {
 } from "@nestjs/common";
 import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import type { HackathonSummary } from "@tikimiki/types";
+import { gatedAvatarUrl } from "../subscriptions/premium-personalization";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import {
   applicationQuestions,
@@ -721,7 +722,7 @@ export class HackathonsService {
         userId: users.userId,
         username: users.username,
         displayName: users.displayName,
-        avatarUrl: users.avatarUrl,
+        avatarUrl: gatedAvatarUrl(users.userId, users.avatarUrl),
         assignedAt: userRoles.assignedAt,
       })
       .from(userRoles)
@@ -807,8 +808,7 @@ export class HackathonsService {
     await this.notifications.create({
       userId: input.userId,
       type: "position_assigned",
-      title: "Dodeljena vam je uloga moderatora",
-      body: `Postali ste moderator hakatona „${hk?.title ?? ""}".`,
+      template: { key: "moderator_assigned", params: { hackathonTitle: hk?.title ?? "" } },
       entityType: "hackathon",
       entityId: hackathonId,
     });

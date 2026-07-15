@@ -3,11 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "description": "Shared domain types + enums (single source of truth, front ↔ back)",
-  "type": "module",
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
   },
   "scripts": {
     "lint": "echo \"(types: no lint)\" && exit 0",
