@@ -620,6 +620,15 @@ export class TeamsService {
       });
     }
 
+    // Joining a team doesn't admit the new member into the hackathon either —
+    // mirror what create() does for the leader by filing an application on
+    // their behalf (best-effort). createTeam() also catches up any earlier
+    // teammate who was never filed, so the whole roster stays eligible for
+    // the organizer's "Approve Team" action and the resulting cohor access.
+    await this.applicationsService
+      .createTeam(userId, { hackathonId: team.hackathonId, teamId, answers: [] })
+      .catch(() => undefined);
+
     return this.buildTeamDto(teamId, userId);
   }
 
