@@ -6,14 +6,12 @@ import { AvatarStack } from "./AvatarStack";
 import type { OpenTeam } from "@/lib/api";
 
 /**
- * OpenTeamCard — a single "open team" card from the Open-teams grid, shared by
- * /teams and /teams/find. Both pages render an almost-identical card; their
- * small differences are exposed as props:
- *   - `cardClass`   : base class ("tm-open-card" on /teams, "card tm-open-card"
- *                     on /teams/find which layers the shared .card surface).
- *   - `showBadge`   : render the absolute "Open" badge (only /teams used it).
- *   - `hackIcon`    : prefix the hackathon line with a hackathon icon
- *                     (/teams/find did, /teams did not).
+ * OpenTeamCard — a single "open team" card, used on /teams for both the plain
+ * "Open teams" grid and the "AI suggestions" ranked grid. Their small
+ * differences are exposed as props:
+ *   - `cardClass`   : base class, default "tm-open-card".
+ *   - `showBadge`   : render the absolute "Open" badge.
+ *   - `hackIcon`    : prefix the hackathon line with a hackathon icon.
  *   - `slotIcon`    : render a plus-icon in empty seats instead of a bare "+".
  *   - `score`       : how well the caller would complement this team — a
  *                     badge shown when the card renders a suggested

@@ -13,7 +13,7 @@ import { personName } from "@/lib/displayName";
  * "Pronađi tim" button on a hackathon's detail page (shown only once the
  * caller is approved for that hackathon and has no team there yet).
  *
- * Unlike the ongoing ranked list on /teams/find ("Suggested" tab), this shows
+ * Unlike the ongoing ranked list on /teams ("AI suggestions"), this shows
  * ONE concrete team combination at a time (api.getTeamProposal), which the
  * caller accepts or rejects-and-regenerates (excluding everyone from every
  * previously rejected combination). Accepting creates a real team (caller

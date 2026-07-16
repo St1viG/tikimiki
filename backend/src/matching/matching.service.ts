@@ -58,9 +58,12 @@ export class MatchingService {
   ) {}
 
   /**
-   * Members relevant to `hackathonId` — they applied (pending/approved) or
-   * have sat on a team there — who are not currently an active member of any
-   * team for that hackathon. Excludes `excludeUserId` (the caller).
+   * Candidates for `hackathonId` — any platform member not currently an
+   * active team member for that hackathon. Excludes `excludeUserId` (the
+   * caller). Deliberately platform-wide rather than scoped to whoever already
+   * applied to this hackathon: requiring prior hackathon affiliation starves
+   * the pool on a young platform (nobody to suggest until people first
+   * self-organize), which defeats the point of a suggestion feature.
    */
   async freeAgentsForHackathon(
     hackathonId: string,
@@ -72,20 +75,6 @@ export class MatchingService {
       where ${eq(teamMembers.userId, members.userId)}
         and ${eq(teams.hackathonId, hackathonId)}
         and ${activeTeamMember}
-    )`;
-
-    const anyTeamInHackathonSql = sql<boolean>`exists (
-      select 1 from team_members
-      inner join teams on ${eq(teams.teamId, teamMembers.teamId)}
-      where ${eq(teamMembers.userId, members.userId)}
-        and ${eq(teams.hackathonId, hackathonId)}
-    )`;
-
-    const appliedToHackathonSql = sql<boolean>`exists (
-      select 1 from applications
-      where ${eq(applications.userId, members.userId)}
-        and ${eq(applications.hackathonId, hackathonId)}
-        and ${inArray(applications.status, ["pending", "approved"])}
     )`;
 
     const rows = await this.db
@@ -101,7 +90,6 @@ export class MatchingService {
           isNull(users.deletedAt),
           ne(members.userId, excludeUserId),
           sql`not ${activeTeamInHackathonSql}`,
-          sql`(${appliedToHackathonSql} or ${anyTeamInHackathonSql})`,
         ),
       )
       .orderBy(asc(users.username));

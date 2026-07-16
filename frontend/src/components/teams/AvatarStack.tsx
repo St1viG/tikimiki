@@ -3,7 +3,7 @@ import { personName } from "@/lib/displayName";
 import "./teams-shared.css";
 
 /* Canonical avatar-position palette for team rosters, defined once and re-exported
-   so /teams and /teams/find cycle the palette identically. */
+   so every /teams grid cycles the palette identically. */
 export const AV_POS = ["tm-av-v", "tm-av-l", "tm-av-t", "tm-av-r"] as const;
 
 export type AvatarSize = "sm" | "md" | "xl";

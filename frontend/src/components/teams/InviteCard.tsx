@@ -4,18 +4,17 @@ import { personName } from "@/lib/displayName";
 import type { TeamInvitation } from "@/lib/api";
 
 /**
- * InviteCard — a single team-invitation card shared by /teams and /teams/find.
+ * InviteCard — a single team-invitation card, used on /teams.
  *
- * NOTE: the previous "AI match %" widget (TeamsClient `aiMatchPct` /
- * FindClient `mockMatch`) has been REMOVED. It fabricated a 70–99% score with
- * no backing API field on the invitation, shown next to real invites — a
- * misleading signal. The card now leads with the real hackathon/team context.
+ * NOTE: the previous "AI match %" widget (`aiMatchPct` / `mockMatch`) has
+ * been REMOVED. It fabricated a 70–99% score with no backing API field on
+ * the invitation, shown next to real invites — a misleading signal. The card
+ * now leads with the real hackathon/team context.
  *
- *   - `meSeed`     : avatar seed for the "you" orb (username on /teams, the
- *                    invitation id on /teams/find — kept per page).
- *   - `forIcon`    : prefix the eyebrow line with a calendar icon (/teams/find).
- *   - `cardClass`  : "tm-sug" (/teams) vs "card tm-sug" (/teams/find surface).
- *   - `declineLabel`: pages use different decline copy.
+ *   - `meSeed`      : avatar seed for the "you" orb (defaults to the username).
+ *   - `forIcon`     : prefix the eyebrow line with a calendar icon.
+ *   - `cardClass`   : base class, default "tm-sug".
+ *   - `declineLabel`: caller-supplied decline copy.
  */
 export interface InviteCardProps {
   invite: TeamInvitation;

@@ -17,12 +17,12 @@ export interface SoloPlayerCardPlayer {
 }
 
 /**
- * SoloPlayerCard — a "free agent" card shared by /teams and /teams/find. The
- * avatar uses the shared {@link AV_POS} palette (indexed by the player's grid
- * position) so the same agent renders the same colour on both pages.
- *   - `cardClass` : "tm-solo" (/teams) vs "card tm-solo" (/teams/find surface).
- *   - `actionIcon`: prefix the invite button with a plus icon (/teams did).
- *   - `disabled`  : caller has no team to invite into (/teams/find disables).
+ * SoloPlayerCard — a "free agent" card used on /teams (both the plain "Free
+ * agents" list and the "AI suggestions" ranked list). The avatar uses the
+ * shared {@link AV_POS} palette (indexed by the player's grid position).
+ *   - `cardClass` : row surface class, default "tm-solo".
+ *   - `actionIcon`: prefix the invite button with a plus icon.
+ *   - `disabled`  : caller has no team to invite into.
  *   - `score`     : how well this player complements the caller's team — a
  *                   badge shown when the card renders a matching suggestion
  *                   rather than the plain free-agent list.

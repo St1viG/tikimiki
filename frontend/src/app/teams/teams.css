@@ -66,12 +66,28 @@
   pointer-events: none;
 }
 
+/* Actions row — "AI suggestions" (left) + "Create team" (right), sitting above
+   the tabs row so they don't crowd the tab divider. */
+.tm-actions-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 6px 0;
+}
+.tm-action-active {
+  border-color: var(--violet-light);
+  color: var(--violet-light);
+  background: rgba(180, 155, 255, 0.08);
+}
+
 /* Section filter mechanism (data-filter ↔ data-section) */
 .tm-section {
   margin-bottom: 28px;
 }
 .tm-page[data-filter="mine"] .tm-section:not([data-section="mine"]),
 .tm-page[data-filter="invites"] .tm-section:not([data-section="invites"]),
+.tm-page[data-filter="suggested"] .tm-section:not([data-section="suggested"]),
 .tm-page[data-filter="open"] .tm-section:not([data-section="open"]),
 .tm-page[data-filter="solo"] .tm-section:not([data-section="solo"]),
 .tm-page[data-filter="board"] .tm-section:not([data-section="board"]) {

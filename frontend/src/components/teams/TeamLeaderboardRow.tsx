@@ -22,13 +22,13 @@ export function PxSpark() {
 }
 
 /**
- * TeamLeaderboardRow — a ranked team row shared by /teams and /teams/find.
- * Top-3 ranks get a {@link PixelMedal} (token-driven). The XP marker and the
- * pixel-font treatment differ per page, exposed via props:
- *   - `cardClass` : "tm-lb-row" (/teams) vs "card tm-lb-row" (/teams/find).
- *   - `pixelFont` : wrap rank/XP numbers in `.px-font` (/teams only).
- *   - `xpMarker`  : "spark" (pixel spark, /teams) or "flame" (icon, /teams/find).
- *   - `youLabel`  : when set and `isYou`, render the "you" pill (/teams).
+ * TeamLeaderboardRow — a ranked team row used on /teams. Top-3 ranks get a
+ * {@link PixelMedal} (token-driven). The XP marker and pixel-font treatment
+ * are exposed via props:
+ *   - `cardClass` : row surface class, default "tm-lb-row".
+ *   - `pixelFont` : wrap rank/XP numbers in `.px-font`.
+ *   - `xpMarker`  : "spark" (pixel spark) or "flame" (icon).
+ *   - `youLabel`  : when set and `isYou`, render the "you" pill.
  */
 export interface TeamLeaderboardRowProps {
   entry: LeaderboardEntry;

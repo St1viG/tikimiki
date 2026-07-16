@@ -8,7 +8,7 @@ import type { HackathonSummary } from "@tikimiki/types";
 
 /**
  * CreateTeamPopup — modal dialog for creating a new team.
- * Triggered by the "Create team" buttons on /teams and /teams/find.
+ * Triggered by the "Create team" button on /teams.
  * Uses the shared, themed `.am-*` modal classes (globals.css).
  *
  * Wiring: the "Create team" button POSTs via api.createTeam(name, hackathonId).

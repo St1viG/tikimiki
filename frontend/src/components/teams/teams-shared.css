@@ -1,10 +1,8 @@
 /* Shared Teams component styles
- * Imported by the shared components under src/components/teams/. These rules
- * were previously duplicated inline in teams.css / find.css; centralizing them
- * here keeps the extracted <AvatarStack>, <PixelMedal>, <OpenTeamCard>,
- * <SoloPlayerCard>, <InviteCard> and <TeamLeaderboardRow> visually identical
- * on both /teams and /teams/find. (Page-level layout/grid rules stay in the
- * co-located teams.css / find.css.)
+ * Imported by the shared components under src/components/teams/, used on
+ * /teams: <AvatarStack>, <PixelMedal>, <OpenTeamCard>, <SoloPlayerCard>,
+ * <InviteCard> and <TeamLeaderboardRow>. (Page-level layout/grid rules stay
+ * in the co-located teams.css.)
  *
  * Autor: Nenad Skoković (2023/0039)
  * */
