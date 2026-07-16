@@ -230,9 +230,13 @@ export class ApplicationsService {
   /* ── Team application ────────────────────────────────────── */
 
   /**
-   * Creates individual applications for every active team member.
-   * Members who already have a non-deleted application for this hackathon are
-   * silently skipped. Returns the newly created ApplicationDtos.
+   * Creates individual applications for every active team member. Members who
+   * already have a non-deleted application for this hackathon (e.g. they
+   * applied solo before joining/forming this team) get that application
+   * relinked to this team instead of a duplicate row — otherwise their
+   * application stays orphaned (teamId null or pointing at a stale team) and
+   * they silently vanish from the team's roster and from "Approve Team".
+   * Returns the created/relinked ApplicationDtos.
    */
   async createTeam(callerId: string, input: CreateTeamApplicationInput): Promise<ApplicationDto[]> {
     // Caller must be a member.
@@ -297,44 +301,68 @@ export class ApplicationsService {
 
     const memberUserIds = teamMemberRows.map((r) => r.userId);
 
-    // Find members who already have an active application.
+    // Find members who already have an active application, and whether it's
+    // already linked to this team.
     const existing = await this.db
-      .select({ userId: applications.userId })
+      .select({
+        userId: applications.userId,
+        applicationId: applications.applicationId,
+        teamId: applications.teamId,
+      })
       .from(applications)
       .where(and(eq(applications.hackathonId, input.hackathonId), isNull(applications.deletedAt)));
-    const alreadyApplied = new Set(existing.map((r) => r.userId));
+    const existingByUser = new Map(existing.map((r) => [r.userId, r]));
 
-    const toApply = memberUserIds.filter((uid) => !alreadyApplied.has(uid));
-    if (toApply.length === 0) {
+    const toApply = memberUserIds.filter((uid) => !existingByUser.has(uid));
+    const toRelink = memberUserIds
+      .map((uid) => existingByUser.get(uid))
+      .filter((r): r is NonNullable<typeof r> => r !== undefined && r.teamId !== input.teamId);
+
+    if (toApply.length === 0 && toRelink.length === 0) {
       return [];
     }
 
     const createdIds = await this.db.transaction(async (tx) => {
-      const inserted = await tx
-        .insert(applications)
-        .values(
-          toApply.map((uid) => ({
-            userId: uid,
-            hackathonId: input.hackathonId,
-            teamId: input.teamId,
-            status: "pending" as const,
-          })),
-        )
-        .returning({ applicationId: applications.applicationId });
-
-      if (input.answers && input.answers.length > 0) {
-        await tx.insert(questionAnswers).values(
-          inserted.flatMap((app) =>
-            input.answers!.map((a) => ({
-              applicationId: app.applicationId,
-              questionId: a.questionId,
-              answer: a.answer,
+      let inserted: { applicationId: string }[] = [];
+      if (toApply.length > 0) {
+        inserted = await tx
+          .insert(applications)
+          .values(
+            toApply.map((uid) => ({
+              userId: uid,
+              hackathonId: input.hackathonId,
+              teamId: input.teamId,
+              status: "pending" as const,
             })),
-          ),
-        );
+          )
+          .returning({ applicationId: applications.applicationId });
+
+        if (input.answers && input.answers.length > 0) {
+          await tx.insert(questionAnswers).values(
+            inserted.flatMap((app) =>
+              input.answers!.map((a) => ({
+                applicationId: app.applicationId,
+                questionId: a.questionId,
+                answer: a.answer,
+              })),
+            ),
+          );
+        }
       }
 
-      return inserted.map((r) => r.applicationId);
+      if (toRelink.length > 0) {
+        await tx
+          .update(applications)
+          .set({ teamId: input.teamId, updatedAt: new Date() })
+          .where(
+            inArray(
+              applications.applicationId,
+              toRelink.map((r) => r.applicationId),
+            ),
+          );
+      }
+
+      return [...inserted.map((r) => r.applicationId), ...toRelink.map((r) => r.applicationId)];
     });
 
     // Notify the organizer once about the batch.

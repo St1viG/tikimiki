@@ -506,9 +506,12 @@ export class TeamsService {
     // needs the organizer to approve a hackathon application. File one on
     // their behalf (best-effort: skip silently if the hackathon requires a
     // custom application form, closed registration, etc. — the leader can
-    // still apply manually from the hackathon page in that case).
+    // still apply manually from the hackathon page in that case). Uses
+    // createTeam() rather than create() so a pre-existing solo application
+    // (e.g. the leader applied before forming this team) gets relinked to
+    // the new team instead of silently staying orphaned.
     await this.applicationsService
-      .create(userId, { hackathonId: input.hackathonId, teamId, answers: [] })
+      .createTeam(userId, { hackathonId: input.hackathonId, teamId, answers: [] })
       .catch(() => undefined);
 
     // Only invite the teammates the leader explicitly picked — team formation
