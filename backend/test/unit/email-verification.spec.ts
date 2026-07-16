@@ -65,7 +65,7 @@ function tokenFrom(devLink: string | undefined): string {
 const jwt = new JwtService();
 
 function makeService(db: unknown, mail: { sendMail: ReturnType<typeof vi.fn> }) {
-  return new AccountService(db as never, jwt, {} as never, mail as never);
+  return new AccountService(db as never, jwt, {} as never, mail as never, {} as never);
 }
 
 function mailMock() {

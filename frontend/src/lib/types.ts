@@ -66,7 +66,8 @@ export type NotificationType =
   | "new_direct_message"
   | "position_assigned"
   | "bounty_result_posted"
-  | "merch_order_shipped";
+  | "merch_order_shipped"
+  | "new_org_request";
 
 /* Presentation helpers */
 

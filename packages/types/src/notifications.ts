@@ -240,6 +240,27 @@ export const NOTIFICATION_TEMPLATES = {
       sr: "Pozvani korisnik je odbio/la poziv u tim {teamName}.",
     },
   },
+  organization_verified: {
+    title: { en: "Organization verified", sr: "Organizacija verifikovana" },
+    body: {
+      en: 'Your organization "{orgName}" was verified. 🎉',
+      sr: 'Vaša organizacija „{orgName}" je verifikovana. 🎉',
+    },
+  },
+  organization_rejected: {
+    title: { en: "Organization rejected", sr: "Organizacija odbijena" },
+    body: {
+      en: 'Your organization "{orgName}" was rejected. Reason: {reason}',
+      sr: 'Vaša organizacija „{orgName}" je odbijena. Razlog: {reason}',
+    },
+  },
+  new_org_request: {
+    title: { en: "New organization request", sr: "Nov zahtev za verifikaciju" },
+    body: {
+      en: 'Organization "{orgName}" (@{username}) is awaiting verification.',
+      sr: 'Organizacija „{orgName}" (@{username}) čeka verifikaciju.',
+    },
+  },
 } as const satisfies Record<string, NotificationTemplate>;
 
 export type NotificationTemplateKey = keyof typeof NOTIFICATION_TEMPLATES;

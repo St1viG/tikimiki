@@ -36,7 +36,13 @@ describe("AccountService.requestEmailVerification — NODE_ENV=production", () =
     const mail = { sendMail: vi.fn().mockResolvedValue(undefined) };
     const logSpy = vi.spyOn(console, "log").mockImplementation(() => undefined);
 
-    const service = new AccountService(db as never, jwt as never, {} as never, mail as never);
+    const service = new AccountService(
+      db as never,
+      jwt as never,
+      {} as never,
+      mail as never,
+      {} as never,
+    );
     const result = await service.requestEmailVerification("user-1");
 
     expect(result.alreadyVerified).toBe(false);

@@ -38,7 +38,13 @@ function fakeDb(rows: Row[] = []) {
 const jwt = new JwtService();
 
 function makeService(rows: Row[]) {
-  return new AccountService(fakeDb(rows) as never, jwt, {} as never, new MailService());
+  return new AccountService(
+    fakeDb(rows) as never,
+    jwt,
+    {} as never,
+    new MailService(),
+    {} as never,
+  );
 }
 
 /**

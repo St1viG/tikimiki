@@ -11,6 +11,7 @@ import { AuthzService } from "../common/authz.service";
 import { DAY_MS } from "../common/constants";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import { MailService } from "../mail/mail.service";
+import { NotificationsService } from "../notifications/notifications.service";
 import {
   appeals,
   auditLog,
@@ -125,6 +126,7 @@ export class AdminService {
     @Inject(DRIZZLE) private readonly db: DrizzleDB,
     private readonly authz: AuthzService,
     private readonly mail: MailService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   /**
@@ -450,6 +452,19 @@ export class AdminService {
       `Vaša organizacija „${row.name}" je verifikovana.`,
     );
 
+    await this.notifications
+      .create({
+        userId: targetUserId,
+        type: "organization_verified",
+        template: { key: "organization_verified", params: { orgName: row.name } },
+      })
+      .catch((err) => {
+        console.error(
+          `[admin] failed to create org-verified notification for ${targetUserId}:`,
+          err,
+        );
+      });
+
     return (await this.orgDto(targetUserId))!;
   }
 
@@ -490,6 +505,22 @@ export class AdminService {
       "Organizacija odbijena",
       `Vaša organizacija „${row.name}" je odbijena. Razlog: ${body.reason}`,
     );
+
+    await this.notifications
+      .create({
+        userId: targetUserId,
+        type: "organization_rejected",
+        template: {
+          key: "organization_rejected",
+          params: { orgName: row.name, reason: body.reason },
+        },
+      })
+      .catch((err) => {
+        console.error(
+          `[admin] failed to create org-rejected notification for ${targetUserId}:`,
+          err,
+        );
+      });
 
     return (await this.orgDto(targetUserId))!;
   }

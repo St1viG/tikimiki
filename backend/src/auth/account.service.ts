@@ -13,6 +13,7 @@ import { env } from "../config/env";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import { administrators, appeals, organizations, users } from "../db/schema";
 import { MailService } from "../mail/mail.service";
+import { NotificationsService } from "../notifications/notifications.service";
 
 type AccountTokenType = "email_verify" | "password_reset";
 
@@ -34,6 +35,7 @@ export class AccountService {
     private readonly jwt: JwtService,
     private readonly authz: AuthzService,
     private readonly mail: MailService,
+    private readonly notifications: NotificationsService,
   ) {}
 
   private signToken(userId: string, typ: AccountTokenType, ttlSeconds: number): Promise<string> {
@@ -163,7 +165,7 @@ export class AccountService {
   async notifyAdminsOfOrgRequest(orgName: string, username: string, email: string): Promise<void> {
     try {
       const admins = await this.db
-        .select({ email: users.email })
+        .select({ userId: administrators.userId, email: users.email })
         .from(administrators)
         .innerJoin(users, eq(administrators.userId, users.userId))
         .where(isNull(users.deletedAt));
@@ -174,6 +176,15 @@ export class AccountService {
             "Nov zahtev za verifikaciju organizacije",
             `<p>Organizacija „${orgName}" (korisnik @${username}, ${email}) čeka verifikaciju u admin panelu.</p>`,
           ),
+        ),
+      );
+      await Promise.all(
+        admins.map((a) =>
+          this.notifications.create({
+            userId: a.userId,
+            type: "new_org_request",
+            template: { key: "new_org_request", params: { orgName, username } },
+          }),
         ),
       );
     } catch (err) {
