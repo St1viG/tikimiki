@@ -56,6 +56,7 @@ const M = {
   edit: { en: "Edit", sr: "Izmeni" },
   applications: { en: "Applications", sr: "Prijave" },
   teamsNav: { en: "Teams", sr: "Timovi" },
+  results: { en: "Results", sr: "Rezultati" },
 
   statusUpcoming: { en: "Upcoming", sr: "Predstojeći" },
   statusLive: { en: "Live", sr: "U toku" },
@@ -256,6 +257,14 @@ export function ManageClient() {
                       >
                         <Icon name="teams" aria-hidden="true" /> {t("teamsNav")}
                       </Link>
+                      {(h.status === "ongoing" || h.status === "finished") && (
+                        <Link
+                          className="btn btn-ghost hk-btn-sm"
+                          href={`/cohor?hackathon=${h.hackathonId}&channel=rezultati`}
+                        >
+                          <Icon name="leaderboard" aria-hidden="true" /> {t("results")}
+                        </Link>
+                      )}
                       <Link
                         className="btn btn-primary hk-btn-sm"
                         href={`/hackathons/${h.hackathonId}/edit`}

@@ -300,6 +300,7 @@ export interface ServerSummary {
   serverId: string;
   hackathonId: string;
   hackathonTitle: string;
+  hackathonStatus: "upcoming" | "ongoing" | "finished" | "cancelled";
   name: string;
   logoUrl: string | null;
 }

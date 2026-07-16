@@ -49,6 +49,7 @@ export interface ServerDto {
   serverId: string;
   hackathonId: string;
   hackathonTitle: string;
+  hackathonStatus: "upcoming" | "ongoing" | "finished" | "cancelled";
   name: string;
   logoUrl: string | null;
 }
@@ -382,6 +383,7 @@ export class ChatService {
         serverId: servers.serverId,
         hackathonId: servers.hackathonId,
         hackathonTitle: hackathons.title,
+        hackathonStatus: hackathons.status,
         name: servers.name,
         logoUrl: servers.logoUrl,
       })
@@ -393,6 +395,7 @@ export class ChatService {
       serverId: r.serverId,
       hackathonId: r.hackathonId,
       hackathonTitle: r.hackathonTitle,
+      hackathonStatus: r.hackathonStatus,
       name: r.name,
       logoUrl: r.logoUrl,
     }));

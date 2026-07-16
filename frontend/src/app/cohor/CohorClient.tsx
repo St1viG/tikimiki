@@ -113,7 +113,6 @@ import {
   type HackathonResults,
   type ServerMember,
   type Relationship,
-  type ActiveHackathon,
   type ChannelGroup,
   type Permission,
   type ServerRole,
@@ -443,9 +442,6 @@ export function CohorClient() {
     setValue: setDraft,
     search: mentionSearch,
   });
-
-  // Home landing view data: the user's ongoing hackathon (or null) + friends.
-  const [activeHackathon, setActiveHackathon] = useState<ActiveHackathon | null>(null);
 
   /* Message context menu (right-click) */
   const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number; m: ApiMessage } | null>(null);
@@ -971,6 +967,11 @@ export function CohorClient() {
   // Deep link: /cohor?server=<serverId> opens that server (handled once the
   // servers list has loaded, in the mount effect below).
   const serverParam = searchParams.get("server");
+  // Deep link: /cohor?hackathon=<hackathonId> opens that hackathon's server —
+  // for callers (e.g. the organizer's "My hackathons" page) that only know the
+  // hackathonId, not its serverId. Combine with &channel=rezultati to land
+  // straight on the results form.
+  const hackathonParam = searchParams.get("hackathon");
   // Deep link: /cohor?server=<id>&channel=<name> also selects a channel by
   // name once that server's channel tree has loaded (e.g. the "Add project"
   // button on /teams links straight to #predaja-projekta). Consumed once.
@@ -1242,12 +1243,20 @@ export function CohorClient() {
         if (cancelled) return;
         setServers(list);
         setServersLoaded(true);
-        setActiveHackathon(active);
         // A ?dm= deep link owns the initial view (handled in its own effect).
         if (dmParam) return;
         // ?server=<id> deep link: open that server.
         if (serverParam) {
           const target = list.find((s) => s.serverId === serverParam);
+          if (target) {
+            enterServerMode();
+            await loadServer(target.serverId, target);
+            return;
+          }
+        }
+        // ?hackathon=<id> deep link: same, but keyed by hackathonId.
+        if (hackathonParam) {
+          const target = list.find((s) => s.hackathonId === hackathonParam);
           if (target) {
             enterServerMode();
             await loadServer(target.serverId, target);
@@ -1270,7 +1279,7 @@ export function CohorClient() {
     return () => {
       cancelled = true;
     };
-    // dmParam/serverParam are read once on mount; enter*Mode/loadServer are stable.
+    // dmParam/serverParam/hackathonParam are read once on mount; enter*Mode/loadServer are stable.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadServer]);
 
@@ -2479,8 +2488,11 @@ export function CohorClient() {
 
   /* Channel switching */
   function switchChannel(name: string, desc: string, type = "general") {
-    // rezultati is locked while the hackathon is active
-    if (name === "rezultati" && isHackathonActive) {
+    // rezultati is locked while the hackathon is active — but only for
+    // regular participants; the organizer/moderator (who the backend already
+    // lets publish results whenever they want, no time check) can open it
+    // early to prepare/publish results without waiting out the countdown.
+    if (name === "rezultati" && isHackathonActive && !can("manage_messages")) {
       showRezultatiLockedToast();
       return;
     }
@@ -3152,12 +3164,14 @@ export function CohorClient() {
   const activeConvo = dmConvos.find((c) => c.conversationId === activeConvoId);
   const activeIsGroup = !!activeConvo && isGroupConvo(activeConvo);
 
-  /* The active hackathon's server (from /me/active-hackathon) gets a "live"
-     marker among the inline tabs. Active servers show directly; past ones
-     are tucked into the clock dropdown. */
-  const activeHackServerId = activeHackathon?.serverId ?? null;
-  const activeServers = servers.filter((s) => s.serverId === activeHackServerId);
-  const pastServers = servers.filter((s) => s.serverId !== activeHackServerId);
+  /* Every server whose hackathon is currently "ongoing" gets a "live" marker
+     among the inline tabs — not just the single one /me/active-hackathon
+     happens to pick (that endpoint has no way to choose between several
+     hackathons run by the same org, so it can't decide which one deserves
+     the badge). Active servers show directly; past/upcoming ones are tucked
+     into the clock dropdown. */
+  const activeServers = servers.filter((s) => s.hackathonStatus === "ongoing");
+  const pastServers = servers.filter((s) => s.hackathonStatus !== "ongoing");
   const dmUnreadTotal = dmConvos.reduce((sum, c) => sum + (c.unreadCount ?? 0), 0);
 
   /* A single member row in the right-hand participants panel. `online` toggles
@@ -3395,7 +3409,7 @@ export function CohorClient() {
                     const unread = channelUnread[cid] ?? 0;
                     const isActive = activeChannel === ch.name;
                     const isRezultati = ch.name === "rezultati";
-                    const isLocked = isRezultati && isHackathonActive;
+                    const isLocked = isRezultati && isHackathonActive && !can("manage_messages");
                     const muted = mutedChannels.has(cid);
                     const iconKind = channelIconKind(ch.type);
                     return (
@@ -3432,7 +3446,7 @@ export function CohorClient() {
                           </span>
                         )}
                         <span className="ch-name">{ch.name}</span>
-                        {isRezultati && isHackathonActive ? (
+                        {isRezultati && isHackathonActive && !can("manage_messages") ? (
                           <span
                             className="ch-locked-icon"
                             id="ch-rezultati-lock"
@@ -3997,13 +4011,13 @@ export function CohorClient() {
                 <div className="panel-org-row">
                   <div className="panel-org-av panel-org-av-green is-orb">
                     <GenerativeAvatar
-                      seed={activeHackathon?.organizationName ?? ""}
+                      seed={hackathon?.organizationName ?? ""}
                       className="orb-art"
                     />
                   </div>
                   <div>
                     <span className="panel-org-name panel-org-name-green">
-                      {activeHackathon?.organizationName}
+                      {hackathon?.organizationName}
                     </span>
                     <span className="role-badge role-badge-org">{t("roleBadgeOrg")}</span>
                     <div className="panel-org-time">11. april 2026. u 09:00</div>
@@ -4509,13 +4523,13 @@ export function CohorClient() {
                 <div className="panel-org-row">
                   <div className="panel-org-av panel-org-av-green is-orb">
                     <GenerativeAvatar
-                      seed={activeHackathon?.organizationName ?? ""}
+                      seed={hackathon?.organizationName ?? ""}
                       className="orb-art"
                     />
                   </div>
                   <div>
                     <div className="panel-org-name panel-org-name-green">
-                      {activeHackathon?.organizationName}{" "}
+                      {hackathon?.organizationName}{" "}
                       <span className="panel-org-meta">{t("glasanjeOrgMeta")}</span>
                     </div>
                     <div className="panel-org-say">
@@ -4778,11 +4792,17 @@ export function CohorClient() {
               className="swap-panel"
               style={{ display: panel === "rezultati" ? "flex" : "none" }}
             >
-              {/* Locked state (while hackathon is active and nothing published) */}
+              {/* Locked state (while hackathon is active and nothing published) —
+                  the organizer/moderator bypasses this, same as the channel lock above. */}
               <div
                 id="rezultati-locked"
                 className="rezultati-locked"
-                style={{ display: isHackathonActive && !results?.published ? "" : "none" }}
+                style={{
+                  display:
+                    isHackathonActive && !results?.published && !can("manage_messages")
+                      ? ""
+                      : "none",
+                }}
               >
                 <div className="rezultati-locked-ic">
                   <Icon name="lock" className="ic-lg" />
@@ -4799,19 +4819,24 @@ export function CohorClient() {
               <div
                 id="rezultati-unlocked"
                 className="rezultati-unlocked"
-                style={{ display: !isHackathonActive || results?.published ? "flex" : "none" }}
+                style={{
+                  display:
+                    !isHackathonActive || results?.published || can("manage_messages")
+                      ? "flex"
+                      : "none",
+                }}
               >
                 <div className="panel-pad-top">
                   <div className="panel-org-row">
                     <div className="panel-org-av panel-org-av-green is-orb">
                       <GenerativeAvatar
-                        seed={activeHackathon?.organizationName ?? ""}
+                        seed={hackathon?.organizationName ?? ""}
                         className="orb-art"
                       />
                     </div>
                     <div>
                       <span className="panel-org-name panel-org-name-green">
-                        {activeHackathon?.organizationName}
+                        {hackathon?.organizationName}
                       </span>
                       <span className="role-badge role-badge-org">{t("roleBadgeOrg")}</span>
                       <div className="panel-org-time" id="rezultati-header-time">
