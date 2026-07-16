@@ -11,6 +11,7 @@ import { RailRight } from "@/components/shell/RailRight";
 import { CreateTeamPopup } from "@/components/popups/CreateTeamPopup";
 import { JoinTeamPopup } from "@/components/popups/JoinTeamPopup";
 import { ProfilePopup } from "@/components/popups/ProfilePopup";
+import { TeamDetailPopup } from "@/components/popups/TeamDetailPopup";
 import {
   AV_POS,
   AvatarStack,
@@ -67,6 +68,7 @@ const M = {
   tabSolo: { en: "Free agents", sr: "Slobodni igrači" },
   tabBoard: { en: "Leaderboard", sr: "Rang lista" },
   createTeam: { en: "Create team", sr: "Kreiraj tim" },
+  aiSuggestions: { en: "AI suggestions", sr: "AI predlozi" },
   sectionMine: { en: "My teams", sr: "Moji timovi" },
   members: { en: "members", sr: "člana" },
   tasks: { en: "tasks", sr: "taskova" },
@@ -126,6 +128,8 @@ export function TeamsClient() {
   const [joinTarget, setJoinTarget] = useState<string | null>(null);
   // Username whose profile popup is open (null = closed).
   const [popupUser, setPopupUser] = useState<string | null>(null);
+  // Team whose roster popup is open (null = closed).
+  const [detailTeam, setDetailTeam] = useState<Team | null>(null);
 
   // Live data
   const [myTeams, setMyTeams] = useState<Team[]>([]);
@@ -398,6 +402,9 @@ export function TeamsClient() {
                 {t("tabBoard")}
               </button>
             </div>
+            <Link className="btn btn-ghost" href="/teams/find">
+              <Icon name="sparkles" /> {t("aiSuggestions")}
+            </Link>
             <button className="btn btn-primary" onClick={() => setCreateOpen(true)}>
               <Icon name="plus" /> {t("createTeam")}
             </button>
@@ -468,7 +475,13 @@ export function TeamsClient() {
                         onOpenProfile={setPopupUser}
                       />
                       <div className="tm-tc-body">
-                        <h2 className="tm-tc-name">{team.name}</h2>
+                        <button
+                          type="button"
+                          className="tm-tc-name tm-tc-name-btn"
+                          onClick={() => setDetailTeam(team)}
+                        >
+                          {team.name}
+                        </button>
                         <div className="tm-tc-for">
                           <Icon name="hackathon" /> {team.hackathonTitle}
                         </div>
@@ -770,6 +783,13 @@ export function TeamsClient() {
         open={popupUser !== null}
         username={popupUser}
         onClose={() => setPopupUser(null)}
+      />
+      <TeamDetailPopup
+        open={detailTeam !== null}
+        team={detailTeam}
+        onClose={() => setDetailTeam(null)}
+        onOpenProfile={setPopupUser}
+        meId={user?.userId}
       />
     </>
   );
