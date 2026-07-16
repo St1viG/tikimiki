@@ -10,7 +10,7 @@
  * Autor: Dimitrije Pesic (2023/0014)
  */
 
-import { sql, type SQL } from "drizzle-orm";
+import { getTableName, sql, type SQL } from "drizzle-orm";
 import type { PgColumn } from "drizzle-orm/pg-core";
 
 /** True when the avatar is an animated GIF — a Premium-only personalization. */
@@ -25,10 +25,16 @@ export function isGifAvatar(avatarUrl: string | null): boolean {
  * bare `users.avatarUrl` in any DTO the client renders.
  */
 export function gatedAvatarUrl(ownerId: PgColumn, avatarUrl: PgColumn): SQL<string | null> {
+  // The owner column must be qualified by hand: in a single-table select
+  // drizzle renders a bare `${ownerId}` as just `"user_id"`, and inside the
+  // EXISTS subquery that unqualified name binds to `s` (subscriptions), turning
+  // the correlation into the tautology `s.user_id = s.user_id` — the gate then
+  // passes GIFs through whenever ANY active subscription exists.
+  const owner = sql`${sql.identifier(getTableName(ownerId.table))}.${sql.identifier(ownerId.name)}`;
   return sql<string | null>`case
-    when ${avatarUrl} ~* '\.gif$' and not exists (
+    when ${avatarUrl} ~* '\\.gif$' and not exists (
       select 1 from subscriptions s
-      where s.user_id = ${ownerId}
+      where s.user_id = ${owner}
         and s.status = 'active'
         and s.ends_at > now()
     ) then null

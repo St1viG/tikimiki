@@ -27,6 +27,7 @@ import {
   users,
 } from "../db/schema";
 import { NotificationsService } from "../notifications/notifications.service";
+import { gatedAvatarUrl } from "../subscriptions/premium-personalization";
 
 type TeamNotifType =
   | "team_invitation_received"
@@ -155,7 +156,7 @@ export class TeamsService {
         userId: teamMembers.userId,
         username: users.username,
         displayName: users.displayName,
-        avatarUrl: users.avatarUrl,
+        avatarUrl: gatedAvatarUrl(users.userId, users.avatarUrl),
         role: teamMembers.role,
         points: members.points,
       })
