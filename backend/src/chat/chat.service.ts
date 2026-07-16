@@ -301,6 +301,8 @@ export class ChatService {
    * - User must be a server member.
    * - For `private` channels: user must be in `channel_members`, or hold
    *   `manage_channels` (moderators/organizers always have access).
+   * - For `team` channels: user must be an active member of the channel's
+   *   team, or hold `manage_channels`.
    *
    * Returns `{ serverId, type }` so callers avoid a second channel query.
    */
@@ -312,6 +314,7 @@ export class ChatService {
       .select({
         serverId: channelGroups.serverId,
         type: channels.type,
+        teamId: channels.teamId,
         deletedAt: channels.deletedAt,
       })
       .from(channels)
@@ -332,6 +335,22 @@ export class ChatService {
         const perms = await this.authz.getServerPermissions(row.serverId, userId);
         if (!perms.has("manage_channels")) {
           throw new ForbiddenException("You are not a member of this channel");
+        }
+      }
+    }
+
+    if (row.type === "team" && row.teamId) {
+      const [membership] = await this.db
+        .select({ userId: teamMembers.userId })
+        .from(teamMembers)
+        .where(
+          and(eq(teamMembers.teamId, row.teamId), eq(teamMembers.userId, userId), activeTeamMember),
+        )
+        .limit(1);
+      if (!membership) {
+        const perms = await this.authz.getServerPermissions(row.serverId, userId);
+        if (!perms.has("manage_channels")) {
+          throw new ForbiddenException("You are not a member of this team's channel");
         }
       }
     }
@@ -574,14 +593,43 @@ export class ChatService {
             name: channels.name,
             type: channels.type,
             position: channels.position,
+            teamId: channels.teamId,
           })
           .from(channels)
           .where(and(inArray(channels.groupId, groupIds), isNull(channels.deletedAt)))
           .orderBy(asc(channels.position))
       : [];
 
+    // Team channels are only visible to that team's active members (or
+    // moderators/organizers) — everyone else shouldn't even see them listed.
+    const teamChannelTeamIds = [
+      ...new Set(
+        channelRows.filter((c) => c.type === "team" && c.teamId).map((c) => c.teamId as string),
+      ),
+    ];
+    let visibleTeamIds = new Set<string>();
+    if (teamChannelTeamIds.length > 0) {
+      const perms = await this.authz.getServerPermissions(serverId, userId);
+      if (perms.has("manage_channels")) {
+        visibleTeamIds = new Set(teamChannelTeamIds);
+      } else {
+        const myTeams = await this.db
+          .select({ teamId: teamMembers.teamId })
+          .from(teamMembers)
+          .where(
+            and(
+              eq(teamMembers.userId, userId),
+              inArray(teamMembers.teamId, teamChannelTeamIds),
+              activeTeamMember,
+            ),
+          );
+        visibleTeamIds = new Set(myTeams.map((t) => t.teamId));
+      }
+    }
+
     const channelsByGroup = new Map<string, ServerChannelDto[]>();
     for (const c of channelRows) {
+      if (c.type === "team" && c.teamId && !visibleTeamIds.has(c.teamId)) continue;
       const list = channelsByGroup.get(c.groupId) ?? [];
       list.push({
         channelId: c.channelId,
