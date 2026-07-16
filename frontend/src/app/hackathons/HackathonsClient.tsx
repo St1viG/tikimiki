@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import type { HackathonSummary, HackathonType } from "@tikimiki/types";
 import { Icon } from "@/components/Icon";
@@ -8,7 +8,7 @@ import { AppShell } from "@/components/shell/AppShell";
 import { RailRight } from "@/components/shell/RailRight";
 import { useT } from "@/components/i18n/LanguageProvider";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { getHackathons, getMyApplications, type Application } from "@/lib/api";
+import { getHackathons, getMyApplications, withdrawApplication, type Application } from "@/lib/api";
 import { initials } from "@/lib/format";
 
 /**
@@ -68,6 +68,14 @@ const M = {
   appTeam: { en: "team", sr: "tim" },
   appSolo: { en: "solo", sr: "pojedinačno" },
   viewApp: { en: "View hackathon", sr: "Pogledaj hackathon" },
+  withdrawBtn: { en: "Withdraw", sr: "Povuci prijavu" },
+  withdrawConfirm: { en: "Withdraw this application?", sr: "Povući ovu prijavu?" },
+  withdrawConfirmYes: { en: "Withdraw", sr: "Povuci" },
+  withdrawCancel: { en: "Cancel", sr: "Odustani" },
+  toastWithdrawFailed: {
+    en: "Couldn't withdraw — try again",
+    sr: "Povlačenje nije uspelo — pokušaj ponovo",
+  },
   sectionDone: { en: "Completed hackathons", sr: "Završeni hackathoni" },
   empty: { en: "No hackathons yet.", sr: "Još nema hackathona." },
   loadError: { en: "Couldn't load hackathons.", sr: "Greška pri učitavanju hackathona." },
@@ -144,6 +152,10 @@ export function HackathonsClient() {
 
   // The signed-in viewer's applications (null until loaded / anon).
   const [apps, setApps] = useState<Application[] | null>(null);
+  // Withdraw flow for a row in "My applications" (SSU10).
+  const [confirmWithdrawId, setConfirmWithdrawId] = useState<string | null>(null);
+  const [withdrawBusyId, setWithdrawBusyId] = useState<string | null>(null);
+  const [withdrawError, setWithdrawError] = useState<string | null>(null);
 
   // A live "now" tick so the ongoing-countdown re-renders each minute.
   const [now, setNow] = useState(() => Date.now());
@@ -191,6 +203,29 @@ export function HackathonsClient() {
       cancelled = true;
     };
   }, [user]);
+
+  // Withdraw a pending/approved application (SSU10). Optimistic: drop the row
+  // immediately (a withdrawn application no longer shows in "My applications"),
+  // restore it on failure.
+  const withdraw = useCallback(
+    async (applicationId: string) => {
+      setConfirmWithdrawId(null);
+      setWithdrawBusyId(applicationId);
+      setWithdrawError(null);
+      const prev = apps;
+      setApps((list) => (list ?? []).filter((a) => a.applicationId !== applicationId));
+      try {
+        await withdrawApplication(applicationId);
+      } catch (err) {
+        console.error("withdrawApplication failed", err);
+        setApps(prev ?? null);
+        setWithdrawError(applicationId);
+      } finally {
+        setWithdrawBusyId(null);
+      }
+    },
+    [apps],
+  );
 
   // Tick the live countdown once a minute (only matters while a live section shows).
   useEffect(() => {
@@ -552,39 +587,81 @@ export function HackathonsClient() {
             <p className="hk-empty-note">{t("yourEmpty")}</p>
           ) : (
             <div className="hk-apply-list">
-              {apps.map((a) => (
-                <div
-                  key={a.applicationId}
-                  className="hk-apply-row"
-                  style={
-                    hidden(`${a.hackathonTitle} ${a.teamName ?? ""}`)
-                      ? { display: "none" }
-                      : undefined
-                  }
-                >
-                  <div className={`hk-apply-status ${statusClass(a.status)}`}>
-                    <Icon name={statusIcon(a.status)} /> {statusLabel(a.status)}
-                  </div>
-                  <div className="hk-apply-info">
-                    <div className="hk-apply-name">{a.hackathonTitle}</div>
-                    <div className="hk-apply-meta">
-                      {a.teamName ? (
-                        <>
-                          {t("appTeam")} <strong>{a.teamName}</strong>
-                        </>
-                      ) : (
-                        t("appSolo")
-                      )}
-                    </div>
-                  </div>
-                  <Link
-                    className="btn btn-ghost hk-btn-sm"
-                    href={`/hackathons/${a.hackathonId}/apply`}
+              {apps.map((a) => {
+                const canWithdraw = a.status === "pending" || a.status === "approved";
+                return (
+                  <div
+                    key={a.applicationId}
+                    className="hk-apply-row"
+                    style={
+                      hidden(`${a.hackathonTitle} ${a.teamName ?? ""}`)
+                        ? { display: "none" }
+                        : undefined
+                    }
                   >
-                    {t("viewApp")}
-                  </Link>
-                </div>
-              ))}
+                    <div className="hk-apply-row-main">
+                      <div className={`hk-apply-status ${statusClass(a.status)}`}>
+                        <Icon name={statusIcon(a.status)} /> {statusLabel(a.status)}
+                      </div>
+                      <div className="hk-apply-info">
+                        <div className="hk-apply-name">{a.hackathonTitle}</div>
+                        <div className="hk-apply-meta">
+                          {a.teamName ? (
+                            <>
+                              {t("appTeam")} <strong>{a.teamName}</strong>
+                            </>
+                          ) : (
+                            t("appSolo")
+                          )}
+                        </div>
+                      </div>
+                      <div className="hk-apply-actions">
+                        <Link
+                          className="btn btn-ghost hk-btn-sm"
+                          href={`/hackathons/${a.hackathonId}/apply`}
+                        >
+                          {t("viewApp")}
+                        </Link>
+                        {canWithdraw && (
+                          <button
+                            type="button"
+                            className="btn btn-ghost hk-btn-sm"
+                            disabled={withdrawBusyId === a.applicationId}
+                            onClick={() => setConfirmWithdrawId(a.applicationId)}
+                          >
+                            <Icon name="x" /> {t("withdrawBtn")}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    {confirmWithdrawId === a.applicationId && (
+                      <div className="fb-confirm" role="alertdialog">
+                        <p className="fb-confirm-warn">
+                          <Icon name="flag" /> {t("withdrawConfirm")}
+                        </p>
+                        <div className="fb-confirm-actions">
+                          <button
+                            className="btn btn-ghost"
+                            onClick={() => setConfirmWithdrawId(null)}
+                          >
+                            {t("withdrawCancel")}
+                          </button>
+                          <button
+                            className="btn btn-danger"
+                            disabled={withdrawBusyId === a.applicationId}
+                            onClick={() => withdraw(a.applicationId)}
+                          >
+                            <Icon name="x" /> {t("withdrawConfirmYes")}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    {withdrawError === a.applicationId && (
+                      <p className="hk-apply-error">{t("toastWithdrawFailed")}</p>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </section>

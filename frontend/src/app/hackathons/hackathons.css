@@ -731,9 +731,59 @@
   border: 1px solid var(--line);
   transition: border-color 0.18s;
 }
+.hk-apply-row {
+  flex-direction: column;
+  align-items: stretch;
+}
+.hk-apply-row-main {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
 .hk-apply-row:hover,
 .hk-done-row:hover {
   border-color: var(--line-strong);
+}
+.hk-apply-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.hk-apply-error {
+  margin: 8px 0 0;
+  font-size: var(--fs-sm);
+  color: var(--red);
+}
+.fb-confirm {
+  margin-top: 12px;
+  padding: 13px 14px;
+  border-radius: var(--r-sm);
+  background: color-mix(in srgb, var(--red) 7%, transparent);
+  border: 1px solid color-mix(in srgb, var(--red) 30%, transparent);
+}
+.fb-confirm-warn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+  margin: 0 0 12px;
+}
+.fb-confirm-warn .ic {
+  width: 16px;
+  height: 16px;
+  color: var(--red);
+  flex-shrink: 0;
+}
+.fb-confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.fb-confirm-actions .btn .ic {
+  width: 15px;
+  height: 15px;
 }
 .hk-apply-status {
   display: inline-flex;
