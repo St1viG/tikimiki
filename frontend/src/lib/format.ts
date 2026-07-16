@@ -81,6 +81,12 @@ export function hashString(seed: string): number {
   return Math.abs(h);
 }
 
+/** Deterministic colour-class for a cohor team-name badge (Discord-style role tag). */
+const TEAM_TAG_CLASSES = ["tag-v", "tag-t", "tag-l", "tag-r"] as const;
+export function teamTagClassFor(teamName: string): string {
+  return TEAM_TAG_CLASSES[hashString(teamName) % TEAM_TAG_CLASSES.length];
+}
+
 const RELATIVE_UNITS: Array<[Intl.RelativeTimeFormatUnit, number]> = [
   ["year", 60 * 60 * 24 * 365],
   ["month", 60 * 60 * 24 * 30],

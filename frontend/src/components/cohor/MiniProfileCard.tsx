@@ -4,6 +4,7 @@ import { PremiumBadge } from "@/components/ui/PremiumBadge";
 import type { EquippedCosmetic } from "@/lib/api";
 import { usernameEffectStyle } from "@/lib/cosmetics";
 import { personName } from "@/lib/displayName";
+import { teamTagClassFor } from "@/lib/format";
 
 /**
  * The identity portion of a mini profile card: banner, overlapping avatar,
@@ -143,7 +144,13 @@ export function MiniProfileCard({
               )}
             </div>
             <div className="mini-profile-section-label">{teamLabel}</div>
-            <div className="mini-profile-team">{member.teamName ?? noTeamLabel}</div>
+            {member.teamName ? (
+              <span className={`mini-profile-team-tag ${teamTagClassFor(member.teamName)}`}>
+                {member.teamName}
+              </span>
+            ) : (
+              <div className="mini-profile-team">{noTeamLabel}</div>
+            )}
           </>
         )}
       </div>

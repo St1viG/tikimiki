@@ -25,6 +25,7 @@ import {
 } from "@/components/mentions/useMentionAutocomplete";
 import { MentionClickContext } from "@/components/mentions/MentionLink";
 import { profileDecorationStyle, usernameEffectStyle, withDecorationClass } from "@/lib/cosmetics";
+import { teamTagClassFor } from "@/lib/format";
 import { isUserMentioned } from "@/lib/mentions";
 import { ImageLightbox } from "@/components/ImageLightbox";
 import { CohorToast, type CohorToastVariant } from "@/components/popups/CohorToast";
@@ -2909,6 +2910,9 @@ export function CohorClient() {
             {personName({ displayName: m.displayName, username: m.username })}
           </span>
           {m.isModerator && <span className="member-mod-badge">{t("srvModeratorBadge")}</span>}
+          {m.teamName && (
+            <span className={`member-team-badge ${teamTagClassFor(m.teamName)}`}>{m.teamName}</span>
+          )}
         </div>
         <div className="member-handle">@{m.username}</div>
       </div>
@@ -6986,6 +6990,11 @@ export function CohorClient() {
                             })}
                             {m.isModerator && (
                               <span className="member-mod-badge">{t("srvModeratorBadge")}</span>
+                            )}
+                            {m.teamName && (
+                              <span className={`member-team-badge ${teamTagClassFor(m.teamName)}`}>
+                                {m.teamName}
+                              </span>
                             )}
                           </div>
                           <div className="srv-member-handle">@{m.username}</div>
