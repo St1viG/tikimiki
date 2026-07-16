@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Icon } from "@/components/Icon";
 import { AppShell } from "@/components/shell/AppShell";
 import { AVATAR_VARIANTS, type AvatarVariantEntry } from "@/components/ui/GenerativeAvatar";
@@ -164,6 +164,7 @@ function VariantCard({
 }
 
 export function AvatarsClient() {
+  const router = useRouter();
   const t = useT(M);
   const [seed, setSeed] = useState("andrej");
 
@@ -171,9 +172,14 @@ export function AvatarsClient() {
     <AppShell variant="no-right">
       <main id="main" className="page">
         <div className="page-head">
-          <Link className="col-back" href="/" aria-label={t("backLabel")}>
+          <button
+            type="button"
+            className="col-back"
+            aria-label={t("backLabel")}
+            onClick={() => router.back()}
+          >
             <Icon name="arrow-left" />
-          </Link>
+          </button>
           <div className="col-titles">
             <h1 className="page-title">{t("pageTitle")}</h1>
             <p className="page-sub">{t("pageSub")}</p>

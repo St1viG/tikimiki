@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Icon } from "@/components/Icon";
 import { AppShell } from "@/components/shell/AppShell";
 import { GameCard } from "@/components/gamehub/GameCard";
@@ -97,6 +97,7 @@ function displayFor(id: GameId, kind: ResultKind, raw: number): string {
  * reports its outcome via `onComplete`, which records the play to the backend.
  */
 export function GamehubClient() {
+  const router = useRouter();
   const { status } = useRequireAuth();
   const t = useT(M);
   const [openGame, setOpenGame] = useState<GameId | null>(null);
@@ -207,9 +208,14 @@ export function GamehubClient() {
     <AppShell right={<FriendsPanel />}>
       <main className="gh-stack" id="main">
         <div className="page-head">
-          <Link className="col-back" href="/" aria-label={t("back")}>
+          <button
+            type="button"
+            className="col-back"
+            aria-label={t("back")}
+            onClick={() => router.back()}
+          >
             <Icon name="arrow-left" />
-          </Link>
+          </button>
           <div className="col-titles">
             <h1 className="page-title">
               <Icon name="gamehub" /> GameHub

@@ -421,6 +421,7 @@ export function BountyCard({
   count,
   applied,
   onApply,
+  onDelete,
 }: {
   id: string;
   cardStyle?: CSSProperties;
@@ -434,6 +435,8 @@ export function BountyCard({
   count: number;
   applied: boolean;
   onApply: () => void;
+  /** Org-only: renders a remove button on the card (SSU16 §4, upcoming hackathons only). */
+  onDelete?: () => void;
 }) {
   const t = useT(M);
   return (
@@ -443,6 +446,17 @@ export function BountyCard({
           <Icon name={badgeIcon} className="ic-sm" /> {sponsor}
         </div>
         <div className="bounty-prize-pill">{prize}</div>
+        {onDelete && (
+          <button
+            type="button"
+            className="bounty-remove-btn"
+            title={t("bountyRemoveBtn")}
+            aria-label={t("bountyRemoveBtn")}
+            onClick={onDelete}
+          >
+            <Icon name="trash" className="ic-sm" />
+          </button>
+        )}
       </div>
       <div className="bounty-title">{title}</div>
       <div className="bounty-desc">{desc}</div>

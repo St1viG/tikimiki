@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { HackathonSummary, HackathonType } from "@tikimiki/types";
 import { Icon } from "@/components/Icon";
 import { AppShell } from "@/components/shell/AppShell";
@@ -16,12 +17,14 @@ import {
   getHackathon,
   getHackathonProjects,
   getHackathonResults,
+  getHackathonSubmissions,
   getMyApplications,
   getMyTeams,
   getMyVote,
   getVotingStatus,
   type Application,
   type HackathonResults,
+  type Project,
   type ProjectVote,
 } from "@/lib/api";
 
@@ -123,6 +126,20 @@ const M = {
   voteBtn: { en: "Vote", sr: "Glasaj" },
   votedBadge: { en: "Your vote", sr: "Tvoj glas" },
   votesLabel: { en: "votes", sr: "glasova" },
+
+  // Post-hackathon project portfolio (SSU13 scenario 5)
+  portfolioTitle: { en: "Projects", sr: "Projekti" },
+  portfolioHint: {
+    en: "Every team's final presentation, kept here as part of the hackathon's history.",
+    sr: "Finalna prezentacija svakog tima, sačuvana ovde kao deo istorije hakatona.",
+  },
+  portfolioNoVideo: {
+    en: "This team didn't upload a presentation video.",
+    sr: "Ovaj tim nije otpremio video prezentaciju.",
+  },
+  portfolioRepo: { en: "Repository", sr: "Repozitorijum" },
+  portfolioCopyLink: { en: "Copy video link", sr: "Kopiraj link videa" },
+  portfolioCopied: { en: "Link copied!", sr: "Link kopiran!" },
 } as const;
 
 function pad(n: number): string {
@@ -139,6 +156,7 @@ function dateRange(aIso: string, bIso: string): string {
 }
 
 export function HackathonDetailClient({ hackathonId }: { hackathonId: string }) {
+  const router = useRouter();
   const t = useT(M);
   const { user } = useAuth();
 
@@ -156,6 +174,10 @@ export function HackathonDetailClient({ hackathonId }: { hackathonId: string }) 
   const [projects, setProjects] = useState<ProjectVote[]>([]);
   const [votedProjectId, setVotedProjectId] = useState<string | null>(null);
   const [voteBusy, setVoteBusy] = useState(false);
+  // Post-hackathon portfolio (SSU13 scenario 5) — every submitted project,
+  // video included, kept visible on the hackathon's page after it ends.
+  const [submissions, setSubmissions] = useState<Project[]>([]);
+  const [copiedProjectId, setCopiedProjectId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -177,10 +199,26 @@ export function HackathonDetailClient({ hackathonId }: { hackathonId: string }) 
           .catch(() => undefined);
       })
       .catch(() => undefined);
+    // Public showcase of every submitted project — the source for the
+    // post-hackathon portfolio section below.
+    getHackathonSubmissions(hackathonId)
+      .then((p) => !cancelled && setSubmissions(p))
+      .catch(() => undefined);
     return () => {
       cancelled = true;
     };
   }, [hackathonId]);
+
+  async function copyVideoLink(p: Project) {
+    if (!p.videoUrl) return;
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}${p.videoUrl}`);
+      setCopiedProjectId(p.projectId);
+      setTimeout(() => setCopiedProjectId((id) => (id === p.projectId ? null : id)), 2000);
+    } catch {
+      /* clipboard permission denied — no-op, the button just won't confirm */
+    }
+  }
 
   // The caller's existing vote: by account when signed in, else by the
   // guest fingerprint stored in this browser.
@@ -246,9 +284,14 @@ export function HackathonDetailClient({ hackathonId }: { hackathonId: string }) 
 
   const header = (
     <header className="page-head hd-head">
-      <Link className="col-back" href="/hackathons" aria-label={t("back")}>
+      <button
+        type="button"
+        className="col-back"
+        aria-label={t("back")}
+        onClick={() => router.back()}
+      >
         <Icon name="arrow-left" />
-      </Link>
+      </button>
       <div className="col-titles">
         <h1 className="page-title">
           <Icon name="hackathon" /> {t("pageTitle")}
@@ -578,6 +621,58 @@ export function HackathonDetailClient({ hackathonId }: { hackathonId: string }) 
                 </li>
               ))}
             </ul>
+          </section>
+        )}
+
+        {/* Post-hackathon project portfolio — every submission stays visible
+            with its video as part of the hackathon's history (SSU13 scenario 5). */}
+        {hack.status === "finished" && submissions.length > 0 && (
+          <section className="hd-section" id="hd-portfolio">
+            <h3 className="hd-section-title">
+              <Icon name="image" className="ic-sm" /> {t("portfolioTitle")}
+            </h3>
+            <p className="hd-about">{t("portfolioHint")}</p>
+            <div className="hd-portfolio-list">
+              {submissions.map((p) => (
+                <div key={p.projectId} className="hd-portfolio-card">
+                  <div className="hd-portfolio-head">
+                    <span className="hd-podium-team">{p.teamName}</span>
+                    <span className="hd-podium-project">{p.title}</span>
+                  </div>
+                  {p.videoUrl ? (
+                    <div className="hd-portfolio-video">
+                      <video src={p.videoUrl} controls preload="metadata" />
+                    </div>
+                  ) : (
+                    <p className="hd-portfolio-novideo">{t("portfolioNoVideo")}</p>
+                  )}
+                  <div className="hd-portfolio-actions">
+                    {p.repositoryUrl && (
+                      <a
+                        className="btn btn-ghost"
+                        href={p.repositoryUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <Icon name="github" className="ic-sm" /> {t("portfolioRepo")}
+                      </a>
+                    )}
+                    {p.videoUrl && (
+                      <button
+                        type="button"
+                        className="btn btn-ghost"
+                        onClick={() => copyVideoLink(p)}
+                      >
+                        <Icon name="link" className="ic-sm" />{" "}
+                        {copiedProjectId === p.projectId
+                          ? t("portfolioCopied")
+                          : t("portfolioCopyLink")}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
           </section>
         )}
 

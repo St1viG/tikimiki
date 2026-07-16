@@ -497,3 +497,43 @@
   margin-left: 0;
   text-align: left;
 }
+
+/* ── Post-hackathon project portfolio (SSU13 scenario 5) */
+.hd-portfolio-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 12px;
+}
+.hd-portfolio-card {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.hd-portfolio-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.hd-portfolio-video video {
+  width: 100%;
+  max-height: 360px;
+  display: block;
+  background: #000;
+  border-radius: 8px;
+}
+.hd-portfolio-novideo {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0;
+}
+.hd-portfolio-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Icon } from "@/components/Icon";
 import { AppShell } from "@/components/shell/AppShell";
 import { RailRight } from "@/components/shell/RailRight";
@@ -16,6 +16,7 @@ import {
   markNotificationRead,
   type Notification,
 } from "@/lib/api";
+import { emitNotificationsRead } from "@/lib/notificationsBus";
 
 /**
  * NotificationsClient — interactive notifications page.
@@ -96,6 +97,7 @@ function isToday(iso: string): boolean {
 }
 
 export function NotificationsClient() {
+  const router = useRouter();
   useRequireAuth();
   const t = useT(M);
   const { locale } = useLanguage();
@@ -131,9 +133,13 @@ export function NotificationsClient() {
     });
     if (alreadyRead) return;
 
-    // Persist; revert on failure.
+    // Drop the nav rail badge right away — don't wait on the network.
+    emitNotificationsRead(1);
+
+    // Persist; revert (badge included) on failure.
     markNotificationRead(id).catch((err) => {
       console.error(err);
+      emitNotificationsRead(-1);
       setNotifs((prev) =>
         prev
           ? prev.map((n) =>
@@ -153,8 +159,8 @@ export function NotificationsClient() {
 
   // Mark all as read.
   function markAll() {
-    const hadUnread = (notifs ?? []).some((n) => n.readAt === null);
-    if (!hadUnread) return;
+    const unreadCount = (notifs ?? []).filter((n) => n.readAt === null).length;
+    if (unreadCount === 0) return;
 
     const stamp = new Date().toISOString();
     setNotifs((prev) =>
@@ -163,8 +169,12 @@ export function NotificationsClient() {
         : prev,
     );
 
+    // Drop the nav rail badge right away — don't wait on the network.
+    emitNotificationsRead(unreadCount);
+
     markAllNotificationsRead().catch((err) => {
       console.error(err);
+      emitNotificationsRead(-unreadCount);
       // Reload from the server to restore the true state on failure.
       getNotifications("all")
         .then((data) => setNotifs(data.map((n) => ({ ...n, dotFading: false }))))
@@ -254,9 +264,14 @@ export function NotificationsClient() {
     <AppShell right={<RailRight />}>
       <main id="main">
         <div className="page-head nf-head">
-          <Link className="col-back" href="/" aria-label={t("backLabel")}>
+          <button
+            type="button"
+            className="col-back"
+            aria-label={t("backLabel")}
+            onClick={() => router.back()}
+          >
             <Icon name="arrow-left" />
-          </Link>
+          </button>
           <div className="col-titles">
             <h1 className="page-title">
               <Icon name="bell" /> {t("pageTitle")}

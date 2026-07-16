@@ -13,6 +13,7 @@ import * as api from "@/lib/api";
 import { usernameEffectStyle } from "@/lib/cosmetics";
 import { personName } from "@/lib/displayName";
 import { getSocket } from "@/lib/socket";
+import { onNotificationsRead } from "@/lib/notificationsBus";
 
 /* RailLeft — shared left navigation rail. Active item derived from the current
    pathname (usePathname) and marked aria-current="page". Nav labels localize via
@@ -137,9 +138,19 @@ export function RailLeft() {
     const onNotification = () => void load();
     socket?.on("notification", onNotification);
 
+    // Drop the badge the instant notifications are marked read elsewhere
+    // (e.g. the /notifications page) — adjusted locally by the delta rather
+    // than re-fetched, so it moves on click instead of waiting on a
+    // network round-trip.
+    const offRead = onNotificationsRead((delta) => {
+      if (cancelled) return;
+      setUnreadCount((c) => Math.max(0, c - delta));
+    });
+
     return () => {
       cancelled = true;
       socket?.off("notification", onNotification);
+      offRead();
     };
   }, [status]);
 

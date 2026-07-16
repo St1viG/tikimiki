@@ -41,6 +41,7 @@ export interface TeamMemberDto {
   userId: string;
   username: string;
   displayName: string | null;
+  avatarUrl: string | null;
   role: "leader" | "member";
 }
 
@@ -130,6 +131,7 @@ interface ActiveMemberRow {
   userId: string;
   username: string;
   displayName: string | null;
+  avatarUrl: string | null;
   role: "leader" | "member";
   points: number;
 }
@@ -153,6 +155,7 @@ export class TeamsService {
         userId: teamMembers.userId,
         username: users.username,
         displayName: users.displayName,
+        avatarUrl: users.avatarUrl,
         role: teamMembers.role,
         points: members.points,
       })
@@ -228,6 +231,7 @@ export class TeamsService {
         userId: m.userId,
         username: m.username,
         displayName: m.displayName,
+        avatarUrl: m.avatarUrl,
         role: m.role,
       })),
       createdAt: team.createdAt.toISOString(),
@@ -282,6 +286,7 @@ export class TeamsService {
           userId: m.userId,
           username: m.username,
           displayName: m.displayName,
+          avatarUrl: m.avatarUrl,
           role: m.role,
         })),
         createdAt: t.createdAt.toISOString(),
@@ -452,7 +457,11 @@ export class TeamsService {
     }
 
     const [hackathon] = await this.db
-      .select({ hackathonId: hackathons.hackathonId, status: hackathons.status })
+      .select({
+        hackathonId: hackathons.hackathonId,
+        status: hackathons.status,
+        maxTeamSize: hackathons.maxTeamSize,
+      })
       .from(hackathons)
       .where(and(eq(hackathons.hackathonId, input.hackathonId), isNull(hackathons.deletedAt)))
       .limit(1);
@@ -463,6 +472,17 @@ export class TeamsService {
 
     if (await this.hasActiveTeamInHackathon(userId, input.hackathonId)) {
       throw new ConflictException("You already have a team in this hackathon");
+    }
+
+    // Teammates the leader picked to invite on creation — capped at
+    // maxTeamSize - 1 (the leader themselves fills the first slot).
+    const inviteeUserIds = Array.from(new Set(input.inviteeUserIds ?? [])).filter(
+      (id) => id !== userId,
+    );
+    if (inviteeUserIds.length > hackathon.maxTeamSize - 1) {
+      throw new BadRequestException(
+        `You can invite at most ${hackathon.maxTeamSize - 1} teammates for this hackathon`,
+      );
     }
 
     const teamId = await this.db.transaction(async (tx) => {
@@ -490,6 +510,14 @@ export class TeamsService {
     await this.applicationsService
       .create(userId, { hackathonId: input.hackathonId, teamId, answers: [] })
       .catch(() => undefined);
+
+    // Only invite the teammates the leader explicitly picked — team formation
+    // is opt-in per invitee, not a blast to every other hackathon applicant.
+    // Each invite still goes through the normal pending-invitation flow
+    // (Invites tab, accept/decline).
+    for (const inviteeId of inviteeUserIds) {
+      await this.invite(teamId, userId, { userId: inviteeId }).catch(() => undefined);
+    }
 
     return this.buildTeamDto(teamId, userId);
   }

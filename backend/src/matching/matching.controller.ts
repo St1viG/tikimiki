@@ -27,6 +27,19 @@ export class MatchingController {
     return this.matchingService.teamSuggestions(hackathonId, userId);
   }
 
+  /**
+   * Full, unscored list of this hackathon's approved-but-teamless applicants
+   * — powers the "pick your teammates" checklist on team creation.
+   */
+  @Get("hackathons/:id/team-candidates")
+  @UseGuards(JwtAuthGuard)
+  teamCandidates(
+    @CurrentUser() userId: string,
+    @Param("id", new ParseUUIDPipe()) hackathonId: string,
+  ) {
+    return this.matchingService.freeAgentsForHackathon(hackathonId, userId);
+  }
+
   /** SSU12: propose one AI-assembled team combination (re-rollable via `excludeUserIds`). */
   @Post("hackathons/:id/team-proposal")
   @UseGuards(JwtAuthGuard)

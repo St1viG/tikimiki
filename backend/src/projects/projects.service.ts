@@ -11,7 +11,18 @@ import { basename, join } from "path";
 import { and, asc, eq, isNull } from "drizzle-orm";
 import { activeTeamMember } from "../common/team.predicates";
 import { DRIZZLE, type DrizzleDB } from "../db/db.module";
-import { hackathons, projects, teamMembers, teams } from "../db/schema";
+import {
+  hackathons,
+  permissions,
+  projects,
+  serverRolePermissions,
+  serverRoles,
+  servers,
+  teamMembers,
+  teams,
+  userRoles,
+} from "../db/schema";
+import { NotificationsService } from "../notifications/notifications.service";
 import type { CreateProjectInput, UpdateProjectInput } from "./dto";
 
 export type ProjectStatus = "draft" | "submitted" | "under_review" | "judged";
@@ -47,6 +58,7 @@ interface ProjectRow {
   createdAt: Date;
   updatedAt: Date;
   endsAt: Date;
+  organizationId: string;
 }
 
 /** Absolute path to the directory served statically at "/uploads". */
@@ -54,7 +66,10 @@ const UPLOAD_DIR = join(process.cwd(), "uploads");
 
 @Injectable()
 export class ProjectsService {
-  constructor(@Inject(DRIZZLE) private readonly db: DrizzleDB) {}
+  constructor(
+    @Inject(DRIZZLE) private readonly db: DrizzleDB,
+    private readonly notifications: NotificationsService,
+  ) {}
 
   /* ── helpers ──────────────────────────────────────────────── */
 
@@ -140,6 +155,7 @@ export class ProjectsService {
       createdAt: projects.createdAt,
       updatedAt: projects.updatedAt,
       endsAt: hackathons.endsAt,
+      organizationId: hackathons.organizationId,
     };
   }
 
@@ -234,7 +250,11 @@ export class ProjectsService {
     return Boolean(row);
   }
 
-  /** Edit a project's details. Team-member only; not allowed once judged. */
+  /**
+   * Edit a project's details (including the presentation video). Team-member
+   * only; not allowed once judged, and — per SSU13 — not allowed once the
+   * hackathon's submission deadline (`endsAt`) has passed.
+   */
   async updateProject(
     projectId: string,
     userId: string,
@@ -244,6 +264,9 @@ export class ProjectsService {
     await this.assertTeamMember(row.teamId, userId);
     if (row.status === "judged") {
       throw new BadRequestException("A judged project can no longer be edited");
+    }
+    if (Date.now() > row.endsAt.getTime()) {
+      throw new BadRequestException("The submission period for this hackathon has ended");
     }
 
     const patch: Partial<typeof projects.$inferInsert> = {
@@ -261,7 +284,60 @@ export class ProjectsService {
       await this.deleteUploadedVideo(row.videoUrl);
     }
 
+    // A new (or replacement) video was uploaded — tell the team, the server's
+    // moderators and the organizing account (SSU13 scenario 1, step 6).
+    if (input.videoUrl && input.videoUrl !== row.videoUrl) {
+      await this.notifyVideoUploaded(row, userId);
+    }
+
     return this.toDto(await this.loadProject(projectId));
+  }
+
+  /**
+   * Notify every active team member, every server moderator (a "manage_messages"
+   * role holder) and the hackathon's organizing account that `row`'s team just
+   * uploaded/replaced its presentation video. The uploader itself is skipped.
+   */
+  private async notifyVideoUploaded(row: ProjectRow, actorId: string): Promise<void> {
+    const [members, moderators] = await Promise.all([
+      this.db
+        .select({ userId: teamMembers.userId })
+        .from(teamMembers)
+        .where(and(eq(teamMembers.teamId, row.teamId), activeTeamMember)),
+      this.db
+        .select({ userId: userRoles.userId })
+        .from(userRoles)
+        .innerJoin(serverRoles, eq(serverRoles.serverRoleId, userRoles.serverRoleId))
+        .innerJoin(servers, eq(servers.serverId, serverRoles.serverId))
+        .innerJoin(
+          serverRolePermissions,
+          eq(serverRolePermissions.serverRoleId, serverRoles.serverRoleId),
+        )
+        .innerJoin(permissions, eq(permissions.permissionId, serverRolePermissions.permissionId))
+        .where(
+          and(eq(servers.hackathonId, row.hackathonId), eq(permissions.name, "manage_messages")),
+        ),
+    ]);
+
+    const recipients = new Set<string>([
+      ...members.map((m) => m.userId),
+      ...moderators.map((m) => m.userId),
+      row.organizationId,
+    ]);
+    recipients.delete(actorId);
+
+    for (const recipientId of recipients) {
+      await this.notifications.create({
+        userId: recipientId,
+        type: "project_video_uploaded",
+        template: {
+          key: "project_video_uploaded",
+          params: { teamName: row.teamName, projectTitle: row.title },
+        },
+        entityType: "project",
+        entityId: row.projectId,
+      });
+    }
   }
 
   /**

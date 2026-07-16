@@ -1500,9 +1500,14 @@ export function SettingsClient() {
     >
       <main className="feed" id="main">
         <div className="page-head">
-          <Link className="col-back" href="/" aria-label={t("back")}>
+          <button
+            type="button"
+            className="col-back"
+            aria-label={t("back")}
+            onClick={() => router.back()}
+          >
             <Icon name="arrow-left" />
-          </Link>
+          </button>
           <div className="col-titles">
             <h1 className="page-title">
               <Icon name="settings" /> {t("pageTitle")}

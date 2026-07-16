@@ -443,7 +443,8 @@ export class BountiesService {
   /**
    * Delete a bounty. Its prize row, submissions and results all cascade via
    * FK (`on delete cascade` on hackathon_prizes / bounty_submissions /
-   * hackathon_results), so a single delete suffices.
+   * hackathon_results), so a single delete suffices. Only allowed while the
+   * hackathon hasn't started yet (SSU16 §4).
    */
   async deleteBounty(
     hackathonId: string,
@@ -452,6 +453,15 @@ export class BountiesService {
   ): Promise<{ success: true }> {
     await this.authz.assertHackathonOwnerOrAdmin(hackathonId, userId);
     await this.getBountyInHackathon(hackathonId, bountyId);
+
+    const [hackathon] = await this.db
+      .select({ status: hackathons.status })
+      .from(hackathons)
+      .where(eq(hackathons.hackathonId, hackathonId))
+      .limit(1);
+    if (hackathon?.status !== "upcoming") {
+      throw new BadRequestException("Bounties can only be removed before the hackathon starts");
+    }
 
     await this.db.delete(bounties).where(eq(bounties.bountyId, bountyId));
 

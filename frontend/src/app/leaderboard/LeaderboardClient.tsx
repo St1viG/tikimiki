@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Icon } from "@/components/Icon";
 import { GenerativeAvatar } from "@/components/ui/GenerativeAvatar";
 import { useT } from "@/components/i18n/LanguageProvider";
@@ -70,6 +70,7 @@ interface RankedEntry extends LeaderboardEntry {
 }
 
 export function LeaderboardClient() {
+  const router = useRouter();
   const t = useT(M);
   const { user } = useAuth();
   const [period, setPeriod] = useState<UiPeriod>("svi");
@@ -142,9 +143,14 @@ export function LeaderboardClient() {
   return (
     <main className="lb" id="lb">
       <div className="page-head">
-        <Link className="col-back" href="/" aria-label={t("backLabel")}>
+        <button
+          type="button"
+          className="col-back"
+          aria-label={t("backLabel")}
+          onClick={() => router.back()}
+        >
           <Icon name="arrow-left" aria-hidden={undefined} />
-        </Link>
+        </button>
         <div className="col-titles">
           <h1 className="page-title">
             <Icon name="trophy" /> {t("pageTitle")}

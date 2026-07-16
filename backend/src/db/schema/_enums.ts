@@ -149,6 +149,7 @@ export const notificationType = pgEnum("notification_type", [
   "report_resolved",
   "report_dismissed",
   "new_org_request",
+  "project_video_uploaded",
 ]);
 
 export const appealStatus = pgEnum("appeal_status", ["pending", "approved", "rejected"]);

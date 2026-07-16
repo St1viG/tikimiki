@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { HackathonSummary, HackathonType } from "@tikimiki/types";
 import { Icon } from "@/components/Icon";
 import { AppShell } from "@/components/shell/AppShell";
@@ -134,6 +135,7 @@ function dateRange(aIso: string, bIso: string): string {
 }
 
 export function ApplyHackathonClient({ hackathonId }: { hackathonId: string }) {
+  const router = useRouter();
   const t = useT(M);
   const { user, status } = useAuth();
 
@@ -286,9 +288,14 @@ export function ApplyHackathonClient({ hackathonId }: { hackathonId: string }) {
   /* Header (shared across states) */
   const header = (
     <header className="page-head ap-head">
-      <Link className="col-back" href="/hackathons" aria-label={t("back")}>
+      <button
+        type="button"
+        className="col-back"
+        aria-label={t("back")}
+        onClick={() => router.back()}
+      >
         <Icon name="arrow-left" />
-      </Link>
+      </button>
       <div className="col-titles">
         <h1 className="page-title">
           <Icon name="hackathon" /> {t("pageTitle")}

@@ -172,6 +172,41 @@
   color: var(--lemon);
   transform: rotate(180deg);
 }
+.hk-select-chip {
+  position: relative;
+  padding-right: 26px;
+}
+.hk-select-chip select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  outline: none;
+  padding-right: 4px;
+}
+.hk-select-chip::after {
+  content: "";
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: translateY(-65%) rotate(45deg);
+  pointer-events: none;
+  opacity: 0.7;
+}
+.hk-chip-clear {
+  color: var(--muted);
+}
+.hk-chip-clear:hover {
+  color: var(--red);
+  border-color: color-mix(in srgb, var(--red) 40%, transparent);
+}
 .hk-chip-sort {
   display: inline-flex;
   align-items: center;

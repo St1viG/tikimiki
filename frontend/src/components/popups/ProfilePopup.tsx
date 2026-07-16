@@ -55,6 +55,7 @@ const M = {
   badgeHowTo: { en: "How to earn it", sr: "Kako se dobija" },
   badgeAwarded: { en: "Earned", sr: "Osvojen" },
   badgeDetails: { en: "Badge details", sr: "Detalji bedža" },
+  sponsorWins: { en: "Sponsor prizes", sr: "Sponzorske nagrade" },
 } as const;
 
 /**
@@ -548,6 +549,31 @@ export function ProfilePopup({ open, onClose, username }: ProfilePopupProps) {
                             </button>
                           ))}
                         </div>
+                      )}
+                      {profile.sponsorWins.length > 0 && (
+                        <>
+                          <div className="pp-section-label">{t("sponsorWins")}</div>
+                          <div className="pp-hack-list">
+                            {profile.sponsorWins.map((w) => (
+                              <div
+                                className="pp-hack-item"
+                                key={w.bountyId}
+                                style={{ cursor: "default" }}
+                              >
+                                <span className="pp-hack-badge">
+                                  <Icon name="coin" className="ic" />
+                                </span>
+                                <div className="pp-hack-info">
+                                  <div className="pp-hack-name">{w.title}</div>
+                                  <div className="pp-hack-sub">
+                                    {w.sponsorName}
+                                    {w.description ? ` — ${w.description}` : ""}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </>
                       )}
                     </>
                   )}

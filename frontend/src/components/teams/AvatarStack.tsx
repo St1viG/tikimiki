@@ -18,6 +18,7 @@ export interface StackMember {
   userId: string;
   username: string;
   displayName?: string | null;
+  avatarUrl?: string | null;
 }
 
 export interface AvatarStackProps {
@@ -61,7 +62,12 @@ export function AvatarStack({
         const cls = `tm-av ${AV_POS[i % AV_POS.length]} ${sizeClass}${
           meId && m.userId === meId ? " tm-av-me" : ""
         } is-orb`;
-        const avatar = <GenerativeAvatar seed={m.username} className="orb-art" />;
+        const avatar = m.avatarUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={m.avatarUrl} alt={m.username} className="orb-art" />
+        ) : (
+          <GenerativeAvatar seed={m.username} className="orb-art" />
+        );
         if (!interactive) {
           return (
             <div key={m.userId} className={cls}>

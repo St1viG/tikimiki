@@ -1,17 +1,10 @@
 /* Shared Teams component styles
  * Imported by the shared components under src/components/teams/, used on
- * /teams: <AvatarStack>, <PixelMedal>, <OpenTeamCard>, <SoloPlayerCard>,
- * <InviteCard> and <TeamLeaderboardRow>. (Page-level layout/grid rules stay
- * in the co-located teams.css.)
+ * /teams: <AvatarStack>, <OpenTeamCard>, <SoloPlayerCard> and <InviteCard>.
+ * (Page-level layout/grid rules stay in the co-located teams.css.)
  *
  * Autor: Nenad Skoković (2023/0039)
  * */
-
-/* Pixel medal — fills sourced from the --medal-* tokens (globals.css). */
-.px-medal {
-  image-rendering: pixelated;
-  vertical-align: middle;
-}
 
 /* SoloPlayerCard's complementarity-score badge (suggested-teammate lists only). */
 .tm-solo-score {

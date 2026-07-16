@@ -58,12 +58,11 @@ export class MatchingService {
   ) {}
 
   /**
-   * Candidates for `hackathonId` — any platform member not currently an
-   * active team member for that hackathon. Excludes `excludeUserId` (the
-   * caller). Deliberately platform-wide rather than scoped to whoever already
-   * applied to this hackathon: requiring prior hackathon affiliation starves
-   * the pool on a young platform (nobody to suggest until people first
-   * self-organize), which defeats the point of a suggestion feature.
+   * Candidates for `hackathonId` — members approved onto that hackathon who
+   * aren't currently an active team member there. Excludes `excludeUserId`
+   * (the caller). Scoped to actual hackathon participants (not platform-wide)
+   * so every suggestion is someone who can really be invited and can actually
+   * accept: they're already admitted into this specific hackathon.
    */
   async freeAgentsForHackathon(
     hackathonId: string,
@@ -85,6 +84,15 @@ export class MatchingService {
       })
       .from(members)
       .innerJoin(users, eq(members.userId, users.userId))
+      .innerJoin(
+        applications,
+        and(
+          eq(applications.userId, members.userId),
+          eq(applications.hackathonId, hackathonId),
+          eq(applications.status, "approved"),
+          isNull(applications.deletedAt),
+        ),
+      )
       .where(
         and(
           isNull(users.deletedAt),

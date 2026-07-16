@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Icon } from "@/components/Icon";
 import { AppShell } from "@/components/shell/AppShell";
 import { GenerativeAvatar } from "@/components/ui/GenerativeAvatar";
@@ -303,6 +303,7 @@ export function AdminClient() {
   useRequireRole("admin");
   const t = useT(M);
   const { locale } = useLanguage();
+  const router = useRouter();
   const searchParams = useSearchParams();
   const urlTab = searchParams.get("tab");
   const [filter, setFilter] = useState<TabFilter>(isTabFilter(urlTab) ? urlTab : "pregled");
@@ -803,9 +804,14 @@ export function AdminClient() {
       <main className="adm adm-page" id="adm" data-filter={filter}>
         {/* PAGE HEADER */}
         <div className="page-head">
-          <Link className="col-back" href="/" aria-label={t("backLabel")}>
+          <button
+            type="button"
+            className="col-back"
+            aria-label={t("backLabel")}
+            onClick={() => router.back()}
+          >
             <Icon name="arrow-left" />
-          </Link>
+          </button>
           <div className="col-titles">
             <h1 className="page-title">
               <Icon name="shield" /> {t("pageTitle")}{" "}

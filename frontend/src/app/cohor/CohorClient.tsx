@@ -11,7 +11,7 @@ import React, {
   type ReactNode,
 } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Icon } from "@/components/Icon";
 import { useT, useLanguage } from "@/components/i18n/LanguageProvider";
 import { useRequireAuth } from "@/components/auth/AuthProvider";
@@ -62,12 +62,15 @@ import {
   uploadGroupIcon,
   addConversationMembers,
   startConversation,
+  searchUsers,
   getRelationship,
   addFriend,
   removeFriend,
   blockUser,
   unblockUser,
   listBounties,
+  createBounty,
+  deleteBounty,
   applyToBounty,
   unapplyFromBounty,
   getHackathonResults,
@@ -97,6 +100,7 @@ import {
   submitProject,
   withdrawProject,
   uploadProjectVideo,
+  getHackathonSubmissions,
   ApiError,
   type ServerSummary,
   type ChatMessage as ApiMessage,
@@ -114,6 +118,7 @@ import {
   type Permission,
   type ServerRole,
   type Project,
+  type SocialUser,
 } from "@/lib/api";
 import type { HackathonSummary } from "@tikimiki/types";
 import { getSocket } from "@/lib/socket";
@@ -174,6 +179,54 @@ import {
    The route is full-screen (no AppShell); cohor.css is imported by layout.tsx.
  */
 
+/** Minimal shape a member-picker row needs — satisfied by both ServerMember and SocialUser. */
+type PickableUser = {
+  userId: string;
+  username: string;
+  displayName?: string | null;
+  avatarUrl: string | null;
+};
+
+/**
+ * Debounced platform-wide user search (searchUsers), shared by the DM
+ * "find or start a conversation" box and the group member pickers — each
+ * call site keeps its own query state and just renders `results`/`busy`.
+ */
+function useDebouncedUserSearch(query: string, excludeUserId?: string) {
+  const [results, setResults] = useState<SocialUser[] | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    const term = query.trim();
+    if (!term) {
+      setResults(null);
+      setBusy(false);
+      return;
+    }
+    setBusy(true);
+    let cancelled = false;
+    const id = window.setTimeout(() => {
+      searchUsers(term)
+        .then((users) => {
+          if (cancelled) return;
+          setResults(excludeUserId ? users.filter((u) => u.userId !== excludeUserId) : users);
+        })
+        .catch(() => {
+          if (!cancelled) setResults([]);
+        })
+        .finally(() => {
+          if (!cancelled) setBusy(false);
+        });
+    }, 250);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(id);
+    };
+  }, [query, excludeUserId]);
+
+  return { results, busy };
+}
+
 export function CohorClient() {
   const { user } = useRequireAuth();
   const t = useT(M);
@@ -201,6 +254,17 @@ export function CohorClient() {
 
   const hackStartMs = hackathon ? new Date(hackathon.startsAt).getTime() : 0;
   const hackEndMs = hackathon ? new Date(hackathon.endsAt).getTime() : 0;
+  // Submission deadline shown on the Predaja spec card — the real hackathon's
+  // end time, not a placeholder date (submissions close when the event does).
+  const submissionDeadlineLabel = (() => {
+    if (!hackathon) return "";
+    const end = new Date(hackathon.endsAt);
+    const time = `${pad(end.getHours())}:${pad(end.getMinutes())}`;
+    if (locale === "sr") {
+      return `${end.getDate()}. ${end.toLocaleDateString("sr-Latn", { month: "long" })}, ${time}`;
+    }
+    return `${end.toLocaleDateString("en-US", { month: "long" })} ${end.getDate()}, ${time}`;
+  })();
   // Total window length and remaining seconds, clamped ≥ 0, from real time.
   const totalS = hackathon ? Math.max(1, Math.floor((hackEndMs - hackStartMs) / 1000)) : 0;
   const rem = hackathon ? Math.max(0, Math.floor((hackEndMs - nowMs) / 1000)) : 0;
@@ -322,6 +386,8 @@ export function CohorClient() {
   } | null>(null);
   // Guards a friend/block request in flight so we don't fire twice / fight responses.
   const [relBusy, setRelBusy] = useState(false);
+
+  const router = useRouter();
 
   // Real direct-message conversations (replaces the mock DM panel).
   const searchParams = useSearchParams();
@@ -625,6 +691,14 @@ export function CohorClient() {
   const [renamingCardId, setRenamingCardId] = useState<string | null>(null);
   const [renameCardValue, setRenameCardValue] = useState("");
 
+  // DM sidebar "find or start a conversation" search — independent of the
+  // group member pickers below (each keeps its own query state).
+  const [dmSearchQ, setDmSearchQ] = useState("");
+  const { results: dmSearchResults, busy: dmSearchBusy } = useDebouncedUserSearch(
+    dmSearchQ,
+    user?.userId,
+  );
+
   // Group-DM creation modal.
   const [showGroupModal, setShowGroupModal] = useState(false);
   const [groupPick, setGroupPick] = useState<string[]>([]);
@@ -632,6 +706,14 @@ export function CohorClient() {
   const [groupIcon, setGroupIcon] = useState("");
   const [groupIconUploading, setGroupIconUploading] = useState(false);
   const createIconInputRef = useRef<HTMLInputElement | null>(null);
+  // Member picker: platform-wide search only — a group isn't tied to any
+  // hackathon, so the pool is never limited to a particular server's roster.
+  const [groupPickSearchQ, setGroupPickSearchQ] = useState("");
+  const { results: groupPickSearchResults, busy: groupPickSearchBusy } = useDebouncedUserSearch(
+    groupPickSearchQ,
+    user?.userId,
+  );
+  const groupPickPool: PickableUser[] = groupPickSearchResults ?? [];
 
   // Group settings panel (rename / re-icon / add members) for the active group.
   const [showGroupSettings, setShowGroupSettings] = useState(false);
@@ -640,6 +722,11 @@ export function CohorClient() {
   const [gsIconUploading, setGsIconUploading] = useState(false);
   const gsIconInputRef = useRef<HTMLInputElement | null>(null);
   const [gsAddPick, setGsAddPick] = useState<string[]>([]);
+  const [gsAddSearchQ, setGsAddSearchQ] = useState("");
+  const { results: gsAddSearchResults, busy: gsAddSearchBusy } = useDebouncedUserSearch(
+    gsAddSearchQ,
+    user?.userId,
+  );
 
   /* Channel management (manage_channels) */
   // Create-channel modal (group prefilled). null = closed.
@@ -1299,6 +1386,29 @@ export function CohorClient() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [myTeamId]);
 
+  // Org/moderators: load every submitted team's project for this hackathon
+  // while the Predaja panel is open, so they can review other teams' videos.
+  useEffect(() => {
+    if (panel !== "predaja" || !can("manage_messages") || !hackathonId) return;
+    let cancelled = false;
+    setOrgSubmissionsLoading(true);
+    setOrgSubmissionsError(null);
+    getHackathonSubmissions(hackathonId)
+      .then((list) => {
+        if (!cancelled) setOrgSubmissions(list);
+      })
+      .catch((e) => {
+        if (!cancelled) setOrgSubmissionsError(projectErrorMessage(e));
+      })
+      .finally(() => {
+        if (!cancelled) setOrgSubmissionsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [panel, can, hackathonId]);
+
   // Load the Kanban board whenever the resolved team changes.
   useEffect(() => {
     if (!myTeamId) return;
@@ -1541,6 +1651,7 @@ export function CohorClient() {
     setGroupPick([]);
     setGroupName("");
     setGroupIcon("");
+    setGroupPickSearchQ("");
   }, []);
 
   // Create a group conversation from the picked member ids, then open it.
@@ -1552,10 +1663,16 @@ export function CohorClient() {
         setGroupPick([]);
         setGroupName("");
         setGroupIcon("");
+        setGroupPickSearchQ("");
         loadDmConvos(convo.conversationId);
       })
-      .catch(() => {
-        setShowGroupModal(false);
+      .catch((err) => {
+        showToast(
+          "red",
+          "x",
+          <>{err instanceof ApiError ? err.message : t("grpCreateFailed")}</>,
+          4000,
+        );
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [groupPick, groupName, groupIcon]);
@@ -1568,6 +1685,7 @@ export function CohorClient() {
     setGsName(conv.name ?? "");
     setGsIcon(conv.icon ?? "");
     setGsAddPick([]);
+    setGsAddSearchQ("");
     setShowGroupSettings(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeConvoId, dmConvos]);
@@ -1593,7 +1711,14 @@ export function CohorClient() {
           setGsAddPick([]);
           loadDmConvos(activeConvoId);
         })
-        .catch(() => {});
+        .catch((err) => {
+          showToast(
+            "red",
+            "x",
+            <>{err instanceof ApiError ? err.message : t("grpAddMembersFailed")}</>,
+            4000,
+          );
+        });
       // eslint-disable-next-line react-hooks/exhaustive-deps
     },
     [activeConvoId],
@@ -1933,6 +2058,18 @@ export function CohorClient() {
   const [bounties, setBounties] = useState<Bounty[]>([]);
   // The bounty pending a withdraw confirmation (drives BountyUnapplyModal).
   const [unapplyTarget, setUnapplyTarget] = useState<Bounty | null>(null);
+  // Org-only "add sponsor bounty" form state (SSU16 §1).
+  const [bountyForm, setBountyForm] = useState({
+    sponsorName: "",
+    title: "",
+    theme: "",
+    description: "",
+    prizeAward: "",
+  });
+  const [bountyFormBusy, setBountyFormBusy] = useState(false);
+  const [bountyFormError, setBountyFormError] = useState<string | null>(null);
+  // bountyId currently being removed, so its remove button can show a busy state.
+  const [bountyDeleteBusy, setBountyDeleteBusy] = useState<string | null>(null);
 
   /* Group-icon image upload (create modal + settings modal)
      Reads the first picked file, uploads it via the shared API helper and
@@ -2261,6 +2398,14 @@ export function CohorClient() {
   const videoFileInputRef = useRef<HTMLInputElement | null>(null);
   const videoReplaceInputRef = useRef<HTMLInputElement | null>(null);
 
+  /* Org/moderator-only review of every OTHER team's submission (SSU13
+   * scenario 4) — read-only, listed from the public showcase endpoint since
+   * a draft project isn't visible until its team submits it. */
+  const [orgSubmissions, setOrgSubmissions] = useState<Project[] | null>(null);
+  const [orgSubmissionsLoading, setOrgSubmissionsLoading] = useState(false);
+  const [orgSubmissionsError, setOrgSubmissionsError] = useState<string | null>(null);
+  const [expandedSubmissionId, setExpandedSubmissionId] = useState<string | null>(null);
+
   const [repoInput, setRepoInput] = useState("");
   const [repoEditing, setRepoEditing] = useState(true);
   const [repoError, setRepoError] = useState(false);
@@ -2387,11 +2532,12 @@ export function CohorClient() {
             prev.map((m) => (m.id === id ? { ...m, url: res.url, uploading: false } : m)),
           ),
         )
-        .catch(() =>
+        .catch(() => {
           setChatMedia((prev) =>
             prev.map((m) => (m.id === id ? { ...m, uploading: false, error: true } : m)),
-          ),
-        );
+          );
+          showToast("red", "x", <>{t("chatUploadFailed")}</>, 3600);
+        });
     }
   }
   function removeChatMedia(id: string) {
@@ -2405,7 +2551,14 @@ export function CohorClient() {
   /* Send message */
   function sendMsgClick() {
     const text = draft.trim();
-    if (chatMedia.some((m) => m.uploading)) return; // wait for uploads to finish
+    if (chatMedia.some((m) => m.uploading)) {
+      showToast("red", "x", <>{t("chatWaitUpload")}</>, 3000);
+      return;
+    }
+    if (chatMedia.some((m) => m.error)) {
+      showToast("red", "x", <>{t("chatUploadFailed")}</>, 3600);
+      return;
+    }
     const ready = chatMedia.filter((m) => m.url).map((m) => m.url as string);
     if (!text && ready.length === 0) return;
     const replyToId = replyTo?.messageId;
@@ -2428,7 +2581,10 @@ export function CohorClient() {
               serverMsgsRef.current.scrollTop = serverMsgsRef.current.scrollHeight;
           });
         })
-        .catch((err) => console.error(err));
+        .catch((err) => {
+          console.error(err);
+          showToast("red", "x", <>{t("chatSendFailed")}</>, 4000);
+        });
       setReplyTo(null);
     } else if (activeConvoId) {
       sendDirectMessage(activeConvoId, text, replyToId, ready)
@@ -2440,7 +2596,10 @@ export function CohorClient() {
             if (dmMsgsRef.current) dmMsgsRef.current.scrollTop = dmMsgsRef.current.scrollHeight;
           });
         })
-        .catch((err) => console.error(err));
+        .catch((err) => {
+          console.error(err);
+          showToast("red", "x", <>{t("chatSendFailed")}</>, 4000);
+        });
       setReplyTo(null);
     } else if (activeDm) {
       const now = new Date();
@@ -2507,7 +2666,7 @@ export function CohorClient() {
 
   /* Toggle right panel */
   function toggleRightPanel() {
-    if (appMode === "server") setMembersVisible((v) => !v);
+    setMembersVisible((v) => !v);
   }
 
   /* Voting */
@@ -2634,6 +2793,55 @@ export function CohorClient() {
       );
     } catch {
       /* ignore — backend governs bounty eligibility */
+    }
+  }
+
+  // Org: create a new sponsor bounty from bountyForm (SSU16 §1).
+  async function submitNewBounty() {
+    if (!hackathonId) return;
+    const sponsorName = bountyForm.sponsorName.trim();
+    const title = bountyForm.title.trim();
+    if (!sponsorName || !title) {
+      setBountyFormError(t("bountyAddError"));
+      return;
+    }
+    setBountyFormBusy(true);
+    setBountyFormError(null);
+    try {
+      const created = await createBounty(hackathonId, {
+        sponsorName,
+        title,
+        theme: bountyForm.theme.trim() || undefined,
+        description: bountyForm.description.trim() || undefined,
+        prizeAward: bountyForm.prizeAward.trim() || undefined,
+      });
+      setBounties((prev) => [...prev, created]);
+      setBountyForm({ sponsorName: "", title: "", theme: "", description: "", prizeAward: "" });
+    } catch (err) {
+      setBountyFormError(err instanceof ApiError ? err.message : t("bountyAddError"));
+    } finally {
+      setBountyFormBusy(false);
+    }
+  }
+
+  // Org: remove a sponsor bounty; backend only allows this before the
+  // hackathon starts (SSU16 §4) and reports a 400 otherwise.
+  async function removeBounty(b: Bounty) {
+    if (!hackathonId || bountyDeleteBusy) return;
+    if (!window.confirm(t("bountyRemoveConfirm"))) return;
+    setBountyDeleteBusy(b.bountyId);
+    try {
+      await deleteBounty(hackathonId, b.bountyId);
+      setBounties((prev) => prev.filter((x) => x.bountyId !== b.bountyId));
+    } catch (err) {
+      showToast(
+        "red",
+        "flag",
+        <>{err instanceof ApiError ? err.message : t("bountyRemoveLockedToast")}</>,
+        3500,
+      );
+    } finally {
+      setBountyDeleteBusy(null);
     }
   }
 
@@ -2860,6 +3068,85 @@ export function CohorClient() {
   const videoDone = Boolean(project?.videoUrl);
   const githubDone = Boolean(project?.repositoryUrl) && !repoEditing;
   const projectJudged = project?.status === "under_review" || project?.status === "judged";
+
+  /* Org/moderator-only read-only review of every team's submission (SSU13
+   * scenario 4) — rendered inside the Predaja panel for any viewer holding
+   * the "manage_messages" permission on this server. */
+  const orgSubmissionsSection = (
+    <div className="panel-section org-submissions-section">
+      <div className="panel-label">{t("orgSubmissionsTitle")}</div>
+      <div className="panel-brief-note">{t("orgSubmissionsHint")}</div>
+      {orgSubmissionsLoading ? (
+        <div className="panel-brief-note">{t("predajaLoading")}</div>
+      ) : orgSubmissionsError ? (
+        <div className="video-upload-err">⚠ {orgSubmissionsError}</div>
+      ) : !orgSubmissions || orgSubmissions.length === 0 ? (
+        <div className="panel-brief-note">{t("orgSubmissionsEmpty")}</div>
+      ) : (
+        <div className="org-submissions-list">
+          {orgSubmissions.map((p) => {
+            const expanded = expandedSubmissionId === p.projectId;
+            return (
+              <div key={p.projectId} className="org-submission-row">
+                <button
+                  type="button"
+                  className="org-submission-toggle"
+                  onClick={() => setExpandedSubmissionId(expanded ? null : p.projectId)}
+                >
+                  <span className="org-submission-team">{p.teamName}</span>
+                  <span className="org-submission-title">{p.title}</span>
+                  <span className={"status-ic" + (p.videoUrl ? " status-ic-done" : "")}>
+                    <Icon name={p.videoUrl ? "check" : "x"} className="ic-sm" />
+                  </span>
+                  <Icon
+                    name="chevron-down"
+                    className={
+                      "ic-sm org-submission-chevron" +
+                      (expanded ? " org-submission-chevron-open" : "")
+                    }
+                  />
+                </button>
+                {expanded && (
+                  <div className="org-submission-body">
+                    {p.videoUrl ? (
+                      <div className="video-frame">
+                        <video
+                          src={p.videoUrl}
+                          controls
+                          preload="metadata"
+                          style={{
+                            width: "100%",
+                            display: "block",
+                            maxHeight: 340,
+                            background: "#000",
+                          }}
+                        >
+                          {t("videoNoHtml5")}
+                        </video>
+                      </div>
+                    ) : (
+                      <div className="panel-brief-note">{t("orgSubmissionsNoVideo")}</div>
+                    )}
+                    {p.repositoryUrl && (
+                      <a
+                        href={p.repositoryUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="github-link-display org-submission-repo"
+                      >
+                        <Icon name="link" className="ic-sm" />{" "}
+                        {p.repositoryUrl.replace("https://", "")}
+                      </a>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
   // The active conversation (if any) and whether it is a group — drives the
   // image-aware topbar icon and the "click name → group settings" affordance.
   const activeConvo = dmConvos.find((c) => c.conversationId === activeConvoId);
@@ -2948,17 +3235,18 @@ export function CohorClient() {
               feed" brand caps those columns and the active hackathon lines up with
               the current-channel header above the chat. */}
           <div className="cohor-topbar-left">
-            <Link
+            <button
+              type="button"
               className="cohor-brand"
-              href="/"
               aria-label={t("backHomeAria")}
               title={t("backToFeed")}
+              onClick={() => router.back()}
             >
               <Icon name="arrow-left" className="cohor-brand-back ic-sm" />
               <span className="cohor-brand-name">
                 <b>tiki</b>miki
               </span>
-            </Link>
+            </button>
           </div>
 
           {/* Active hackathon(s) inline — only the currently-active server
@@ -3220,66 +3508,112 @@ export function CohorClient() {
                   type="text"
                   aria-label={t("findOrStart")}
                   placeholder={t("findOrStart")}
+                  value={dmSearchQ}
+                  onChange={(e) => setDmSearchQ(e.target.value)}
                 />
               </div>
             </div>
 
             <div className="dm-list">
-              <div className="dm-section">{t("dmSecConversations")}</div>
-
-              {dmConvos.length === 0 && (
-                <div className="dm-row" style={{ opacity: 0.6 }}>
-                  <div className="dm-row-info">
-                    <div className="dm-row-preview">
-                      {locale === "sr" ? "Još nema konverzacija." : "No conversations yet."}
+              {dmSearchQ.trim() ? (
+                <>
+                  <div className="dm-section">{t("dmSecResults")}</div>
+                  {dmSearchBusy && dmSearchResults === null && (
+                    <div className="dm-row" style={{ opacity: 0.6 }}>
+                      <div className="dm-row-info">
+                        <div className="dm-row-preview">{t("dmSearchLoading")}</div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              )}
+                  )}
+                  {dmSearchResults !== null && dmSearchResults.length === 0 && (
+                    <div className="dm-row" style={{ opacity: 0.6 }}>
+                      <div className="dm-row-info">
+                        <div className="dm-row-preview">{t("dmSearchEmpty")}</div>
+                      </div>
+                    </div>
+                  )}
+                  {(dmSearchResults ?? []).map((u) => (
+                    <button
+                      key={u.userId}
+                      className="dm-row"
+                      type="button"
+                      onClick={() => {
+                        setDmSearchQ("");
+                        pmMessage(u.userId);
+                      }}
+                    >
+                      <div className="dm-row-av is-orb">
+                        <OrbArt url={u.avatarUrl} seed={u.username} />
+                        {onlineUsers.has(u.userId) && <span className="dm-row-si"></span>}
+                      </div>
+                      <div className="dm-row-info">
+                        <div className="dm-row-name">
+                          {personName({ displayName: u.displayName, username: u.username })}
+                        </div>
+                        <div className="dm-row-preview">@{u.username}</div>
+                      </div>
+                    </button>
+                  ))}
+                </>
+              ) : (
+                <>
+                  <div className="dm-section">{t("dmSecConversations")}</div>
 
-              {dmConvos.map((c) => {
-                const group = isGroupConvo(c);
-                const nm = convoTitle(c);
-                return (
-                  <button
-                    key={c.conversationId}
-                    className={
-                      "dm-row" + (activeConvoId === c.conversationId ? " dm-row-active" : "")
-                    }
-                    type="button"
-                    onClick={() => openConvo(c.conversationId)}
-                  >
-                    <div className={"dm-row-av is-orb" + (group ? " dm-row-av-group" : "")}>
-                      {group ? (
-                        isImageIcon(c.icon) ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img className="orb-art" src={c.icon} alt={nm} />
-                        ) : (
-                          <span className="dm-row-grp-ic" aria-hidden="true">
-                            {c.icon || GROUP_ICON_FALLBACK}
+                  {dmConvos.length === 0 && (
+                    <div className="dm-row" style={{ opacity: 0.6 }}>
+                      <div className="dm-row-info">
+                        <div className="dm-row-preview">
+                          {locale === "sr" ? "Još nema konverzacija." : "No conversations yet."}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {dmConvos.map((c) => {
+                    const group = isGroupConvo(c);
+                    const nm = convoTitle(c);
+                    return (
+                      <button
+                        key={c.conversationId}
+                        className={
+                          "dm-row" + (activeConvoId === c.conversationId ? " dm-row-active" : "")
+                        }
+                        type="button"
+                        onClick={() => openConvo(c.conversationId)}
+                      >
+                        <div className={"dm-row-av is-orb" + (group ? " dm-row-av-group" : "")}>
+                          {group ? (
+                            isImageIcon(c.icon) ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img className="orb-art" src={c.icon} alt={nm} />
+                            ) : (
+                              <span className="dm-row-grp-ic" aria-hidden="true">
+                                {c.icon || GROUP_ICON_FALLBACK}
+                              </span>
+                            )
+                          ) : (
+                            <OrbArt url={dmOtherAvatarUrl(c)} seed={convoSeed(c)} />
+                          )}
+                          {c.members.some(
+                            (m) => m.userId !== user?.userId && onlineUsers.has(m.userId),
+                          ) && <span className="dm-row-si"></span>}
+                        </div>
+                        <div className="dm-row-info">
+                          <div className="dm-row-name">{nm}</div>
+                          {c.lastMessage && (
+                            <div className="dm-row-preview">{c.lastMessage.content}</div>
+                          )}
+                        </div>
+                        {c.unreadCount > 0 && (
+                          <span className="dm-row-unread" aria-label={t("homeUnreadAria")}>
+                            {c.unreadCount > 99 ? "99+" : c.unreadCount}
                           </span>
-                        )
-                      ) : (
-                        <OrbArt url={dmOtherAvatarUrl(c)} seed={convoSeed(c)} />
-                      )}
-                      {c.members.some(
-                        (m) => m.userId !== user?.userId && onlineUsers.has(m.userId),
-                      ) && <span className="dm-row-si"></span>}
-                    </div>
-                    <div className="dm-row-info">
-                      <div className="dm-row-name">{nm}</div>
-                      {c.lastMessage && (
-                        <div className="dm-row-preview">{c.lastMessage.content}</div>
-                      )}
-                    </div>
-                    {c.unreadCount > 0 && (
-                      <span className="dm-row-unread" aria-label={t("homeUnreadAria")}>
-                        {c.unreadCount > 99 ? "99+" : c.unreadCount}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
+                        )}
+                      </button>
+                    );
+                  })}
+                </>
+              )}
             </div>
 
             <UserStrip
@@ -3335,12 +3669,6 @@ export function CohorClient() {
                     </>
                   )}
                   <div className="topbar-actions">
-                    <button className="topbar-btn" type="button" aria-label={t("searchInChannel")}>
-                      <Icon name="search" className="ic-sm" />
-                    </button>
-                    <button className="topbar-btn" type="button" aria-label={t("pinnedMessages")}>
-                      <Icon name="flag" className="ic-sm" />
-                    </button>
                     <button
                       className="topbar-btn"
                       type="button"
@@ -3668,10 +3996,15 @@ export function CohorClient() {
               <div className="panel-pad-top">
                 <div className="panel-org-row">
                   <div className="panel-org-av panel-org-av-green is-orb">
-                    <GenerativeAvatar seed="mohammedavdol" className="orb-art" />
+                    <GenerativeAvatar
+                      seed={activeHackathon?.organizationName ?? ""}
+                      className="orb-art"
+                    />
                   </div>
                   <div>
-                    <span className="panel-org-name panel-org-name-green">Mohammed Avdol</span>
+                    <span className="panel-org-name panel-org-name-green">
+                      {activeHackathon?.organizationName}
+                    </span>
                     <span className="role-badge role-badge-org">{t("roleBadgeOrg")}</span>
                     <div className="panel-org-time">11. april 2026. u 09:00</div>
                   </div>
@@ -3698,7 +4031,7 @@ export function CohorClient() {
                     <div className="panel-spec">
                       <div className="panel-spec-label">{t("specDeadline")}</div>
                       <div className="panel-spec-val panel-spec-val-lemon">
-                        {t("specDeadlineVal")}
+                        {submissionDeadlineLabel || t("specDeadlineVal")}
                       </div>
                     </div>
                   </div>
@@ -3711,9 +4044,13 @@ export function CohorClient() {
               </div>
 
               {!myTeamId ? (
-                <div className="panel-section">
-                  <div className="panel-brief-note">{t("predajaNoTeam")}</div>
-                </div>
+                can("manage_messages") ? (
+                  orgSubmissionsSection
+                ) : (
+                  <div className="panel-section">
+                    <div className="panel-brief-note">{t("predajaNoTeam")}</div>
+                  </div>
+                )
               ) : projectLoading ? (
                 <div className="panel-section">
                   <div className="panel-brief-note">{t("predajaLoading")}</div>
@@ -4000,6 +4337,7 @@ export function CohorClient() {
                       )}
                     </div>
                   </div>
+                  {can("manage_messages") && orgSubmissionsSection}
                 </>
               )}
             </div>
@@ -4033,6 +4371,95 @@ export function CohorClient() {
                   </span>
                 </div>
 
+                {can("manage_messages") && (
+                  <div className="bounty-add-form">
+                    <div className="panel-label">{t("bountyAddTitle")}</div>
+                    <div className="bounty-add-row">
+                      <div className="bounty-add-field">
+                        <label className="bounty-add-label" htmlFor="bounty-add-sponsor">
+                          {t("bountyAddSponsor")}
+                        </label>
+                        <input
+                          id="bounty-add-sponsor"
+                          className="bounty-add-input"
+                          type="text"
+                          maxLength={100}
+                          value={bountyForm.sponsorName}
+                          onChange={(e) =>
+                            setBountyForm((f) => ({ ...f, sponsorName: e.target.value }))
+                          }
+                        />
+                      </div>
+                      <div className="bounty-add-field">
+                        <label className="bounty-add-label" htmlFor="bounty-add-title">
+                          {t("bountyAddChallengeTitle")}
+                        </label>
+                        <input
+                          id="bounty-add-title"
+                          className="bounty-add-input"
+                          type="text"
+                          maxLength={200}
+                          value={bountyForm.title}
+                          onChange={(e) => setBountyForm((f) => ({ ...f, title: e.target.value }))}
+                        />
+                      </div>
+                    </div>
+                    <div className="bounty-add-row">
+                      <div className="bounty-add-field">
+                        <label className="bounty-add-label" htmlFor="bounty-add-theme">
+                          {t("bountyAddTheme")}
+                        </label>
+                        <input
+                          id="bounty-add-theme"
+                          className="bounty-add-input"
+                          type="text"
+                          maxLength={100}
+                          value={bountyForm.theme}
+                          onChange={(e) => setBountyForm((f) => ({ ...f, theme: e.target.value }))}
+                        />
+                      </div>
+                      <div className="bounty-add-field">
+                        <label className="bounty-add-label" htmlFor="bounty-add-prize">
+                          {t("bountyAddPrize")}
+                        </label>
+                        <input
+                          id="bounty-add-prize"
+                          className="bounty-add-input"
+                          type="text"
+                          maxLength={500}
+                          value={bountyForm.prizeAward}
+                          onChange={(e) =>
+                            setBountyForm((f) => ({ ...f, prizeAward: e.target.value }))
+                          }
+                        />
+                      </div>
+                    </div>
+                    <div className="bounty-add-field">
+                      <label className="bounty-add-label" htmlFor="bounty-add-desc">
+                        {t("bountyAddDesc")}
+                      </label>
+                      <textarea
+                        id="bounty-add-desc"
+                        className="bounty-add-textarea"
+                        value={bountyForm.description}
+                        onChange={(e) =>
+                          setBountyForm((f) => ({ ...f, description: e.target.value }))
+                        }
+                      />
+                    </div>
+                    {bountyFormError && <div className="bounty-add-error">{bountyFormError}</div>}
+                    <button
+                      type="button"
+                      className="btn btn-violet"
+                      disabled={bountyFormBusy}
+                      onClick={submitNewBounty}
+                    >
+                      <Icon name="coin" className="ic-sm" />{" "}
+                      {bountyFormBusy ? t("bountyAddSaving") : t("bountyAddSave")}
+                    </button>
+                  </div>
+                )}
+
                 {/* Real sponsor bounties for the active hackathon */}
                 {bounties.length > 0 ? (
                   bounties.map((b, i) => {
@@ -4052,6 +4479,11 @@ export function CohorClient() {
                         count={b.applicantCount}
                         applied={b.hasApplied}
                         onApply={() => applyBounty(b)}
+                        onDelete={
+                          can("manage_messages") && hackathon?.status === "upcoming"
+                            ? () => removeBounty(b)
+                            : undefined
+                        }
                       />
                     );
                   })
@@ -4076,11 +4508,15 @@ export function CohorClient() {
               <div className="panel-pad-top">
                 <div className="panel-org-row">
                   <div className="panel-org-av panel-org-av-green is-orb">
-                    <GenerativeAvatar seed="mohammedavdol" className="orb-art" />
+                    <GenerativeAvatar
+                      seed={activeHackathon?.organizationName ?? ""}
+                      className="orb-art"
+                    />
                   </div>
                   <div>
                     <div className="panel-org-name panel-org-name-green">
-                      Mohammed Avdol <span className="panel-org-meta">{t("glasanjeOrgMeta")}</span>
+                      {activeHackathon?.organizationName}{" "}
+                      <span className="panel-org-meta">{t("glasanjeOrgMeta")}</span>
                     </div>
                     <div className="panel-org-say">
                       <span className="msg-inline-ic">
@@ -4368,10 +4804,15 @@ export function CohorClient() {
                 <div className="panel-pad-top">
                   <div className="panel-org-row">
                     <div className="panel-org-av panel-org-av-green is-orb">
-                      <GenerativeAvatar seed="mohammedavdol" className="orb-art" />
+                      <GenerativeAvatar
+                        seed={activeHackathon?.organizationName ?? ""}
+                        className="orb-art"
+                      />
                     </div>
                     <div>
-                      <span className="panel-org-name panel-org-name-green">Mohammed Avdol</span>
+                      <span className="panel-org-name panel-org-name-green">
+                        {activeHackathon?.organizationName}
+                      </span>
                       <span className="role-badge role-badge-org">{t("roleBadgeOrg")}</span>
                       <div className="panel-org-time" id="rezultati-header-time">
                         {t("rezHeaderTime")}
@@ -5305,7 +5746,10 @@ export function CohorClient() {
                     type="button"
                     onClick={sendMsgClick}
                     aria-label={t("sendMessage")}
-                    disabled={activeChannelType === "announcements" && !can("manage_messages")}
+                    disabled={
+                      (activeChannelType === "announcements" && !can("manage_messages")) ||
+                      chatMedia.some((m) => m.uploading)
+                    }
                   >
                     <Icon name="share" className="ic-sm" />
                   </button>
@@ -5408,6 +5852,7 @@ export function CohorClient() {
             className={"dm-profile-panel" + (appMode === "dm" ? " dm-visible" : "")}
             id="panel-dm-profile"
             aria-label={t("dmProfilePanelAria")}
+            style={appMode === "dm" && !membersVisible ? { display: "none" } : undefined}
           >
             {appMode === "dm" &&
               (() => {
@@ -5738,12 +6183,34 @@ export function CohorClient() {
               </button>
             </div>
 
-            {/* Members pool */}
+            {/* Members pool — platform-wide search, not tied to any hackathon
+                or server roster: type a name to find anyone on tikimiki. */}
             <div className="grp-field grp-field-grow">
               <span className="grp-label">{t("grpMembersHeader")}</span>
+              <div className="dm-search-wrap grp-member-search">
+                <Icon name="search" className="ic-sm dm-search-ic" />
+                <input
+                  className="dm-search"
+                  type="text"
+                  aria-label={t("grpMemberSearchPh")}
+                  placeholder={t("grpMemberSearchPh")}
+                  value={groupPickSearchQ}
+                  onChange={(e) => setGroupPickSearchQ(e.target.value)}
+                />
+              </div>
               <div className="grp-member-list">
-                {members.length === 0 && <div className="grp-empty">{t("groupModalEmpty")}</div>}
-                {members.map((m) => {
+                {groupPickSearchQ.trim() &&
+                groupPickSearchBusy &&
+                groupPickSearchResults === null ? (
+                  <div className="grp-empty">{t("dmSearchLoading")}</div>
+                ) : (
+                  groupPickPool.length === 0 && (
+                    <div className="grp-empty">
+                      {groupPickSearchQ.trim() ? t("dmSearchEmpty") : t("grpSearchPrompt")}
+                    </div>
+                  )
+                )}
+                {groupPickPool.map((m) => {
                   const checked = groupPick.includes(m.userId);
                   return (
                     <label
@@ -5805,7 +6272,10 @@ export function CohorClient() {
           const conv = dmConvos.find((c) => c.conversationId === activeConvoId);
           if (!conv) return null;
           const memberIds = new Set(conv.members.map((m) => m.userId));
-          const addable = members.filter((m) => !memberIds.has(m.userId));
+          // Platform-wide search, not tied to any hackathon or server roster.
+          const addable: PickableUser[] = (gsAddSearchResults ?? []).filter(
+            (m) => !memberIds.has(m.userId),
+          );
           return (
             <div
               className="grp-modal-overlay"
@@ -5902,9 +6372,26 @@ export function CohorClient() {
                 {/* Add members */}
                 <div className="grp-field grp-field-grow">
                   <span className="grp-label">{t("grpAddMembers")}</span>
+                  <div className="dm-search-wrap grp-member-search">
+                    <Icon name="search" className="ic-sm dm-search-ic" />
+                    <input
+                      className="dm-search"
+                      type="text"
+                      aria-label={t("grpMemberSearchPh")}
+                      placeholder={t("grpMemberSearchPh")}
+                      value={gsAddSearchQ}
+                      onChange={(e) => setGsAddSearchQ(e.target.value)}
+                    />
+                  </div>
                   <div className="grp-member-list">
-                    {addable.length === 0 && (
-                      <div className="grp-empty">{t("grpNoMembersToAdd")}</div>
+                    {gsAddSearchQ.trim() && gsAddSearchBusy && gsAddSearchResults === null ? (
+                      <div className="grp-empty">{t("dmSearchLoading")}</div>
+                    ) : (
+                      addable.length === 0 && (
+                        <div className="grp-empty">
+                          {gsAddSearchQ.trim() ? t("dmSearchEmpty") : t("grpSearchPrompt")}
+                        </div>
+                      )
                     )}
                     {addable.map((m) => {
                       const checked = gsAddPick.includes(m.userId);

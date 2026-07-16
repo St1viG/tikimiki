@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Icon } from "@/components/Icon";
 import { ModeratorRemoveModal } from "@/components/popups/ModeratorRemoveModal";
 import { ModeratorWarnModal } from "@/components/popups/ModeratorWarnModal";
@@ -117,6 +117,7 @@ function reasonClass(category: string): string {
 export function ModeratorClient() {
   const auth = useRequireAuth();
   const t = useT(M);
+  const router = useRouter();
   const searchParams = useSearchParams();
   const serverId = searchParams.get("server");
   const [serverName, setServerName] = useState<string | null>(null);
@@ -243,9 +244,14 @@ export function ModeratorClient() {
     return (
       <main className="mod-page" id="main">
         <div className="page-head">
-          <Link className="col-back" href="/admin?tab=prijave" aria-label={t("backLabel")}>
+          <button
+            type="button"
+            className="col-back"
+            aria-label={t("backLabel")}
+            onClick={() => router.back()}
+          >
             <Icon name="arrow-left" />
-          </Link>
+          </button>
           <div className="col-titles">
             <h1 className="page-title">{t("pageTitle")}</h1>
             <p style={{ color: "var(--muted)", fontSize: "13.5px" }}>{t("accessDenied")}</p>
@@ -260,9 +266,14 @@ export function ModeratorClient() {
       <main className="mod-page" id="main" data-filter="prijave">
         {/* PAGE HEADER */}
         <div className="page-head">
-          <Link className="col-back" href="/admin?tab=prijave" aria-label={t("backLabel")}>
+          <button
+            type="button"
+            className="col-back"
+            aria-label={t("backLabel")}
+            onClick={() => router.back()}
+          >
             <Icon name="arrow-left" />
-          </Link>
+          </button>
           <div className="col-titles">
             <h1 className="page-title">{titleText}</h1>
           </div>

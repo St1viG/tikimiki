@@ -342,6 +342,7 @@ function MemberSurface({
   t: (k: keyof typeof M) => string;
   showToast: (msg: string, type: "green" | "red") => void;
 }) {
+  const router = useRouter();
   const [apps, setApps] = useState<Application[] | null>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -400,9 +401,14 @@ function MemberSurface({
   return (
     <main id="apps">
       <div className="page-head">
-        <Link className="col-back" href="/hackathons" aria-label={t("backLabel")}>
+        <button
+          type="button"
+          className="col-back"
+          aria-label={t("backLabel")}
+          onClick={() => router.back()}
+        >
           <Icon name="arrow-left" />
-        </Link>
+        </button>
         <div className="col-titles">
           <h1 className="page-title">
             <Icon name="hackathon" /> {t("myAppsTitle")}
@@ -580,9 +586,14 @@ function OrganizerSurface({
     <>
       <main id="apps">
         <div className="page-head">
-          <Link className="col-back" href="/hackathons/manage" aria-label={t("backLabel")}>
+          <button
+            type="button"
+            className="col-back"
+            aria-label={t("backLabel")}
+            onClick={() => router.back()}
+          >
             <Icon name="arrow-left" />
-          </Link>
+          </button>
           <div className="col-titles">
             <h1 className="page-title">
               <Icon name="hackathon" /> {t("pageTitle")}

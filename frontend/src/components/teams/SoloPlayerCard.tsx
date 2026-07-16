@@ -96,11 +96,11 @@ export function SoloPlayerCard({
       </div>
       {score !== undefined && <span className="badge badge-open tm-solo-score">+{score}</span>}
       <button
-        className="btn btn-ghost"
+        className={`btn ${invited ? "btn-success" : "btn-ghost"}`}
         disabled={disabled || sending || invited}
         onClick={() => onInvite(player)}
       >
-        {actionIcon && <Icon name="plus" />}{" "}
+        {invited ? <Icon name="check" /> : actionIcon && <Icon name="plus" />}{" "}
         {sending
           ? (labels.inviting ?? labels.inviteToTeam)
           : invited

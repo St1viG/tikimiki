@@ -262,6 +262,24 @@ export class HackathonsService {
           position: 2,
         },
         {
+          groupId: groupGeneral.groupId,
+          type: "general",
+          name: "glasanje-publike",
+          position: 3,
+        },
+        {
+          groupId: groupGeneral.groupId,
+          type: "general",
+          name: "rezultati",
+          position: 4,
+        },
+        {
+          groupId: groupGeneral.groupId,
+          type: "general",
+          name: "bounties",
+          position: 5,
+        },
+        {
           groupId: groupTeams.groupId,
           type: "kanban",
           name: "moj-tim-board",

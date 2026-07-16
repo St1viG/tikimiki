@@ -5,11 +5,11 @@
  */
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Icon } from "@/components/Icon";
 import { AppShell } from "@/components/shell/AppShell";
 import { RailRight } from "@/components/shell/RailRight";
 import { CreateTeamPopup } from "@/components/popups/CreateTeamPopup";
-import { JoinTeamPopup } from "@/components/popups/JoinTeamPopup";
 import { ProfilePopup } from "@/components/popups/ProfilePopup";
 import { TeamDetailPopup } from "@/components/popups/TeamDetailPopup";
 import {
@@ -18,7 +18,6 @@ import {
   OpenTeamCard,
   SoloPlayerCard,
   InviteCard,
-  TeamLeaderboardRow,
   type SoloPlayerCardPlayer,
 } from "@/components/teams";
 import { useT } from "@/components/i18n/LanguageProvider";
@@ -27,8 +26,6 @@ import * as api from "@/lib/api";
 import type {
   Team,
   OpenTeam,
-  SoloPlayer,
-  LeaderboardEntry,
   TeamInvitation,
   TeamJoinRequest,
   Project,
@@ -43,15 +40,14 @@ import type {
  *   - "My teams"      → api.getMyTeams()
  *   - "Invites"       → api.getMyInvitations()  (Accept → api.acceptInvitation,
  *                       Decline → api.declineInvitation; badge = invitations.length)
- *   - "Open teams"    → api.getOpenTeams()  ("Request to join" → api.requestToJoinTeam)
- *   - "Free agents"   → api.getSoloPlayers()  ("Invite to team" →
- *                       api.inviteToTeam(myTeams[0].teamId, userId) when the caller
- *                       has a team; otherwise opens JoinTeamPopup)
- *   - "AI suggestions" → api.getMyActiveHackathon() then api.getTeamSuggestions(id) —
- *                       ranked teammates to invite + ranked open teams to join, by
- *                       skill complementarity; empty state when there's no active hackathon.
- *   - "Team leaderboard" → api.getTeamLeaderboard()
- *   - "Create team"   → CreateTeamPopup → api.createTeam(name, hackathonId)
+ *   - "AI suggestions" → api.getTeamSuggestions(hackathonId), called once per team the
+ *                       caller belongs to (each hackathon scores suggestions against
+ *                       "my team in that hackathon" server-side) — rendered as one
+ *                       "For team X" group per team, plus ranked open teams to join
+ *                       (api.getMyActiveHackathon()-scoped) for callers with no team yet.
+ *   - "Create team"   → CreateTeamPopup → api.createTeam(name, hackathonId), which also
+ *                       invites every other participant of that hackathon server-side —
+ *                       no separate "browse open teams / free agents" flow needed.
  *
  * Behaviour:
  *   - Tab filter: updates data-filter on the <main> element so the co-located
@@ -59,9 +55,9 @@ import type {
  *     "suggested" has no pill in the tablist — only the "AI suggestions" button (above
  *     the tabs row) switches into it, same mechanism as handleTabClick.
  *   - "Create team" opens <CreateTeamPopup />.
- *   - "Invite to team" buttons (free agents/suggested teammates) open <JoinTeamPopup />
- *     with the agent's username as the teamName prop (invite framing) when the caller
- *     has no team yet.
+ *   - "Invite to team" on a suggested teammate invites into that specific team's roster
+ *     (the group it was suggested under) — the whole suggested-teammates block is omitted
+ *     for a caller with no teams at all, since there's no team to invite into.
  * Supplies its own `<main className="tm-page" id="main">`.
  */
 
@@ -72,16 +68,12 @@ const M = {
   tablistLabel: { en: "Filter teams", sr: "Filter timova" },
   tabMine: { en: "My teams", sr: "Moji timovi" },
   tabInvites: { en: "Invites", sr: "Pozivi" },
-  tabOpen: { en: "Open teams", sr: "Otvoreni timovi" },
-  tabSolo: { en: "Free agents", sr: "Slobodni igrači" },
-  tabBoard: { en: "Leaderboard", sr: "Rang lista" },
   createTeam: { en: "Create team", sr: "Kreiraj tim" },
   aiSuggestions: { en: "AI suggestions", sr: "AI predlozi" },
   sectionMine: { en: "My teams", sr: "Moji timovi" },
   members: { en: "members", sr: "člana" },
   tasks: { en: "tasks", sr: "taskova" },
   openServer: { en: "Open server", sr: "Otvori server" },
-  place: { en: "place", sr: "mesto" },
   sectionInvites: { en: "Invites", sr: "Pozivnice" },
   invitesHeadline: {
     en: "Teams inviting you to join.",
@@ -92,12 +84,9 @@ const M = {
   accepting: { en: "Accepting…", sr: "Prihvatam…" },
   declining: { en: "Declining…", sr: "Odbijam…" },
   emptyInvites: { en: "No invites right now.", sr: "Trenutno nema poziva." },
-  sectionOpen: { en: "Open teams", sr: "Otvoreni timovi" },
-  openBadge: { en: "Open", sr: "Otvoren" },
   lookingFor: { en: "Looking for", sr: "Traže" },
   requestJoin: { en: "Request to join", sr: "Zatraži priključenje" },
   requested: { en: "Requested", sr: "Zatraženo" },
-  sectionSolo: { en: "Free agents", sr: "Slobodni igrači" },
   inviteToTeam: { en: "Invite to team", sr: "Pozovi u tim" },
   invited: { en: "Invited", sr: "Pozvan" },
   inviting: { en: "Inviting…", sr: "Pozivam…" },
@@ -106,6 +95,7 @@ const M = {
     en: "Free agents ranked by how well they'd complement your skills.",
     sr: "Slobodni igrači rangirani po tome koliko dopunjuju tvoje veštine.",
   },
+  forTeam: { en: "For team", sr: "Za tim" },
   sectionSuggestedTeams: { en: "Suggested teams", sr: "Predloženi timovi" },
   suggestedTeamsHeadline: {
     en: "Open teams ranked by how well you'd complement them.",
@@ -120,13 +110,9 @@ const M = {
     en: "No suggested teams right now.",
     sr: "Trenutno nema predloženih timova.",
   },
-  sectionBoard: { en: "Team leaderboard", sr: "Leaderboard timova" },
   youLabel: { en: "you", sr: "ti" },
   loading: { en: "Loading…", sr: "Učitavanje…" },
   emptyMine: { en: "You're not in any team yet.", sr: "Još nisi ni u jednom timu." },
-  emptyOpen: { en: "No open teams right now.", sr: "Trenutno nema otvorenih timova." },
-  emptySolo: { en: "No free agents right now.", sr: "Trenutno nema slobodnih igrača." },
-  emptyBoard: { en: "No ranked teams yet.", sr: "Još nema rangiranih timova." },
   joining: { en: "Sending…", sr: "Šaljem…" },
   addProject: { en: "Add project", sr: "Dodaj projekat" },
   editDraft: { en: "Edit draft", sr: "Uredi nacrt" },
@@ -144,15 +130,15 @@ const M = {
   joinReqDecline: { en: "Decline", sr: "Odbij" },
 } as const;
 
-type Filter = "mine" | "invites" | "suggested" | "open" | "solo" | "board";
+type Filter = "mine" | "invites" | "suggested";
 
 export function TeamsClient() {
+  const router = useRouter();
   const { user } = useRequireAuth();
   const t = useT(M);
 
   const [filter, setFilter] = useState<Filter>("mine");
   const [createOpen, setCreateOpen] = useState(false);
-  const [joinTarget, setJoinTarget] = useState<string | null>(null);
   // Username whose profile popup is open (null = closed).
   const [popupUser, setPopupUser] = useState<string | null>(null);
   // Team whose roster popup is open (null = closed).
@@ -160,11 +146,11 @@ export function TeamsClient() {
 
   // Live data
   const [myTeams, setMyTeams] = useState<Team[]>([]);
-  const [openTeams, setOpenTeams] = useState<OpenTeam[]>([]);
-  const [soloPlayers, setSoloPlayers] = useState<SoloPlayer[]>([]);
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [invitations, setInvitations] = useState<TeamInvitation[]>([]);
-  const [suggestedTeammates, setSuggestedTeammates] = useState<TeammateSuggestion[]>([]);
+  // Suggested teammates per team the caller belongs to, keyed by teamId.
+  const [suggestionsByTeam, setSuggestionsByTeam] = useState<Record<string, TeammateSuggestion[]>>(
+    {},
+  );
   const [suggestedTeams, setSuggestedTeams] = useState<TeamSuggestion[]>([]);
   const [hasActiveHackathon, setHasActiveHackathon] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -172,8 +158,10 @@ export function TeamsClient() {
   // Per-action busy / optimistic tracking, keyed by id.
   const [joiningId, setJoiningId] = useState<string | null>(null);
   const [requestedTeamIds, setRequestedTeamIds] = useState<Set<string>>(new Set());
-  const [invitingUserId, setInvitingUserId] = useState<string | null>(null);
-  const [invitedUserIds, setInvitedUserIds] = useState<Set<string>>(new Set());
+  // Keyed by "teamId:userId" — the same free agent can be suggested under
+  // more than one "For team X" group, so invite state must not leak across teams.
+  const [invitingKey, setInvitingKey] = useState<string | null>(null);
+  const [invitedKeys, setInvitedKeys] = useState<Set<string>>(new Set());
   const [invitationBusyId, setInvitationBusyId] = useState<string | null>(null);
   // The caller's project per team (drives the "Add project"/"Edit draft"/"Submitted" label).
   const [projectsByTeam, setProjectsByTeam] = useState<Record<string, Project | null>>({});
@@ -185,25 +173,42 @@ export function TeamsClient() {
 
   const loadAll = useCallback(async () => {
     try {
-      const [mine, open, solo, board, invites, activeHackathon] = await Promise.all([
+      const [mine, invites, activeHackathon] = await Promise.all([
         api.getMyTeams(),
-        api.getOpenTeams(),
-        api.getSoloPlayers(),
-        api.getTeamLeaderboard(),
         api.getMyInvitations(),
         api.getMyActiveHackathon().catch(() => null),
       ]);
       setMyTeams(mine);
-      setOpenTeams(open);
-      setSoloPlayers(solo);
-      setLeaderboard(board);
       setInvitations(invites);
       setHasActiveHackathon(activeHackathon !== null);
-      const suggestions = activeHackathon
-        ? await api.getTeamSuggestions(activeHackathon.hackathonId).catch(() => null)
-        : null;
-      setSuggestedTeammates(suggestions?.teammates ?? []);
-      setSuggestedTeams(suggestions?.teams ?? []);
+
+      // "For team X" suggestions — one lookup per team the caller belongs to.
+      // Each hackathon's endpoint scores against "my team in that hackathon"
+      // server-side (a user has at most one active team per hackathon), so
+      // this naturally yields suggestions specific to each team.
+      const perTeam = await Promise.all(
+        mine.map((team) =>
+          api
+            .getTeamSuggestions(team.hackathonId)
+            .then((s) => ({ hackathonId: team.hackathonId, suggestions: s }))
+            .catch(() => ({ hackathonId: team.hackathonId, suggestions: null })),
+        ),
+      );
+      setSuggestionsByTeam(
+        Object.fromEntries(
+          mine.map((team, i) => [team.teamId, perTeam[i].suggestions?.teammates ?? []]),
+        ),
+      );
+
+      // Open-team suggestions (for a caller with no team in their active
+      // hackathon) — reuse a per-team lookup above when it already covered
+      // that hackathon, otherwise fetch it once more.
+      const reused = perTeam.find((f) => f.hackathonId === activeHackathon?.hackathonId);
+      const openSuggestions = !activeHackathon
+        ? null
+        : (reused?.suggestions ??
+          (await api.getTeamSuggestions(activeHackathon.hackathonId).catch(() => null)));
+      setSuggestedTeams(openSuggestions?.teams ?? []);
     } catch (err) {
       console.error("Failed to load teams data", err);
     } finally {
@@ -300,11 +305,6 @@ export function TeamsClient() {
     }
   };
 
-  // The caller's primary team — used as the inviting team for free agents.
-  // (Handling multiple teams per user — selecting which one to invite from —
-  // is not yet implemented.)
-  const myTeam = myTeams[0] ?? null;
-
   const handleTabClick = (f: Filter) => {
     setFilter(f);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -353,23 +353,19 @@ export function TeamsClient() {
     }
   };
 
-  // Invite a free agent into the caller's primary team. Optimistically mark
-  // "Invited"; revert on failure. Callers without a team open JoinTeamPopup.
-  const handleInviteSolo = async (player: SoloPlayerCardPlayer) => {
-    if (!myTeam) {
-      // No team yet: open JoinTeamPopup as a workaround — there is no inviteToTeam
-      // endpoint to call without a real teamId, so we capture the intent instead.
-      setJoinTarget(player.username);
-      return;
-    }
-    setInvitingUserId(player.userId);
+  // Invite a free agent into a specific team (the "For team X" group the
+  // suggestion appeared under). Optimistically mark "Invited"; revert on
+  // failure.
+  const handleInviteSolo = async (player: SoloPlayerCardPlayer, team: Team) => {
+    const key = `${team.teamId}:${player.userId}`;
+    setInvitingKey(key);
     try {
-      await api.inviteToTeam(myTeam.teamId, player.userId);
-      setInvitedUserIds((prev) => new Set(prev).add(player.userId));
+      await api.inviteToTeam(team.teamId, player.userId);
+      setInvitedKeys((prev) => new Set(prev).add(key));
     } catch (err) {
       console.error("Failed to invite player to team", err);
     } finally {
-      setInvitingUserId(null);
+      setInvitingKey(null);
     }
   };
 
@@ -379,9 +375,14 @@ export function TeamsClient() {
         <main className="tm-page" id="main" data-filter={filter}>
           {/* Page header */}
           <div className="page-head tm-headrow">
-            <Link className="col-back" href="/" aria-label={t("back")}>
+            <button
+              type="button"
+              className="col-back"
+              aria-label={t("back")}
+              onClick={() => router.back()}
+            >
               <Icon name="arrow-left" />
-            </Link>
+            </button>
             <div className="col-titles">
               <h1 className="page-title">
                 <Icon name="teams" /> {t("pageTitle")}
@@ -425,33 +426,6 @@ export function TeamsClient() {
                 onClick={() => handleTabClick("invites")}
               >
                 {t("tabInvites")} <span className="tm-tab-count">{invitations.length}</span>
-              </button>
-              <button
-                className={`tm-tab${filter === "open" ? " tm-tab-active" : ""}`}
-                data-filter="open"
-                role="tab"
-                aria-selected={filter === "open"}
-                onClick={() => handleTabClick("open")}
-              >
-                {t("tabOpen")}
-              </button>
-              <button
-                className={`tm-tab${filter === "solo" ? " tm-tab-active" : ""}`}
-                data-filter="solo"
-                role="tab"
-                aria-selected={filter === "solo"}
-                onClick={() => handleTabClick("solo")}
-              >
-                {t("tabSolo")}
-              </button>
-              <button
-                className={`tm-tab${filter === "board" ? " tm-tab-active" : ""}`}
-                data-filter="board"
-                role="tab"
-                aria-selected={filter === "board"}
-                onClick={() => handleTabClick("board")}
-              >
-                {t("tabBoard")}
               </button>
             </div>
           </div>
@@ -720,50 +694,76 @@ export function TeamsClient() {
             </div>
           </section>
 
-          {/* PREDLOŽENI SAIGRAČI / AI SUGGESTIONS */}
+          {/* PREDLOŽENI SAIGRAČI / AI SUGGESTIONS — one "For team X" group per
+              team the caller belongs to; the whole block is omitted for a
+              caller with no teams (nothing to invite into). */}
+          {(loading || myTeams.length > 0) && (
+            <section
+              className="tm-section"
+              data-section="suggested"
+              aria-label={t("sectionSuggested")}
+            >
+              <div className="tm-ai-head">
+                <div>
+                  <div className="tm-ai-eyebrow">
+                    <Icon name="sparkles" /> {t("sectionSuggested")}
+                  </div>
+                  <h2 className="tm-ai-h">{t("suggestedHeadline")}</h2>
+                </div>
+              </div>
+
+              {loading ? (
+                <p className="page-sub">{t("loading")}</p>
+              ) : (
+                myTeams.map((team) => {
+                  const teammates = suggestionsByTeam[team.teamId] ?? [];
+                  return (
+                    <div key={team.teamId} className="tm-suggested-team-group">
+                      <h3 className="tm-suggested-team-title">
+                        {t("forTeam")} {team.name}:
+                      </h3>
+                      <div className="tm-solo-grid">
+                        {teammates.length === 0 ? (
+                          <p className="page-sub">{t("emptySuggested")}</p>
+                        ) : (
+                          teammates.map((player, i) => {
+                            const key = `${team.teamId}:${player.userId}`;
+                            return (
+                              <SoloPlayerCard
+                                key={key}
+                                player={player}
+                                index={i}
+                                invited={invitedKeys.has(key)}
+                                sending={invitingKey === key}
+                                onInvite={(p) => handleInviteSolo(p, team)}
+                                onOpenProfile={setPopupUser}
+                                actionIcon
+                                score={player.score}
+                                labels={{
+                                  inviteToTeam: t("inviteToTeam"),
+                                  invited: t("invited"),
+                                  inviting: t("inviting"),
+                                }}
+                              />
+                            );
+                          })
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </section>
+          )}
+
+          {/* PREDLOŽENI TIMOVI / OPEN TEAMS TO JOIN — stays visible even when
+              the caller has no teams, since this is how a team-less user
+              finds one; same "suggested" filter/section as the block above. */}
           <section
             className="tm-section"
             data-section="suggested"
-            aria-label={t("sectionSuggested")}
+            aria-label={t("sectionSuggestedTeams")}
           >
-            <div className="tm-ai-head">
-              <div>
-                <div className="tm-ai-eyebrow">
-                  <Icon name="sparkles" /> {t("sectionSuggested")}
-                </div>
-                <h2 className="tm-ai-h">{t("suggestedHeadline")}</h2>
-              </div>
-            </div>
-
-            <div className="tm-solo-grid">
-              {loading ? (
-                <p className="page-sub">{t("loading")}</p>
-              ) : !hasActiveHackathon ? (
-                <p className="page-sub">{t("emptySuggestedNoHackathon")}</p>
-              ) : suggestedTeammates.length === 0 ? (
-                <p className="page-sub">{t("emptySuggested")}</p>
-              ) : (
-                suggestedTeammates.map((player, i) => (
-                  <SoloPlayerCard
-                    key={player.userId}
-                    player={player}
-                    index={i}
-                    invited={invitedUserIds.has(player.userId)}
-                    sending={invitingUserId === player.userId}
-                    onInvite={handleInviteSolo}
-                    onOpenProfile={setPopupUser}
-                    actionIcon
-                    score={player.score}
-                    labels={{
-                      inviteToTeam: t("inviteToTeam"),
-                      invited: t("invited"),
-                      inviting: t("inviting"),
-                    }}
-                  />
-                ))
-              )}
-            </div>
-
             <div className="tm-ai-head">
               <div>
                 <div className="tm-ai-eyebrow">
@@ -803,88 +803,6 @@ export function TeamsClient() {
               )}
             </div>
           </section>
-
-          {/* OTVORENI TIMOVI */}
-          <section className="tm-section" data-section="open" aria-label={t("sectionOpen")}>
-            <div className="tm-open-grid">
-              {loading ? (
-                <p className="page-sub">{t("loading")}</p>
-              ) : openTeams.length === 0 ? (
-                <p className="page-sub">{t("emptyOpen")}</p>
-              ) : (
-                openTeams.map((team) => (
-                  <OpenTeamCard
-                    key={team.teamId}
-                    team={team}
-                    requested={requestedTeamIds.has(team.teamId)}
-                    sending={joiningId === team.teamId}
-                    onRequest={handleRequestJoin}
-                    showBadge
-                    labels={{
-                      openBadge: t("openBadge"),
-                      lookingFor: t("lookingFor"),
-                      members: t("members"),
-                      requestJoin: t("requestJoin"),
-                      requested: t("requested"),
-                      joining: t("joining"),
-                    }}
-                  />
-                ))
-              )}
-            </div>
-          </section>
-
-          {/* SLOBODNI IGRAČI */}
-          <section className="tm-section" data-section="solo" aria-label={t("sectionSolo")}>
-            <div className="tm-solo-grid">
-              {loading ? (
-                <p className="page-sub">{t("loading")}</p>
-              ) : soloPlayers.length === 0 ? (
-                <p className="page-sub">{t("emptySolo")}</p>
-              ) : (
-                soloPlayers.map((player, i) => (
-                  <SoloPlayerCard
-                    key={player.userId}
-                    player={player}
-                    index={i}
-                    invited={invitedUserIds.has(player.userId)}
-                    sending={invitingUserId === player.userId}
-                    onInvite={handleInviteSolo}
-                    onOpenProfile={setPopupUser}
-                    actionIcon
-                    labels={{
-                      inviteToTeam: t("inviteToTeam"),
-                      invited: t("invited"),
-                      inviting: t("inviting"),
-                    }}
-                  />
-                ))
-              )}
-            </div>
-          </section>
-
-          {/* LEADERBOARD */}
-          <section className="tm-section" data-section="board" aria-label={t("sectionBoard")}>
-            <div className="tm-lb">
-              {loading ? (
-                <p className="page-sub">{t("loading")}</p>
-              ) : leaderboard.length === 0 ? (
-                <p className="page-sub">{t("emptyBoard")}</p>
-              ) : (
-                leaderboard.map((entry) => (
-                  <TeamLeaderboardRow
-                    key={entry.teamId}
-                    entry={entry}
-                    isYou={entry.members.some((m) => m.userId === user?.userId)}
-                    pixelFont
-                    xpMarker="spark"
-                    youLabel={t("youLabel")}
-                    onOpenProfile={setPopupUser}
-                  />
-                ))
-              )}
-            </div>
-          </section>
         </main>
       </AppShell>
 
@@ -894,19 +812,6 @@ export function TeamsClient() {
         onClose={() => {
           setCreateOpen(false);
           void loadAll();
-        }}
-      />
-      {/* Opened when a team-less user taps "Invite to team" on a free agent:
-          there is no team to invite into yet, so we collect an intro message.
-          onSubmit is wired; without a team id
-          there is no invite endpoint to hit, so we record the intent and close
-          rather than fake a successful request. */}
-      <JoinTeamPopup
-        open={joinTarget !== null}
-        teamName={joinTarget ?? ""}
-        onClose={() => setJoinTarget(null)}
-        onSubmit={(message) => {
-          console.info("Join-team message captured for", joinTarget, message);
         }}
       />
       <ProfilePopup

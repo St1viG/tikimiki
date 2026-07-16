@@ -33,7 +33,8 @@ export type NotificationType =
   | "new_application"
   | "report_resolved"
   | "report_dismissed"
-  | "new_org_request";
+  | "new_org_request"
+  | "project_video_uploaded";
 
 /** Possible values for a notification's `entityType` column (entity_type enum). */
 export type NotificationEntityType =

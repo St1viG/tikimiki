@@ -95,6 +95,7 @@ export function TeamDetailPopup({
                     {m.displayName || m.username}
                   </button>
                   <span className="tm-joinreq-sub">
+                    {" "}
                     {m.role === "leader" ? t("leader") : t("member")}
                   </span>
                 </div>

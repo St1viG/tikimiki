@@ -20,6 +20,7 @@ import { DRIZZLE, type DrizzleDB } from "../db/db.module";
 import {
   administrators,
   badges,
+  bounties,
   follows,
   memberSkills,
   members,
@@ -72,6 +73,16 @@ export interface PublicBadgeDto {
   awardedAt: string;
 }
 
+/** A sponsor bounty this user's team won (SSU16 §5) — permanently visible on the profile. */
+export interface PublicBountyWinDto {
+  bountyId: string;
+  title: string;
+  sponsorName: string;
+  description: string | null;
+  /** When the win was credited (ISO). */
+  awardedAt: string;
+}
+
 export interface PublicProfileDto {
   userId: string;
   username: string;
@@ -86,6 +97,8 @@ export interface PublicProfileDto {
   /** Subset of `skills` GitHub-verified via `GithubService.deriveAndStoreSkills` (N03). */
   verifiedSkillNames: string[];
   badges: PublicBadgeDto[];
+  /** Sponsor bounty prizes this user's team has won. */
+  sponsorWins: PublicBountyWinDto[];
   followerCount: number;
   followingCount: number;
   /** Whether the requesting viewer follows this user (false when anonymous/self). */
@@ -458,34 +471,62 @@ export class UsersService {
       isFollowing = Boolean(f);
     }
 
-    const [points, skillRows, badgeRows, followerRow, followingRow, isPremium, equipped] =
-      await Promise.all([
-        this.getPoints(user.userId),
-        this.getSkillRows(user.userId),
-        this.db
-          .select({
-            badgeId: badges.badgeId,
-            name: badges.name,
-            description: badges.description,
-            iconUrl: badges.iconUrl,
-            category: badges.category,
-            awardedAt: userBadges.awardedAt,
-          })
-          .from(userBadges)
-          .innerJoin(badges, eq(userBadges.badgeId, badges.badgeId))
-          .where(eq(userBadges.userId, user.userId))
-          .orderBy(desc(userBadges.awardedAt)),
-        this.db
-          .select({ value: sql<number>`count(*)::int` })
-          .from(follows)
-          .where(eq(follows.followeeId, user.userId)),
-        this.db
-          .select({ value: sql<number>`count(*)::int` })
-          .from(follows)
-          .where(eq(follows.followerId, user.userId)),
-        this.subscriptions.isPremium(user.userId),
-        this.cosmetics.equippedForUser(user.userId),
-      ]);
+    const [
+      points,
+      skillRows,
+      badgeRows,
+      sponsorWinRows,
+      followerRow,
+      followingRow,
+      isPremium,
+      equipped,
+    ] = await Promise.all([
+      this.getPoints(user.userId),
+      this.getSkillRows(user.userId),
+      this.db
+        .select({
+          badgeId: badges.badgeId,
+          name: badges.name,
+          description: badges.description,
+          iconUrl: badges.iconUrl,
+          category: badges.category,
+          awardedAt: userBadges.awardedAt,
+        })
+        .from(userBadges)
+        .innerJoin(badges, eq(userBadges.badgeId, badges.badgeId))
+        .where(eq(userBadges.userId, user.userId))
+        .orderBy(desc(userBadges.awardedAt)),
+      // Sponsor bounty wins: one `bounty_placement` point transaction per
+      // won bounty (see BountiesService.creditPlacementOnce), joined back
+      // to the bounty for its sponsor/title/description (SSU16 §5).
+      this.db
+        .select({
+          bountyId: bounties.bountyId,
+          title: bounties.title,
+          sponsorName: bounties.sponsorName,
+          description: bounties.description,
+          awardedAt: pointTransactions.createdAt,
+        })
+        .from(pointTransactions)
+        .innerJoin(bounties, eq(bounties.bountyId, pointTransactions.referenceId))
+        .where(
+          and(
+            eq(pointTransactions.userId, user.userId),
+            eq(pointTransactions.type, "bounty_placement"),
+          ),
+        )
+        .orderBy(desc(pointTransactions.createdAt)),
+      this.db
+        .select({ value: sql<number>`count(*)::int` })
+        .from(follows)
+        .where(eq(follows.followeeId, user.userId)),
+      this.db
+        .select({ value: sql<number>`count(*)::int` })
+        .from(follows)
+        .where(eq(follows.followerId, user.userId)),
+      this.subscriptions.isPremium(user.userId),
+      this.cosmetics.equippedForUser(user.userId),
+    ]);
 
     // Banner and GIF avatar are Premium-only: kept in the DB after premium
     // lapses (for reactivation) but hidden from display until then.
@@ -509,6 +550,13 @@ export class UsersService {
         iconUrl: b.iconUrl,
         category: b.category,
         awardedAt: b.awardedAt.toISOString(),
+      })),
+      sponsorWins: sponsorWinRows.map((w) => ({
+        bountyId: w.bountyId,
+        title: w.title,
+        sponsorName: w.sponsorName,
+        description: w.description,
+        awardedAt: w.awardedAt.toISOString(),
       })),
       followerCount: followerRow[0] ? Number(followerRow[0].value) : 0,
       followingCount: followingRow[0] ? Number(followingRow[0].value) : 0,

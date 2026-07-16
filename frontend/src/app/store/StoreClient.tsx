@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Icon } from "@/components/Icon";
 import { AppShell } from "@/components/shell/AppShell";
 import { BuyModal } from "@/components/popups/BuyModal";
@@ -68,6 +69,7 @@ function buyOpacity(item: MerchItem, xp: number): React.CSSProperties {
 }
 
 export function StoreClient() {
+  const router = useRouter();
   useRequireAuth();
   const t = useT(M);
 
@@ -250,9 +252,14 @@ export function StoreClient() {
       <main className="feed" id="store">
         {/* Page header */}
         <div className="page-head">
-          <Link className="col-back" href="/" aria-label={t("backLabel")}>
+          <button
+            type="button"
+            className="col-back"
+            aria-label={t("backLabel")}
+            onClick={() => router.back()}
+          >
             <Icon name="arrow-left" />
-          </Link>
+          </button>
           <div className="col-titles">
             <h1 className="page-title">
               <Icon name="cart" /> {t("pageTitle")}

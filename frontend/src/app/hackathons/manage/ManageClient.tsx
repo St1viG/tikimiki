@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { HackathonSummary } from "@tikimiki/types";
 import { Icon } from "@/components/Icon";
 import { AppShell } from "@/components/shell/AppShell";
@@ -54,6 +55,7 @@ const M = {
   view: { en: "View", sr: "Pogledaj" },
   edit: { en: "Edit", sr: "Izmeni" },
   applications: { en: "Applications", sr: "Prijave" },
+  teamsNav: { en: "Teams", sr: "Timovi" },
 
   statusUpcoming: { en: "Upcoming", sr: "Predstojeći" },
   statusLive: { en: "Live", sr: "U toku" },
@@ -78,6 +80,7 @@ function draftTitle(d: HackathonDraft): string {
 }
 
 export function ManageClient() {
+  const router = useRouter();
   useRequireRole("organization");
   const t = useT(M);
 
@@ -137,9 +140,14 @@ export function ManageClient() {
     <AppShell variant="no-right">
       <main className="hk-page" id="main">
         <div className="page-head">
-          <Link className="col-back" href="/hackathons" aria-label={t("back")}>
+          <button
+            type="button"
+            className="col-back"
+            aria-label={t("back")}
+            onClick={() => router.back()}
+          >
             <Icon name="arrow-left" aria-hidden="true" />
-          </Link>
+          </button>
           <div className="col-titles">
             <h1 className="page-title">
               <Icon name="hackathon" aria-hidden="true" /> {t("pageTitle")}
@@ -241,6 +249,12 @@ export function ManageClient() {
                         href={`/applications?hackathonId=${h.hackathonId}`}
                       >
                         {t("applications")}
+                      </Link>
+                      <Link
+                        className="btn btn-ghost hk-btn-sm"
+                        href={`/hackathons/teams?hackathonId=${h.hackathonId}`}
+                      >
+                        <Icon name="teams" aria-hidden="true" /> {t("teamsNav")}
                       </Link>
                       <Link
                         className="btn btn-primary hk-btn-sm"

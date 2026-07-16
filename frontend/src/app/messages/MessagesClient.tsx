@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Icon } from "@/components/Icon";
 import { AppShell } from "@/components/shell/AppShell";
 import { GenerativeAvatar } from "@/components/ui/GenerativeAvatar";
@@ -38,6 +38,7 @@ export function MessagesClient() {
   const { status } = useRequireAuth();
   const { user } = useAuth();
   const t = useT(M);
+  const router = useRouter();
   const params = useSearchParams();
 
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -134,9 +135,14 @@ export function MessagesClient() {
     <AppShell variant="no-right">
       <main className="feed" id="main">
         <div className="page-head">
-          <Link className="col-back" href="/" aria-label={t("back")}>
+          <button
+            type="button"
+            className="col-back"
+            aria-label={t("back")}
+            onClick={() => router.back()}
+          >
             <Icon name="arrow-left" />
-          </Link>
+          </button>
           <div className="col-titles">
             <h1 className="page-title">
               <Icon name="comment" /> {t("title")}

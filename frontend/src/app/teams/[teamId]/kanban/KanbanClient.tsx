@@ -1,7 +1,7 @@
 "use client";
 
 import "./kanban.css";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/Icon";
 import { AppShell } from "@/components/shell/AppShell";
@@ -40,6 +40,7 @@ function initials(name: string): string {
 /* ── component ───────────────────────────────────────────────── */
 
 export function KanbanClient({ teamId }: { teamId: string }) {
+  const router = useRouter();
   useRequireAuth();
 
   const [board, setBoard] = useState<KanbanBoard | null>(null);
@@ -325,9 +326,14 @@ export function KanbanClient({ teamId }: { teamId: string }) {
         {/* Header */}
         <header className="kb-header">
           <div className="kb-headrow">
-            <Link className="col-back" href="/teams" aria-label="Nazad na timove">
+            <button
+              type="button"
+              className="col-back"
+              aria-label="Nazad na timove"
+              onClick={() => router.back()}
+            >
               <Icon name="arrow-left" />
-            </Link>
+            </button>
             <div className="kb-title-group">
               <h1 className="kb-title">
                 <Icon name="list" />

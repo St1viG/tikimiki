@@ -126,7 +126,6 @@ export const M = {
     sr: "Novo grupno ćaskanje – kreiranje grupe",
   },
   groupModalTitle: { en: "New group chat", sr: "Novo grupno ćaskanje" },
-  groupModalEmpty: { en: "No members available.", sr: "Nema dostupnih članova." },
   groupCreate: { en: "Create", sr: "Kreiraj" },
   groupCancel: { en: "Cancel", sr: "Otkaži" },
   // Group-chat management (create modal + settings)
@@ -143,7 +142,6 @@ export const M = {
   grpAddMembers: { en: "Add members", sr: "Dodaj članove" },
   grpAddBtn: { en: "Add", sr: "Dodaj" },
   grpAddAll: { en: "Add selected", sr: "Dodaj izabrane" },
-  grpNoMembersToAdd: { en: "Everyone is already in this group.", sr: "Svi su već u ovoj grupi." },
   grpEditAria: { en: "Edit group", sr: "Izmeni grupu" },
   grpAvatarPreview: { en: "Group icon preview", sr: "Pregled ikonice grupe" },
   grpUploadImg: { en: "Upload image", sr: "Otpremi sliku" },
@@ -152,10 +150,33 @@ export const M = {
   grpUploadFailed: { en: "Image upload failed", sr: "Otpremanje slike nije uspelo" },
   findOrStart: { en: "Find or start a conversation", sr: "Pronađi ili započni razgovor" },
   dmSecConversations: { en: "Conversations", sr: "Razgovori" },
+  dmSecResults: { en: "People", sr: "Ljudi" },
+  dmSearchLoading: { en: "Searching…", sr: "Pretraga…" },
+  dmSearchEmpty: { en: "No one found", sr: "Niko nije pronađen" },
+  chatUploadFailed: {
+    en: "Attachment upload failed — remove it and try again",
+    sr: "Otpremanje priloga nije uspelo — ukloni ga i pokušaj ponovo",
+  },
+  chatWaitUpload: {
+    en: "Wait for the attachment to finish uploading",
+    sr: "Sačekaj da se prilog otpremi",
+  },
+  chatSendFailed: { en: "Message failed to send", sr: "Slanje poruke nije uspelo" },
+  grpAddMembersFailed: {
+    en: "Couldn't add member — try again",
+    sr: "Dodavanje člana nije uspelo — pokušaj ponovo",
+  },
+  grpCreateFailed: {
+    en: "Couldn't create the group — try again",
+    sr: "Kreiranje grupe nije uspelo — pokušaj ponovo",
+  },
+  grpMemberSearchPh: { en: "Search people…", sr: "Pretraži ljude…" },
+  grpSearchPrompt: {
+    en: "Type a name to find anyone on tikimiki",
+    sr: "Ukucaj ime da pronađeš bilo koga na tikimikiju",
+  },
 
   // Topbar actions
-  searchInChannel: { en: "Search in channel", sr: "Pretraži u kanalu" },
-  pinnedMessages: { en: "Pinned messages", sr: "Zakačene poruke" },
   toggleParticipants: { en: "Show/hide participants", sr: "Prikaži/sakrij učesnike" },
 
   // Predaja panel
@@ -241,6 +262,19 @@ export const M = {
     sr: "Nešto je pošlo po zlu. Pokušaj ponovo.",
   },
   videoUploading: { en: "Uploading…", sr: "Otpremam…" },
+  orgSubmissionsTitle: { en: "Team submissions", sr: "Predaje timova" },
+  orgSubmissionsHint: {
+    en: "Review every team's submitted video and repository. Only judges and the organization can see this list.",
+    sr: "Pregledaj otpremljeni video i repozitorijum svakog tima. Ovu listu vide samo sudije i organizacija.",
+  },
+  orgSubmissionsEmpty: {
+    en: "No team has submitted a project yet.",
+    sr: "Nijedan tim još nije predao projekat.",
+  },
+  orgSubmissionsNoVideo: {
+    en: "This team hasn't uploaded a video yet.",
+    sr: "Ovaj tim još nije otpremio video.",
+  },
 
   // Bounties panel
   bountyOrgName: { en: "Sponsor Bounty Challenges", sr: "Sponzorski Bounty Izazovi" },
@@ -291,6 +325,27 @@ export const M = {
   bountyEmptySub: {
     en: "Sponsors have not posted any bounty challenges for this hackathon.",
     sr: "Sponzori još nisu objavili bounty izazove za ovaj hakaton.",
+  },
+  bountyAddTitle: { en: "Add sponsor bounty", sr: "Dodaj sponzorski pod-izazov" },
+  bountyAddSponsor: { en: "Sponsor name", sr: "Naziv sponzora" },
+  bountyAddChallengeTitle: { en: "Challenge name", sr: "Naziv pod-izazova" },
+  bountyAddTheme: { en: "Theme (optional)", sr: "Tema (opciono)" },
+  bountyAddDesc: { en: "Judging criteria / description", sr: "Kriterijumi ocenjivanja / opis" },
+  bountyAddPrize: { en: "Prize (optional)", sr: "Nagrada (opciono)" },
+  bountyAddSave: { en: "Save bounty", sr: "Sačuvaj pod-izazov" },
+  bountyAddSaving: { en: "Saving…", sr: "Čuvam…" },
+  bountyAddError: {
+    en: "Fill in the sponsor and challenge name.",
+    sr: "Popuni naziv sponzora i naziv pod-izazova.",
+  },
+  bountyRemoveBtn: { en: "Remove bounty", sr: "Ukloni pod-izazov" },
+  bountyRemoveConfirm: {
+    en: "Remove this bounty? This can only be done before the hackathon starts.",
+    sr: "Ukloniti ovaj pod-izazov? Ovo je moguće samo pre početka hakatona.",
+  },
+  bountyRemoveLockedToast: {
+    en: "Bounties can only be removed before the hackathon starts.",
+    sr: "Pod-izazovi se mogu ukloniti samo pre početka hakatona.",
   },
 
   // Bounty toasts

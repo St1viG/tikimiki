@@ -610,6 +610,14 @@ export interface PublicProfile {
     /** When this user earned the badge (ISO). */
     awardedAt: string;
   }[];
+  /** Sponsor bounty prizes this user's team has won (SSU16). */
+  sponsorWins: {
+    bountyId: string;
+    title: string;
+    sponsorName: string;
+    description: string | null;
+    awardedAt: string;
+  }[];
   followerCount: number;
   followingCount: number;
   isFollowing: boolean;
@@ -679,7 +687,13 @@ export interface Team {
   serverId: string | null;
   memberCount: number;
   totalXp: number;
-  members: { userId: string; username: string; displayName?: string | null; role: string }[];
+  members: {
+    userId: string;
+    username: string;
+    displayName?: string | null;
+    avatarUrl: string | null;
+    role: string;
+  }[];
   createdAt: string;
 }
 export interface OpenTeam {
@@ -691,29 +705,19 @@ export interface OpenTeam {
   maxTeamSize: number;
   members: { userId: string; username: string; displayName?: string | null }[];
 }
-export interface LeaderboardEntry {
-  rank: number;
-  teamId: string;
-  teamName: string;
-  hackathonTitle: string;
-  totalXp: number;
-  members: { userId: string; username: string; displayName?: string | null }[];
-}
-export interface SoloPlayer {
-  userId: string;
-  username: string;
-  displayName?: string | null;
-  bio: string | null;
-  points: number;
-  skills: string[];
-}
-
 export const getMyTeams = () => GET<Team[]>("/teams/me");
-export const getOpenTeams = () => GET<OpenTeam[]>("/teams/open");
-export const getTeamLeaderboard = () => GET<LeaderboardEntry[]>("/teams/leaderboard");
-export const getSoloPlayers = () => GET<SoloPlayer[]>("/teams/solo");
-export const createTeam = (name: string, hackathonId: string) =>
-  POST<Team>("/teams", { name, hackathonId });
+
+/** Per-team progress row for the organizer's team overview (organizer/admin only). */
+export interface TeamOverview {
+  teamId: string;
+  name: string;
+  memberCount: number;
+  projectStatus: string | null;
+}
+export const getTeamsOverview = (hackathonId: string) =>
+  GET<TeamOverview[]>(`/hackathons/${hackathonId}/teams/overview`);
+export const createTeam = (name: string, hackathonId: string, inviteeUserIds?: string[]) =>
+  POST<Team>("/teams", { name, hackathonId, inviteeUserIds });
 export const joinTeam = (teamId: string) => POST<Team>(`/teams/${teamId}/join`);
 
 export interface TeamJoinRequest {
@@ -776,6 +780,17 @@ export interface TeamSuggestions {
 
 export const getTeamSuggestions = (hackathonId: string) =>
   GET<TeamSuggestions>(`/hackathons/${hackathonId}/team-suggestions`);
+
+/** A hackathon applicant approved but not yet on a team — pick-a-teammate candidate. */
+export interface TeamCandidate {
+  userId: string;
+  username: string;
+  displayName?: string | null;
+  skills: string[];
+}
+/** Full, unscored list of `hackathonId`'s approved-but-teamless applicants. */
+export const getTeamCandidates = (hackathonId: string) =>
+  GET<TeamCandidate[]>(`/hackathons/${hackathonId}/team-candidates`);
 
 // AI team proposal (SSU12 — one concrete combination, not the ongoing "Suggested" list above)
 export interface TeamProposal {
@@ -1422,6 +1437,20 @@ export interface HackathonResults {
 }
 export const listBounties = (hackathonId: string) =>
   GET<Bounty[]>(`/hackathons/${hackathonId}/bounties`);
+/** Body for creating a sponsor bounty (organizer/admin, SSU16). */
+export interface CreateBountyBody {
+  sponsorName: string;
+  title: string;
+  theme?: string;
+  description?: string;
+  /** Award value shown on the bounty card, e.g. "500 €"; omit for no prize. */
+  prizeAward?: string;
+}
+export const createBounty = (hackathonId: string, body: CreateBountyBody) =>
+  POST<Bounty>(`/hackathons/${hackathonId}/bounties`, body);
+/** Remove a sponsor bounty (organizer/admin, only before the hackathon starts). */
+export const deleteBounty = (hackathonId: string, bountyId: string) =>
+  DELETE<{ success: true }>(`/hackathons/${hackathonId}/bounties/${bountyId}`);
 export const applyToBounty = (hackathonId: string, bountyId: string) =>
   POST<{ success: true; applicantCount: number }>(
     `/hackathons/${hackathonId}/bounties/${bountyId}/apply`,

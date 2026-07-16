@@ -31,17 +31,27 @@ const UPLOAD_DIR = join(process.cwd(), "uploads");
 /** Business limit for uploaded project videos (50 MB). */
 const VIDEO_MAX_BYTES = 50 * 1024 * 1024;
 
+/** QuickTime top-level atom types a `.mov` may start with when it has no `ftyp` box. */
+const QUICKTIME_ATOMS = new Set(["moov", "mdat", "free", "skip", "wide", "pnot"]);
+
 /**
- * Best-effort magic-byte sniff for the two supported video containers, so a
- * file merely renamed to `.mp4`/`.webm` (with non-video contents) is rejected:
- *  - MP4 / ISO-BMFF: the ASCII marker "ftyp" at byte offset 4.
+ * Best-effort magic-byte sniff for the supported video containers, so a file
+ * merely renamed to a video extension (with non-video contents) is rejected:
+ *  - MP4 / ISO-BMFF: the ASCII marker "ftyp" at byte offset 4 (brand "qt  " at
+ *    offset 8 means QuickTime rather than MP4).
+ *  - QuickTime / MOV: no "ftyp" box, but one of the top-level atoms above at
+ *    byte offset 4.
  *  - WebM / Matroska: the EBML signature 0x1A45DFA3 at byte offset 0.
+ *  - AVI: the RIFF container header at offset 0, tagged "AVI " at offset 8.
  *
  * Autor: Stevan Gnjato (2023/0141)
  */
-function sniffVideoType(buffer: Buffer): "video/mp4" | "video/webm" | null {
-  if (buffer.length >= 8 && buffer.toString("ascii", 4, 8) === "ftyp") {
-    return "video/mp4";
+function sniffVideoType(
+  buffer: Buffer,
+): "video/mp4" | "video/webm" | "video/quicktime" | "video/x-msvideo" | null {
+  if (buffer.length >= 12 && buffer.toString("ascii", 4, 8) === "ftyp") {
+    const brand = buffer.toString("ascii", 8, 12);
+    return brand === "qt  " ? "video/quicktime" : "video/mp4";
   }
   if (
     buffer.length >= 4 &&
@@ -51,6 +61,16 @@ function sniffVideoType(buffer: Buffer): "video/mp4" | "video/webm" | null {
     buffer[3] === 0xa3
   ) {
     return "video/webm";
+  }
+  if (buffer.length >= 8 && QUICKTIME_ATOMS.has(buffer.toString("ascii", 4, 8))) {
+    return "video/quicktime";
+  }
+  if (
+    buffer.length >= 12 &&
+    buffer.toString("ascii", 0, 4) === "RIFF" &&
+    buffer.toString("ascii", 8, 12) === "AVI "
+  ) {
+    return "video/x-msvideo";
   }
   return null;
 }
@@ -160,9 +180,9 @@ export class UploadsService {
   }
 
   /**
-   * Save a project presentation video (MP4/WebM only) and return its url.
-   * Rejects oversized files (>50 MB) and anything that is not really a video
-   * once its magic bytes are inspected.
+   * Save a project presentation video (MP4, MOV, AVI or WebM) and return its
+   * url. Rejects oversized files (>50 MB) and anything that is not really a
+   * video once its magic bytes are inspected.
    *
    * Autor: Stevan Gnjato (2023/0141)
    */
@@ -174,7 +194,7 @@ export class UploadsService {
       throw new BadRequestException("Video exceeds the 50MB limit");
     }
     if (!sniffVideoType(file.buffer)) {
-      throw new BadRequestException("Only MP4 or WebM video files are allowed");
+      throw new BadRequestException("Format fajla nije podržan. Koristite MP4, MOV ili AVI.");
     }
 
     const url = this.persist(userId, "video", file);

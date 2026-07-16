@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { HackathonSummary, HackathonType } from "@tikimiki/types";
 import { Icon } from "@/components/Icon";
 import { AppShell } from "@/components/shell/AppShell";
@@ -43,6 +44,10 @@ const M = {
   typePhysical: { en: "Physical", sr: "Fizički" },
   typeVirtual: { en: "Virtual", sr: "Virtuelni" },
   typeHybrid: { en: "Hybrid", sr: "Hibridni" },
+  chipLocationLabel: { en: "Location", sr: "Lokacija" },
+  chipLocationAll: { en: "All locations", sr: "Sve lokacije" },
+  chipPrizeOnly: { en: "With prize", sr: "Sa nagradom" },
+  clearFilters: { en: "Clear filters", sr: "Očisti filtere" },
   sortLabel: { en: "Sort: ", sr: "Sortiraj: " },
   sortNewest: { en: "Newest", sr: "Najskoriji" },
   sortSoonest: { en: "Starting soon", sr: "Najskorije počinje" },
@@ -127,6 +132,7 @@ function fmtCountdown(msLeft: number): string {
 }
 
 export function HackathonsClient() {
+  const router = useRouter();
   const t = useT(M);
   const { user } = useAuth();
 
@@ -144,6 +150,8 @@ export function HackathonsClient() {
   const [filter, setFilter] = useState<HkFilter>("all");
   const [searchQ, setSearchQ] = useState("");
   const [typeFilter, setTypeFilter] = useState<TypeFilter>("all");
+  const [locationFilter, setLocationFilter] = useState<string>("all");
+  const [prizeOnly, setPrizeOnly] = useState(false);
   const [sortMode, setSortMode] = useState<SortMode>("newest");
 
   // Live hackathon data (all sections derive from this single fetch).
@@ -246,16 +254,33 @@ export function HackathonsClient() {
   const liveHacks = all.filter((h) => h.status === "ongoing" && new Date(h.endsAt).getTime() > now);
   const finishedHacks = all.filter((h) => h.status === "finished");
 
-  // Upcoming grid: status "upcoming" + Type filter + Sort.
-  const upcomingHacks = all
-    .filter((h) => h.status === "upcoming")
+  // Distinct locations across upcoming hackathons, for the Location filter —
+  // derived from the full upcoming pool (not the already-filtered result) so
+  // the option list doesn't shrink as other filters narrow the grid.
+  const upcomingPool = all.filter((h) => h.status === "upcoming");
+  const locationOptions = Array.from(
+    new Set(upcomingPool.map((h) => h.location).filter((l): l is string => !!l)),
+  ).sort((a, b) => a.localeCompare(b));
+
+  // Upcoming grid: status "upcoming" + Type/Location/Prize filters + Sort.
+  const upcomingHacks = upcomingPool
     .filter((h) => typeFilter === "all" || h.type === typeFilter)
+    .filter((h) => locationFilter === "all" || h.location === locationFilter)
+    .filter((h) => !prizeOnly || !!h.prizePool)
     .slice()
     .sort((a, b) =>
       sortMode === "newest"
         ? new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         : new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime(),
     );
+
+  const filtersActive = typeFilter !== "all" || locationFilter !== "all" || prizeOnly || q !== "";
+  const clearFilters = () => {
+    setTypeFilter("all");
+    setLocationFilter("all");
+    setPrizeOnly(false);
+    setSearchQ("");
+  };
 
   // Hackathon ids the viewer already applied to (for "Applied" state on cards).
   const appliedIds = new Set((apps ?? []).map((a) => a.hackathonId));
@@ -284,9 +309,14 @@ export function HackathonsClient() {
       <main className="hk-page" id="hk-main" data-filter={filter}>
         {/* PAGE HEADER */}
         <header className="page-head hk-head">
-          <Link className="col-back" href="/" aria-label={t("back")}>
+          <button
+            type="button"
+            className="col-back"
+            aria-label={t("back")}
+            onClick={() => router.back()}
+          >
             <Icon name="arrow-left" />
-          </Link>
+          </button>
           <div className="col-titles">
             <h1 className="page-title">
               <Icon name="hackathon" /> {t("pageTitle")}
@@ -345,6 +375,42 @@ export function HackathonsClient() {
             >
               {typeChipLabel} <Icon name="chevron-down" />
             </button>
+            {/* Location filter — native select styled as a chip, populated from
+                the upcoming hackathons themselves (nothing hardcoded). */}
+            {locationOptions.length > 0 && (
+              <div
+                className={`hk-chip hk-select-chip${locationFilter !== "all" ? " hk-chip-active" : ""}`}
+              >
+                <Icon name="location" className="ic-sm" />
+                <select
+                  aria-label={t("chipLocationLabel")}
+                  value={locationFilter}
+                  onChange={(e) => setLocationFilter(e.target.value)}
+                >
+                  <option value="all">{t("chipLocationAll")}</option>
+                  {locationOptions.map((loc) => (
+                    <option key={loc} value={loc}>
+                      {loc}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+            {/* Prize filter — simple on/off toggle (prize amount is free-text,
+                not a structured number, so a range filter isn't possible). */}
+            <button
+              type="button"
+              className={`hk-chip${prizeOnly ? " hk-chip-active" : ""}`}
+              aria-pressed={prizeOnly}
+              onClick={() => setPrizeOnly((v) => !v)}
+            >
+              <Icon name="trophy" className="ic-sm" /> {t("chipPrizeOnly")}
+            </button>
+            {filtersActive && (
+              <button type="button" className="hk-chip hk-chip-clear" onClick={clearFilters}>
+                <Icon name="x" className="ic-sm" /> {t("clearFilters")}
+              </button>
+            )}
             {/* Sort — toggles Newest ⇄ Starting soon over the grid */}
             <button
               className="hk-chip-sort hk-chip"

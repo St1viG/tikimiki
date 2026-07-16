@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Icon } from "@/components/Icon";
 import { useT } from "@/components/i18n/LanguageProvider";
 import { AuthShell } from "@/components/auth/AuthShell";
@@ -76,14 +77,15 @@ const M = {
 } as const;
 
 export function HelpClient() {
+  const router = useRouter();
   const t = useT(M);
   return (
     <AuthShell as="main" footerVariant="links">
       <section className="legal-card" aria-labelledby="legal-heading">
-        <Link className="legal-back" href="/">
+        <button type="button" className="legal-back" onClick={() => router.back()}>
           <Icon name="arrow-left" />
           {t("back")}
-        </Link>
+        </button>
         <div className="legal-badge" aria-hidden="true">
           <Icon name="mail" />
         </div>

@@ -129,7 +129,7 @@ export class MediaUploadController {
     return this.uploads.saveMedia(userId, file);
   }
 
-  /* ── project presentation video (MP4/WebM) ────────────────── */
+  /* ── project presentation video (MP4/MOV/AVI/WebM) ────────── */
 
   /**
    * `POST /uploads/video`. The interceptor caps memory at a hard ceiling; the

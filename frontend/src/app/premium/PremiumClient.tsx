@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Icon } from "@/components/Icon";
 import { AppShell } from "@/components/shell/AppShell";
 import { useLanguage, useT } from "@/components/i18n/LanguageProvider";
@@ -144,6 +144,7 @@ const M = {
 type FaqId = 0 | 1 | 2 | 3;
 
 export function PremiumClient() {
+  const router = useRouter();
   useRequireAuth();
   const t = useT(M);
   const { locale } = useLanguage();
@@ -284,9 +285,14 @@ export function PremiumClient() {
     <AppShell variant="no-right">
       <main className="premium-page" id="main">
         <div className="page-head">
-          <Link className="col-back" href="/" aria-label={t("backLabel")}>
+          <button
+            type="button"
+            className="col-back"
+            aria-label={t("backLabel")}
+            onClick={() => router.back()}
+          >
             <Icon name="arrow-left" />
-          </Link>
+          </button>
           <div className="col-titles">
             <h1 className="page-title">
               <Icon name="premium" /> Premium

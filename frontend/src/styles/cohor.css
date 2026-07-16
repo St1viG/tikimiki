@@ -3045,6 +3045,80 @@ img.msg-att {
   font-weight: 700;
   white-space: nowrap;
 }
+.bounty-remove-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition:
+    border-color 0.15s var(--ease-out),
+    color 0.15s var(--ease-out);
+}
+.bounty-remove-btn:hover {
+  border-color: var(--red, #e5484d);
+  color: var(--red, #e5484d);
+}
+.bounty-add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  padding: 16px;
+  margin-bottom: 20px;
+}
+.bounty-add-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.bounty-add-field {
+  flex: 1;
+  min-width: 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.bounty-add-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.bounty-add-input,
+.bounty-add-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--ink);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.bounty-add-input:focus,
+.bounty-add-textarea:focus {
+  border-color: var(--violet-light);
+}
+.bounty-add-textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+.bounty-add-error {
+  font-size: 12px;
+  color: var(--red);
+}
 .bounty-title {
   font-family: var(--display);
   font-size: 16px;
@@ -3229,6 +3303,66 @@ img.msg-att {
   color: var(--muted);
   background: var(--surface-3);
   border: 1px solid var(--line);
+}
+
+.org-submissions-section {
+  border-top: 1px solid var(--line);
+  padding-top: 18px;
+}
+.org-submissions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+.org-submission-row {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+.org-submission-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 14px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  color: var(--ink);
+}
+.org-submission-team {
+  font-weight: 700;
+  font-size: 13px;
+}
+.org-submission-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.org-submission-chevron {
+  transition: transform 0.15s;
+}
+.org-submission-chevron-open {
+  transform: rotate(180deg);
+}
+.org-submission-body {
+  padding: 0 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.org-submission-repo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
 }
 
 .projects-list {
@@ -5051,6 +5185,9 @@ img.msg-att {
 }
 
 /* Member pool list */
+.grp-member-search {
+  margin-bottom: 8px;
+}
 .grp-member-list {
   flex: 1;
   min-height: 80px;

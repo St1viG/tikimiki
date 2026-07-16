@@ -87,10 +87,7 @@
 }
 .tm-page[data-filter="mine"] .tm-section:not([data-section="mine"]),
 .tm-page[data-filter="invites"] .tm-section:not([data-section="invites"]),
-.tm-page[data-filter="suggested"] .tm-section:not([data-section="suggested"]),
-.tm-page[data-filter="open"] .tm-section:not([data-section="open"]),
-.tm-page[data-filter="solo"] .tm-section:not([data-section="solo"]),
-.tm-page[data-filter="board"] .tm-section:not([data-section="board"]) {
+.tm-page[data-filter="suggested"] .tm-section:not([data-section="suggested"]) {
   display: none;
 }
 
@@ -144,47 +141,6 @@
 .tm-av-me {
   outline: 2px solid var(--lemon);
   outline-offset: 2px;
-}
-
-.tm-r-you {
-  font-size: var(--fs-xs);
-  color: var(--lemon);
-  background: color-mix(in srgb, var(--lemon) 10%, transparent);
-  border: 1px solid color-mix(in srgb, var(--lemon) 30%, transparent);
-  padding: 2px 9px;
-  border-radius: 999px;
-  font-weight: 700;
-}
-
-/* Pixel accents (content decoration, not chrome) */
-.px-font {
-  font-family: "Press Start 2P", monospace;
-  font-weight: 400;
-  letter-spacing: 0.02em;
-}
-.px-medal {
-  width: 22px;
-  height: 27px;
-  image-rendering: pixelated;
-  vertical-align: middle;
-}
-.px-spark {
-  width: 10px;
-  height: 18px;
-  image-rendering: pixelated;
-  vertical-align: -3px;
-  margin-right: 6px;
-  animation: px-spark-pulse 1.6s steps(2) infinite;
-}
-@keyframes px-spark-pulse {
-  0%,
-  60% {
-    opacity: 1;
-  }
-  61%,
-  100% {
-    opacity: 0.55;
-  }
 }
 
 /* MOJI TIMOVI — one card per team the user is part of */
@@ -437,6 +393,22 @@
   color: var(--lemon);
 }
 
+/* Per-team group inside "Suggested teammates" — one block per team the
+   caller belongs to, each with its own "For team X" heading. */
+.tm-suggested-team-group {
+  margin-bottom: 22px;
+}
+.tm-suggested-team-group:last-child {
+  margin-bottom: 0;
+}
+.tm-suggested-team-title {
+  font-family: var(--display);
+  font-size: var(--fs-base);
+  font-weight: 700;
+  color: var(--ink-2);
+  margin-bottom: 10px;
+}
+
 .tm-sug-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -520,19 +492,12 @@
   border-color: var(--line-strong);
   transform: translateY(-2px);
 }
-.tm-open-badge {
-  position: absolute;
-  top: 13px;
-  right: 13px;
-  z-index: 2;
-}
 .tm-open-hack {
   font-size: 10.5px;
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-weight: 700;
-  padding-right: 78px;
 }
 /* hierarchy: team-name leads, members + status follow */
 .tm-open-name {
@@ -614,123 +579,6 @@
   justify-content: center;
 }
 
-/* LEADERBOARD */
-.tm-lb {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  max-width: 720px;
-  margin: 0 auto;
-}
-.tm-lb-row {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 13px 16px;
-  border-radius: var(--r-sm);
-  background: var(--surface);
-  border: 1px solid var(--line);
-  transition: border-color 0.16s var(--ease-out);
-}
-.tm-lb-row:hover {
-  border-color: var(--line-strong);
-}
-.tm-lb-rank {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 56px;
-}
-.tm-lb-rank .px-font {
-  font-size: 12px;
-  color: var(--ink);
-}
-.tm-lb-gold .px-font,
-.tm-lb-silver .px-font,
-.tm-lb-bronze .px-font {
-  color: var(--lemon-vivid);
-}
-
-.tm-lb-gold,
-.tm-lb-silver,
-.tm-lb-bronze {
-  position: relative;
-}
-.tm-lb-gold::before,
-.tm-lb-silver::before,
-.tm-lb-bronze::before {
-  content: "";
-  position: absolute;
-  top: -1px;
-  left: -1px;
-  width: 8px;
-  height: 8px;
-  border-top: 2px solid var(--c);
-  border-left: 2px solid var(--c);
-}
-.tm-lb-gold::after,
-.tm-lb-silver::after,
-.tm-lb-bronze::after {
-  content: "";
-  position: absolute;
-  bottom: -1px;
-  right: -1px;
-  width: 8px;
-  height: 8px;
-  border-bottom: 2px solid var(--c);
-  border-right: 2px solid var(--c);
-}
-.tm-lb-gold {
-  --c: var(--lemon-vivid);
-}
-.tm-lb-silver {
-  --c: var(--medal-silver);
-}
-.tm-lb-bronze {
-  --c: var(--medal-bronze);
-}
-
-.tm-lb-avs {
-  display: flex;
-  gap: 3px;
-  flex-shrink: 0;
-}
-.tm-lb-name {
-  flex: 1;
-  min-width: 0;
-  font-size: var(--fs-sm);
-  font-weight: 700;
-  color: var(--ink);
-}
-.tm-lb-name .tm-r-you {
-  margin-left: 6px;
-  vertical-align: middle;
-}
-.tm-lb-xp {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-family: var(--mono);
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -0.01em;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--muted);
-}
-/* XP points read as a confident mono number; "XP" stays muted */
-.tm-lb-xp .px-font {
-  font-family: var(--mono);
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  color: var(--lemon-vivid);
-}
-.tm-lb-gold .tm-lb-xp .px-font {
-  text-shadow: 0 0 12px color-mix(in srgb, var(--lemon) 30%, transparent);
-}
-
 /* Responsive */
 @media (max-width: 1000px) {
   .tm-open-grid {
@@ -757,8 +605,5 @@
 @media (max-width: 480px) {
   .tm-solo-grid {
     grid-template-columns: repeat(2, 1fr);
-  }
-  .tm-open-hack {
-    padding-right: 72px;
   }
 }

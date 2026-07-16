@@ -261,6 +261,13 @@ export const NOTIFICATION_TEMPLATES = {
       sr: 'Organizacija „{orgName}" (@{username}) čeka verifikaciju.',
     },
   },
+  project_video_uploaded: {
+    title: { en: "Presentation video uploaded", sr: "Video prezentacija otpremljena" },
+    body: {
+      en: 'Team {teamName} uploaded a presentation video for "{projectTitle}".',
+      sr: 'Tim {teamName} je otpremio video prezentaciju za „{projectTitle}".',
+    },
+  },
 } as const satisfies Record<string, NotificationTemplate>;
 
 export type NotificationTemplateKey = keyof typeof NOTIFICATION_TEMPLATES;

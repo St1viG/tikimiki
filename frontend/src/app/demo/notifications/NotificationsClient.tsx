@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Icon } from "@/components/Icon";
 import { AppShell } from "@/components/shell/AppShell";
 import { NotificationPopup } from "@/components/popups/NotificationPopup";
@@ -38,6 +38,7 @@ const M = {
 } as const;
 
 export function NotificationsClient() {
+  const router = useRouter();
   const t = useT(M);
 
   return (
@@ -45,9 +46,14 @@ export function NotificationsClient() {
       <AppShell variant="no-right">
         <main id="main">
           <div className="page-head">
-            <Link className="col-back" href="/" aria-label={t("backLabel")}>
+            <button
+              type="button"
+              className="col-back"
+              aria-label={t("backLabel")}
+              onClick={() => router.back()}
+            >
               <Icon name="arrow-left" />
-            </Link>
+            </button>
             <div className="col-titles">
               <h1 className="page-title">
                 <Icon name="bell" /> {t("pageTitle")}

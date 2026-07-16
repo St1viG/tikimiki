@@ -475,9 +475,14 @@ export function NewHackathonClient({
       <AppShell right={<RailRight />}>
         <main className="nh-page" id="nh-main">
           <header className="page-head nh-head">
-            <Link className="col-back" href="/hackathons" aria-label={t("back")}>
+            <button
+              type="button"
+              className="col-back"
+              aria-label={t("back")}
+              onClick={() => router.back()}
+            >
               <Icon name="arrow-left" />
-            </Link>
+            </button>
             <div className="col-titles">
               <h1 className="page-title">
                 <Icon name="hackathon" /> {t("pageTitle")}
@@ -707,9 +712,14 @@ export function NewHackathonClient({
     <AppShell right={<RailRight />}>
       <main className="nh-page" id="nh-main">
         <header className="page-head nh-head">
-          <Link className="col-back" href="/hackathons" aria-label={t("back")}>
+          <button
+            type="button"
+            className="col-back"
+            aria-label={t("back")}
+            onClick={() => router.back()}
+          >
             <Icon name="arrow-left" />
-          </Link>
+          </button>
           <div className="col-titles">
             <h1 className="page-title">
               <Icon name="hackathon" /> {isEdit ? t("editTitle") : t("pageTitle")}

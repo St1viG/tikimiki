@@ -3,6 +3,8 @@ import { z } from "zod";
 export const createTeamSchema = z.object({
   name: z.string().trim().min(1).max(100),
   hackathonId: z.string().uuid(),
+  /** Teammates to invite on creation — picked by the leader, capped at maxTeamSize - 1. */
+  inviteeUserIds: z.array(z.string().uuid()).max(100).optional(),
 });
 export type CreateTeamInput = z.infer<typeof createTeamSchema>;
 
