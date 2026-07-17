@@ -299,7 +299,7 @@ describe("applications lifecycle (e2e)", () => {
       expect((res.body as { teamId: string }[]).every((a) => a.teamId === team.teamId)).toBe(true);
     });
 
-    it("skips members who already have an active application", async () => {
+    it("relinks a member's pre-existing application to this team instead of skipping it", async () => {
       const org = await registerOrganization(app);
       const hk = await createHackathon(app, org);
       const leader = await registerMember(app);
@@ -310,27 +310,32 @@ describe("applications lifecycle (e2e)", () => {
         .insert(teamMembers)
         .values({ teamId: team.teamId, userId: member2.userId, role: "member" });
 
-      // Leader individually applies first.
+      // Leader individually applies first (application.teamId is null).
       await apply(leader.token, hk.hackathonId).expect(201);
 
-      // Team apply: only member2 should receive a new application.
+      // Team apply: member2 gets a new application, leader's existing one is
+      // relinked to this team rather than left orphaned.
       const res = await http()
         .post("/api/v1/applications/team")
         .set("Authorization", `Bearer ${leader.token}`)
         .send({ hackathonId: hk.hackathonId, teamId: team.teamId })
         .expect(201);
 
-      expect(res.body).toHaveLength(1);
-      expect((res.body as { hackathonId: string }[])[0].hackathonId).toBe(hk.hackathonId);
+      expect(res.body).toHaveLength(2);
+      expect((res.body as { teamId: string }[]).every((a) => a.teamId === team.teamId)).toBe(true);
     });
 
-    it("returns empty array when all members already applied", async () => {
+    it("returns empty array when every member's application is already linked to this team", async () => {
       const org = await registerOrganization(app);
       const hk = await createHackathon(app, org);
       const leader = await registerMember(app);
       const team = await createTeam(app, hk.hackathonId, leader);
 
-      await apply(leader.token, hk.hackathonId).expect(201);
+      await http()
+        .post("/api/v1/applications/team")
+        .set("Authorization", `Bearer ${leader.token}`)
+        .send({ hackathonId: hk.hackathonId, teamId: team.teamId })
+        .expect(201);
 
       const res = await http()
         .post("/api/v1/applications/team")

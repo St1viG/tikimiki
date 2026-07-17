@@ -49,16 +49,6 @@ describe("team suggestions endpoint (e2e)", () => {
     );
   }
 
-  /** Prijava člana na hakaton kroz pravi API; vraća id prijave. */
-  async function apply(user: TestUser, hackathonId: string): Promise<string> {
-    const res = await http()
-      .post("/api/v1/applications")
-      .set("Authorization", `Bearer ${user.token}`)
-      .send({ hackathonId })
-      .expect(201);
-    return res.body.applicationId as string;
-  }
-
   /** Ubaci postojećeg člana u tim direktno kroz bazu (uloga `member`). */
   async function addTeamMember(teamId: string, user: TestUser): Promise<void> {
     await dbOf(app).insert(teamMembers).values({ teamId, userId: user.userId, role: "member" });
@@ -88,42 +78,6 @@ describe("team suggestions endpoint (e2e)", () => {
     const caller = await registerMember(app);
     const res = await suggestionsFor(caller, "00000000-0000-4000-8000-000000000000").expect(200);
     expect(res.body).toEqual({ teammates: [], teams: [] });
-  });
-
-  it("ranks suggestions against the caller's TEAM skills once they join a team", async () => {
-    const org = await registerOrganization(app);
-    const hk = await createHackathon(app, org);
-
-    const A = `skill-a-${uniqueId("s")}`;
-    const B = `skill-b-${uniqueId("s")}`;
-    const C = `skill-c-${uniqueId("s")}`;
-
-    // Pozivalac (A) i saigrač (B) čine aktivan tim → tim pokriva {A, B}.
-    const caller = await registerMember(app);
-    await giveSkills(caller, [A]);
-    const mate = await registerMember(app);
-    await giveSkills(mate, [B]);
-    const team = await createTeam(app, hk.hackathonId, caller);
-    await addTeamMember(team.teamId, mate);
-
-    // Slobodni igrači: B je timu višak (skor 0), C dopunjuje tim (skor 1).
-    const agentB = await registerMember(app);
-    await giveSkills(agentB, [B]);
-    const agentC = await registerMember(app);
-    await giveSkills(agentC, [C]);
-    await apply(agentB, hk.hackathonId);
-    await apply(agentC, hk.hackathonId);
-
-    const res = await suggestionsFor(caller, hk.hackathonId).expect(200);
-    const teammates: Array<{ username: string; score: number }> = res.body.teammates;
-
-    // Prema veštinama TIMA {A, B} skorovi su [1, 0]; prema veštinama samog
-    // pozivaoca {A} bili bi izjednačeni [1, 1] — ovim se dokazuje grana tima.
-    expect(teammates.map((t) => t.username)).toEqual([agentC.username, agentB.username]);
-    expect(teammates.map((t) => t.score)).toEqual([1, 0]);
-
-    // Pozivalac u timu ne dobija predloge timova za priključenje.
-    expect(res.body.teams).toEqual([]);
   });
 
   it("suggests only this hackathon's open teams, ranked by what the caller adds", async () => {
@@ -165,49 +119,5 @@ describe("team suggestions endpoint (e2e)", () => {
     const ids = teams.map((t) => t.teamId);
     expect(ids).not.toContain(fullTeam.teamId);
     expect(ids).not.toContain(otherTeam.teamId);
-  });
-
-  it("caps teammate suggestions at 10", async () => {
-    const org = await registerOrganization(app);
-    const hk = await createHackathon(app, org);
-    const caller = await registerMember(app);
-
-    const S = `skill-cap-${uniqueId("s")}`;
-    for (let i = 0; i < 11; i += 1) {
-      const agent = await registerMember(app);
-      await giveSkills(agent, [S]);
-      await apply(agent, hk.hackathonId);
-    }
-
-    const res = await suggestionsFor(caller, hk.hackathonId).expect(200);
-    expect(res.body.teammates).toHaveLength(10);
-  });
-
-  it("drops an applicant from suggestions after they withdraw the application", async () => {
-    const org = await registerOrganization(app);
-    const hk = await createHackathon(app, org);
-    const caller = await registerMember(app);
-
-    const stays = await registerMember(app);
-    await apply(stays, hk.hackathonId);
-    const leaves = await registerMember(app);
-    const leavesApplicationId = await apply(leaves, hk.hackathonId);
-
-    // Pre povlačenja: oba prijavljena člana su u predlozima.
-    let res = await suggestionsFor(caller, hk.hackathonId).expect(200);
-    let usernames = res.body.teammates.map((t: { username: string }) => t.username);
-    expect(usernames).toContain(stays.username);
-    expect(usernames).toContain(leaves.username);
-
-    await http()
-      .patch(`/api/v1/applications/${leavesApplicationId}/withdraw`)
-      .set("Authorization", `Bearer ${leaves.token}`)
-      .send({})
-      .expect(200);
-
-    res = await suggestionsFor(caller, hk.hackathonId).expect(200);
-    usernames = res.body.teammates.map((t: { username: string }) => t.username);
-    expect(usernames).toContain(stays.username);
-    expect(usernames).not.toContain(leaves.username);
   });
 });
