@@ -9,7 +9,6 @@ import { useAuth } from "@/components/auth/AuthProvider";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { OAuthButtons } from "@/components/auth/OAuthButtons";
 import { PasswordField } from "@/components/auth/PasswordField";
-import { StrengthMeter, passwordStrength } from "@/components/auth/StrengthMeter";
 import { Captcha } from "@/components/auth/Captcha";
 import { ApiError } from "@/lib/api";
 
@@ -35,11 +34,17 @@ const M = {
   emailAddress: { en: "Email address", sr: "Email adresa" },
   username: { en: "Username", sr: "Korisničko ime" },
   password: { en: "Password", sr: "Lozinka" },
-  passwordMin: { en: "At least 8 characters", sr: "Najmanje 8 karaktera" },
   confirmPassword: { en: "Confirm password", sr: "Potvrda lozinke" },
-  repeatPassword: { en: "Repeat password", sr: "Ponovi lozinku" },
   passwordsMatch: { en: "Passwords match", sr: "Lozinke se poklapaju" },
   passwordsNoMatch: { en: "Passwords do not match", sr: "Lozinke se ne poklapaju" },
+  // Password requirements checklist — same copy as the member signup (AuthClient).
+  reqsLabel: { en: "Password requirements", sr: "Zahtevi za lozinku" },
+  reqLen: { en: "8+ characters", sr: "8+ karaktera" },
+  reqUpper: { en: "Uppercase letter", sr: "Veliko slovo" },
+  reqNumber: { en: "Number", sr: "Broj" },
+  reqSymbol: { en: "Symbol", sr: "Simbol" },
+  reqMet: { en: "met", sr: "ispunjeno" },
+  reqUnmet: { en: "not met", sr: "nedostaje" },
   termsAgreeOrg: {
     en: "On behalf of the organization I accept the",
     sr: "U ime organizacije prihvatam",
@@ -87,6 +92,15 @@ const M = {
   backToLogin: { en: "Back to sign in", sr: "Nazad na prijavu" },
 } as const;
 
+/* Same rules the backend registerSchema enforces (mirrors PW_REQS in the
+   member AuthClient, which this page's checklist copies). */
+const PW_REQS = [
+  { key: "reqLen", test: (p: string) => p.length >= 8 },
+  { key: "reqUpper", test: (p: string) => /[A-Z]/.test(p) },
+  { key: "reqNumber", test: (p: string) => /\d/.test(p) },
+  { key: "reqSymbol", test: (p: string) => /[^A-Za-z0-9]/.test(p) },
+] as const satisfies ReadonlyArray<{ key: keyof typeof M; test: (p: string) => boolean }>;
+
 export function SignupOrganizationClient() {
   const t = useT(M);
   const router = useRouter();
@@ -97,10 +111,9 @@ export function SignupOrganizationClient() {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
 
-  // Passwords + strength
+  // Passwords
   const [password, setPassword] = useState("");
   const [confirmPw, setConfirmPw] = useState("");
-  const strength = passwordStrength(password);
 
   // Terms + submit state
   const [termsChecked, setTermsChecked] = useState(false);
@@ -220,7 +233,6 @@ export function SignupOrganizationClient() {
               className="auth-input"
               id="org-name"
               type="text"
-              placeholder="npr. Tech for Good d.o.o."
               value={orgName}
               onChange={(e) => setOrgName(e.target.value)}
             />
@@ -234,7 +246,6 @@ export function SignupOrganizationClient() {
               className="auth-input"
               id="org-email"
               type="email"
-              placeholder="kontakt@organizacija.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -252,7 +263,6 @@ export function SignupOrganizationClient() {
                 className="auth-input has-prefix"
                 id="org-username"
                 type="text"
-                placeholder="naziv_organizacije"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
               />
@@ -263,13 +273,22 @@ export function SignupOrganizationClient() {
             <label className="auth-label" htmlFor="pw-signup">
               {t("password")}
             </label>
-            <PasswordField
-              id="pw-signup"
-              value={password}
-              onChange={setPassword}
-              placeholder={t("passwordMin")}
-            />
-            <StrengthMeter strength={strength} />
+            <PasswordField id="pw-signup" value={password} onChange={setPassword} />
+            {/* Requirements checklist — same as the member signup card */}
+            <ul className="auth-reqs" id="pw-reqs" aria-label={t("reqsLabel")}>
+              {PW_REQS.map((r) => {
+                const ok = r.test(password);
+                return (
+                  <li key={r.key} className={ok ? "auth-req met" : "auth-req"}>
+                    <span className="auth-req-dot" aria-hidden="true">
+                      <Icon name="check" />
+                    </span>
+                    {t(r.key)}
+                    <span className="auth-sr"> ({t(ok ? "reqMet" : "reqUnmet")})</span>
+                  </li>
+                );
+              })}
+            </ul>
           </div>
 
           <div className="auth-field">
@@ -280,7 +299,6 @@ export function SignupOrganizationClient() {
               id="pw-confirm"
               value={confirmPw}
               onChange={setConfirmPw}
-              placeholder={t("repeatPassword")}
               error={matchVisible && !matchOk}
             />
             <div

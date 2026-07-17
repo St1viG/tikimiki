@@ -223,9 +223,13 @@
 .hk-tab:hover {
   color: var(--ink);
 }
-.hk-tab-active {
+/* Scoped under .adm-tabs so it outranks hackathons.css's
+   `.hk-tab.hk-tab-active { color: var(--lemon) }`, which would otherwise
+   paint yellow text on this yellow pill when both stylesheets are loaded. */
+.adm-tabs .hk-tab.hk-tab-active {
   color: var(--on-accent);
   background: var(--lemon);
+  border-bottom-color: transparent;
 }
 .hk-tab-count {
   min-width: 18px;
@@ -241,7 +245,7 @@
   color: var(--violet-light);
   font-variant-numeric: tabular-nums;
 }
-.hk-tab-active .hk-tab-count {
+.adm-tabs .hk-tab.hk-tab-active .hk-tab-count {
   background: color-mix(in srgb, var(--on-accent) 18%, transparent);
   color: var(--on-accent);
 }
